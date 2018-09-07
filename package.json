@@ -1,0 +1,43 @@
+{
+  "name": "webpack_test",
+  "version": "1.0.0",
+  "description": "webpack_test",
+  "private": true,
+  "dependencies": {
+    "npm": "^6.4.1",
+    "webpack": "^4.17.2",
+    "webpack-cli": "^3.1.0"
+  },
+  "devDependencies": {
+    "clean-webpack-plugin": "^0.1.19",
+    "css-loader": "^1.0.0",
+    "csv-loader": "^3.0.2",
+    "express": "^4.16.3",
+    "file-loader": "^2.0.0",
+    "html-webpack-plugin": "^3.2.0",
+    "style-loader": "^0.23.0",
+    "webpack-dev-middleware": "^3.2.0",
+    "webpack-dev-server": "^3.1.8",
+    "xml-loader": "^1.2.1"
+  },
+  "scripts": {
+    "start": "webpack-dev-server --open",
+    "test": "test",
+    "server": "node server.js",
+    "watch": "webpack --watch --mode development",
+    "build": "webpack -p --mode production"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/ClarityAcuity/test.git"
+  },
+  "keywords": [
+    "webpack_test"
+  ],
+  "author": "Clarityacuity",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/ClarityAcuity/test/issues"
+  },
+  "homepage": "https://github.com/ClarityAcuity/test#readme"
+}
