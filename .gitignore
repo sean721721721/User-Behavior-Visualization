@@ -75,3 +75,7 @@ typings/
 # Others
 components/
 dist/
+.vscode/
+jsconfig.json
+.jsbeautifyrc
+null.js
