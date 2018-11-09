@@ -1,0 +1,709 @@
+/* reset css */
+
+html,
+body,
+div,
+span,
+applet,
+object,
+iframe,
+h1,
+h2,
+h3,
+h4,
+h5,
+h6,
+p,
+blockquote,
+pre,
+a,
+abbr,
+acronym,
+address,
+big,
+cite,
+code,
+del,
+dfn,
+em,
+img,
+ins,
+kbd,
+q,
+s,
+samp,
+small,
+strike,
+strong,
+sub,
+sup,
+tt,
+var,
+b,
+u,
+i,
+center,
+dl,
+dt,
+dd,
+ol,
+ul,
+li,
+fieldset,
+form,
+label,
+legend,
+table,
+caption,
+tbody,
+tfoot,
+thead,
+tr,
+th,
+td,
+article,
+aside,
+canvas,
+details,
+embed,
+figure,
+figcaption,
+footer,
+header,
+hgroup,
+menu,
+nav,
+output,
+ruby,
+section,
+summary,
+time,
+mark,
+audio,
+video {
+    margin: 0;
+    padding: 0;
+    border: 0;
+    font-size: 100%;
+    font: inherit;
+    vertical-align: baseline;
+}
+
+* {
+    box-sizing: border-box
+}
+
+/* HTML5 display-role reset for older browsers */
+
+article,
+aside,
+details,
+figcaption,
+figure,
+footer,
+header,
+hgroup,
+menu,
+nav,
+section {
+    display: block;
+}
+
+body {
+    line-height: 1;
+}
+
+ol,
+ul {
+    list-style: none;
+}
+
+blockquote,
+q {
+    quotes: none;
+}
+
+blockquote:before,
+blockquote:after,
+q:before,
+q:after {
+    content: '';
+    content: none;
+}
+
+table {
+    border-collapse: collapse;
+    border-spacing: 0;
+    padding: 13px;
+    border: 1px;
+    width: 100%;
+    table-layout: fixed;
+}
+
+/* reset css end */
+
+body {
+    background: lightgray;
+    text-align: center;
+    font-family: "Times New Roman", Times, serif;
+    /*margin-left: 1px;
+    margin-right: 1px;*/
+}
+
+fieldset {
+    display: inline-block;
+    border: 1px #af3333 solid;
+    border-radius: 10px;
+    margin: 5px;
+    padding: 5px;
+}
+
+svg {
+    background: white;
+    border: 1px solid;
+}
+
+div.tooltip.a {
+    position: absolute;
+    text-align: left;
+    padding: 2px;
+    font: 12px sans-serif;
+    background: lightsteelblue;
+    border: 1px;
+    border-radius: 8px;
+    pointer-events: none;
+}
+
+div.tooltip.b {
+    position: absolute;
+    text-align: left;
+    padding: 2px;
+    font: 12px sans-serif;
+    background: lightsteelblue;
+    border: 1px;
+    border-radius: 8px;
+    pointer-events: none;
+}
+
+div.tooltip.c {
+    position: absolute;
+}
+
+th,
+td {
+    text-align: left;
+    font: 15px sans-serif;
+}
+
+/* Style the tab */
+
+div.tab {
+    overflow: hidden;
+    border: 1px solid #ccc;
+    background-color: #f1f1f1;
+}
+
+/* Style the buttons inside the tab */
+
+div.tab button {
+    background-color: inherit;
+    float: left;
+    border: none;
+    outline: none;
+    cursor: pointer;
+    padding: 14px 16px;
+    transition: 0.3s;
+    font-size: 17px;
+}
+
+/* Change background color of buttons on hover */
+
+div.tab button:hover {
+    background-color: #ddd;
+}
+
+/* Create an active/current tablink class */
+
+div.tab button.active {
+    background-color: #ccc;
+}
+
+/* Style the tab content */
+
+.tabcontent {
+    display: none;
+    padding: 6px 12px;
+    border: 1px solid #ccc;
+    border-top: none;
+}
+
+.tabcontent input {
+    width: 100px;
+}
+
+/* Style the close button */
+
+.topright {
+    float: right;
+    cursor: pointer;
+    font-size: 20px;
+}
+
+.topright:hover {
+    color: red;
+}
+
+#para {
+    display: inline-block;
+}
+
+#csv {
+    display: inline-block;
+}
+
+#select {
+    text-align: left;
+}
+
+#detail {
+    text-align: left;
+}
+
+.selective {
+    fill: black;
+    stroke: white;
+}
+
+.selectext {
+    fill: white;
+}
+
+rect:hover {
+    fill-opacity: 0.8;
+    stroke: black;
+}
+
+path:hover {
+    fill-opacity: 0.8;
+    stroke: black;
+}
+
+/* grid setting */
+
+.grid {
+    margin: 0 0 0 0;
+    border: 2px solid #CCC;
+    height: 95vh;
+    display: grid;
+    grid-gap: 1px;
+    grid-template-rows: [grow1] auto [grow2] minmax(1px, 90vh) [growend];
+}
+
+.box {
+    background-color: #444;
+    color: #fff;
+    border-radius: 5px;
+    padding: 5px;
+    font-size: 100%;
+}
+
+.menu {
+    padding: 5px;
+    grid-row: grow1 / grow2;
+}
+
+.grid1 {
+    margin: 0 0 0 0;
+    border: 2px solid #CCC;
+    display: grid;
+    grid-gap: 1px;
+    grid-row: grow2 / growend;
+    grid-template-columns: [col1] 0.56fr [col2] 0.44fr [colend];
+}
+
+.userview {
+    overflow-y: auto;
+    grid-column: col2 / colend;
+}
+
+.grid2 {
+    background-color: lightgray;
+    margin: 0 0 0 0;
+    display: grid;
+    grid-gap: 1px;
+    grid-column: col1 / col2;
+    grid-template-columns: [scol1] 0.5fr [scol2] 0.5fr [scolend];
+    grid-template-rows: [srow1] minmax(auto, 1fr) [srow2] minmax(30vh, 30vh) [srowend];
+}
+
+.overview {
+    overflow-y: auto;
+    grid-column: scol1 / scol2;
+    grid-row: srow1 / srow2;
+}
+
+.postview {
+    grid-column: scol2 / scolend;
+    grid-row: srow1 / srow2;
+}
+
+.detailview {
+    overflow-y: scroll;
+    color: #444;
+    background-color: white;
+    border: 5px solid #444;
+    grid-column: scol1 / scolend;
+    grid-row: srow2 / srowend;
+}
+
+.detailview p {
+    padding: 5px;
+}
+
+.dvicon {
+    width: 16px;
+    height: 16px;
+}
+
+.query,
+.summary {
+    margin: 5px;
+    margin-left: 5px;
+    margin-right: 5px;
+    border: 1px solid;
+}
+
+tr,
+th,
+td {
+    margin: 1px;
+    border: 1px dashed;
+    padding: 5px;
+}
+
+#overlap{
+    overflow: hidden;
+    position: relative;
+    width: 100%;
+    height: 100%;
+}
+
+canvas {
+    background: #fff;
+    width: 100%;
+    height: 100%;
+    position: absolute;
+    left: 0;
+    top: 0;
+}
+
+/*****************************************************/
+
+/*next and previous botton*/
+
+.pagination .detail {
+    text-decoration: none;
+    display: inline-block;
+    padding: 4px 8px;
+}
+
+a:hover {
+    background-color: #ddd;
+    color: black;
+}
+
+.previous {
+    background-color: #f1f1f1;
+    color: black;
+}
+
+.next {
+    background-color: #4CAF50;
+    color: white;
+}
+
+.round {
+    border-radius: 50%;
+}
+
+/*****************************************************/
+
+/*glyph*/
+
+#target {
+    margin: 40px 0;
+}
+
+.wrapper {
+    position: relative;
+}
+
+.chart {
+    margin-bottom: 40px;
+}
+
+.star-title {
+    /*font-size: 14px;*/
+}
+
+.star-label {
+    fill: #00f;
+    pointer-events: none;
+}
+
+.star-origin {
+    fill: #333;
+}
+
+.star-axis {
+    stroke: #ccc;
+    stroke-dasharray: 4 5;
+    opacity: 0.5;
+}
+
+.star-guideline {
+    stroke: #888;
+    opacity: 0.5;
+}
+
+.star-path {
+    stroke: #444;
+    fill: #709CB1;
+    fill-opacity: 0.6;
+}
+
+.star-line {
+    stroke: #000;
+}
+
+.star-interaction {
+    opacity: 0.1;
+}
+
+.star-interaction:hover {
+    fill-opacity: 0.8;
+    stroke: none;
+    opacity: 0.1;
+}
+
+.interaction {
+    pointer-events: none;
+}
+
+.interaction.label {
+    position: absolute;
+    font-size: 11px;
+    text-shadow: 0 1px 0 #FFF, 0 -1px 0 #FFF, 1px 0 #FFF, -1px 0 #FFF;
+}
+
+.interaction.circle {
+    fill: #444;
+    fill-opacity: 0.6;
+    stroke: #444;
+}
+
+/*****************************************************/
+
+/*accordion*/
+
+button.accordion,
+button.subaccordion {
+    background-color: #eee;
+    color: #444;
+    cursor: pointer;
+    padding: 1px;
+    width: 100%;
+    border: none;
+    text-align: left;
+    outline: none;
+    font-size: 15px;
+    transition: 0.4s;
+}
+
+button.accordion.active,
+button.accordion:hover,
+button.subaccordion.active,
+button.subaccordion:hover {
+    background-color: #ccc;
+}
+
+button.accordion:after,
+button.subaccordion:after {
+    content: '\002B';
+    color: #777;
+    font-weight: bold;
+    float: right;
+    margin-left: 5px;
+}
+
+button.accordion.active:after,
+button.subaccordion.active:after {
+    content: "\2212";
+}
+
+div.panel {
+    padding: 0 18px;
+    background-color: white;
+    max-height: 0;
+    overflow: hidden;
+    transition: max-height 0.2s ease-out;
+}
+
+#pageA {
+    display: inline-block;
+    float: left;
+    border: 1px solid #ccc;
+    width: 50%;
+}
+
+#pageB {
+    display: inline-block;
+    float: left;
+    border: 1px solid #ccc;
+    width: 50%;
+}
+
+.foreignObject {
+    font: 9px sans-serif;
+    text-overflow: ellipsis;
+    text-align: left;
+    word-wrap: break-word;
+}
+
+.highlight {
+    background-color: #000;
+}
+
+.author {
+    color: red;
+}
+
+/**************************************Loading effect*/
+
+.wrapperloading {
+    position: relative;
+    height: 200px;
+    width: 200px;
+    top: 50%;
+    margin-top: -100px;
+    left: 50%;
+    margin-left: -100px;
+}
+
+.wrapperloading .loading.down {
+    position: relative;
+    height: 100px;
+    width: 100px;
+    top: 50%;
+    margin-top: -50px;
+    left: 50%;
+    margin-left: -50px;
+    border-radius: 150px;
+    border: 3px solid lightsteelblue;
+    border-left-color: lightsteelblue;
+    border-top-color: rgb(75, 75, 124);
+    border-bottom-color: #0080FF;
+    border-right-color: lightsteelblue;
+    -webkit-animation: rotation 1s linear infinite;
+    -moz-animation: rotation 1s linear infinite;
+    -o-animation: rotation 1s linear infinite;
+    animation: rotation 1s linear infinite;
+}
+
+@-webkit-keyframes rotation {
+    0% {
+        -webkit-transform: rotate(0deg);
+        -moz-transform: rotate(0deg);
+        -ms-transform: rotate(0deg);
+        -o-transform: rotate(0deg);
+        transform: rotate(0deg);
+    }
+    50% {
+        -webkit-transform: rotate(180deg);
+        -moz-transform: rotate(180deg);
+        -ms-transform: rotate(180deg);
+        -o-transform: rotate(180deg);
+        transform: rotate(180deg);
+    }
+    100% {
+        -webkit-transform: rotate(360deg);
+        -moz-transform: rotate(360deg);
+        -ms-transform: rotate(360deg);
+        -o-transform: rotate(360deg);
+        transform: rotate(360deg);
+    }
+}
+
+@-moz-keyframes rotation {
+    0% {
+        -webkit-transform: rotate(0deg);
+        -moz-transform: rotate(0deg);
+        -ms-transform: rotate(0deg);
+        -o-transform: rotate(0deg);
+        transform: rotate(0deg);
+    }
+    50% {
+        -webkit-transform: rotate(180deg);
+        -moz-transform: rotate(180deg);
+        -ms-transform: rotate(180deg);
+        -o-transform: rotate(180deg);
+        transform: rotate(180deg);
+    }
+    100% {
+        -webkit-transform: rotate(360deg);
+        -moz-transform: rotate(360deg);
+        -ms-transform: rotate(360deg);
+        -o-transform: rotate(360deg);
+        transform: rotate(360deg);
+    }
+}
+
+@-o-keyframes rotation {
+    0% {
+        -webkit-transform: rotate(0deg);
+        -moz-transform: rotate(0deg);
+        -ms-transform: rotate(0deg);
+        -o-transform: rotate(0deg);
+        transform: rotate(0deg);
+    }
+    50% {
+        -webkit-transform: rotate(180deg);
+        -moz-transform: rotate(180deg);
+        -ms-transform: rotate(180deg);
+        -o-transform: rotate(180deg);
+        transform: rotate(180deg);
+    }
+    100% {
+        -webkit-transform: rotate(360deg);
+        -moz-transform: rotate(360deg);
+        -ms-transform: rotate(360deg);
+        -o-transform: rotate(360deg);
+        transform: rotate(360deg);
+    }
+}
+
+@keyframes rotation {
+    0% {
+        -webkit-transform: rotate(0deg);
+        -moz-transform: rotate(0deg);
+        -ms-transform: rotate(0deg);
+        -o-transform: rotate(0deg);
+        transform: rotate(0deg);
+    }
+    50% {
+        -webkit-transform: rotate(180deg);
+        -moz-transform: rotate(180deg);
+        -ms-transform: rotate(180deg);
+        -o-transform: rotate(180deg);
+        transform: rotate(180deg);
+    }
+    100% {
+        -webkit-transform: rotate(360deg);
+        -moz-transform: rotate(360deg);
+        -ms-transform: rotate(360deg);
+        -o-transform: rotate(360deg);
+        transform: rotate(360deg);
+    }
+}
+
+/**************************************Loading effect*/

@@ -73,9 +73,13 @@ typings/
 .serverless
 
 # Others
+ptt-web-crawler/
 components/
+/coverage/
 dist/
+pttdata/
 .vscode/
 jsconfig.json
 .jsbeautifyrc
 null.js
+test.js

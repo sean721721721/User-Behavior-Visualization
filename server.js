@@ -2,17 +2,67 @@ const express = require('express');
 const webpack = require('webpack');
 const webpackDevMiddleware = require('webpack-dev-middleware');
 
-const app = express();
-const config = require('./webpack.common.js');
+const os = require('os');
 
-const compiler = webpack(config);
+const app = express();
+const config = require('./config')[app.settings.env];
+const wpconfig = require('./webpack.common.js');
+
+const compiler = webpack(wpconfig);
+
+/*
+let options = {
+  timeout: 10000000,
+  pool: {
+    maxSockets: Infinity,
+  },
+  headers: {
+    connection: 'keep-alive',
+  },
+};
+*/
+
+/*
+ * Connect to database
+ * remove if not needed
+ */
+require('./db').connect(config);
+// eslint-disable-next-line no-console
+console.log('db connected');
+/*
+ * Load all models and controllers
+ * remove if not needed, and you can also remove fs variable declaration above
+ */
+// controller auto load Account model
+/*
+require("./models")(app);
+console.log('model');
+*/
+require('./controllers')(app);
+// eslint-disable-next-line no-console
+console.log('controlers loaded');
+/*
+ * Set Express settings (middleware and etc)
+ * see settings.js to add remove options
+ */
+require('./settings')(app, config);
+// eslint-disable-next-line no-console
+console.log('settings loaded');
 
 // Tell express to use the webpack-dev-middleware and use the webpack.config.js
 // configuration file as a base.
 app.use(webpackDevMiddleware(compiler, {
-  publicPath: config.output.publicPath,
+  publicPath: wpconfig.output.publicPath,
 }));
 
-// Serve the files on port 3000.
+/*
+ * Serve the files on port xxxx.
+ */
+if (os.platform() === 'linux') {
+  app.set('port', process.env.PORT || 3000);
+} else {
+  app.set('port', process.env.PORT || 8000);
+}
+
 // eslint-disable-next-line no-console
-app.listen(3000, console.log('Example app listening on port 3000!\n'));
+app.listen(app.get('port'), console.log('Express server listening on port %s', app.get('port')));

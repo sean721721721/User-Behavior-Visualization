@@ -1,8 +1,8 @@
 {
   "root": true,
   "parser": "babel-eslint",
-  "extends": "airbnb",
-  "plugins": ["react", "import"],
+  "extends": ["airbnb", "plugin:flowtype/recommended"],
+  "plugins": ["react", "import", "flowtype"],
   "rules": {
     "react/jsx-filename-extension": [1, {
       "extensions": [".js", ".jsx"]
@@ -14,12 +14,16 @@
     }]
   },
   "env": {
-    "browser": true
+    "browser": true,
+    "jest": true
   },
   "settings": {
     "import/resolver": {
       "webpack": {},
-      "babel-module": {}
+      "babel-module": {},
+      "node": {
+        "paths": ["controllers"]
+      }
     }
   },
   "overrides": [

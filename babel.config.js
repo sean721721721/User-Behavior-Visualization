@@ -9,9 +9,11 @@ const presets = [
     useBuiltIns: 'usage',
     modules: false,
   }],
+  ['@babel/flow'],
 ];
 
 const plugins = ['@babel/plugin-syntax-dynamic-import',
+  '@babel/plugin-proposal-class-properties',
   ['module-resolver', {
     root: ['./app'],
     alias: {
