@@ -80,7 +80,13 @@ class Page extends React.Component {
     if (tab.show) {
       return (
         <div id="Page1" className="tabcontent">
-          <span className="topright" role="button" tabIndex="0" onClick={tab.onChange} onKeyDown={tab.onChange}>
+          <span
+            className="topright"
+            role="button"
+            tabIndex="0"
+            onClick={tab.onChange}
+            onKeyDown={tab.onChange}
+          >
             x
           </span>
           <fieldset>
@@ -160,10 +166,16 @@ class Page extends React.Component {
   }
 }
 
-Page.defaultProps = {
-};
+Page.defaultProps = {};
 Page.propTypes = {
-  init: PropTypes.shape.isRequired,
+  init: PropTypes.shape({
+    pagename1: PropTypes.string,
+    since1: PropTypes.string,
+    until1: PropTypes.string,
+    wordfilter1: PropTypes.string,
+    idfilter1: PropTypes.string,
+    contentfilter1: PropTypes.string,
+  }).isRequired,
 };
 
 export default Page;

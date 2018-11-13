@@ -1,10 +1,10 @@
 // @flow
 import React from 'react';
 import ReactDOM from 'react-dom';
-import Menu from './components/menu';
+import Grid from './components/grid';
 import './styles.scss';
 
-ReactDOM.render(<Menu />, document.getElementById('app'));
+ReactDOM.render(<Grid />, document.getElementById('app'));
 
 /* import Board from './components/board';
 
