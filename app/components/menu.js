@@ -2,7 +2,7 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import ParameterTab from './parameter';
-import Page1 from './page';
+import Page from './page';
 import SubmitTab from './submit';
 import DownloadtTab from './download';
 
@@ -21,23 +21,7 @@ class Menu extends React.Component {
         this.setState(() => ({
           showParameter: true,
           showPage1: false,
-          initPage1: {
-            pagename1: 'Gossiping',
-            since1: '2018-06-01',
-            until1: '2018-06-10',
-            wordfilter1: '丁守中',
-            idfilter1: '',
-            contentfilter1: '柯文哲',
-          },
           showPage2: false,
-          initPage2: {
-            pagename1: 'Gossiping',
-            since1: '2018-06-01',
-            until1: '2018-06-10',
-            wordfilter1: '柯文哲',
-            idfilter1: '',
-            contentfilter1: '丁守中',
-          },
           showSubmit: false,
           showDownload: false,
         }));
@@ -46,23 +30,7 @@ class Menu extends React.Component {
         this.setState(() => ({
           showParameter: false,
           showPage1: true,
-          initPage1: {
-            pagename1: 'Gossiping',
-            since1: '2018-06-01',
-            until1: '2018-06-10',
-            wordfilter1: '丁守中',
-            idfilter1: '',
-            contentfilter1: '柯文哲',
-          },
           showPage2: false,
-          initPage2: {
-            pagename1: 'Gossiping',
-            since1: '2018-06-01',
-            until1: '2018-06-10',
-            wordfilter1: '柯文哲',
-            idfilter1: '',
-            contentfilter1: '丁守中',
-          },
           showSubmit: false,
           showDownload: false,
         }));
@@ -71,23 +39,7 @@ class Menu extends React.Component {
         this.setState(() => ({
           showParameter: false,
           showPage1: false,
-          initPage1: {
-            pagename1: 'Gossiping',
-            since1: '2018-06-01',
-            until1: '2018-06-10',
-            wordfilter1: '丁守中',
-            idfilter1: '',
-            contentfilter1: '柯文哲',
-          },
           showPage2: true,
-          initPage2: {
-            pagename1: 'Gossiping',
-            since1: '2018-06-01',
-            until1: '2018-06-10',
-            wordfilter1: '柯文哲',
-            idfilter1: '',
-            contentfilter1: '丁守中',
-          },
           showSubmit: false,
           showDownload: false,
         }));
@@ -96,23 +48,7 @@ class Menu extends React.Component {
         this.setState(() => ({
           showParameter: false,
           showPage1: false,
-          initPage1: {
-            pagename1: 'Gossiping',
-            since1: '2018-06-01',
-            until1: '2018-06-10',
-            wordfilter1: '丁守中',
-            idfilter1: '',
-            contentfilter1: '柯文哲',
-          },
           showPage2: false,
-          initPage2: {
-            pagename1: 'Gossiping',
-            since1: '2018-06-01',
-            until1: '2018-06-10',
-            wordfilter1: '柯文哲',
-            idfilter1: '',
-            contentfilter1: '丁守中',
-          },
           showSubmit: true,
           showDownload: false,
         }));
@@ -121,23 +57,7 @@ class Menu extends React.Component {
         this.setState(() => ({
           showParameter: false,
           showPage1: false,
-          initPage1: {
-            pagename1: 'Gossiping',
-            since1: '2018-06-01',
-            until1: '2018-06-10',
-            wordfilter1: '丁守中',
-            idfilter1: '',
-            contentfilter1: '柯文哲',
-          },
           showPage2: false,
-          initPage2: {
-            pagename1: 'Gossiping',
-            since1: '2018-06-01',
-            until1: '2018-06-10',
-            wordfilter1: '柯文哲',
-            idfilter1: '',
-            contentfilter1: '丁守中',
-          },
           showSubmit: false,
           showDownload: true,
         }));
@@ -152,23 +72,7 @@ class Menu extends React.Component {
     this.setState(() => ({
       showParameter: false,
       showPage1: false,
-      initPage1: {
-        pagename1: 'Gossiping',
-        since1: '2018-06-01',
-        until1: '2018-06-10',
-        wordfilter1: '丁守中',
-        idfilter1: '',
-        contentfilter1: '柯文哲',
-      },
       showPage2: false,
-      initPage2: {
-        pagename1: 'Gossiping',
-        since1: '2018-06-01',
-        until1: '2018-06-10',
-        wordfilter1: '柯文哲',
-        idfilter1: '',
-        contentfilter1: '丁守中',
-      },
       showSubmit: false,
       showDownload: false,
     }));
@@ -178,13 +82,17 @@ class Menu extends React.Component {
   render() {
     const {
       showParameter,
+      initParameter,
       showPage1,
       initPage1,
       showPage2,
       initPage2,
       showSubmit,
+      submitType,
       showDownload,
     } = this.state;
+
+    const { onSubmit } = this.props;
 
     return (
       <div className="box menu">
@@ -192,56 +100,32 @@ class Menu extends React.Component {
           <button className="tablinks" type="button">
             <a href="/">Reset</a>
           </button>
-          <button
-            className="tablinks"
-            type="button"
-            onClick={(e) => {
-              this.openTab(e, 'Parameters');
-            }}
-          >
+          <button className="tablinks" type="button" onClick={e => this.openTab(e, 'Parameters')}>
             Parameters
           </button>
-          <button
-            className="tablinks"
-            type="button"
-            onClick={(e) => {
-              this.openTab(e, 'Page1');
-            }}
-          >
+          <button className="tablinks" type="button" onClick={e => this.openTab(e, 'Page1')}>
             Page1
           </button>
-          <button
-            className="tablinks"
-            type="button"
-            onClick={(e) => {
-              this.openTab(e, 'Page2');
-            }}
-          >
+          <button className="tablinks" type="button" onClick={e => this.openTab(e, 'Page2')}>
             Page2
           </button>
-          <button
-            className="tablinks"
-            type="button"
-            onClick={(e) => {
-              this.openTab(e, 'Submit');
-            }}
-          >
+          <button className="tablinks" type="button" onClick={e => this.openTab(e, 'Submit')}>
             Submit
           </button>
-          <button
-            className="tablinks"
-            type="button"
-            onClick={(e) => {
-              this.openTab(e, 'Download');
-            }}
-          >
+          <button className="tablinks" type="button" onClick={e => this.openTab(e, 'Download')}>
             Download
           </button>
         </div>
-        <ParameterTab show={showParameter} onChange={this.handleCloseTab} />
-        <Page1 show={showPage1} init={initPage1} onChange={this.handleCloseTab} />
-        <Page1 show={showPage2} init={initPage2} onChange={this.handleCloseTab} />
-        <SubmitTab show={showSubmit} onChange={this.handleCloseTab} />
+        <ParameterTab show={showParameter} init={initParameter} onChange={this.handleCloseTab} />
+        <Page show={showPage1} init={initPage1} onChange={this.handleCloseTab} />
+        <Page show={showPage2} init={initPage2} onChange={this.handleCloseTab} />
+        <SubmitTab
+          show={showSubmit}
+          type={submitType}
+          set={this.state}
+          onChange={this.handleCloseTab}
+          onSubmit={onSubmit}
+        />
         <DownloadtTab show={showDownload} onChange={this.handleCloseTab} />
       </div>
     );
@@ -254,25 +138,27 @@ Menu.propTypes = {
     showParameter: PropTypes.bool,
     showPage1: PropTypes.bool,
     initPage1: PropTypes.shape({
-      pagename1: PropTypes.string,
-      since1: PropTypes.string,
-      until1: PropTypes.string,
-      wordfilter1: PropTypes.string,
-      idfilter1: PropTypes.string,
-      contentfilter1: PropTypes.string,
+      pagename: PropTypes.string,
+      since: PropTypes.string,
+      until: PropTypes.string,
+      wordfilter: PropTypes.string,
+      idfilter: PropTypes.string,
+      contentfilter: PropTypes.string,
     }),
     showPage2: PropTypes.bool,
     initPage2: PropTypes.shape({
-      pagename2: PropTypes.string,
-      since2: PropTypes.string,
-      until2: PropTypes.string,
-      wordfilter2: PropTypes.string,
-      idfilter2: PropTypes.string,
-      contentfilter2: PropTypes.string,
+      pagename: PropTypes.string,
+      since: PropTypes.string,
+      until: PropTypes.string,
+      wordfilter: PropTypes.string,
+      idfilter: PropTypes.string,
+      contentfilter: PropTypes.string,
     }),
     showSubmit: PropTypes.bool,
+    submitType: PropTypes.string,
     showDownload: PropTypes.bool,
   }).isRequired,
+  onSubmit: PropTypes.func.isRequired,
 };
 
 export default Menu;

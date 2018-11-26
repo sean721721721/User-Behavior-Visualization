@@ -25,23 +25,23 @@ class Page extends React.Component {
     const { target } = e;
     const { name, value } = target;
     switch (name) {
-      case 'pagename1':
-        this.setState({ pagename1: value });
+      case 'pagename':
+        this.setState({ pagename: value });
         break;
-      case 'since1':
-        this.setState({ since1: value });
+      case 'since':
+        this.setState({ since: value });
         break;
-      case 'until1':
-        this.setState({ until1: value });
+      case 'until':
+        this.setState({ until: value });
         break;
-      case 'wordfilter1':
-        this.setState({ wordfilter1: value });
+      case 'wordfilter':
+        this.setState({ wordfilter: value });
         break;
-      case 'idfilter1':
-        this.setState({ idfilter1: value });
+      case 'idfilter':
+        this.setState({ idfilter: value });
         break;
-      case 'contentfilter1':
-        this.setState({ contentfilter1: value });
+      case 'contentfilter':
+        this.setState({ contentfilter: value });
         break;
       default:
         // console.log(target, name, value);
@@ -57,7 +57,7 @@ class Page extends React.Component {
 
   render() {
     const {
-      pagename1, since1, until1, wordfilter1, idfilter1, contentfilter1,
+      pagename, since, until, wordfilter, idfilter, contentfilter,
     } = this.state;
     const tab = this.props;
     const actions = [
@@ -94,11 +94,11 @@ class Page extends React.Component {
             <label htmlFor="x">
               pagename:
               <input
-                name="pagename1"
+                name="pagename"
                 id="pagename1"
                 type="text"
                 list="pagenamelist"
-                value={pagename1}
+                value={pagename}
                 onChange={this.handleChange}
               />
             </label>
@@ -107,10 +107,10 @@ class Page extends React.Component {
               since:
               <input
                 type="date"
-                name="since1"
+                name="since"
                 id="date1"
                 placeholder="date"
-                value={since1}
+                value={since}
                 onChange={this.handleChange}
               />
             </label>
@@ -118,10 +118,10 @@ class Page extends React.Component {
               until:
               <input
                 type="date"
-                name="until1"
+                name="until"
                 id="date2"
                 placeholder="date"
-                value={until1}
+                value={until}
                 onChange={this.handleChange}
               />
             </label>
@@ -129,10 +129,10 @@ class Page extends React.Component {
               key word filter:
               <input
                 type="keyword1"
-                name="wordfilter1"
+                name="wordfilter"
                 id="keyword1"
                 placeholder="keyword"
-                value={wordfilter1}
+                value={wordfilter}
                 onChange={this.handleChange}
               />
             </label>
@@ -140,10 +140,10 @@ class Page extends React.Component {
               userid filter:
               <input
                 type="userid1"
-                name="idfilter1"
+                name="idfilter"
                 id="userid1"
                 placeholder="userid"
-                value={idfilter1}
+                value={idfilter}
                 onChange={this.handleChange}
               />
             </label>
@@ -151,10 +151,10 @@ class Page extends React.Component {
               content word filter:
               <input
                 type="keyword3"
-                name="contentfilter1"
+                name="contentfilter"
                 id="keyword3"
                 placeholder="keyword"
-                value={contentfilter1}
+                value={contentfilter}
                 onChange={this.handleChange}
               />
             </label>
@@ -169,12 +169,12 @@ class Page extends React.Component {
 Page.defaultProps = {};
 Page.propTypes = {
   init: PropTypes.shape({
-    pagename1: PropTypes.string,
-    since1: PropTypes.string,
-    until1: PropTypes.string,
-    wordfilter1: PropTypes.string,
-    idfilter1: PropTypes.string,
-    contentfilter1: PropTypes.string,
+    pagename: PropTypes.string,
+    since: PropTypes.string,
+    until: PropTypes.string,
+    wordfilter: PropTypes.string,
+    idfilter: PropTypes.string,
+    contentfilter: PropTypes.string,
   }).isRequired,
 };
 

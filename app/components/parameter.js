@@ -1,15 +1,12 @@
 // @flow
 import React from 'react';
+import PropTypes from 'prop-types';
 import DataList from './datalist';
 
 class ParameterTab extends React.Component {
   constructor(props) {
     super(props);
-    this.state = {
-      var1: 'reaction',
-      var2: 'comment',
-      posttype: 'PTT',
-    };
+    this.state = props.init;
     this.handleChange = this.handleChange.bind(this);
   }
 
@@ -35,7 +32,9 @@ class ParameterTab extends React.Component {
 
   render() {
     // const showParameter = this.props.value;
-    const { var1, var2, posttype } = this.state;
+    const {
+      var1, min1, max1, var2, min2, max2, posttype,
+    } = this.state;
     const tab = this.props;
     console.log(tab);
     const actions = ['reaction', 'comment', 'share', 'push', 'boo', 'neutral'];
@@ -60,7 +59,13 @@ class ParameterTab extends React.Component {
     if (tab.show) {
       return (
         <div id="Parameters" className="tabcontent">
-          <span className="topright" role="button" tabIndex="0" onClick={tab.onChange} onKeyDown={tab.onChange}>
+          <span
+            className="topright"
+            role="button"
+            tabIndex="0"
+            onClick={tab.onChange}
+            onKeyDown={tab.onChange}
+          >
             x
           </span>
           <fieldset>
@@ -79,11 +84,25 @@ class ParameterTab extends React.Component {
             <DataList props={list1} />
             <label htmlFor="minvar1">
               from
-              <input name="minvar1" id="minvar1" type="number" min="0" defaultValue="0" />
+              <input
+                name="minvar1"
+                id="minvar1"
+                type="number"
+                min="0"
+                value={min1}
+                onChange={this.handleChange}
+              />
             </label>
             <label htmlFor="maxvar1">
               to
-              <input name="maxvar1" id="maxvar1" type="number" min="0" />
+              <input
+                name="maxvar1"
+                id="maxvar1"
+                type="number"
+                min="0"
+                value={max1}
+                onChange={this.handleChange}
+              />
             </label>
             <label htmlFor="varname2">
               var 2:
@@ -99,11 +118,25 @@ class ParameterTab extends React.Component {
             <DataList props={list2} />
             <label htmlFor="x">
               from
-              <input name="minvar2" id="minvar2" type="number" min="0" defaultValue="0" />
+              <input
+                name="minvar2"
+                id="minvar2"
+                type="number"
+                min="0"
+                value={min2}
+                onChange={this.handleChange}
+              />
             </label>
             <label htmlFor="x">
               to
-              <input name="maxvar2" id="maxvar2" type="number" min="0" />
+              <input
+                name="maxvar2"
+                id="maxvar2"
+                type="number"
+                min="0"
+                value={max2}
+                onChange={this.handleChange}
+              />
             </label>
             <label htmlFor="x">
               posttype:
@@ -124,5 +157,17 @@ class ParameterTab extends React.Component {
     return null;
   }
 }
+
+ParameterTab.defaultProps = {};
+ParameterTab.propTypes = {
+  init: PropTypes.shape({
+    var1: PropTypes.string,
+    min1: PropTypes.string,
+    max1: PropTypes.string,
+    var2: PropTypes.string,
+    min2: PropTypes.string,
+    posttype: PropTypes.string,
+  }).isRequired,
+};
 
 export default ParameterTab;
