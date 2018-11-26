@@ -2,7 +2,7 @@
 //var express = require('express');
 //var router = express.Router();
 var bodyParser = require('body-parser');
-//var query = require('./query.js');
+var query = require('./query.js');
 const querystring = require('querystring');
 var should = require('should');
 
@@ -135,16 +135,6 @@ function urlhandle(req, res, next) {
         hasquery = true;
     }
     req.query.hasquery = hasquery;
-    /*
-    var posttype = req.params.posttype; //'status','video','link','photo'
-    var fromname = req.params.fromname;
-    var minshare = req.params.minshare;
-    var maxshare = req.params.maxshare;
-    var minlike = req.params.minlike;
-    var maxlike = req.params.maxlike;
-    var minreaction = req.params.minreaction;
-    var maxreaction = req.params.maxreaction;
-    */
     //console.log(req.params);
     next();
 };
@@ -173,20 +163,6 @@ function redirecturl(req, res) {
     });
     res.redirect('/query?' + query);
 };
-/*
-router.get('/echo/:message?', exposeTemplates, function (req, res) {
-  res.render('echo', {
-    title: 'Echo',
-    message: req.params.message,
-
-    // Overrides which layout to use, instead of the defaul "main" layout.
-    layout: 'shared-templates',
-
-    partials: Promise.resolve({
-      echo: hbs.handlebars.compile('<p>ECHO: {{message}}</p>'),
-    })
-  });
-});*/
 
 module.exports = function (app) {
     /* 
@@ -206,31 +182,6 @@ module.exports = function (app) {
     passport.use(new LocalStrategy(Account.authenticate()));
     passport.serializeUser(Account.serializeUser());
     passport.deserializeUser(Account.deserializeUser());
-    //console.log('account');
-    /*
-    app.get("/", function (req, res, next) {
-        res.render("home", {
-            pageTitle: "Home"
-        });
-    });
-
-    app.get("/foo", function (req, res, next) {
-        res.render("home", {
-            pageTitle: "Foo"
-        });
-    });
-
-    app.get("/bar", function (req, res, next) {
-        res.render("home", {
-            pageTitle: "Bar"
-        });
-    });
-
-    app.get("/snarf", function (req, res, next) {
-        res.render("home", {
-            pageTitle: "Snarf"
-        });
-    });*/
 
     app.param('postid', function (req, res, next, postid) {
         req.postid = postid;
@@ -240,11 +191,7 @@ module.exports = function (app) {
 
     app.get('/', function (req, res) {
         if (req.session.passport && req.session.passport.user !== undefined) {
-            res.render('home', {
-                title: 'Home',
-                boturl: '/logout',
-                botton: 'Logout',
-            });
+            res.send('index.html');
         } else {
             req.session.passport = {};
             res.render('home', {
@@ -370,24 +317,4 @@ module.exports = function (app) {
             res.redirect('/');
         });
     });
-
-    //app.get('/pagevis', pagevisExpressHandler.callback);
-    //app.get('/pagevis', ansyc.callback);
-    //app.get('/db', mongodbExpressHandler.callback);
-    //app.get('/table', tableHandler.callback);
-    //app.get('/pagedata', pagedataExpressHandler.callback);
-    //app.get('/crawlervis', crawlervisExpressHandler.callback);
-    //app.get('/mongodbTextSearch', mongodbTextSearchExpressHandler.callback);
-    //app.get('/qq', urlencodedParser, queryHandler.callback);
-
-    /*
-    res.render('vis', {
-      title: 'vis',
-      query: "query1: " + req.params.page1 + "　time:　" + req.params.time1 + "　to　" + req.params.time2 + "貼文數: " + result[0].length + "<br>" +
-        "query2: " + req.params.page2 + "　time:　" + req.params.time3 + "　to　" + req.params.time4 + "貼文數: " + result[1].length,
-      summary: "共同活動使用者數: " + oldata.length + "<br>" + "所有貼文數: " + postlist.length,
-      data: [postlist, oldata],
-    });*/
-    //var testurl ="http://140.119.164.22:3000/query?time1=2010-11-17T04:54:56+0000&time2=2010-11-28T04:54:56+0000"
-    //module.exports = router;
 };

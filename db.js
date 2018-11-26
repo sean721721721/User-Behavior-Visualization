@@ -7,7 +7,7 @@ var fbschema = require('./models/postSchema.js');
 // Use native promises
 mongoose.Promise = global.Promise;
 var options = {
-    useMongoClient: true
+    // useMongoClient: true
 };
 
 let db1, db2;
