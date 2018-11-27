@@ -1,20 +1,28 @@
 // @flow
 import React from 'react';
+import PropTypes from 'prop-types';
 
-const Button = (props) => {
+type ButtonProps = {
+  style: PropTypes.shape,
+  classname: PropTypes.string,
+  action: PropTypes.func,
+  title: PropTypes.string,
+  type: PropTypes.string,
+};
+
+const Button = (props: ButtonProps) => {
   const {
-    style, type, action, title,
+    style, classname, action, title, type,
   } = props;
-  console.log(style);
   return (
     <button
       style={style}
-      className={type == 'primary' ? 'btn btn-primary' : 'btn btn-secondary'}
+      className={classname === 'primary' ? 'btn btn-primary' : 'btn btn-secondary'}
       onClick={action}
+      type={type}
     >
       {title}
     </button>
   );
 };
-
 export default Button;

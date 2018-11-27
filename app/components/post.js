@@ -12,7 +12,10 @@ function PushList({ props }: PushProps) {
   let boocount = 0;
   const pushs = list.map((push, i) => {
     const {
-      pushtag, userid, pushcontent, datetime,
+      push_tag: pushtag,
+      push_userid: userid,
+      push_content: pushcontent,
+      push_ipdatetime: datetime,
     } = push;
     const tag = push === '→' ? '箭頭' : pushtag;
     let typecount;
@@ -29,8 +32,8 @@ function PushList({ props }: PushProps) {
         boocount += 1;
         typecount = boocount;
     }
-    const divtitle = `${i.toString()}樓，第${typecount.toString()}${tag}`;
-    const floor = `${i.toString()}樓`;
+    const divtitle = `${(i + 1).toString()}樓，第${typecount.toString()}${tag}`;
+    const floor = `${(i + 1).toString()}樓`;
     return (
       <div className="push pwe-push-section-1" title={divtitle} key={i.toString()}>
         <span className="pwe-floor">{floor}</span>
@@ -47,10 +50,8 @@ function PushList({ props }: PushProps) {
     );
   });
   // const str = `推噓文統計：推=${pushcount}, 噓=${boocount}, →=${arrowcount}`;
-  return (
-    pushs
-    // <div className="pwe-push-statistics">{str}</div>
-  );
+  return pushs;
+  // <div className="pwe-push-statistics">{str}</div>
 }
 
 class Post extends React.Component {
@@ -61,8 +62,10 @@ class Post extends React.Component {
 
   render() {
     const {
-      author, board, title, time, content, href, push,
-    } = this.state;
+      postprops: {
+        author, board, article_title: title, date, content, url: href, messages: push,
+      },
+    } = this.props;
     return (
       <div id="main-container">
         <div id="main-content" className="bbs-screen bbs-content">
@@ -84,7 +87,7 @@ class Post extends React.Component {
           </div>
           <div className="article-metaline">
             <span className="article-meta-tag">時間</span>
-            <span className="article-meta-value">{time}</span>
+            <span className="article-meta-value">{date}</span>
           </div>
           <p>{content}</p>
           <span className="f2">※ 發信站: 批踢踢實業坊(ptt.cc), 來自: 36.237.159.224</span>
@@ -106,32 +109,32 @@ Post.defaultProps = {
   postprops: {
     author: 'Feishawn (亞魚兒)',
     board: 'MobileComm',
-    title: '[LIVE] 小米Mix3發表會',
-    time: 'Thu Oct 25 13:41:00 2018',
+    article_title: '[LIVE] 小米Mix3發表會',
+    date: 'Thu Oct 25 13:41:00 2018',
     content: `首先，先強調這是中國手機 對中國產品看到會頭痛四肢無力心臟不舒服的請盡快按下-- 直播連結:
             https://bit.ly/2Jdy6Nb 英文版論壇圖文直播: http://en.miui.com/thread-4139599-1-1.html
             B站: https://bit.ly/2SmFydc 優酷: https://bit.ly/2PpO4t0
             目前可以確定的就是滑蓋、前鏡頭2400萬畫素、無線充電更快(可能到10W?) 然後有960fps的慢動作
             (我對小米錄影不期不待就是了) 還有5G網路 --`,
-    href: 'https://www.ptt.cc/bbs/MobileComm/M.1540446065.A.825.html',
-    push: [
+    url: 'https://www.ptt.cc/bbs/MobileComm/M.1540446065.A.825.html',
+    messages: [
       {
-        pushtag: '→',
-        userid: 'leopika',
-        pushcontent: '5g等高通下一代處理器出來才有吧',
-        datetime: '10/25 13:41',
+        push_tag: '→',
+        push_userid: 'leopika',
+        push_content: '5g等高通下一代處理器出來才有吧',
+        push_ipdatetime: '10/25 13:41',
       },
       {
-        pushtag: '推',
-        userid: 'BenShiuan',
-        pushcontent: '背後指紋，不知道有沒有螢幕下指紋的版本',
-        datetime: '10/25 13:42',
+        push_tag: '推',
+        push_userid: 'BenShiuan',
+        push_content: '背後指紋，不知道有沒有螢幕下指紋的版本',
+        push_ipdatetime: '10/25 13:42',
       },
       {
-        pushtag: '推',
-        userid: 'abc0922001',
-        pushcontent: '小米錄影的品質與收音，都是爛得厲害',
-        datetime: '10/25 13:42',
+        push_tag: '推',
+        push_userid: 'abc0922001',
+        push_content: '小米錄影的品質與收音，都是爛得厲害',
+        push_ipdatetime: '10/25 13:42',
       },
     ],
   },
@@ -140,11 +143,18 @@ Post.propTypes = {
   postprops: PropTypes.shape({
     author: PropTypes.string,
     board: PropTypes.string,
-    title: PropTypes.string,
-    time: PropTypes.string,
+    article_title: PropTypes.string,
+    date: PropTypes.string,
     content: PropTypes.string,
-    href: PropTypes.string,
-    push: PropTypes.arrayOf(PropTypes.shape({})),
+    url: PropTypes.string,
+    messages: PropTypes.arrayOf(
+      PropTypes.shape({
+        push_tag: PropTypes.string,
+        push_userid: PropTypes.string,
+        push_content: PropTypes.string,
+        push_ipdatetime: PropTypes.string,
+      }),
+    ),
   }),
 };
 /*
