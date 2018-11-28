@@ -5,29 +5,30 @@ import PropTypes from 'prop-types';
 class SubmitTab extends React.Component {
   constructor(props) {
     super(props);
-    this.state = props;
+    this.state = props.set;
+    this.getCR = this.getCR.bind(this);
   }
 
   getCR = (e, str) => {
+    const { onSubmit } = this.props;
     this.setState(() => ({
       type: str,
     }));
-    this.props.onSubmit(e);
-    console.log(this.state);
+    onSubmit(e);
   };
 
   render() {
-    const tab = this.props;
+    const { show, onChange } = this.props;
     // console.log(tab);
-    if (tab.show) {
+    if (show) {
       return (
         <div id="Submit" className="tabcontent">
           <span
             className="topright"
             role="button"
             tabIndex="0"
-            onClick={tab.onChange}
-            onKeyDown={tab.onChange}
+            onClick={onChange}
+            onKeyDown={onChange}
           >
             x
           </span>
@@ -57,8 +58,10 @@ class SubmitTab extends React.Component {
 
 SubmitTab.defaultProps = {};
 SubmitTab.propTypes = {
-  type: PropTypes.string.isRequired,
+  show: PropTypes.string.isRequired,
   set: PropTypes.shape().isRequired,
+  onChange: PropTypes.func.isRequired,
+  onSubmit: PropTypes.func.isRequired,
 };
 
 export default SubmitTab;

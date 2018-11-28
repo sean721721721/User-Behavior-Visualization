@@ -4,18 +4,18 @@ import PropTypes from 'prop-types';
 import Button from './Button';
 
 const buttonStyle = {
-  margin: '10px 10px 10px 10px',
+  margin: '1px 5px 1px 5px',
 };
 
 class List extends React.Component {
   constructor(props) {
     super(props);
-    this.state = props;
     this.buttonSubmit = this.buttonSubmit.bind(this);
   }
 
   buttonSubmit(e, props) {
-    this.props.onChange(e, props);
+    const { onChange } = this.props;
+    onChange(e, props);
   }
 
   render() {
@@ -39,7 +39,7 @@ class List extends React.Component {
               style={buttonStyle}
               classname="getpttpost"
               action={e => this.buttonSubmit(e, list[i])}
-              title={title}
+              title="Go"
               type="button"
             />
             <a href={href} target="_blank" rel="noopener noreferrer">
@@ -52,7 +52,7 @@ class List extends React.Component {
             </div>
             <div className="article-Menu" />
             <div className="data">{date}</div>
-            <div className="mark">{i}</div>
+            <div className="mark">{i + 1}</div>
           </div>
         </div>
       );

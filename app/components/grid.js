@@ -2,7 +2,7 @@
 import React from 'react';
 import Menu from './menu';
 import Cards from './card';
-import PostList from './postlist';
+import PostPage from './postpage';
 import Post from './post';
 import Footer from './Footer';
 import AddCard from '../containers/AddCard';
@@ -90,6 +90,7 @@ class Grid extends React.Component {
             _id: '5b3f1f486e37944c1945c017',
           },
         ],
+        next: '',
       },
       postprops: {
         author: 'Feishawn (亞魚兒)',
@@ -125,9 +126,11 @@ class Grid extends React.Component {
       },
     };
 
+    this.getReqstr = this.getReqstr.bind(this);
     this.changePost = this.changePost.bind(this);
     this.changeList = this.changeList.bind(this);
     this.handleSubmit = this.handleSubmit.bind(this);
+    this.nextPage = this.nextPage.bind(this);
   }
 
   /*
@@ -137,22 +140,7 @@ class Grid extends React.Component {
   }
   */
 
-  changePost() {
-    this.setState(() => ({
-      postprops: {},
-    }));
-  }
-
-  changeList(datalist) {
-    const prop = { list: datalist[1] };
-    this.setState(() => ({
-      postlistprops: prop,
-    }));
-    console.log('change');
-  }
-
-  handleSubmit(e) {
-    e.preventDefault();
+  getReqstr() {
     const {
       menuprops: {
         initParameter: {
@@ -199,14 +187,54 @@ class Grid extends React.Component {
     const str = `${searchurl + strminvar1}&${strmaxvar1}&${strposttype}&`
       + `${strpage1}&${strtime1}&${strtime2}&${struser1}&${strkeyword1}&${strkeyword3}&`
       + `${strpage2}&${strtime3}&${strtime4}&${struser2}&${strkeyword2}&${strkeyword4}&${strco}`;
-    const url = encodeURI(str);
+    return str;
+  }
+
+  handleSubmit(e) {
+    e.preventDefault();
+    const url = encodeURI(this.getReqstr());
     const myRequest = new Request(url, {
       method: 'get',
     });
     fetch(myRequest)
       .then(res => res.json())
       .then((res) => {
-        console.log(res[1]);
+        console.log(res);
+        this.changeList(res);
+      });
+  }
+
+  changePost(e, props) {
+    e.preventDefault();
+    console.log(props);
+    this.setState(() => ({
+      postprops: props,
+    }));
+  }
+
+  changeList(datalist) {
+    const { list, next } = datalist;
+    this.setState(() => ({
+      postlistprops: { list: list[1], next: next[1] },
+    }));
+    console.log('change');
+  }
+
+  nextPage(e) {
+    e.preventDefault();
+
+    const {
+      postlistprops: { next },
+    } = this.state;
+    let url = this.getReqstr();
+    url = encodeURI(`${url}&next=${next}`);
+    const myRequest = new Request(url, {
+      method: 'get',
+    });
+    fetch(myRequest)
+      .then(res => res.json())
+      .then((res) => {
+        console.log(res);
         this.changeList(res);
       });
   }
@@ -235,7 +263,11 @@ class Grid extends React.Component {
             <div className="box detailview">
               <div className="btn-postgroup" />
               <div className="btn-usergroup" />
-              <PostList postlistprops={postlistprops} />
+              <PostPage
+                postlistprops={postlistprops}
+                onChange={this.changePost}
+                nextPage={this.nextPage}
+              />
               <div id="detail" />
             </div>
           </div>
@@ -244,7 +276,6 @@ class Grid extends React.Component {
               <div id="olbutton" />
             </div>
             <Post postprops={postprops} />
-            <div id="overlap" />
           </div>
         </div>
       </div>

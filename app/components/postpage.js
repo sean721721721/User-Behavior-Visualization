@@ -2,9 +2,10 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import List from './postlist';
+import Button from './Button';
 import './bbs.css';
 
-class PostList extends React.Component {
+class PostPage extends React.Component {
   constructor(props) {
     super(props);
     this.state = props;
@@ -13,9 +14,8 @@ class PostList extends React.Component {
   render() {
     const {
       postlistprops: { list },
-      onChange,
+      onChange, nextPage,
     } = this.props;
-    console.log(list);
     return (
       <div id="main-container">
         <div className="action-bar">
@@ -31,6 +31,7 @@ class PostList extends React.Component {
             <a className="btn wide" href="/bbs/MobileComm/index.html">
               上頁
             </a>
+            <Button classname="btn wide" action={nextPage} title="下頁" type="button" />
             <a className="btn wide" href="/bbs/MobileComm/index.html">
               下頁
             </a>
@@ -47,7 +48,7 @@ class PostList extends React.Component {
   }
 }
 
-PostList.defaultProps = {
+PostPage.defaultProps = {
   postlistprops: {
     list: [
       {
@@ -81,6 +82,7 @@ PostList.defaultProps = {
         _id: '5b3f1f486e37944c1945c017',
       },
     ],
+    next: '',
   },
   postprops: {
     author: 'Feishawn (亞魚兒)',
@@ -115,7 +117,7 @@ PostList.defaultProps = {
     ],
   },
 };
-PostList.propTypes = {
+PostPage.propTypes = {
   postlistprops: PropTypes.shape({
     list: PropTypes.arrayOf(
       PropTypes.shape({
@@ -148,6 +150,7 @@ PostList.propTypes = {
         _id: PropTypes.string,
       }),
     ),
+    next: PropTypes.string.isRequired,
   }),
   postprops: PropTypes.shape({
     author: PropTypes.string,
@@ -166,6 +169,7 @@ PostList.propTypes = {
     ),
   }),
   onChange: PropTypes.func.isRequired,
+  nextPage: PropTypes.func.isRequired,
 };
 
-export default PostList;
+export default PostPage;

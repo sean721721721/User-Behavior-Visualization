@@ -34,7 +34,7 @@ class Card extends React.Component {
       <div className="feed">
         <article className="card">
           <div className="card-content">
-            <a className="card-content-link" href="url">
+            <div className="card-content-link" href="url">
               <header className="card-header">
                 <span>{time}</span>
                 <h2 className="card-title">{title}</h2>
@@ -43,7 +43,7 @@ class Card extends React.Component {
                 <h2>:D</h2>
                 <p>{description}</p>
               </section>
-            </a>
+            </div>
             <footer className="card-meta">
               <TagList props={tags} />
             </footer>
