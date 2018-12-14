@@ -90,6 +90,7 @@ class Menu extends React.Component {
       showSubmit,
       submitType,
       showDownload,
+      initDownload,
     } = this.state;
 
     const { onSubmit } = this.props;
@@ -126,7 +127,7 @@ class Menu extends React.Component {
           onChange={this.handleCloseTab}
           onSubmit={onSubmit}
         />
-        <DownloadtTab show={showDownload} onChange={this.handleCloseTab} />
+        <DownloadtTab show={showDownload} config={initDownload} onChange={this.handleCloseTab} />
       </div>
     );
   }
@@ -157,6 +158,29 @@ Menu.propTypes = {
     showSubmit: PropTypes.bool,
     submitType: PropTypes.string,
     showDownload: PropTypes.bool,
+    initDownload: PropTypes.shape({
+      article_id: PropTypes.bool,
+      article_title: PropTypes.bool,
+      author: PropTypes.bool,
+      board: PropTypes.bool,
+      content: PropTypes.bool,
+      date: PropTypes.bool,
+      ip: PropTypes.bool,
+      message_count: PropTypes.shape({
+        all: PropTypes.bool,
+        boo: PropTypes.bool,
+        count: PropTypes.bool,
+        neutral: PropTypes.bool,
+        push: PropTypes.bool,
+      }),
+      messages: PropTypes.shape({
+        push_content: PropTypes.bool,
+        push_ipdatatime: PropTypes.bool,
+        push_tag: PropTypes.bool,
+        push_userid: PropTypes.bool,
+      }),
+      url: PropTypes.bool,
+    }),
   }).isRequired,
   onSubmit: PropTypes.func.isRequired,
 };

@@ -1,7 +1,14 @@
 // @flow
 import React from 'react';
 
-const CheckBox = (props) => {
+type CheckBoxProps = {
+  name: PropTypes.string,
+  title: PropTypes.string,
+  options: PropTypes.array,
+  handleChange: PropTypes.func,
+  selectedOptions: PropTypes.array,
+};
+const CheckBox = (props: CheckBoxProps) => {
   const {
     name, title, options, handleChange, selectedOptions,
   } = props;

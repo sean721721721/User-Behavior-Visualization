@@ -2,6 +2,7 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import Button from './Button';
+import CSV from './csv';
 
 const buttonStyle = {
   margin: '1px 5px 1px 5px',
@@ -19,7 +20,7 @@ class List extends React.Component {
   }
 
   render() {
-    const { list } = this.props;
+    const { list, downloadprops } = this.props;
     const posts = list.map((post, i) => {
       const {
         message_count: { count },
@@ -42,6 +43,7 @@ class List extends React.Component {
               title="Go"
               type="button"
             />
+            <CSV post={post} config={downloadprops} />
             <a href={href} target="_blank" rel="noopener noreferrer">
               {title}
             </a>
@@ -127,6 +129,29 @@ List.propTypes = {
       _id: PropTypes.string,
     }),
   ),
+  downloadprops: PropTypes.shape({
+    article_id: PropTypes.bool,
+    article_title: PropTypes.bool,
+    author: PropTypes.bool,
+    board: PropTypes.bool,
+    content: PropTypes.bool,
+    date: PropTypes.bool,
+    ip: PropTypes.bool,
+    message_count: PropTypes.shape({
+      all: PropTypes.bool,
+      boo: PropTypes.bool,
+      count: PropTypes.bool,
+      neutral: PropTypes.bool,
+      push: PropTypes.bool,
+    }),
+    messages: PropTypes.shape({
+      push_content: PropTypes.bool,
+      push_ipdatatime: PropTypes.bool,
+      push_tag: PropTypes.bool,
+      push_userid: PropTypes.bool,
+    }),
+    url: PropTypes.bool,
+  }).isRequired,
   onChange: PropTypes.func.isRequired,
 };
 

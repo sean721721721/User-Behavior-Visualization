@@ -8,12 +8,13 @@ import './bbs.css';
 class PostPage extends React.Component {
   constructor(props) {
     super(props);
+    //
     this.state = props;
   }
 
   render() {
     const {
-      postlistprops: { list },
+      postlistprops: { list }, downloadprops,
       onChange, nextPage,
     } = this.props;
     return (
@@ -41,7 +42,7 @@ class PostPage extends React.Component {
           </div>
         </div>
         <div className="r-list-container">
-          <List list={list} onChange={onChange} />
+          <List list={list} downloadprops={downloadprops} onChange={onChange} />
         </div>
       </div>
     );
@@ -168,6 +169,29 @@ PostPage.propTypes = {
       }),
     ),
   }),
+  downloadprops: PropTypes.shape({
+    article_id: PropTypes.bool,
+    article_title: PropTypes.bool,
+    author: PropTypes.bool,
+    board: PropTypes.bool,
+    content: PropTypes.bool,
+    date: PropTypes.bool,
+    ip: PropTypes.bool,
+    message_count: PropTypes.shape({
+      all: PropTypes.bool,
+      boo: PropTypes.bool,
+      count: PropTypes.bool,
+      neutral: PropTypes.bool,
+      push: PropTypes.bool,
+    }),
+    messages: PropTypes.shape({
+      push_content: PropTypes.bool,
+      push_ipdatatime: PropTypes.bool,
+      push_tag: PropTypes.bool,
+      push_userid: PropTypes.bool,
+    }),
+    url: PropTypes.bool,
+  }).isRequired,
   onChange: PropTypes.func.isRequired,
   nextPage: PropTypes.func.isRequired,
 };
