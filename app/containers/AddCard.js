@@ -28,7 +28,7 @@ const AddCard = ({ dispatch }) => {
     <div>
       <form className="container-fluid" onSubmit={handleFormSubmit}>
         <Input
-          inputType="text"
+          inputtype="text"
           title="Time"
           name="time"
           ref={(node) => {
@@ -37,7 +37,7 @@ const AddCard = ({ dispatch }) => {
           palceholder="Enter time" /* handleChange={this.handleInput} */
         />
         <Input
-          inputType="text"
+          inputtype="text"
           title="Title"
           name="title"
           ref={(node) => {
@@ -55,7 +55,7 @@ const AddCard = ({ dispatch }) => {
           }}
         />
         <Input
-          inputType="text"
+          inputtype="text"
           title="Tags"
           name="tag"
           ref={(node) => {

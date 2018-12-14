@@ -58,7 +58,7 @@ class SubmitTab extends React.Component {
 
 SubmitTab.defaultProps = {};
 SubmitTab.propTypes = {
-  show: PropTypes.string.isRequired,
+  show: PropTypes.bool.isRequired,
   set: PropTypes.shape().isRequired,
   onChange: PropTypes.func.isRequired,
   onSubmit: PropTypes.func.isRequired,
