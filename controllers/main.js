@@ -2,6 +2,7 @@
 //var express = require('express');
 //var router = express.Router();
 var bodyParser = require('body-parser');
+const path = require('path');
 var query = require('./query.js');
 const querystring = require('querystring');
 var should = require('should');
@@ -194,7 +195,7 @@ module.exports = function(app) {
     next();
   });
 
-  app.get('/', function(req, res) {
+  /*app.get('/', function(req, res) {
     if (req.session.passport && req.session.passport.user !== undefined) {
       res.send('index.html');
     } else {
@@ -204,9 +205,13 @@ module.exports = function(app) {
         boturl: '/login',
         botton: 'Login',
       });
+      res.send({
+        status: 200,
+        message: 'success',
+      });
     }
     console.log(' passport: ', req.session.passport);
-  });
+  });*/
 
   app.get('/query', urlhandle, async function(req, res) {
     try {

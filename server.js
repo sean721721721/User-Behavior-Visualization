@@ -1,15 +1,22 @@
 const express = require('express');
-const webpack = require('webpack');
-const webpackDevMiddleware = require('webpack-dev-middleware');
+const helmet = require('helmet');
+const cors = require('cors');
+// const webpack = require('webpack');
+// const webpackDevMiddleware = require('webpack-dev-middleware');
 
 const os = require('os');
+const path = require('path');
 
 const app = express();
 const config = require('./config')[app.settings.env];
-const wpconfig = require('./webpack.common.js');
+// const wpconfig = require('./webpack.common.js');
 
-const compiler = webpack(wpconfig);
+// const compiler = webpack(wpconfig);
 
+app.use(cors());
+app.use(helmet());
+
+const root = path.resolve(__dirname);
 /*
 let options = {
   timeout: 10000000,
@@ -21,7 +28,10 @@ let options = {
   },
 };
 */
-
+/*
+ * Serve up files in the /dist directory statically
+ */
+app.use(express.static(`${__dirname}/dist`));
 /*
  * Connect to database
  * remove if not needed
@@ -51,9 +61,10 @@ console.log('settings loaded');
 
 // Tell express to use the webpack-dev-middleware and use the webpack.config.js
 // configuration file as a base.
-app.use(webpackDevMiddleware(compiler, {
+/* app.use(webpackDevMiddleware(compiler, {
   publicPath: wpconfig.output.publicPath,
 }));
+*/
 
 /*
  * Serve the files on port xxxx.

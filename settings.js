@@ -1,18 +1,17 @@
 /* eslint-disable */
-var express = require("express");
-var path = require('path');
+var express = require('express');
 
 // mongoStore used for storing session in mongodb
 // mongoStore = require("connect-mongo")(require("connect"));
 
-module.exports = function (app, config) {
+module.exports = function(app, config) {
+  var env = process.env.NODE_ENV || 'development';
 
-  var env = process.env.NODE_ENV || "development";
-
-  /* 
-   * Serve up files in the /public directory statically
-   */
-  app.use(express.static('./dist'));
+  // handle every other route with index.html, which will contain
+  // a script tag to your application's JavaScript file(s).
+  app.get('*', function(request, response) {
+    response.sendFile('/dist/index.html');
+  });
 
   /*
    * dev configuration
@@ -28,10 +27,10 @@ module.exports = function (app, config) {
   // /*
   // * production configuration
   // */
-  // else {		
+  // else {
   // 	app.use(require("compression")({
   // 		threshold: 512 // only compress things that are at least 512 bytes in size
-  // 	}));				
+  // 	}));
   // }
 
   // parse request body (JSON, or otherwise)
@@ -57,13 +56,10 @@ module.exports = function (app, config) {
   */
 
   // global error handler
-  app.use(function (err, req, res, next) {
+  app.use(function(err, req, res, next) {
     res.status(err.status || 500);
     // handle error somehow
-    res.render('error', {
-      message: err.message,
-      error: {}
-    });
+    res.send(err);
     res.end();
   });
 };
