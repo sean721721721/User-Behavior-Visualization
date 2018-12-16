@@ -1,5 +1,9 @@
 // @flow
 import React from 'react';
+import Lodash from 'lodash';
+import { createStore } from 'redux';
+import { Provider } from 'react-redux';
+import rootReducer from '../reducers';
 import Menu from './menu';
 import Cards from './card';
 import PostPage from './postpage';
@@ -8,6 +12,8 @@ import Footer from './Footer';
 import AddCard from '../containers/AddCard';
 import VisibleCardList from '../containers/VisibleCardList';
 import './bbs.css';
+
+const store = createStore(rootReducer);
 
 class Grid extends React.Component {
   constructor(props) {
@@ -19,7 +25,6 @@ class Grid extends React.Component {
       items: [],
       */
       menuprops: {
-        showParameter: true,
         initParameter: {
           var1: 'reaction',
           min1: '0',
@@ -29,7 +34,6 @@ class Grid extends React.Component {
           max2: '',
           posttype: 'PTT',
         },
-        showPage1: false,
         initPage1: {
           pagename: 'Gossiping',
           since: '2018-06-01',
@@ -38,7 +42,6 @@ class Grid extends React.Component {
           idfilter: '',
           contentfilter: '柯文哲',
         },
-        showPage2: false,
         initPage2: {
           pagename: 'Gossiping',
           since: '2018-06-01',
@@ -47,9 +50,30 @@ class Grid extends React.Component {
           idfilter: '',
           contentfilter: '丁守中',
         },
-        showSubmit: false,
         submitType: 'All',
-        showDownload: false,
+        initDownload: {
+          article_id: true,
+          article_title: true,
+          author: true,
+          board: true,
+          content: true,
+          date: true,
+          ip: true,
+          message_count: {
+            all: true,
+            boo: true,
+            count: true,
+            neutral: true,
+            push: true,
+          },
+          messages: {
+            push_content: true,
+            push_ipdatetime: true,
+            push_tag: true,
+            push_userid: true,
+          },
+          url: true,
+        },
       },
       cardprops: {
         time: '23 Oct 018',
@@ -131,6 +155,9 @@ class Grid extends React.Component {
     this.changeList = this.changeList.bind(this);
     this.handleSubmit = this.handleSubmit.bind(this);
     this.nextPage = this.nextPage.bind(this);
+    this.handleTab = this.handleTab.bind(this);
+    this.handleDownloadTab = this.handleDownloadTab.bind(this);
+    this.selectedOptions = this.selectedOptions.bind(this);
   }
 
   /*
@@ -239,45 +266,145 @@ class Grid extends React.Component {
       });
   }
 
+  // should change to <input>
+  handleTab(e, tab) {
+    const { target } = e;
+    const { name, value } = target;
+    console.log(tab, name, value);
+    this.setState((prevState) => {
+      const state = Lodash.cloneDeep(prevState);
+      state.menuprops[tab][name] = value;
+      console.log(state);
+      return state;
+    });
+  }
+
+  handleDownloadTab(e) {
+    const newSelection = e.target.value;
+    const selectedOptions = this.selectedOptions();
+    if (selectedOptions.indexOf(newSelection) > -1) {
+      this.setState((prevState) => {
+        const state = Lodash.cloneDeep(prevState);
+        if (state.menuprops.initDownload[newSelection] !== undefined) {
+          state.menuprops.initDownload[newSelection] = false;
+        } else if (state.menuprops.initDownload.message_count[newSelection] !== undefined) {
+          state.menuprops.initDownload.message_count[newSelection] = false;
+        } else {
+          state.menuprops.initDownload.messages[newSelection] = false;
+        }
+        return state;
+      });
+    } else {
+      this.setState((prevState) => {
+        const state = Lodash.cloneDeep(prevState);
+        if (state.menuprops.initDownload[newSelection] !== undefined) {
+          state.menuprops.initDownload[newSelection] = true;
+        } else if (state.menuprops.initDownload.message_count[newSelection] !== undefined) {
+          state.menuprops.initDownload.message_count[newSelection] = true;
+        } else {
+          state.menuprops.initDownload.messages[newSelection] = true;
+        }
+        return state;
+      });
+    }
+    // console.log(this.state);
+  }
+
+  selectedOptions() {
+    const {
+      menuprops: {
+        initDownload: {
+          article_id,
+          article_title,
+          author,
+          board,
+          content,
+          date,
+          ip,
+          message_count: {
+            all, boo, count, neutral, push,
+          },
+          messages: {
+            push_content, push_ipdatetime, push_tag, push_userid,
+          },
+          url,
+        },
+      },
+    } = this.state;
+    // console.log(this.state);
+    const array = [];
+    if (article_id) array.push('article_id');
+    if (article_title) array.push('article_title');
+    if (author) array.push('author');
+    if (board) array.push('board');
+    if (content) array.push('content');
+    if (date) array.push('date');
+    if (ip) array.push('ip');
+    if (all) array.push('all');
+    if (boo) array.push('boo');
+    if (count) array.push('count');
+    if (neutral) array.push('neutral');
+    if (push) array.push('push');
+    if (push_content) array.push('push_content');
+    if (push_ipdatetime) array.push('push_ipdatetime');
+    if (push_tag) array.push('push_tag');
+    if (push_userid) array.push('push_userid');
+    if (url) array.push('url');
+    // console.log(array);
+    return array;
+  }
+
   render() {
     const {
       menuprops, cardprops, postlistprops, postprops,
     } = this.state;
+    const selectedOptions = this.selectedOptions();
     return (
       <div className="grid">
-        <Menu menuprops={menuprops} onSubmit={this.handleSubmit} />
-        <div className="grid1">
-          <div className="grid2">
-            <div className="box overview">
-              <div id="template" className="slider__list" />
-              <div id="over" />
-              <div id="select" />
-              <VisibleCardList />
-              <Cards cardprops={cardprops} />
-              <Footer />
+        <Menu
+          menuprops={menuprops}
+          onSubmit={this.handleSubmit}
+          handlePT={e=> this.handleTab(e, 'initParameter')}
+          handlePT1={e => this.handleTab(e, 'initPage1')}
+          handlePT2={e => this.handleTab(e, 'initPage2')}
+          handleDT={this.handleDownloadTab}
+          selectedOptions={selectedOptions}
+        />
+        <Provider store={store}>
+          <div className="grid1">
+            <div className="grid2">
+              <div className="box overview">
+                <div id="template" className="slider__list" />
+                <div id="over" />
+                <div id="select" />
+                <VisibleCardList />
+                <Cards cardprops={cardprops} />
+                <Footer />
+              </div>
+              <div className="box postview">
+                <div id="page" />
+                <AddCard />
+              </div>
+              <div className="box detailview">
+                <div className="btn-postgroup" />
+                <div className="btn-usergroup" />
+                <PostPage
+                  postlistprops={postlistprops}
+                  downloadprops={menuprops.initDownload}
+                  onChange={this.changePost}
+                  nextPage={this.nextPage}
+                />
+                <div id="detail" />
+              </div>
             </div>
-            <div className="box postview">
-              <div id="page" />
-              <AddCard />
-            </div>
-            <div className="box detailview">
-              <div className="btn-postgroup" />
-              <div className="btn-usergroup" />
-              <PostPage
-                postlistprops={postlistprops}
-                onChange={this.changePost}
-                nextPage={this.nextPage}
-              />
-              <div id="detail" />
+            <div className="box userview" id="table">
+              <div id="userdeg">
+                <div id="olbutton" />
+              </div>
+              <Post postprops={postprops} />
             </div>
           </div>
-          <div className="box userview" id="table">
-            <div id="userdeg">
-              <div id="olbutton" />
-            </div>
-            <Post postprops={postprops} />
-          </div>
-        </div>
+        </Provider>
       </div>
     );
   }

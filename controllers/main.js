@@ -291,7 +291,7 @@ module.exports = function(app) {
       },
     );
   });
-
+  /*
   app.get('/login', function(req, res) {
     //console.log(res);
     res.render('login', {
@@ -299,12 +299,12 @@ module.exports = function(app) {
       title: 'Login',
     });
   });
-
+  */
   app.post(
     '/login',
     urlencodedParser,
     passport.authenticate('local', {
-      failureRedirect: '/login',
+      failureRedirect: '/',
       failureFlash: true,
     }),
     (req, res, next) => {
@@ -322,7 +322,19 @@ module.exports = function(app) {
             account.username.should.eql(req.body.username);
             console.log('   username: ', account.username);
             console.log('login');
-            res.redirect('/');
+            //res.redirect('/');
+            const fakeAuth = {
+              isAuthenticated: true,
+              authenticate(cb) {
+                this.isAuthenticated = true;
+                setTimeout(cb, 100); // fake async
+              },
+              signout(cb) {
+                this.isAuthenticated = false;
+                setTimeout(cb, 100);
+              },
+            };
+            res.send(fakeAuth);
           },
         );
       });
