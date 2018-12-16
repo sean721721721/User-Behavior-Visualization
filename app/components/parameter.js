@@ -7,36 +7,18 @@ class ParameterTab extends React.Component {
   constructor(props) {
     super(props);
     this.state = props.init;
-    this.handleChange = this.handleChange.bind(this);
-  }
-
-  // should change to <input>
-  handleChange(e) {
-    const { target } = e;
-    const { name, value } = target;
-    switch (name) {
-      case 'var1':
-        this.setState({ var1: value });
-        break;
-      case 'var2':
-        this.setState({ var2: value });
-        break;
-      case 'posttype':
-        this.setState({ posttype: value });
-        break;
-      default:
-        // console.log(target, name, value);
-        break;
-    }
   }
 
   render() {
     // const showParameter = this.props.value;
     const {
-      var1, min1, max1, var2, min2, max2, posttype,
-    } = this.state;
-    const tab = this.props;
-    console.log(tab);
+      show,
+      init: {
+        var1, min1, max1, var2, min2, max2, posttype,
+      },
+      onChange,
+      handlePT,
+    } = this.props;
     const actions = ['reaction', 'comment', 'share', 'push', 'boo', 'neutral'];
     const list1 = {
       listid: 'varname1list',
@@ -56,15 +38,15 @@ class ParameterTab extends React.Component {
       name: 'posttype',
       lists: ['status', 'video', 'link', 'photo', 'PTT'],
     };
-    if (tab.show) {
+    if (show) {
       return (
         <div id="Parameters" className="tabcontent">
           <span
             className="topright"
             role="button"
             tabIndex="0"
-            onClick={tab.onChange}
-            onKeyDown={tab.onChange}
+            onClick={onChange}
+            onKeyDown={onChange}
           >
             x
           </span>
@@ -78,7 +60,7 @@ class ParameterTab extends React.Component {
                 type="text"
                 list="varname1list"
                 value={var1}
-                onChange={this.handleChange}
+                onChange={handlePT}
               />
             </label>
             <DataList props={list1} />
@@ -90,7 +72,7 @@ class ParameterTab extends React.Component {
                 type="number"
                 min="0"
                 value={min1}
-                onChange={this.handleChange}
+                onChange={handlePT}
               />
             </label>
             <label htmlFor="maxvar1">
@@ -101,7 +83,7 @@ class ParameterTab extends React.Component {
                 type="number"
                 min="0"
                 value={max1}
-                onChange={this.handleChange}
+                onChange={handlePT}
               />
             </label>
             <label htmlFor="varname2">
@@ -112,7 +94,7 @@ class ParameterTab extends React.Component {
                 type="text"
                 list="varname2list"
                 value={var2}
-                onChange={this.handleChange}
+                onChange={handlePT}
               />
             </label>
             <DataList props={list2} />
@@ -124,7 +106,7 @@ class ParameterTab extends React.Component {
                 type="number"
                 min="0"
                 value={min2}
-                onChange={this.handleChange}
+                onChange={handlePT}
               />
             </label>
             <label htmlFor="x">
@@ -135,7 +117,7 @@ class ParameterTab extends React.Component {
                 type="number"
                 min="0"
                 value={max2}
-                onChange={this.handleChange}
+                onChange={handlePT}
               />
             </label>
             <label htmlFor="x">
@@ -146,7 +128,7 @@ class ParameterTab extends React.Component {
                 type="text"
                 list="posttypelist"
                 value={posttype}
-                onChange={this.handleChange}
+                onChange={handlePT}
               />
             </label>
             <DataList props={posttypelist} />
@@ -160,6 +142,7 @@ class ParameterTab extends React.Component {
 
 ParameterTab.defaultProps = {};
 ParameterTab.propTypes = {
+  show: PropTypes.bool.isRequired,
   init: PropTypes.shape({
     var1: PropTypes.string,
     min1: PropTypes.string,
@@ -168,6 +151,8 @@ ParameterTab.propTypes = {
     min2: PropTypes.string,
     posttype: PropTypes.string,
   }).isRequired,
+  onChange: PropTypes.func.isRequired,
+  handlePT: PropTypes.func.isRequired,
 };
 
 export default ParameterTab;

@@ -17,36 +17,6 @@ class Page extends React.Component {
       contentfilter1: props.init.contentfilter1,
     };
     */
-    this.handleChange = this.handleChange.bind(this);
-  }
-
-  // should change to <input>
-  handleChange(e) {
-    const { target } = e;
-    const { name, value } = target;
-    switch (name) {
-      case 'pagename':
-        this.setState({ pagename: value });
-        break;
-      case 'since':
-        this.setState({ since: value });
-        break;
-      case 'until':
-        this.setState({ until: value });
-        break;
-      case 'wordfilter':
-        this.setState({ wordfilter: value });
-        break;
-      case 'idfilter':
-        this.setState({ idfilter: value });
-        break;
-      case 'contentfilter':
-        this.setState({ contentfilter: value });
-        break;
-      default:
-        // console.log(target, name, value);
-        break;
-    }
   }
 
   /*
@@ -57,9 +27,13 @@ class Page extends React.Component {
 
   render() {
     const {
-      pagename, since, until, wordfilter, idfilter, contentfilter,
-    } = this.state;
-    const tab = this.props;
+      show,
+      init: {
+        pagename, since, until, wordfilter, idfilter, contentfilter,
+      },
+      onChange,
+      handlePT,
+    } = this.props;
     const actions = [
       '客台',
       '勞動之王',
@@ -77,15 +51,15 @@ class Page extends React.Component {
       name: 'pagename',
       lists: actions,
     };
-    if (tab.show) {
+    if (show) {
       return (
         <div id="Page1" className="tabcontent">
           <span
             className="topright"
             role="button"
             tabIndex="0"
-            onClick={tab.onChange}
-            onKeyDown={tab.onChange}
+            onClick={onChange}
+            onKeyDown={onChange}
           >
             x
           </span>
@@ -99,7 +73,7 @@ class Page extends React.Component {
                 type="text"
                 list="pagenamelist"
                 value={pagename}
-                onChange={this.handleChange}
+                onChange={handlePT}
               />
             </label>
             <DataList props={pagenamelist} />
@@ -111,7 +85,7 @@ class Page extends React.Component {
                 id="date1"
                 placeholder="date"
                 value={since}
-                onChange={this.handleChange}
+                onChange={handlePT}
               />
             </label>
             <label htmlFor="x">
@@ -122,7 +96,7 @@ class Page extends React.Component {
                 id="date2"
                 placeholder="date"
                 value={until}
-                onChange={this.handleChange}
+                onChange={handlePT}
               />
             </label>
             <label htmlFor="x">
@@ -133,7 +107,7 @@ class Page extends React.Component {
                 id="keyword1"
                 placeholder="keyword"
                 value={wordfilter}
-                onChange={this.handleChange}
+                onChange={handlePT}
               />
             </label>
             <label htmlFor="x">
@@ -144,7 +118,7 @@ class Page extends React.Component {
                 id="userid1"
                 placeholder="userid"
                 value={idfilter}
-                onChange={this.handleChange}
+                onChange={handlePT}
               />
             </label>
             <label htmlFor="x">
@@ -155,7 +129,7 @@ class Page extends React.Component {
                 id="keyword3"
                 placeholder="keyword"
                 value={contentfilter}
-                onChange={this.handleChange}
+                onChange={handlePT}
               />
             </label>
           </fieldset>
@@ -168,6 +142,7 @@ class Page extends React.Component {
 
 Page.defaultProps = {};
 Page.propTypes = {
+  show: PropTypes.bool.isRequired,
   init: PropTypes.shape({
     pagename: PropTypes.string,
     since: PropTypes.string,
@@ -176,6 +151,8 @@ Page.propTypes = {
     idfilter: PropTypes.string,
     contentfilter: PropTypes.string,
   }).isRequired,
+  onChange: PropTypes.func.isRequired,
+  handlePT: PropTypes.func.isRequired,
 };
 
 export default Page;

@@ -186,7 +186,7 @@ PostPage.propTypes = {
     }),
     messages: PropTypes.shape({
       push_content: PropTypes.bool,
-      push_ipdatatime: PropTypes.bool,
+      push_ipdatetime: PropTypes.bool,
       push_tag: PropTypes.bool,
       push_userid: PropTypes.bool,
     }),

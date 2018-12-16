@@ -118,8 +118,10 @@ function toCSV(datalist, config) {
       if (format[j] === 'messages') offset = count;
       count += subcolumn;
       for (let k = 0; k < subcolumn; k += 1) {
-        head += subformat[k];
-        head += ',';
+        if (subformat[k] !== '_id') {
+          head += subformat[k];
+          head += ',';
+        }
       }
     }
     if (j === column - 1) head += '\n';
@@ -137,8 +139,10 @@ function toCSV(datalist, config) {
         const subcolumn = subformat.length;
         for (let k = 0; k < subcolumn; k += 1) {
           // console.log('subformat', datalist[i][format[j]], subformat);
-          content += datalist[i][format[j]][subformat[k]];
-          content += ',';
+          if (subformat[k] !== '_id') {
+            content += datalist[i][format[j]][subformat[k]];
+            content += ',';
+          }
         }
       } else {
         content += datalist[i][format[j]];
@@ -151,6 +155,7 @@ function toCSV(datalist, config) {
     }
     head += content;
   }
+  // console.log(head);
   return head;
 }
 
@@ -174,7 +179,7 @@ function addOffset(offset) {
  * @param {object} propconfig
  */
 function subCSV(prop, proplength, offset, propconfig) {
-  let content = '';
+  let content = ' ,';
   const row = prop.length;
   const offsetstr = addOffset(offset);
   const format = Object.keys(propconfig);
@@ -241,7 +246,7 @@ class CSV extends React.Component {
       type: 'text/csv',
     });
     const bloburl = URL.createObjectURL(blob);
-    //const imgurl = '../app/img/download.jpg';
+    // const imgurl = '../app/img/download.jpg';
 
     const style = {
       margin: '1px 5px 1px 5px',
@@ -256,6 +261,7 @@ class CSV extends React.Component {
     );
   }
 }
+
 CSV.defaultProps = {};
 CSV.propTypes = {
   post: PropTypes.shape({

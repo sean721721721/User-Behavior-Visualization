@@ -9,8 +9,14 @@ import DownloadtTab from './download';
 class Menu extends React.Component {
   constructor(props) {
     super(props);
-    this.state = props.menuprops;
-
+    this.state = {
+      ...props.menuprops,
+      showParameter: true,
+      showPage1: false,
+      showPage2: false,
+      showSubmit: false,
+      showDownload: false,
+    };
     this.openTab = this.openTab.bind(this);
     this.handleCloseTab = this.handleCloseTab.bind(this);
   }
@@ -82,18 +88,24 @@ class Menu extends React.Component {
   render() {
     const {
       showParameter,
-      initParameter,
       showPage1,
-      initPage1,
       showPage2,
-      initPage2,
       showSubmit,
       submitType,
       showDownload,
-      initDownload,
     } = this.state;
 
-    const { onSubmit } = this.props;
+    const {
+      onSubmit,
+      menuprops: {
+        initParameter, initPage1, initPage2, initDownload,
+      },
+      handlePT,
+      handlePT1,
+      handlePT2,
+      handleDT,
+      selectedOptions,
+    } = this.props;
 
     return (
       <div className="box menu">
@@ -117,9 +129,24 @@ class Menu extends React.Component {
             Download
           </button>
         </div>
-        <ParameterTab show={showParameter} init={initParameter} onChange={this.handleCloseTab} />
-        <Page show={showPage1} init={initPage1} onChange={this.handleCloseTab} />
-        <Page show={showPage2} init={initPage2} onChange={this.handleCloseTab} />
+        <ParameterTab
+          show={showParameter}
+          init={initParameter}
+          onChange={this.handleCloseTab}
+          handlePT={handlePT}
+        />
+        <Page
+          show={showPage1}
+          init={initPage1}
+          onChange={this.handleCloseTab}
+          handlePT={handlePT1}
+        />
+        <Page
+          show={showPage2}
+          init={initPage2}
+          onChange={this.handleCloseTab}
+          handlePT={handlePT2}
+        />
         <SubmitTab
           show={showSubmit}
           type={submitType}
@@ -127,7 +154,13 @@ class Menu extends React.Component {
           onChange={this.handleCloseTab}
           onSubmit={onSubmit}
         />
-        <DownloadtTab show={showDownload} config={initDownload} onChange={this.handleCloseTab} />
+        <DownloadtTab
+          show={showDownload}
+          config={initDownload}
+          onChange={this.handleCloseTab}
+          handleDT={handleDT}
+          selectedOptions={selectedOptions}
+        />
       </div>
     );
   }
@@ -138,6 +171,9 @@ Menu.propTypes = {
   menuprops: PropTypes.shape({
     showParameter: PropTypes.bool,
     showPage1: PropTypes.bool,
+    showPage2: PropTypes.bool,
+    showSubmit: PropTypes.bool,
+    showDownload: PropTypes.bool,
     initPage1: PropTypes.shape({
       pagename: PropTypes.string,
       since: PropTypes.string,
@@ -146,7 +182,6 @@ Menu.propTypes = {
       idfilter: PropTypes.string,
       contentfilter: PropTypes.string,
     }),
-    showPage2: PropTypes.bool,
     initPage2: PropTypes.shape({
       pagename: PropTypes.string,
       since: PropTypes.string,
@@ -155,9 +190,7 @@ Menu.propTypes = {
       idfilter: PropTypes.string,
       contentfilter: PropTypes.string,
     }),
-    showSubmit: PropTypes.bool,
     submitType: PropTypes.string,
-    showDownload: PropTypes.bool,
     initDownload: PropTypes.shape({
       article_id: PropTypes.bool,
       article_title: PropTypes.bool,
@@ -175,7 +208,7 @@ Menu.propTypes = {
       }),
       messages: PropTypes.shape({
         push_content: PropTypes.bool,
-        push_ipdatatime: PropTypes.bool,
+        push_ipdatetime: PropTypes.bool,
         push_tag: PropTypes.bool,
         push_userid: PropTypes.bool,
       }),
@@ -183,6 +216,11 @@ Menu.propTypes = {
     }),
   }).isRequired,
   onSubmit: PropTypes.func.isRequired,
+  handlePT: PropTypes.func.isRequired,
+  handlePT1: PropTypes.func.isRequired,
+  handlePT2: PropTypes.func.isRequired,
+  handleDT: PropTypes.func.isRequired,
+  selectedOptions: PropTypes.arrayOf(PropTypes.string).isRequired,
 };
 
 export default Menu;

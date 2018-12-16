@@ -7,81 +7,12 @@ class DownloadTab extends React.Component {
   constructor(props) {
     super(props);
     this.state = props.config;
-
-    this.handleCheckBox = this.handleCheckBox.bind(this);
-    this.selectedOptions = this.selectedOptions.bind(this);
-    this.checked = this.checked.bind(this);
-  }
-
-  handleCheckBox(e) {
-    const newSelection = e.target.value;
-    const selectedOptions = this.selectedOptions();
-    if (selectedOptions.indexOf(newSelection) > -1) {
-      this.setState(prevState => ({
-        ...prevState,
-        // message_count: prevState.config.message_count,
-        // messages: prevState.config.messages,
-        [newSelection]: false,
-      }));
-    } else {
-      this.setState(prevState => ({
-        ...prevState.config,
-        // message_count: prevState.config.message_count,
-        // messages: prevState.config.messages,
-        [newSelection]: true,
-      }));
-    }
-    console.log(this.state);
-  }
-
-  selectedOptions() {
-    const {
-      article_id,
-      article_title,
-      author,
-      board,
-      content,
-      date,
-      ip,
-      message_count: {
-        all, boo, count, neutral, push,
-      },
-      messages: {
-        push_content, push_ipdatatime, push_tag, push_userid,
-      },
-      url,
-    } = this.state;
-    console.log(this.state);
-    const array = [];
-    if (article_id) array.push('article_id');
-    if (article_title) array.push('article_title');
-    if (author) array.push('author');
-    if (board) array.push('board');
-    if (content) array.push('content');
-    if (date) array.push('date');
-    if (ip) array.push('ip');
-    if (all) array.push('all');
-    if (boo) array.push('boo');
-    if (count) array.push('count');
-    if (neutral) array.push('neutral');
-    if (push) array.push('push');
-    if (push_content) array.push('push_content');
-    if (push_ipdatatime) array.push('push_ipdatatime');
-    if (push_tag) array.push('push_tag');
-    if (push_userid) array.push('push_userid');
-    if (url) array.push('url');
-    console.log(array);
-    return array;
-  }
-
-  checked(option) {
-    return selectedOptions.indexOf(option) > -1;
   }
 
   render() {
-    //const { config } = this.state;
-    const { show, onChange, config } = this.props;
-    const selectedOptions = this.selectedOptions();
+    // const { config } = this.state;
+    const { show, onChange, config, handleDT ,selectedOptions } = this.props;
+    // const selectedOptions = this.selectedOptions();
     const options = [
       'article_id',
       'article_title',
@@ -96,7 +27,7 @@ class DownloadTab extends React.Component {
       'neutral',
       'push',
       'push_content',
-      'push_ipdatatime',
+      'push_ipdatetime',
       'push_tag',
       'push_userid',
       'url',
@@ -118,7 +49,7 @@ class DownloadTab extends React.Component {
               name="csv format"
               title="csv format"
               options={options}
-              handleChange={this.handleCheckBox}
+              handleChange={handleDT}
               selectedOptions={selectedOptions}
               // checked={this.checked()}
             />
@@ -150,13 +81,15 @@ DownloadTab.propTypes = {
     }),
     messages: PropTypes.shape({
       push_content: PropTypes.bool,
-      push_ipdatatime: PropTypes.bool,
+      push_ipdatetime: PropTypes.bool,
       push_tag: PropTypes.bool,
       push_userid: PropTypes.bool,
     }),
     url: PropTypes.bool,
   }).isRequired,
   onChange: PropTypes.func.isRequired,
+  handleDT: PropTypes.func.isRequired,
+  selectedOptions: PropTypes.arrayOf(PropTypes.string).isRequired,
 };
 
 export default DownloadTab;
