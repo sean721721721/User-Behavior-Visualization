@@ -21,14 +21,19 @@ class List extends React.Component {
 
   render() {
     const { list, downloadprops } = this.props;
+    // console.log(downloadprops);
     const posts = list.map((post, i) => {
       const {
         message_count: { count },
         url: href,
         article_title: title,
         author,
+        board,
         date,
       } = post;
+      const filename = `${board}_${author}_${date}.csv`;
+
+      const postarr = [post];
 
       return (
         <div className="r-ent" key={i.toString()}>
@@ -43,7 +48,7 @@ class List extends React.Component {
               title="Go"
               type="button"
             />
-            <CSV post={post} config={downloadprops} />
+            <CSV filename={filename} post={postarr} config={downloadprops} />
             <a href={href} target="_blank" rel="noopener noreferrer">
               {title}
             </a>

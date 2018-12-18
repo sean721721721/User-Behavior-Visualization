@@ -3,6 +3,7 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import List from './postlist';
 import Button from './Button';
+import CSV from './csv';
 import './bbs.css';
 
 class PostPage extends React.Component {
@@ -14,12 +15,18 @@ class PostPage extends React.Component {
 
   render() {
     const {
-      postlistprops: { list }, downloadprops,
-      onChange, nextPage,
+      postlistprops: { list },
+      downloadprops,
+      filename,
+      onChange,
+      previousPage,
+      nextPage,
     } = this.props;
+    // console.log(downloadprops);
     return (
       <div id="main-container">
         <div className="action-bar">
+          <CSV filename={filename} post={list} config={downloadprops} />
           <div className="btn-group btn-group-dir">
             <a className="btn-selected" href="/bbs/MobileComm/index.html">
               看板
@@ -29,13 +36,8 @@ class PostPage extends React.Component {
             <a className="btn wide" href="/bbs/MobileComm/index.html">
               最舊
             </a>
-            <a className="btn wide" href="/bbs/MobileComm/index.html">
-              上頁
-            </a>
+            <Button classname="btn wide" action={previousPage} title="上頁" type="button" />
             <Button classname="btn wide" action={nextPage} title="下頁" type="button" />
-            <a className="btn wide" href="/bbs/MobileComm/index.html">
-              下頁
-            </a>
             <a className="btn wide" href="/bbs/MobileComm/index.html">
               最新
             </a>
@@ -67,7 +69,7 @@ PostPage.defaultProps = {
           count: 3,
           neutral: 11,
           push: 3,
-          id_: '5b3f1f486e37944c1945c018',
+          _id: '5b3f1f486e37944c1945c018',
         },
         messages: [
           {
@@ -83,6 +85,7 @@ PostPage.defaultProps = {
         _id: '5b3f1f486e37944c1945c017',
       },
     ],
+    previous: '',
     next: '',
   },
   postprops: {
@@ -192,7 +195,9 @@ PostPage.propTypes = {
     }),
     url: PropTypes.bool,
   }).isRequired,
+  filename: PropTypes.string.isRequired,
   onChange: PropTypes.func.isRequired,
+  previousPage: PropTypes.func.isRequired,
   nextPage: PropTypes.func.isRequired,
 };
 

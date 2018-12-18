@@ -114,6 +114,7 @@ class Grid extends React.Component {
             _id: '5b3f1f486e37944c1945c017',
           },
         ],
+        previous: '',
         next: '',
       },
       postprops: {
@@ -150,10 +151,12 @@ class Grid extends React.Component {
       },
     };
 
+    this.getFilename = this.getFilename.bind(this);
     this.getReqstr = this.getReqstr.bind(this);
     this.changePost = this.changePost.bind(this);
     this.changeList = this.changeList.bind(this);
     this.handleSubmit = this.handleSubmit.bind(this);
+    this.previousPage = this.previousPage.bind(this);
     this.nextPage = this.nextPage.bind(this);
     this.handleTab = this.handleTab.bind(this);
     this.handleDownloadTab = this.handleDownloadTab.bind(this);
@@ -166,6 +169,35 @@ class Grid extends React.Component {
     this.forceUpdate(console.log('update'));
   }
   */
+  getFilename() {
+    const {
+      menuprops: {
+        initParameter: {
+          var1: varname1, min1: minvar1, max1: maxvar1, posttype,
+        },
+        initPage1: {
+          pagename: pagename1,
+          since: date1,
+          until: date2,
+          wordfilter: keyword1,
+          contentfilter: keyword3,
+          idfilter: user1,
+        },
+        initPage2: {
+          pagename: pagename2,
+          since: date3,
+          until: date4,
+          wordfilter: keyword2,
+          contentfilter: keyword4,
+          idfilter: user2,
+        },
+        submitType: type,
+      },
+    } = this.state;
+
+    const filename = `${pagename1}_${date1}_${date2}.csv`;
+    return filename;
+  }
 
   getReqstr() {
     const {
@@ -227,7 +259,7 @@ class Grid extends React.Component {
       .then(res => res.json())
       .then((res) => {
         console.log(res);
-        this.changeList(res);
+        this.changeList(res, 0);
       });
   }
 
@@ -239,12 +271,36 @@ class Grid extends React.Component {
     }));
   }
 
-  changeList(datalist) {
-    const { list, next } = datalist;
-    this.setState(() => ({
-      postlistprops: { list: list[1], next: next[1] },
+  changeList(datalist, collection) {
+    const { list, next, previous } = datalist;
+    this.setState(prevState => ({
+      ...prevState,
+      postlistprops: {
+        list: list[collection],
+        previous: previous[collection],
+        next: next[collection],
+      },
     }));
     console.log('change');
+  }
+
+  previousPage(e) {
+    e.preventDefault();
+
+    const {
+      postlistprops: { previous },
+    } = this.state;
+    let url = this.getReqstr();
+    url = encodeURI(`${url}&previous=${previous}`);
+    const myRequest = new Request(url, {
+      method: 'get',
+    });
+    fetch(myRequest)
+      .then(res => res.json())
+      .then((res) => {
+        console.log(res);
+        this.changeList(res, 0);
+      });
   }
 
   nextPage(e) {
@@ -262,7 +318,7 @@ class Grid extends React.Component {
       .then(res => res.json())
       .then((res) => {
         console.log(res);
-        this.changeList(res);
+        this.changeList(res, 0);
       });
   }
 
@@ -359,12 +415,14 @@ class Grid extends React.Component {
       menuprops, cardprops, postlistprops, postprops,
     } = this.state;
     const selectedOptions = this.selectedOptions();
+    const filename = this.getFilename();
+    console.log(filename);
     return (
       <div className="grid">
         <Menu
           menuprops={menuprops}
           onSubmit={this.handleSubmit}
-          handlePT={e=> this.handleTab(e, 'initParameter')}
+          handlePT={e => this.handleTab(e, 'initParameter')}
           handlePT1={e => this.handleTab(e, 'initPage1')}
           handlePT2={e => this.handleTab(e, 'initPage2')}
           handleDT={this.handleDownloadTab}
@@ -391,7 +449,9 @@ class Grid extends React.Component {
                 <PostPage
                   postlistprops={postlistprops}
                   downloadprops={menuprops.initDownload}
+                  filename={filename}
                   onChange={this.changePost}
+                  previousPage={this.previousPage}
                   nextPage={this.nextPage}
                 />
                 <div id="detail" />

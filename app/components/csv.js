@@ -103,7 +103,7 @@ const config = {
 function toCSV(datalist, config) {
   const row = datalist.length;
   let head = ' ,';
-  const format = Object.keys(config);
+  const format = Object.keys(config).filter(prop => config[prop]);
   const column = format.length;
   let offset = 0;
   let count = 0;
@@ -115,7 +115,10 @@ function toCSV(datalist, config) {
       // console.log(datalist[format[j]]);
       const subformat = Object.keys(config[format[j]]);
       const subcolumn = subformat.length;
-      if (format[j] === 'messages') offset = count;
+      if (format[j] === 'messages') {
+        count += 1;
+        offset = count;
+      }
       count += subcolumn;
       for (let k = 0; k < subcolumn; k += 1) {
         if (subformat[k] !== '_id') {
@@ -135,8 +138,11 @@ function toCSV(datalist, config) {
         content += addOffset(mcolumn);
         messagestr = subCSV(datalist[i][format[j]], count, offset, config.messages);
       } else if (format[j] === 'message_count') {
-        const subformat = Object.keys(datalist[0][format[j]]);
+        const subformat = Object.keys(datalist[0][format[j]]).filter(
+          prop => config.message_count[prop],
+        );
         const subcolumn = subformat.length;
+        content += ' ,';
         for (let k = 0; k < subcolumn; k += 1) {
           // console.log('subformat', datalist[i][format[j]], subformat);
           if (subformat[k] !== '_id') {
@@ -178,17 +184,17 @@ function addOffset(offset) {
  * @param {number} offset
  * @param {object} propconfig
  */
-function subCSV(prop, proplength, offset, propconfig) {
-  let content = ' ,';
-  const row = prop.length;
+function subCSV(props, proplength, offset, propconfig) {
+  let content = '';
+  const row = props.length;
   const offsetstr = addOffset(offset);
-  const format = Object.keys(propconfig);
+  const format = Object.keys(propconfig).filter(prop => propconfig[prop]);
   // console.log('format', format);
   const column = format.length;
   for (let i = 0; i < row; i += 1) {
     content += offsetstr;
     for (let j = 0; j < column; j += 1) {
-      content += prop[i][format[j]];
+      content += props[i][format[j]];
       content += ',';
     }
     content += addOffset(proplength - offset - column);
@@ -223,6 +229,24 @@ class CSV extends React.Component {
   constructor(props) {
     super(props);
     this.buttonSubmit = this.buttonSubmit.bind(this);
+    this.bloburl = this.bloburl.bind(this);
+  }
+
+  bloburl() {
+    const { post, config } = this.props;
+    let csvstr;
+    if (!Array.isArray(post)) {
+      csvstr = toCSV([post], config);
+    } else {
+      csvstr = toCSV(post, config);
+    }
+    // console.log(csvstr);
+    const blob = new Blob([csvstr], {
+      type: 'text/csv',
+    });
+    const bloburl = URL.createObjectURL(blob);
+    // const imgurl = '../app/img/download.jpg';
+    return bloburl;
   }
 
   buttonSubmit(e, props) {
@@ -231,28 +255,14 @@ class CSV extends React.Component {
   }
 
   render() {
-    const { post, config } = this.props;
-    const {
-      message_count: { count },
-      url: href,
-      article_title: title,
-      author,
-      board,
-      date,
-    } = post;
-    const filename = `${board}_${author}_${date}.csv`;
-    const csvstr = toCSV([post], config);
-    const blob = new Blob([csvstr], {
-      type: 'text/csv',
-    });
-    const bloburl = URL.createObjectURL(blob);
-    // const imgurl = '../app/img/download.jpg';
-
+    const { filename } = this.props;
     const style = {
       margin: '1px 5px 1px 5px',
       width: '16px',
       height: '16px',
     };
+    const bloburl = this.bloburl();
+    // console.log(bloburl);
 
     return (
       <a download={filename} href={bloburl}>
@@ -264,22 +274,25 @@ class CSV extends React.Component {
 
 CSV.defaultProps = {};
 CSV.propTypes = {
-  post: PropTypes.shape({
-    author: PropTypes.string,
-    board: PropTypes.string,
-    article_title: PropTypes.string,
-    date: PropTypes.string,
-    content: PropTypes.string,
-    url: PropTypes.string,
-    messages: PropTypes.arrayOf(
-      PropTypes.shape({
-        push_tag: PropTypes.string,
-        push_userid: PropTypes.string,
-        push_content: PropTypes.string,
-        push_ipdatetime: PropTypes.string,
-      }),
-    ),
-  }).isRequired,
+  filename: PropTypes.string.isRequired,
+  post: PropTypes.arrayOf(
+    PropTypes.shape({
+      author: PropTypes.string,
+      board: PropTypes.string,
+      article_title: PropTypes.string,
+      date: PropTypes.string,
+      content: PropTypes.string,
+      url: PropTypes.string,
+      messages: PropTypes.arrayOf(
+        PropTypes.shape({
+          push_tag: PropTypes.string,
+          push_userid: PropTypes.string,
+          push_content: PropTypes.string,
+          push_ipdatetime: PropTypes.string,
+        }),
+      ),
+    }),
+  ).isRequired,
   config: PropTypes.shape({
     article_id: PropTypes.bool,
     article_title: PropTypes.bool,
