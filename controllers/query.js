@@ -45,7 +45,7 @@ let queryobj = function queryobj(req, res, time1, time2, userid, tkeyword, ckeyw
         console.log(time1, time2);
         if (time1) {
           if (!time2) {
-            time2 = Date(Date.now());
+            time2 = new Date(Date.now());
           }
           queryobj['date'] = {
             $gte: time1,
@@ -64,7 +64,7 @@ let queryobj = function queryobj(req, res, time1, time2, userid, tkeyword, ckeyw
     if (time1 || time2) {
       if (time1) {
         if (!time2) {
-          time2 = Date(Date.now());
+          time2 = new Date(Date.now());
         }
         queryobj['created_time'] = {
           $gte: time1,
@@ -81,20 +81,6 @@ let queryobj = function queryobj(req, res, time1, time2, userid, tkeyword, ckeyw
     queryobj['article_title'] = {
       $regex: tkeyword,
     };
-  }
-  if (ckeyword !== undefined) {
-    queryobj['$or'] = [
-      {
-        content: {
-          $regex: ckeyword,
-        },
-      },
-      {
-        'messages.push_content': {
-          $regex: ckeyword,
-        },
-      },
-    ];
   }
   if (userid !== undefined) {
     queryobj['messages.push_userid'] = userid;
@@ -195,20 +181,89 @@ let queryobj = function queryobj(req, res, time1, time2, userid, tkeyword, ckeyw
       };
     }
   }
-  if (req.params.next) {
-    const [nextdate, nextid] = req.params.next.split('_');
-    queryobj['$or'].push({
-      date: { $lt: nextdate },
-    });
-    queryobj['$or'].push({
-      _id: { $lt: nextid },
-    });
+  if (req.params.previous) {
+    const [previousdate, previousid] = req.params.previous.split('_');
+    if (ckeyword !== undefined) {
+      let keyobj = {};
+      keyobj['$or'] = [
+        {
+          content: {
+            $regex: ckeyword,
+          },
+        },
+        {
+          'messages.push_content': {
+            $regex: ckeyword,
+          },
+        },
+      ];
+      let previousobj = {};
+      previousobj['$or'] = [
+        { date: { $lt: new Date(previousdate) } },
+        { date: { $lt: new Date(previousdate) }, _id: { $lt: previousid } },
+      ];
+      queryobj['$and'] = [keyobj, previousobj];
+      console.log(previousobj['$or'][0], previousobj['$or'][1]);
+    }
+  } else {
+    if (req.params.next) {
+      const [nextdate, nextid] = req.params.next.split('_');
+      if (ckeyword !== undefined) {
+        let keyobj = {};
+        keyobj['$or'] = [
+          {
+            content: {
+              $regex: ckeyword,
+            },
+          },
+          {
+            'messages.push_content': {
+              $regex: ckeyword,
+            },
+          },
+        ];
+        let nextobj = {};
+        nextobj['$or'] = [
+          { date: { $gt: new Date(nextdate) } },
+          { date: { $gt: new Date(nextdate) }, _id: { $gt: nextid } },
+        ];
+        queryobj['$and'] = [keyobj, nextobj];
+        console.log(nextobj['$or'][0], nextobj['$or'][1]);
+      }
+    } else {
+      if (ckeyword !== undefined) {
+        queryobj['$or'] = [
+          {
+            content: {
+              $regex: ckeyword,
+            },
+          },
+          {
+            'messages.push_content': {
+              $regex: ckeyword,
+            },
+          },
+        ];
+      }
+    }
   }
-  console.log('queryobj= ', queryobj);
+  // console.log('queryobj= ', queryobj);
   return queryobj;
 };
 
-let findquery = async function findquery(page, queryobj, ptt, limit) {
+/**
+ db.getCollection('gossipings').find({ 
+  article_title: { '$regex': '丁守中' },
+  '$and': [
+    {'$or': [ {date:{ '$gt': Date('2018-06-05 02:54:44.000Z')}}, {_id:{'$gt': ObjectId("5b3f1f6f6e37944c194de342")}} ],},
+    {'$or': [ {content:{'$regex': '柯文哲' }}, {'messages.push_content': {'$regex':'柯文哲'}} ]}
+    ]}).sort({
+      date: 1,
+      _id: 1,
+    })
+ */
+
+let findquery = async function findquery(page, queryobj, ptt, limit, sort) {
   //console.log(options)
   let pagepost;
   if (ptt) {
@@ -228,9 +283,13 @@ let findquery = async function findquery(page, queryobj, ptt, limit) {
   }
   //return Query(queryobj, options, pagepost, page);
   // console.log(page, pagepost);
-  let query = pagepost
-    .find(queryobj)
-    /*, function (err, pagepost) {
+  let query;
+  if (limit < 0) {
+    query = pagepost.find(queryobj).sort(sort);
+  } else {
+    query = pagepost
+      .find(queryobj)
+      /*, function (err, pagepost) {
                     //logger.log('info',pagepost);
                     console.log('query: ', queryobj);
                     return pagepost;
@@ -241,21 +300,197 @@ let findquery = async function findquery(page, queryobj, ptt, limit) {
                 .catch(err=>{
                     console.log(err);
                 })*/
-    .sort({
-      date: -1,
-      _id: -1,
-    })
-    .limit(limit);
+      .sort(sort)
+      .limit(limit);
+  }
   let doc = await query.exec();
+  const first = doc[0];
+  const previous = first ? `${first.date}_${first._id}` : ``;
   const last = doc[doc.length - 1];
   const next = last ? `${last.date}_${last._id}` : '';
-  console.log(next);
+  console.log(doc.length, next);
   return new Promise((resolve, reject) => {
     resolve({
       result: doc,
+      previous: previous,
       next: next,
     });
   });
+};
+
+function isEmpty(obj) {
+  for (var key in obj) {
+    if (obj.hasOwnProperty(key)) return false;
+  }
+  return true;
+}
+
+let callback = function callback(req, res) {
+  let limit = 4;
+  let sort = req.params.sort;
+  if (req.query.hasquery === false) {
+    console.log('no query!');
+    let queryresult = {
+      title: 'query',
+      query: '沒有選取資料範圍',
+      summary: '',
+      data: [,],
+    };
+    return queryresult;
+  } else {
+    console.log('go db');
+    let page1 = req.params.page1;
+    let user1 = req.params.user1;
+    let keyword1 = req.params.keyword1;
+    let keyword3 = req.params.keyword3;
+    let page2 = req.params.page2;
+    let user2 = req.params.user2;
+    let keyword2 = req.params.keyword2;
+    let keyword4 = req.params.keyword4;
+    let time1 = req.params.time1;
+    let time2 = req.params.time2;
+    let time3 = req.params.time3;
+    let time4 = req.params.time4;
+    let queryobj1 = queryobj(req, res, time1, time2, user1, keyword1, keyword3);
+    let queryobj2 = queryobj(req, res, time3, time4, user2, keyword2, keyword4);
+    let samequery =
+      page1 === page2 &&
+      time1 === time3 &&
+      time2 === time4 &&
+      keyword1 === keyword2 &&
+      keyword3 === keyword4 &&
+      user1 === user2;
+    let onequery = isEmpty(queryobj1) || isEmpty(queryobj2);
+    console.log('checkquery ', isEmpty(queryobj1), isEmpty(queryobj2), onequery);
+    let ptt = false;
+    if (req.params.posttype === 'PTT') {
+      ptt = true;
+    }
+    //if (samequery || onequery) {
+    if (true) {
+      return new Promise((resolve, reject) => {
+        if (!isEmpty(queryobj1)) {
+          limit = -1;
+          resolve(
+            findquery(page1, queryobj1, ptt, limit, sort).then(res => {
+              console.log('q1 lenght: ' + res.result.length);
+              //let ul1 = dl.newualist(result, ptt);
+              /*let postlist = dl.bindpostlist(res, res, ptt);
+              let user = Object.values(ul1);
+                        let userlist = dl.binduserobj(ul1, ul1, user, user);
+                        let oldata = dl.overlap(userlist, 'all');
+                        console.log('All');
+                        oldata = dl.olresult(oldata);
+                        let sortdata = dl.sortdegree(oldata);
+                        let queryresult = {
+                            title: 'query',
+                            query: req.params,
+                            summary: [
+                                [result.length, result.length, result.length * 2],
+                                [user.length, user.length, user.length * 2]
+                            ],
+                            data: [postlist, oldata, sortdata],
+                        };
+                        return queryresult;*/
+              return { list: [res.result, []], previous: [res.previous], next: [res.next] };
+            }),
+          );
+        } else if (!isEmpty(queryobj2)) {
+          resolve(
+            findquery(page2, queryobj2, ptt, limit, sort).then(res => {
+              //console.log('q2 lenght: ' + res.length);
+              //let ul2 = dl.newualist(result, ptt);
+              /*let postlist = dl.bindpostlist(res, res, ptt);
+              let user = Object.values(ul2);
+                        let userlist = dl.binduserobj(ul2, ul2, user, user);
+                        let oldata = dl.overlap(userlist, 'all');
+                        console.log('All');
+                        oldata = dl.olresult(oldata);
+                        let sortdata = dl.sortdegree(oldata);
+                        let queryresult = {
+                            title: 'query',
+                            query: req.params,
+                            summary: [
+                                [result.length, result.length, result.length * 2],
+                                [user.length, user.length, user.length * 2]
+                            ],
+                            data: [postlist, oldata, sortdata],
+                        };
+                        return queryresult;*/
+              return { list: [[], res.result], previous: [res.previous], next: [res.next] };
+            }),
+          );
+        } else {
+          console.log('--else--');
+          let queryresult = {
+            title: 'query',
+            query: '沒有選取資料範圍',
+            summary: [,],
+            data: [, ,],
+          };
+          reject(queryresult);
+        }
+      }).catch(err => {
+        logger.log('error', err);
+      });
+    } else {
+      return Promise.all([
+        findquery(page1, queryobj1, ptt, limit, sort),
+        findquery(page2, queryobj2, ptt, limit, sort),
+      ])
+        .then(res => {
+          console.log('q1 lenght: ' + res[0].result.length);
+          console.log('q2 lenght: ' + res[1].result.length);
+          //let ul1 = dl.newualist(result[0], ptt);
+          //let ul2 = dl.newualist(result[1], ptt);
+          /*let postlist = dl.bindpostlist(res[0].result, res[1].result, ptt);
+          let user = Object.values(ul1);
+                    let tuser = Object.values(ul2);
+                    let userlist = dl.binduserobj(ul1, ul2, user, tuser);
+                    let oldata = userlist;
+                    if (req.params.co === 'Co reaction') {
+                        oldata = dl.overlap(userlist, 'like');
+                    }
+                    if (req.params.co === 'Co comment') {
+                        oldata = dl.overlap(userlist, 'comment');
+                    }
+                    if (req.params.co === 'Co share') {
+                        oldata = dl.overlap(userlist, 'share');
+                    }
+                    if (req.params.co === 'All') {
+                        oldata = dl.overlap(userlist, 'all');
+                    }
+                    console.log(req.params.co);
+                    oldata = dl.olresult(oldata);
+                    let sortdata = dl.sortdegree(oldata);
+                    let queryresult = {
+                        title: 'query',
+                        query: req.params,
+                        summary: [
+                            [result[0].length, result[1].length, result[0].length + result[1].length],
+                            [user.length, tuser.length, userlist.length]
+                        ],
+                        data: [postlist, oldata, sortdata],
+                    };
+                    //console.log(queryresult);
+                    return queryresult;*/
+          //console.log(postlist.length);
+          return {
+            list: [res[0].result, res[1].result],
+            previous: [res[0].previous, res[1].previous],
+            next: [res[0].next, res[1].next],
+          };
+        })
+        .catch(err => {
+          logger.log('error', err);
+        });
+    }
+    /*mapreduce
+        mapreduce(queryobj1);
+        */
+    //res.send(files);
+    //console.log(files.length);
+  }
 };
 
 let mapreduce = function mapreduce(queryobj) {
@@ -329,174 +564,6 @@ let mapreduce = function mapreduce(queryobj) {
     console.log(res);
     return res;
   });
-};
-
-function isEmpty(obj) {
-  for (var key in obj) {
-    if (obj.hasOwnProperty(key)) return false;
-  }
-  return true;
-}
-
-let callback = function callback(req, res) {
-  let limit = 10;
-  if (req.query.hasquery === false) {
-    console.log('no query!');
-    let queryresult = {
-      title: 'query',
-      query: '沒有選取資料範圍',
-      summary: '',
-      data: [,],
-    };
-    return queryresult;
-  } else {
-    console.log('go db');
-    let page1 = req.params.page1;
-    let user1 = req.params.user1;
-    let keyword1 = req.params.keyword1;
-    let keyword3 = req.params.keyword3;
-    let page2 = req.params.page2;
-    let user2 = req.params.user2;
-    let keyword2 = req.params.keyword2;
-    let keyword4 = req.params.keyword4;
-    let time1 = req.params.time1;
-    let time2 = req.params.time2;
-    let time3 = req.params.time3;
-    let time4 = req.params.time4;
-    let queryobj1 = queryobj(req, res, time1, time2, user1, keyword1, keyword3);
-    let queryobj2 = queryobj(req, res, time3, time4, user2, keyword2, keyword4);
-    let samequery =
-      page1 === page2 &&
-      time1 === time3 &&
-      time2 === time4 &&
-      keyword1 === keyword2 &&
-      keyword3 === keyword4 &&
-      user1 === user2;
-    let onequery = isEmpty(queryobj1) || isEmpty(queryobj2);
-    console.log('checkquery ', isEmpty(queryobj1), isEmpty(queryobj2), onequery);
-    let ptt = false;
-    if (req.params.posttype === 'PTT') {
-      ptt = true;
-    }
-    if (samequery || onequery) {
-      return new Promise((resolve, reject) => {
-        if (!isEmpty(queryobj1)) {
-          resolve(
-            findquery(page1, queryobj1, ptt, limit).then(result => {
-              console.log('q1 lenght: ' + res.length);
-              //let ul1 = dl.newualist(result, ptt);
-              let postlist = dl.bindpostlist(res, res, ptt);
-              /*let user = Object.values(ul1);
-                        let userlist = dl.binduserobj(ul1, ul1, user, user);
-                        let oldata = dl.overlap(userlist, 'all');
-                        console.log('All');
-                        oldata = dl.olresult(oldata);
-                        let sortdata = dl.sortdegree(oldata);
-                        let queryresult = {
-                            title: 'query',
-                            query: req.params,
-                            summary: [
-                                [result.length, result.length, result.length * 2],
-                                [user.length, user.length, user.length * 2]
-                            ],
-                            data: [postlist, oldata, sortdata],
-                        };
-                        return queryresult;*/
-              return { list: postlist, next: res.next };
-            }),
-          );
-        } else if (!isEmpty(queryobj2)) {
-          resolve(
-            findquery(page2, queryobj2, ptt, limit).then(res => {
-              console.log('q2 lenght: ' + res.length);
-              //let ul2 = dl.newualist(result, ptt);
-              let postlist = dl.bindpostlist(res, res, ptt);
-              /*let user = Object.values(ul2);
-                        let userlist = dl.binduserobj(ul2, ul2, user, user);
-                        let oldata = dl.overlap(userlist, 'all');
-                        console.log('All');
-                        oldata = dl.olresult(oldata);
-                        let sortdata = dl.sortdegree(oldata);
-                        let queryresult = {
-                            title: 'query',
-                            query: req.params,
-                            summary: [
-                                [result.length, result.length, result.length * 2],
-                                [user.length, user.length, user.length * 2]
-                            ],
-                            data: [postlist, oldata, sortdata],
-                        };
-                        return queryresult;*/
-              return { list: postlist, next: res.next };
-            }),
-          );
-        } else {
-          console.log('--else--');
-          let queryresult = {
-            title: 'query',
-            query: '沒有選取資料範圍',
-            summary: [,],
-            data: [, ,],
-          };
-          reject(queryresult);
-        }
-      }).catch(err => {
-        logger.log('error', err);
-      });
-    } else {
-      return Promise.all([
-        findquery(page1, queryobj1, ptt, limit),
-        findquery(page2, queryobj2, ptt, limit),
-      ])
-        .then(res => {
-          //console.log('q1 lenght: ' + res[0].length);
-          //console.log('q2 lenght: ' + res[1].length);
-          //let ul1 = dl.newualist(result[0], ptt);
-          //let ul2 = dl.newualist(result[1], ptt);
-          let postlist = dl.bindpostlist(res[0].result, res[1].result, ptt);
-          /*let user = Object.values(ul1);
-                    let tuser = Object.values(ul2);
-                    let userlist = dl.binduserobj(ul1, ul2, user, tuser);
-                    let oldata = userlist;
-                    if (req.params.co === 'Co reaction') {
-                        oldata = dl.overlap(userlist, 'like');
-                    }
-                    if (req.params.co === 'Co comment') {
-                        oldata = dl.overlap(userlist, 'comment');
-                    }
-                    if (req.params.co === 'Co share') {
-                        oldata = dl.overlap(userlist, 'share');
-                    }
-                    if (req.params.co === 'All') {
-                        oldata = dl.overlap(userlist, 'all');
-                    }
-                    console.log(req.params.co);
-                    oldata = dl.olresult(oldata);
-                    let sortdata = dl.sortdegree(oldata);
-                    let queryresult = {
-                        title: 'query',
-                        query: req.params,
-                        summary: [
-                            [result[0].length, result[1].length, result[0].length + result[1].length],
-                            [user.length, tuser.length, userlist.length]
-                        ],
-                        data: [postlist, oldata, sortdata],
-                    };
-                    //console.log(queryresult);
-                    return queryresult;*/
-          //console.log(postlist.length);
-          return { list: postlist, next: [res[0].next, res[1].next] };
-        })
-        .catch(err => {
-          logger.log('error', err);
-        });
-    }
-    /*mapreduce
-        mapreduce(queryobj1);
-        */
-    //res.send(files);
-    //console.log(files.length);
-  }
 };
 
 var exports = (module.exports = {});

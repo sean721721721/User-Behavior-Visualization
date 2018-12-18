@@ -19,153 +19,40 @@ var textParser = bodyParser.text();
 var passport = require('passport');
 var LocalStrategy = require('passport-local').Strategy;
 
+function querytoParams(req, prop) {
+  if (req.query[prop]) {
+    req.params[prop] = req.query[prop];
+  }
+}
+
 function urlhandle(req, res, next) {
   console.log('urlhandle ', req.query);
   var hasquery = false;
   //var postid = req.params.postid;
+  let props = Object.keys(req.query);
+  let l = props.length;
+  if (l > 0) hasquery = true;
+  for (let i = 0; i < l; i += 1) {
+    querytoParams(req, props[i], hasquery);
+  }
+  if (req.query.previous && req.query.previous.length > 0) {
+    req.params.sort = {
+      date: -1,
+      _id: -1,
+    };
+  } else {
+    req.params.sort = {
+      date: 1,
+      _id: 1,
+    };
+  }
   if (req.query['postid']) {
     req.params.postid = req.query['postid'];
-    hasquery = true;
-  }
-  if (req.query['page1']) {
-    req.params.page1 = req.query['page1'];
-    hasquery = true;
-  }
-  //var time1 = req.params.time1;
-  if (req.query['time1']) {
-    req.params.time1 = req.query['time1'];
-    hasquery = true;
-  }
-  //var time2 = req.params.time2;
-  if (req.query['time2']) {
-    req.params.time2 = req.query['time2'];
-    hasquery = true;
-  }
-  if (req.query['keyword1']) {
-    req.params.keyword1 = req.query['keyword1'];
-  }
-  if (req.query['keyword3']) {
-    req.params.keyword3 = req.query['keyword3'];
-  }
-  if (req.query['user1']) {
-    req.params.user1 = req.query['user1'];
-  }
-  if (req.query['page2']) {
-    req.params.page2 = req.query['page2'];
-    hasquery = true;
-  }
-  //var time3 = req.params.time3;
-  if (req.query['time3']) {
-    req.params.time3 = req.query['time3'];
-    hasquery = true;
-  }
-  //var time4 = req.params.time4;
-  if (req.query['time4']) {
-    req.params.time4 = req.query['time4'];
-    hasquery = true;
-  }
-  if (req.query['user2']) {
-    req.params.user2 = req.query['user2'];
-  }
-  if (req.query['keyword2']) {
-    req.params.keyword2 = req.query['keyword2'];
-  }
-  if (req.query['keyword4']) {
-    req.params.keyword4 = req.query['keyword4'];
-  }
-  if (req.query['posttype']) {
-    req.params.posttype = req.query['posttype'];
-    hasquery = true;
-  }
-  if (req.query['fromname']) {
-    req.params.fromname = req.query['fromname'];
-    hasquery = true;
-  }
-  if (req.query['minshare']) {
-    req.params.minshare = req.query['minshare'];
-    hasquery = true;
-  }
-  if (req.query['maxshare']) {
-    req.params.maxshare = req.query['maxshare'];
-    hasquery = true;
-  }
-  if (req.query['minlike']) {
-    req.params.minlike = req.query['minlike'];
-    hasquery = true;
-  }
-  if (req.query['maxlike']) {
-    req.params.maxlike = req.query['maxlike'];
-    hasquery = true;
-  }
-  if (req.query['mincomment']) {
-    req.params.mincomment = req.query['mincomment'];
-    hasquery = true;
-  }
-  if (req.query['maxcomment']) {
-    req.params.maxcomment = req.query['maxcomment'];
-    hasquery = true;
-  }
-  if (req.query['minpush']) {
-    req.params.minpush = req.query['minpush'];
-    hasquery = true;
-  }
-  if (req.query['maxpush']) {
-    req.params.maxpush = req.query['maxpush'];
-    hasquery = true;
-  }
-  if (req.query['minboo']) {
-    req.params.minboo = req.query['minboo'];
-    hasquery = true;
-  }
-  if (req.query['maxboo']) {
-    req.params.maxboo = req.query['maxboo'];
-    hasquery = true;
-  }
-  if (req.query['minneutral']) {
-    req.params.minneutral = req.query['minneutral'];
-    hasquery = true;
-  }
-  if (req.query['maxneutral']) {
-    req.params.maxneutral = req.query['maxneutral'];
-    hasquery = true;
-  }
-  if (req.query['co']) {
-    req.params.co = req.query['co'];
-    hasquery = true;
-  }
-  if (req.query['next']) {
-    req.params.next = req.query['next'];
     hasquery = true;
   }
   req.query.hasquery = hasquery;
   //console.log(req.params);
   next();
-}
-
-function redirecturl(req, res) {
-  var body = req.body;
-  const query = querystring.stringify({
-    minlike: body.minlike,
-    maxlike: body.maxlike,
-    mincomment: body.mincomment,
-    maxcomment: body.maxcomment,
-    posttype: body.posttype,
-    page1: body.pagename1,
-    time1: body.date1,
-    time2: body.date2,
-    user1: body.user1,
-    keyword1: body.keyword1,
-    keyword3: body.keyword3,
-    page2: body.pagename2,
-    time3: body.date3,
-    time4: body.date4,
-    user2: body.user2,
-    keyword2: body.keyword2,
-    keyword4: body.keyword4,
-    co: body.co,
-    next: body.next,
-  });
-  res.redirect('/query?' + query);
 }
 
 module.exports = function(app) {
@@ -212,31 +99,6 @@ module.exports = function(app) {
     }
     console.log(' passport: ', req.session.passport);
   });*/
-
-  app.get('/query', urlhandle, async function(req, res) {
-    try {
-      var result = await query.callback(req, res);
-      //console.log(result);
-      res.render('query', result);
-    } catch (err) {
-      console.log(err);
-    }
-  });
-
-  app.get('/vis', urlhandle, async function(req, res) {
-    try {
-      var result = await query.callback(req, res);
-      result.title = 'vis';
-      //console.log(result);
-      res.render('vis', result);
-    } catch (err) {
-      console.log(err);
-    }
-  });
-
-  app.post('/query', urlencodedParser, redirecturl);
-
-  app.post('/vis', urlencodedParser, redirecturl);
 
   // ajax getting data for the web
   app.get('/searching', urlencodedParser, urlhandle, async function(req, res) {
