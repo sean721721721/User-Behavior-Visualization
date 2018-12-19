@@ -8,7 +8,7 @@ var fs = require('fs');
 /*var MongoClient = require('mongodb').MongoClient,*/
 var assert = require('assert');
 var mongoose = require('mongoose');
-const winston = require('winston')
+const winston = require('winston');
 var schema = require('../models/pttSchema.js');
 
 //assert.equal(query.exec().constructor, global.Promise);
@@ -29,171 +29,179 @@ const logger = winston.createLogger({
   format: winston.format.json(),
   transports: [
     //
-    // - Write to all logs with level `info` and below to `combined.log` 
+    // - Write to all logs with level `info` and below to `combined.log`
     // - Write all logs error (and below) to `error.log`.
     //
     new winston.transports.Console(),
     new winston.transports.File({
       name: 'info-file',
       filename: '../logs/store-info.log',
-      level: 'info'
+      level: 'info',
     }),
-     new winston.transports.File({
+    new winston.transports.File({
       name: 'warn-file',
       filename: '../logs/store-warn.log',
-      level: 'warn'
+      level: 'warn',
     }),
     new winston.transports.File({
       name: 'error-file',
       filename: '../logs/store-error.log',
-      level: 'error'
+      level: 'error',
     }),
   ],
   exceptionHandlers: [
     new winston.transports.File({
-      filename: '../logs/exceptions.log'
+      filename: '../logs/exceptions.log',
     }),
   ],
-  exitOnError: false
+  exitOnError: false,
 });
 
 //
 // If we're not in production then log to the `console` with the format:
 // `${info.level}: ${info.message} JSON.stringify({ ...rest }) `
-// 
+//
 if (process.env.NODE_ENV !== 'production') {
-  logger.add(new winston.transports.Console({
-    format: winston.format.simple()
-  }));
+  logger.add(
+    new winston.transports.Console({
+      format: winston.format.simple(),
+    }),
+  );
 }
-
 
 // Use native promises
 var options = {
-    promiseLibrary: global.Promise,
-    useNewUrlParser: true,
-}
+  promiseLibrary: global.Promise,
+  useNewUrlParser: true,
+};
 
 // Using `mongoose.connect`...
-mongoose.connect('mongodb://villager:4given4get@localhost:27017/ptt?authSource=admin', options);
+mongoose.connect(
+  'mongodb://villager:4given4get@localhost:27017/ptt?authSource=admin',
+  options,
+);
 let db = mongoose.connection;
 db.on('error', console.error.bind(console, 'connection error:'));
-db.once('open', function () {
-    console.log("we're connected!")
+db.once('open', function() {
+  console.log("we're connected!");
 });
 
 function promiseAllP(items, block) {
-    var promises = [];
-    items.forEach(function (item, index) {
-        promises.push(function (item, i) {
-            return new Promise(function (resolve, reject) {
-                return block.apply(this, [item, index, resolve, reject]);
-            });
-        }(item, index))
-    });
-    return Promise.all(promises);
+  var promises = [];
+  items.forEach(function(item, index) {
+    promises.push(
+      (function(item, i) {
+        return new Promise(function(resolve, reject) {
+          return block.apply(this, [item, index, resolve, reject]);
+        });
+      })(item, index),
+    );
+  });
+  return Promise.all(promises);
 }
 
 var saveFiles = function saveFiles(dirname, collection, schema) {
-    mongoose.model(collection, schema);
+  mongoose.model(collection, schema);
 
-    function save(files) {
-        var pagepost = mongoose.model(collection);
-        var savepost = Object.assign({}, files);
-        //console.log(files.articles[j]);
-        var query = {
-            'article_id': files['article_id']
-        };
-        //console.log(query);
-        return new Promise((resolve, reject) => {
-                pagepost.replaceOne(query, files,{
-                    upsert: true
-                }, function (err, savepost, numAffected) {
-                    //logger.log('info', 'update:'+ files['article_id']);
-                    /*if (post !== undefined) {
+  function save(files) {
+    var pagepost = mongoose.model(collection);
+    var savepost = Object.assign({}, files);
+    //console.log(files.articles[j]);
+    var query = {
+      article_id: files['article_id'],
+    };
+    //console.log(query);
+    return new Promise((resolve, reject) => {
+      pagepost.replaceOne(
+        query,
+        files,
+        {
+          upsert: true,
+        },
+        function(err, savepost, numAffected) {
+          //logger.log('info', 'update:'+ files['article_id']);
+          /*if (post !== undefined) {
                         console.log(files['article_id']);
                     }*/
-                    if (err) {
-                        reject(err);
-                    }
-                    resolve('true');
-                })
-            })
-            .catch((err) => {
-                logger.log('warn', 'did not save post: ', files['article_id']);
-                logger.log('error', err);
-            });
-    }
+          if (err) {
+            reject(err);
+          }
+          resolve('true');
+        },
+      );
+    }).catch(err => {
+      logger.log('warn', 'did not save post: ', files['article_id']);
+      logger.log('error', err);
+    });
+  }
 
-    return new Promise((resolve, reject) => {
-            fs.readdir(dirname, function (err, filenames) {
-                if (err) return reject(err);
-                resolve(split())
-                async function split() {
-                    await promiseAllP(filenames, (filename, index, resolve, reject) => {
-                            if (err) {
-                                reject(err);
-                            }
-                            let p = new Promise((resolve, reject) => {
-                                    fs.readFile(dirname + '/' + filename, 'utf-8', (err, data) => {
-                                        if (err) {
-                                            reject(err);
-                                        }
-                                        resolve(sub());
-                                        async function sub() {
-                                            var files = JSON.parse(data);
-                                            var fl = files.articles.length;
-                                            logger.log('info', filename, " length = ", fl);
-                                            for (var j = 0; j < fl; j++) {
-                                                await save(files.articles[j]);
-                                            }
-                                        }
-                                    });
-                                })
-                                .catch((err) => {
-                                    logger.log('error', err);
-                                });
-
-                            return resolve(p);
-                        })
-                        .catch(err => {
-                            logger.log('error', err);
-                        })
+  return new Promise((resolve, reject) => {
+    fs.readdir(dirname, function(err, filenames) {
+      if (err) return reject(err);
+      resolve(split());
+      async function split() {
+        await promiseAllP(filenames, (filename, index, resolve, reject) => {
+          if (err) {
+            reject(err);
+          }
+          let p = new Promise((resolve, reject) => {
+            fs.readFile(dirname + '/' + filename, 'utf-8', (err, data) => {
+              if (err) {
+                reject(err);
+              }
+              resolve(sub());
+              async function sub() {
+                var files = JSON.parse(data);
+                var fl = files.articles.length;
+                logger.log('info', filename, ' length = ', fl);
+                for (var j = 0; j < fl; j++) {
+                  await save(files.articles[j]);
                 }
+              }
             });
-        })
-        .catch(err => {
+          }).catch(err => {
             logger.log('error', err);
-        });
-}
+          });
 
-// argv [argv0, boardname, ...datafolder]
+          return resolve(p);
+        }).catch(err => {
+          logger.log('error', err);
+        });
+      }
+    });
+  }).catch(err => {
+    logger.log('error', err);
+  });
+};
+
+// argv [argv0, path, boardname, ...datafolder]
 process.argv.shift();
 process.argv.shift();
+let path = process.argv.shift();
 let board = process.argv.shift();
-let root = "../pttdata/" + board;
+let root = '../pttdata/' + path;
 let folders = process.argv;
-console.log(folders);
+console.log(path, board, folders);
 //var folders = ['30', '31', '32', '33', '34', '35', '36', '37', '38']; // 'Tech_Job', 'Gossiping', 'Soft_Job'];
 //folders.forEach(folder => {
 //var root = "../pttdata/Gossiping";
 readfolder();
 async function readfolder() {
-    for (let i = 0; i < folders.length; i++) {
-        folder = folders[i];
-        await saveFiles(root + '/' + folder, board, schema.pttSchema)
-            .then(function () {
-                console.log('saved');
-            })
-            .catch(error => {
-                console.log(error);
-            });
-        //mongoose.model(folder, schema.postSchema)
-        //mongoose.model(folder, schema.pttSchema)
-        //var pagepost = mongoose.model(folder);
-        //console.log(typeof(root + '/' + folder))
-    }
-    process.exit(-1);
+  for (let i = 0; i < folders.length; i++) {
+    folder = folders[i];
+    await saveFiles(path + '/' + folder, board, schema.pttSchema)
+      .then(function() {
+        console.log('saved');
+      })
+      .catch(error => {
+        console.log(error);
+      });
+    //mongoose.model(folder, schema.postSchema)
+    //mongoose.model(folder, schema.pttSchema)
+    //var pagepost = mongoose.model(folder);
+    //console.log(typeof(root + '/' + folder))
+  }
+  process.exit(-1);
 }
 /* problem posts list
 Gossiping

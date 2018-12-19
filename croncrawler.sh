@@ -8,24 +8,24 @@
 
 export PATH=/home/villager/miniconda3/bin:/usr/local/cuda-8.0/bin:/home/villager/miniconda3/bin:/home/villager/.nvm/versions/node/v10.12.0/bin:/usr/local/cuda-8.0/bin:/home/villager/.cargo/bin:/home/villager/bin:/var/lib/mongodb-mms-automation/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/games:/usr/local/games:/snap/bin
 #"Please input board name: "
-bn=Gossiping
+bn=MobileComm
 #"Please input page per json: "
 n=1
 #"Please input begin page index: "
-bi=39000
+bi=6000
 #"Please input end page index: "
-ei=39010
+ei=6005
 #"Please input pttdata directory path(ex: ../pttdata/boardname): "
-dirpath=/home/villager/test/pttdata/Gossiping
-DATE=`date '+%d-%H:%M'`
-mkdir "$dirpath-$DATE"
+dirpath=/home/villager/test/pttdata/MobileComm
+DATE=`date '+%d_%H_%M'`
+mkdir "$dirpath_$DATE"
 loop=$(((($ei - $bi) / $n) + 1))
 echo "dirpath: $dirpath"
 echo "loop: $loop"
 echo "begin index: $bi"
 echo "end index: $ei"
 dir=/home/villager/test/ptt-web-crawler
-args="Gossiping"
+args="$dirpath_$DATE"
 space=" "
 cd "$dir"
 for((i=0;i<$loop;i++))
@@ -36,10 +36,11 @@ do
         ni=$ei
     fi
     echo "current page index: $bi to $ni"
-    folder=($dirpath-$DATE/$i)
+    folder=($dirpath_$DATE/$i)
     #args=("$args$space$i")
     echo "folder: $folder"
     python /home/villager/test/ptt-web-crawler/PttWebCrawler/crawler.py -b "$bn" -i "$bi" "$ni" -dp "$folder"
+    node "/home/villager/test/server/ptttomongo.js" "$args" "$bn" "$i"
     bi=$(($ni + 1))
 done
 cd ..

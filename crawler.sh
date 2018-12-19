@@ -20,7 +20,7 @@ echo "loop: $loop"
 echo "begin index: $bi"
 echo "end index: $ei"
 dir=./ptt-web-crawler
-args="MC"
+args="$dirpath"
 space=" "
 cd "$dir"
 for((i=0;i<$loop;i++))
@@ -35,7 +35,7 @@ do
     #args=("$args$space$i")
     echo "folder: $folder"
     python -m "PttWebCrawler" -b "$bn" -i "$bi" "$ni" -dp "$folder"
-    node "../server/ptttomongo.js" "$args" "$i"
+    node "../server/ptttomongo.js" "$dirpath" "$bn" "$i"
     bi=$(($ni + 1))
 done
 cd ..
