@@ -5,35 +5,16 @@ import {
 } from 'react-router-dom';
 // import LoginTab from './Login';
 import Grid from './grid';
+import Input from './Input';
+import Button from './Button';
 import './login.css';
 // import LoginTab from './Login';
 
-function AuthExample() {
-  return (
-    <Router>
-      <div>
-        <AuthButton />
-        <ul>
-          <li>
-            <Link to="/public">Public Page</Link>
-          </li>
-          <li>
-            <Link to="/ptttool">Protected Page</Link>
-          </li>
-        </ul>
-        <Route path="/public" component={Public} />
-        <Route path="/login" component={LoginTab} />
-        <PrivateRoute path="/ptttool" component={Protected} />
-      </div>
-    </Router>
-  );
-}
-
-const fakeAuth = {
+const Auth = {
   isAuthenticated: false,
   authenticate(cb) {
     this.isAuthenticated = true;
-    setTimeout(cb, 100); // fake async
+    setTimeout(cb, 100); // async
   },
   signout(cb) {
     this.isAuthenticated = false;
@@ -41,68 +22,13 @@ const fakeAuth = {
   },
 };
 
-class LoginTab extends React.Component {
-  state = { redirectToReferrer: false };
-
-  login = () => {
-    fakeAuth.authenticate(() => {
-      this.setState({ redirectToReferrer: true });
-    });
-  };
-
-  render() {
-    console.log(this.props);
-    const { from } = this.props.location.state || { from: { pathname: '/' } };
-    const { redirectToReferrer } = this.state;
-
-    // console.log(tab);
-    if (redirectToReferrer) return <Redirect to={from} />;
-    return (
-      <div className="container">
-        <div>
-          <p>
-            You must log in to view the page at
-            {from.pathname}
-          </p>
-          <button onClick={this.login}>Log in</button>
-        </div>
-        <section id="content">
-          <form action="/login" method="post">
-            <h1>Login</h1>
-            <div>
-              <input type="text" placeholder="Username" required="" id="username" name="username" />
-            </div>
-            <div>
-              <input
-                type="password"
-                placeholder="Password"
-                required=""
-                id="password"
-                name="password"
-              />
-            </div>
-            <div>
-              <input type="submit" value="Login" />
-              <a href="#">Lost your password?</a>
-              <a href="/register">Register</a>
-            </div>
-          </form>
-          <div className="button">
-            <a href="/">Home</a>
-          </div>
-        </section>
-      </div>
-    );
-  }
-}
-
-const AuthButton = withRouter(({ history }) => (fakeAuth.isAuthenticated ? (
+const AuthButton = withRouter(({ history }) => (Auth.isAuthenticated ? (
   <p>
       Welcome!
     {' '}
     <button
       onClick={() => {
-        fakeAuth.signout(() => history.push('/'));
+        Auth.signout(() => history.push('/'));
       }}
     >
         Sign out
@@ -116,7 +42,7 @@ function PrivateRoute({ component: Component, ...rest }) {
   return (
     <Route
       {...rest}
-      render={props => (fakeAuth.isAuthenticated ? (
+      render={props => (Auth.isAuthenticated ? (
         <Component {...props} />
       ) : (
         <Redirect
@@ -129,6 +55,135 @@ function PrivateRoute({ component: Component, ...rest }) {
       }
     />
   );
+}
+
+function AuthExample() {
+  const from = { pathname: '/ptttool' };
+  return (
+    <Router>
+      <div>
+        {/* <AuthButton />
+        <ul>
+          <li>
+            <Link to="/login">Public Page</Link>
+          </li>
+          <li>
+            <Link to="/ptttool">Protected Page</Link>
+          </li>
+        </ul> */}
+        <Redirect to={from} />
+        <Route path="/login" component={LoginTab} />
+        <PrivateRoute path="/ptttool" component={Protected} />
+      </div>
+    </Router>
+  );
+}
+
+/**
+          <div>
+          <p>
+            You must log in to view the page at
+            {from.pathname}
+          </p>
+          <button onClick={this.login}>Log in</button>
+        </div>
+ */
+class LoginTab extends React.Component {
+  constructor(props) {
+    super(props);
+    this.state = { redirectToReferrer: false, username: '', password: '' };
+    this.login = this.login.bind(this);
+    this.handleInput = this.handleInput.bind(this);
+    this.handleSubmit = this.handleSubmit.bind(this);
+  }
+
+  login = () => {
+    const { username, password } = this.state;
+    const authstr = `/login?username=${username}&password=${password}`;
+    const auth = new Request(authstr, {
+      method: 'post',
+    });
+    console.log(auth);
+    fetch(auth)
+      .then(res => res.json())
+      .then((res) => {
+        console.log(res);
+        Auth.isAuthenticated = res.isAuthenticated;
+        Auth.authenticate(() => {
+          this.setState({ redirectToReferrer: res.isAuthenticated });
+        });
+      });
+  };
+
+  handleInput = (e) => {
+    const value = e.target.value;
+    const name = e.target.name;
+    this.setState(
+      prevState => ({
+        ...prevState,
+        [name]: value,
+      }) /* ,
+      () => console.log(this.state), */,
+    );
+  };
+
+  handleSubmit = (e) => {
+    e.preventDefault();
+    const userData = this.state.newUser;
+    this.login();
+  };
+
+  render() {
+    console.log(this.props);
+    const { from } = this.props.location.state || { from: { pathname: '/' } };
+    const { redirectToReferrer, username, password } = this.state;
+    const buttonStyle = {};
+    // console.log(tab);
+    if (redirectToReferrer) return <Redirect to={from} />;
+    return (
+      <div className="container">
+        <section id="content">
+          <form action="/login" method="get">
+            <h1>Login</h1>
+            <div>
+              <Input
+                inputtype="text"
+                title=""
+                name="username"
+                value={username}
+                palceholder="Username"
+                onChange={this.handleInput}
+              />
+            </div>
+            <div>
+              <Input
+                inputtype="password"
+                title=""
+                name="password"
+                value={password}
+                placeholder="Password"
+                onChange={this.handleInput}
+              />
+            </div>
+            <div>
+              <Button
+                action={this.handleSubmit}
+                type="primary"
+                classname="primary"
+                title="Login"
+                style={buttonStyle}
+              />
+              <a href="#">Lost your password?</a>
+              <a href="/register">Register</a>
+            </div>
+          </form>
+          <div className="button">
+            <a href="/">Home</a>
+          </div>
+        </section>
+      </div>
+    );
+  }
 }
 
 function Public() {

@@ -1,5 +1,6 @@
 /* eslint-disable */
 var express = require('express');
+const path = require('path');
 
 // mongoStore used for storing session in mongodb
 // mongoStore = require("connect-mongo")(require("connect"));
@@ -10,7 +11,7 @@ module.exports = function(app, config) {
   // handle every other route with index.html, which will contain
   // a script tag to your application's JavaScript file(s).
   app.get('*', function(request, response) {
-    response.sendFile('/dist/index.html');
+    response.sendFile(path.join(__dirname+'/dist/index.html'));
   });
 
   /*

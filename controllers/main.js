@@ -55,6 +55,40 @@ function urlhandle(req, res, next) {
   next();
 }
 
+function redirecturl(req, res) {
+  var body = req.body;
+  const query = querystring.stringify({
+    minlike: body.minlike,
+    maxlike: body.maxlike,
+    mincomment: body.mincomment,
+    maxcomment: body.maxcomment,
+    posttype: body.posttype,
+    page1: body.pagename1,
+    time1: body.date1,
+    time2: body.date2,
+    user1: body.user1,
+    keyword1: body.keyword1,
+    keyword3: body.keyword3,
+    page2: body.pagename2,
+    time3: body.date3,
+    time4: body.date4,
+    user2: body.user2,
+    keyword2: body.keyword2,
+    keyword4: body.keyword4,
+    co: body.co,
+  });
+  res.redirect('/query?' + query);
+}
+
+function authurl(req, res, next) {
+  console.log('authurl', req.query);
+  req.body = {
+    username: req.query.username,
+    password: req.query.password,
+  };
+  next();
+}
+
 module.exports = function(app) {
   /*
    * passort settings
@@ -81,6 +115,10 @@ module.exports = function(app) {
     //console.log(postid);
     next();
   });
+
+  app.post('/query', urlencodedParser, redirecturl);
+
+  app.post('/vis', urlencodedParser, redirecturl);
 
   /*app.get('/', function(req, res) {
     if (req.session.passport && req.session.passport.user !== undefined) {
@@ -117,6 +155,7 @@ module.exports = function(app) {
   });
 
   // for passport
+  /*
   app.get('/register', function(req, res) {
     res.render('register', {
       layout: 'auth',
@@ -153,6 +192,7 @@ module.exports = function(app) {
       },
     );
   });
+  */
   /*
   app.get('/login', function(req, res) {
     //console.log(res);
@@ -165,11 +205,13 @@ module.exports = function(app) {
   app.post(
     '/login',
     urlencodedParser,
+    authurl,
     passport.authenticate('local', {
       failureRedirect: '/',
       failureFlash: true,
     }),
     (req, res, next) => {
+      console.log(req.body);
       req.session.save(err => {
         if (err) {
           console.log(err);
@@ -185,18 +227,10 @@ module.exports = function(app) {
             console.log('   username: ', account.username);
             console.log('login');
             //res.redirect('/');
-            const fakeAuth = {
+            const Auth = {
               isAuthenticated: true,
-              authenticate(cb) {
-                this.isAuthenticated = true;
-                setTimeout(cb, 100); // fake async
-              },
-              signout(cb) {
-                this.isAuthenticated = false;
-                setTimeout(cb, 100);
-              },
             };
-            res.send(fakeAuth);
+            res.send(Auth);
           },
         );
       });

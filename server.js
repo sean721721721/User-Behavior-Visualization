@@ -5,7 +5,6 @@ const cors = require('cors');
 // const webpackDevMiddleware = require('webpack-dev-middleware');
 
 const os = require('os');
-const path = require('path');
 
 const app = express();
 const config = require('./config')[app.settings.env];
@@ -16,7 +15,6 @@ const config = require('./config')[app.settings.env];
 app.use(cors());
 app.use(helmet());
 
-const root = path.resolve(__dirname);
 /*
 let options = {
   timeout: 10000000,
