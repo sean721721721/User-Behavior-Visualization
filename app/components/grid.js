@@ -11,6 +11,7 @@ import Post from './post';
 import Footer from './Footer';
 import AddCard from '../containers/AddCard';
 import VisibleCardList from '../containers/VisibleCardList';
+import Loading from './loading';
 import './bbs.css';
 
 const store = createStore(rootReducer);
@@ -24,6 +25,7 @@ class Grid extends React.Component {
       isLoaded: false,
       items: [],
       */
+      isLoading: false,
       menuprops: {
         initParameter: {
           var1: 'reaction',
@@ -242,7 +244,7 @@ class Grid extends React.Component {
     const strkeyword2 = `keyword2=${keyword2}` || '';
     const strkeyword4 = `keyword4=${keyword4}` || '';
     const strco = `co=${type}` || '';
-    const searchurl = 'http://140.119.164.22:3000/searching?';
+    const searchurl = '/searching?';
     const str = `${searchurl + strminvar1}&${strmaxvar1}&${strposttype}&`
       + `${strpage1}&${strtime1}&${strtime2}&${struser1}&${strkeyword1}&${strkeyword3}&`
       + `${strpage2}&${strtime3}&${strtime4}&${struser2}&${strkeyword2}&${strkeyword4}&${strco}`;
@@ -251,6 +253,7 @@ class Grid extends React.Component {
 
   handleSubmit(e) {
     e.preventDefault();
+    this.setState(prevState => ({ ...prevState, isLoading: true }));
     const url = encodeURI(this.getReqstr());
     const myRequest = new Request(url, {
       method: 'get',
@@ -282,6 +285,7 @@ class Grid extends React.Component {
       },
     }));
     console.log('change');
+    this.setState(prevState => ({ ...prevState, isLoading: false }));
   }
 
   previousPage(e) {
@@ -412,7 +416,7 @@ class Grid extends React.Component {
 
   render() {
     const {
-      menuprops, cardprops, postlistprops, postprops,
+      isLoading, menuprops, cardprops, postlistprops, postprops,
     } = this.state;
     const selectedOptions = this.selectedOptions();
     const filename = this.getFilename();
@@ -435,13 +439,14 @@ class Grid extends React.Component {
                 <div id="template" className="slider__list" />
                 <div id="over" />
                 <div id="select" />
-                <VisibleCardList />
+                <Loading isLoading={isLoading} />
+                {/* <VisibleCardList />
                 <Cards cardprops={cardprops} />
-                <Footer />
+                <Footer /> */}
               </div>
               <div className="box postview">
                 <div id="page" />
-                <AddCard />
+                {/* <AddCard /> */}
               </div>
               <div className="box detailview">
                 <div className="btn-postgroup" />

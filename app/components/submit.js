@@ -35,7 +35,7 @@ class SubmitTab extends React.Component {
           <form action="/query" method="post" id="para">
             <fieldset>
               <legend>Get co-activity</legend>
-              <button name="submit" type="button" onClick={e => this.getCR(e, 'Co reaction')}>
+              {/* <button name="submit" type="button" onClick={e => this.getCR(e, 'Co reaction')}>
                 Co reaction
               </button>
               <button name="submit" type="button" onClick={e => this.getCR(e, 'Co comment')}>
@@ -43,7 +43,7 @@ class SubmitTab extends React.Component {
               </button>
               <button name="submit" type="button" onClick={e => this.getCR(e, 'Co share')}>
                 Co share
-              </button>
+              </button> */}
               <button name="submit" type="button" onClick={e => this.getCR(e, 'All')}>
                 New Submit
               </button>
