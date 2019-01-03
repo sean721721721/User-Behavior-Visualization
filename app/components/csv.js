@@ -102,7 +102,9 @@ const config = {
  */
 function AnytoStr(any) {
   let str = any;
+  const regex = new RegExp(/"/g);
   str += '';
+  str = str.replace(regex, '""');
   return str;
 }
 

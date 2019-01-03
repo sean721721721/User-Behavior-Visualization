@@ -67,7 +67,7 @@ class ParameterTab extends React.Component {
             <label htmlFor="minvar1">
               from
               <input
-                name="minvar1"
+                name="min1"
                 id="minvar1"
                 type="number"
                 min="0"
@@ -78,7 +78,7 @@ class ParameterTab extends React.Component {
             <label htmlFor="maxvar1">
               to
               <input
-                name="maxvar1"
+                name="max1"
                 id="maxvar1"
                 type="number"
                 min="0"
@@ -101,7 +101,7 @@ class ParameterTab extends React.Component {
             <label htmlFor="x">
               from
               <input
-                name="minvar2"
+                name="min2"
                 id="minvar2"
                 type="number"
                 min="0"
@@ -112,7 +112,7 @@ class ParameterTab extends React.Component {
             <label htmlFor="x">
               to
               <input
-                name="maxvar2"
+                name="max2"
                 id="maxvar2"
                 type="number"
                 min="0"
