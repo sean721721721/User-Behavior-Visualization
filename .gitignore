@@ -74,7 +74,7 @@ typings/
 
 # Others
 ptt-web-crawler/
-outsource/
+outsource
 /coverage/
 dist/
 pttdata/

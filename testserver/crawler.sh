@@ -23,6 +23,8 @@ dir=./ptt-web-crawler
 args="$dirpath"
 space=" "
 cd "$dir"
+declare -i to=10
+echo "$to"
 for((i=0;i<$loop;i++))
 do
     ni=$((($bi + $n) - 1))
@@ -34,8 +36,8 @@ do
     folder=($dirpath/$i)
     #args=("$args$space$i")
     echo "folder: $folder"
-    python -m "PttWebCrawler" -b "$bn" -i "$bi" "$ni" -dp "$folder"
-    node "../server/ptttomongo.js" "$dirpath" "$bn" "$i"
+    python -m "PttWebCrawler" -b "$bn" -i "$bi" "$ni" -dp "$folder" -to "$to"
+    node "../lib/ptttomongo.js" "$dirpath" "$bn" "$i"
     bi=$(($ni + 1))
 done
 cd ..

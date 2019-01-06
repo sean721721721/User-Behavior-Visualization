@@ -6,27 +6,27 @@
 # PATH="/home/villager/.nvm/versions/node/v10.12.0/bin/node:$PATH"
 #PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
 
-export PATH=/home/villager/miniconda3/bin:/usr/local/cuda-8.0/bin:/home/villager/miniconda3/bin:/home/villager/.nvm/versions/node/v10.12.0/bin:/usr/local/cuda-8.0/bin:/home/villager/.cargo/bin:/home/villager/bin:/var/lib/mongodb-mms-automation/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/games:/usr/local/games:/snap/bin
+export PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/games:/usr/local/games:/snap/bin:/home/villager/.nvm/versions/node/v10.12.0/bin:
 #"Please input board name: "
-bn=MobileComm
+bn=NBA
 #"Please input page per json: "
 n=1
 #"Please input begin page index: "
 bi=6000
 #"Please input end page index: "
-ei=6005
+ei=6002
 #"Please input pttdata directory path(ex: ../pttdata/boardname): "
-dirpath=/home/villager/test/pttdata/MobileComm
-DATE=`date '+%d_%H_%M'`
-mkdir "$dirpath_$DATE"
+dirpath=/home/villager/test/pttdata/NBA
+DATE=`date '+%d-%H-%M'`
 loop=$(((($ei - $bi) / $n) + 1))
 echo "dirpath: $dirpath"
 echo "loop: $loop"
 echo "begin index: $bi"
 echo "end index: $ei"
-dir=/home/villager/test/ptt-web-crawler
-args="$dirpath_$DATE"
+dir=/home/villager/test/testserver/ptt-web-crawler
+args="$bn-$DATE"
 space=" "
+declare -i to=15
 cd "$dir"
 for((i=0;i<$loop;i++))
 do
@@ -36,13 +36,13 @@ do
         ni=$ei
     fi
     echo "current page index: $bi to $ni"
-    folder=($dirpath_$DATE/$i)
+    folder=(../pttdata/$bn-$DATE/$i)
     #args=("$args$space$i")
     echo "folder: $folder"
-    python /home/villager/test/ptt-web-crawler/PttWebCrawler/crawler.py -b "$bn" -i "$bi" "$ni" -dp "$folder"
-    node "/home/villager/test/server/ptttomongo.js" "$args" "$bn" "$i"
+    echo "mongofolder:" "../pttdata/$args"
+    python /home/villager/test/testserver/ptt-web-crawler/PttWebCrawler/crawler.py -b "$bn" -i "$bi" "$ni" -dp "$folder" -to "$to"
+    node "/home/villager/test/testserver/lib/ptttomongo.js" "../pttdata/$args" "$bn" "$i"
     bi=$(($ni + 1))
 done
 cd ..
 echo "$args"
-#node ./server/ptttomongo.js "$args"

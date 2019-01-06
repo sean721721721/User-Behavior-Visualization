@@ -11,6 +11,36 @@ var mongoose = require('mongoose');
 const winston = require('winston');
 var schema = require('../models/pttSchema.js');
 
+(function(){
+    var parse = JSON.parse;
+    JSON = {
+        stringify: JSON.stringify,
+        validate: function(str){
+            try{
+                parse(str);
+                return true;
+            }catch(err){
+                return err;
+            }
+        },
+
+        parse: function(str){
+            try{
+                return parse(str);
+            }catch(err){
+                return undefined;
+            }
+        }
+    }
+})();
+
+console.log( JSON.validate('{"foo":"bar"}') ); //true
+console.log( JSON.validate('{foo:"bar"}') ); //Error message: [SyntaxError: Unexpected token f]
+
+console.log( JSON.parse('{"foo":"bar"}') ); // js object, { foo: 'bar' }
+console.log( JSON.parse('{foo:"bar"}') ); //undefined
+console.log( JSON.stringify({foo:"bar"}) ); //{"foo":"bar"}
+
 //assert.equal(query.exec().constructor, global.Promise);
 /*
 // Connection URL
@@ -124,13 +154,13 @@ var saveFiles = function saveFiles(dirname, collection, schema) {
                         console.log(files['article_id']);
                     }*/
           if (err) {
+            logger.log('warn', 'did not save post: ' + files['article_id']);
             reject(err);
           }
           resolve('true');
         },
       );
     }).catch(err => {
-      logger.log('warn', 'did not save post: ', files['article_id']);
       logger.log('error', err);
     });
   }
@@ -142,18 +172,21 @@ var saveFiles = function saveFiles(dirname, collection, schema) {
       async function split() {
         await promiseAllP(filenames, (filename, index, resolve, reject) => {
           if (err) {
+            logger.log('warn', 'ReadFolder error, did not save: ' + filename);
             reject(err);
           }
           let p = new Promise((resolve, reject) => {
             fs.readFile(dirname + '/' + filename, 'utf-8', (err, data) => {
               if (err) {
+                logger.log('warn', 'ReadFile error, did not save: ' + filename);
                 reject(err);
               }
               resolve(sub());
               async function sub() {
                 var files = JSON.parse(data);
+                if(files===undefined) logger.log('warn', 'JSON parse error, did not save: ' + filename);
                 var fl = files.articles.length;
-                logger.log('info', filename, ' length = ', fl);
+                logger.log('info', filename + ' length = ' + fl);
                 for (var j = 0; j < fl; j++) {
                   await save(files.articles[j]);
                 }
@@ -181,7 +214,7 @@ let path = process.argv.shift();
 let board = process.argv.shift();
 let root = '../pttdata/' + path;
 let folders = process.argv;
-console.log(path, board, folders);
+logger.log('info', path + ' ' + board + ' ' + folders);
 //var folders = ['30', '31', '32', '33', '34', '35', '36', '37', '38']; // 'Tech_Job', 'Gossiping', 'Soft_Job'];
 //folders.forEach(folder => {
 //var root = "../pttdata/Gossiping";
@@ -194,7 +227,7 @@ async function readfolder() {
         console.log('saved');
       })
       .catch(error => {
-        console.log(error);
+        logger.log('error', error);
       });
     //mongoose.model(folder, schema.postSchema)
     //mongoose.model(folder, schema.pttSchema)
