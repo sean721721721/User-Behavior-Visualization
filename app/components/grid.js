@@ -1,20 +1,17 @@
 // @flow
 import React from 'react';
 import Lodash from 'lodash';
-import { createStore } from 'redux';
 import { Provider } from 'react-redux';
-import rootReducer from '../reducers';
+import store from '../store/index';
 import Menu from './menu';
-import Cards from './card';
 import PostPage from './postpage';
 import Post from './post';
+import Cards from './card';
 import Footer from './Footer';
 import AddCard from '../containers/AddCard';
 import VisibleCardList from '../containers/VisibleCardList';
 import Loading from './loading';
 import './bbs.css';
-
-const store = createStore(rootReducer);
 
 class Grid extends React.Component {
   constructor(props) {
@@ -447,13 +444,15 @@ class Grid extends React.Component {
                 <div id="over" />
                 <div id="select" />
                 <Loading isLoading={isLoading} />
-                {/* <VisibleCardList />
+                <VisibleCardList />
                 <Cards cardprops={cardprops} />
-                <Footer /> */}
+                <Footer />
+                {/* */}
               </div>
               <div className="box postview">
                 <div id="page" />
-                {/* <AddCard /> */}
+                <AddCard />
+                {/* */}
               </div>
               <div className="box detailview">
                 <div className="btn-postgroup" />

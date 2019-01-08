@@ -1,5 +1,10 @@
 /* eslint-disable */
 // @flow
+
+/*
+Using concat(), slice(), and …spread for arrays
+Using Object.assign() and …spread for objects
+*/
 const cards = (state = [], action) => {
   switch (action.type) {
     case 'ADD_CARD':

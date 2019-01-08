@@ -3,8 +3,9 @@ import { connect } from 'react-redux';
 import { toggleCard, VisibilityFilters } from '../actions';
 import CardList from '../components/CardList';
 
+// reducer
 const getVisibleCards = (cards, filter) => {
-  console.log(cards)
+  console.log(cards);
   switch (filter) {
     case VisibilityFilters.SHOW_ALL:
       return cards;

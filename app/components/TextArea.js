@@ -1,7 +1,18 @@
 // @flow
 import React from 'react';
+import PropTypes from 'prop-types';
 
-const TextArea = (props) => {
+type TextAreaProps = {
+  title: PropTypes.string,
+  name: PropTypes.string,
+  rows: PropTypes.num,
+  cols: PropTypes.num,
+  value: PropTypes.string,
+  handleChange: PropTypes.func,
+  placeholder: PropTypes.string,
+};
+
+const TextArea = (props: TextAreaProps) => {
   const {
     title, name, rows, cols, value, handleChange, placeholder,
   } = props;

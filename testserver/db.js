@@ -1,8 +1,8 @@
 /* eslint-disable */
 var mongoose = require("mongoose");
 //var config = require("./config");
-var pttschema = require('../models/pttSchema.js');
-var fbschema = require('../models/postSchema.js');
+var pttschema = require('./models/pttSchema.js');
+var fbschema = require('./models/postSchema.js');
 
 // Use native promises
 mongoose.Promise = global.Promise;

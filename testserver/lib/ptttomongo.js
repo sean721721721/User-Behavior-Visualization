@@ -33,14 +33,14 @@ var schema = require('../models/pttSchema.js');
         }
     }
 })();
-
+/*
 console.log( JSON.validate('{"foo":"bar"}') ); //true
 console.log( JSON.validate('{foo:"bar"}') ); //Error message: [SyntaxError: Unexpected token f]
 
 console.log( JSON.parse('{"foo":"bar"}') ); // js object, { foo: 'bar' }
 console.log( JSON.parse('{foo:"bar"}') ); //undefined
 console.log( JSON.stringify({foo:"bar"}) ); //{"foo":"bar"}
-
+*/
 //assert.equal(query.exec().constructor, global.Promise);
 /*
 // Connection URL

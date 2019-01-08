@@ -1,7 +1,17 @@
 // @flow
 import React from 'react';
+import PropTypes from 'prop-types';
 
-const Input = (props) => {
+type InputProps = {
+  title: PropTypes.string,
+  name: PropTypes.string,
+  inputtype: PropTypes.string,
+  value: PropTypes.string,
+  handleChange: PropTypes.func,
+  placeholder: PropTypes.string,
+};
+
+const Input = (props: InputProps) => {
   const {
     title, name, inputtype, value, handleChange, placeholder,
   } = props;

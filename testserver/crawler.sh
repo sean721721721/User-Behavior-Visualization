@@ -23,7 +23,7 @@ dir=./ptt-web-crawler
 args="$dirpath"
 space=" "
 cd "$dir"
-declare -i to=10
+declare -i to=15
 echo "$to"
 for((i=0;i<$loop;i++))
 do
