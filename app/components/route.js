@@ -11,7 +11,8 @@ import './login.css';
 // import LoginTab from './Login';
 
 const Auth = {
-  isAuthenticated: false,
+  isAuthenticated: true,
+  // isAuthenticated: false,
   authenticate(cb) {
     this.isAuthenticated = true;
     setTimeout(cb, 100); // async
@@ -104,15 +105,21 @@ class LoginTab extends React.Component {
       method: 'post',
     });
     console.log(auth);
-    fetch(auth)
-      .then(res => res.json())
-      .then((res) => {
-        console.log(res);
-        Auth.isAuthenticated = res.isAuthenticated;
-        Auth.authenticate(() => {
-          this.setState({ redirectToReferrer: res.isAuthenticated });
-        });
+    if (Auth.isAuthenticated) {
+      Auth.authenticate(() => {
+        this.setState({ redirectToReferrer: Auth.isAuthenticated });
       });
+    } else {
+      fetch(auth)
+        .then(res => res.json())
+        .then((res) => {
+          console.log(res);
+          Auth.isAuthenticated = res.isAuthenticated;
+          Auth.authenticate(() => {
+            this.setState({ redirectToReferrer: res.isAuthenticated });
+          });
+        });
+    }
   };
 
   handleInput = (e) => {
