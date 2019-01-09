@@ -1,6 +1,7 @@
 // @flow
 import {
   ADD_CARD,
+  EDIT_CARD,
   CLEAR_CARD,
   TOGGLE_CARD,
   EDIT_TIME,
@@ -12,18 +13,24 @@ import {
 let nextCardId = 0;
 export const addCard = (props) => {
   nextCardId += 1;
+  // console.log(props);
   return {
     type: ADD_CARD,
     id: nextCardId,
-    text: props.title,
+    // text: props.title,
     cardprops: {
       time: props.time || '23 Oct 018',
       title: props.title || '柯P',
-      description: '台北市長柯文哲在PTT上別稱',
+      description: props.description || '台北市長柯文哲在PTT上別稱',
       tags: props.tags || ['人物', '政治', '台北'],
     },
   };
 };
+
+export const editCard = cardId => ({
+  type: EDIT_CARD,
+  cardId,
+});
 
 export const clearCard = () => ({
   type: CLEAR_CARD,

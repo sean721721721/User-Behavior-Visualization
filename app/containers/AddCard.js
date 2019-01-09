@@ -13,69 +13,72 @@ import {
 
 const mapStatToProps = (state) => {
   console.log(state);
-  return { cardprops: state.input };
+  const { edit: props } = state;
+  console.log(props);
+  return { card: props };
 };
 
 const mapDispatchToProps = dispatch => ({
   addCard: card => dispatch(addCard(card)),
   clearCard: () => dispatch(clearCard()),
-  editTime: card => dispatch(editTime(card.time)),
-  editTitle: card => dispatch(editTitle(card.title)),
-  editAbout: card => dispatch(editAbout(card.about)),
-  editTag: card => dispatch(editTag(card.tag)),
+  editTime: time => dispatch(editTime(time)),
+  editTitle: title => dispatch(editTitle(title)),
+  editAbout: description => dispatch(editAbout(description)),
+  editTag: tag => dispatch(editTag(tag)),
 });
 class ConnectedAddCard extends React.Component {
   constructor(props) {
     super(props);
-    this.state = {
-      input: {
-        time: '08 Jan 019',
-        title: '柯P',
-        description: '台北市長柯文哲在PTT上別稱',
-        tags: ['人物', '政治', '台北'],
-      },
-    };
 
     this.handleFormSubmit = this.handleFormSubmit.bind(this);
     this.handleTime = this.handleTime.bind(this);
+    this.handleTitle = this.handleTitle.bind(this);
     this.handleTextArea = this.handleTextArea.bind(this);
+    this.handleTag = this.handleTag.bind(this);
   }
 
   handleFormSubmit = (e) => {
     e.preventDefault();
-    let { input } = this.state;
+    const input = this.props.card;
     console.log(input);
     this.props.addCard(input);
-    input = {};
   };
 
   handleTime = (e) => {
     e.preventDefault();
-    let { input } = this.state;
-    this.props.editTime(input);
-    input = {};
+    const time = e.target.value;
+    console.log(time);
+    this.props.editTime(time);
+  };
+
+  handleTitle = (e) => {
+    e.preventDefault();
+    const title = e.target.value;
+    console.log(title);
+    this.props.editTitle(title);
   };
 
   handleTextArea = (e) => {
     e.preventDefault();
-    console.log('Inside handleTextArea');
-    let { input } = this.state;
-    this.props.editAbout(input);
-    input = {};
-    /* const { value } = e.target;
-    this.setState(
-      prevState => ({
-        info: {
-          ...prevState.info,
-          info: value,
-        },
-      }),
-      () => console.log(this.state.info),
-    ); */
+    const about = e.target.value;
+    console.log(about);
+    this.props.editAbout(about);
+  };
+
+  handleTag = (e) => {
+    e.preventDefault();
+    const tag = e.target.value;
+    console.log(tag);
+    this.props.editTag(tag);
   };
 
   render() {
-    const { input } = this.state;
+    console.log(this.props);
+    const {
+      card: {
+        time, title, description: about, tag,
+      },
+    } = this.props;
     const buttonStyle = {
       margin: '10px 10px 10px 10px',
     };
@@ -86,20 +89,20 @@ class ConnectedAddCard extends React.Component {
             inputtype="text"
             title="Time"
             name="time"
-            ref={(node) => {
-              input.time = node.value;
-            }}
+            value={time}
             onChange={this.handleTime}
-            palceholder="Enter time" /* handleChange={this.handleInput} */
+            palceholder="Enter time"
           />
           <Input
             inputtype="text"
             title="Title"
             name="title"
-            ref={(node) => {
+            /* ref={(node) => {
               input.title = node.value;
-            }}
-            palceholder="Enter time" /* handleChange={this.handleInput} */
+            }} */
+            value={title}
+            onChange={this.handleTitle}
+            palceholder="Enter time"
           />
           {/* <TextareaAutosize
           defaultValue="Church-key flannel bicycle rights,
@@ -112,22 +115,22 @@ class ConnectedAddCard extends React.Component {
           }}
         /> */}
           <TextArea
+            // inputtype="text"
             title="About"
             name="cardInfo"
-            rows="5"
-            cols="20"
-            value="SoBad Church-key flannel bicycle rights, tofu tacos before they sold out polaroid for free"
-            handlChange={this.handleTextArea}
+            // rows="5"
+            // cols="20"
+            value={about}
+            onChange={this.handleTextArea}
             placeholder="Enter card info"
           />
           <Input
             inputtype="text"
             title="Tags"
             name="tag"
-            ref={(node) => {
-              input.tags = node.value;
-            }}
-            palceholder="Enter time" /* handleChange={this.handleInput} */
+            value={tag}
+            onChange={this.handleTag}
+            palceholder="Enter time"
           />
           <Button
             action={this.handleFormSubmit}
@@ -173,6 +176,6 @@ const AddCard = ({ dispatch }) => {
 export default connect()(AddCard);
 */
 export default connect(
-  null,
+  mapStatToProps,
   mapDispatchToProps,
 )(ConnectedAddCard);

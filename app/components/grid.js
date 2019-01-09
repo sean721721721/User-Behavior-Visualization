@@ -6,7 +6,6 @@ import store from '../store/index';
 import Menu from './menu';
 import PostPage from './postpage';
 import Post from './post';
-import Cards from './card';
 import Footer from './Footer';
 import AddCard from '../containers/AddCard';
 import VisibleCardList from '../containers/VisibleCardList';
@@ -445,13 +444,13 @@ class Grid extends React.Component {
                 <div id="select" />
                 <Loading isLoading={isLoading} />
                 <VisibleCardList />
-                <Cards cardprops={cardprops} />
+                {/* */}
                 <Footer />
                 {/* */}
               </div>
               <div className="box postview">
                 <div id="page" />
-                <AddCard />
+                <AddCard card={cardprops} />
                 {/* */}
               </div>
               <div className="box detailview">

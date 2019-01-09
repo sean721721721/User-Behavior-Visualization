@@ -1,23 +1,19 @@
 // @flow
 import React from 'react';
 import PropTypes from 'prop-types';
+import CardTitle from './CardTitle';
 import Card from './Card';
-import Cards from './card';
 
 const CardList = ({ cards, toggleCard }) => (
   <div>
     <ul>
       {cards.map(card => (
-        <Card
-          key={card.id}
-          {...card}
-          onClick={() => toggleCard(card.id)}
-        />
+        <div>
+          <CardTitle key={card.id} {...card} onClick={() => toggleCard(card.id)} />
+          <Card cardprops={card.cardprops} />
+        </div>
       ))}
     </ul>
-    {cards.map(card => (
-      <Cards cardprops={card.cardprops} />
-    ))}
   </div>
 );
 

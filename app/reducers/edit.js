@@ -1,44 +1,38 @@
 // @flow
-const { input } = {
+const input = {
   time: '08 Jan 019',
   title: '柯P',
   description: '台北市長柯文哲在PTT上別稱',
-  tags: ['人物', '政治', '台北'],
+  tags: '人物 政治 台北',
 };
 
-const edit = (state = { input }, action) => {
+const Edit = (state = input, action) => {
+  // console.log(state);
+  // console.log(action);
   switch (action.type) {
     case 'EDIT_TIME':
       return {
         ...state,
-        input: {
-          time: action.time,
-        },
+        time: action.time,
       };
     case 'EDIT_TITLE':
       return {
         ...state,
-        input: {
-          title: action.title,
-        },
+        title: action.title,
       };
     case 'EDIT_ABOUT':
       return {
         ...state,
-        input: {
-          description: action.about,
-        },
+        description: action.about,
       };
     case 'EDIT_TAG':
       return {
         ...state,
-        input: {
-          tags: action.tags,
-        },
+        tags: action.tag.split(' '),
       };
     default:
       return state;
   }
 };
 
-export default edit;
+export default Edit;

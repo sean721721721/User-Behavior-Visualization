@@ -1,5 +1,6 @@
 // @flow
 export const ADD_CARD = 'ADD_CARD';
+export const EDIT_CARD = 'EDIT_CARD';
 export const CLEAR_CARD = 'CLEAR_CARD';
 export const TOGGLE_CARD = 'TOGGLE_CARD';
 export const EDIT_TIME = 'EDIT_TIME';
