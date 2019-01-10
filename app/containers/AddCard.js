@@ -12,9 +12,8 @@ import {
 } from '../actions';
 
 const mapStatToProps = (state) => {
-  console.log(state);
   const { edit: props } = state;
-  console.log(props);
+  // console.log(props);
   return { card: props };
 };
 
@@ -31,6 +30,7 @@ class ConnectedAddCard extends React.Component {
     super(props);
 
     this.handleFormSubmit = this.handleFormSubmit.bind(this);
+    this.handleClear = this.handleClear.bind(this);
     this.handleTime = this.handleTime.bind(this);
     this.handleTitle = this.handleTitle.bind(this);
     this.handleTextArea = this.handleTextArea.bind(this);
@@ -39,41 +39,51 @@ class ConnectedAddCard extends React.Component {
 
   handleFormSubmit = (e) => {
     e.preventDefault();
-    const input = this.props.card;
-    console.log(input);
-    this.props.addCard(input);
+    const { card, addCard } = this.props;
+    // console.log(input);
+    addCard(card);
+  };
+
+  handleClear = (e) => {
+    e.preventDefault();
+    const { clearCard } = this.props;
+    clearCard();
   };
 
   handleTime = (e) => {
     e.preventDefault();
+    const { editTime } = this.props;
     const time = e.target.value;
-    console.log(time);
-    this.props.editTime(time);
+    // console.log(time);
+    editTime(time);
   };
 
   handleTitle = (e) => {
     e.preventDefault();
+    const { editTitle } = this.props;
     const title = e.target.value;
-    console.log(title);
-    this.props.editTitle(title);
+    // console.log(title);
+    editTitle(title);
   };
 
   handleTextArea = (e) => {
     e.preventDefault();
+    const { editAbout } = this.props;
     const about = e.target.value;
-    console.log(about);
-    this.props.editAbout(about);
+    // console.log(about);
+    editAbout(about);
   };
 
   handleTag = (e) => {
     e.preventDefault();
+    const { editTag } = this.props;
     const tag = e.target.value;
-    console.log(tag);
-    this.props.editTag(tag);
+    // onsole.log(tag);
+    editTag(tag);
   };
 
   render() {
-    console.log(this.props);
+    // console.log(this.props);
     const {
       card: {
         time, title, description: about, tag,
@@ -91,18 +101,15 @@ class ConnectedAddCard extends React.Component {
             name="time"
             value={time}
             onChange={this.handleTime}
-            palceholder="Enter time"
+            placeholder="Enter time"
           />
           <Input
             inputtype="text"
             title="Title"
             name="title"
-            /* ref={(node) => {
-              input.title = node.value;
-            }} */
             value={title}
             onChange={this.handleTitle}
-            palceholder="Enter time"
+            placeholder="Enter time"
           />
           {/* <TextareaAutosize
           defaultValue="Church-key flannel bicycle rights,
@@ -115,13 +122,12 @@ class ConnectedAddCard extends React.Component {
           }}
         /> */}
           <TextArea
-            // inputtype="text"
             title="About"
             name="cardInfo"
-            // rows="5"
-            // cols="20"
+            rows="5"
+            cols="20"
             value={about}
-            onChange={this.handleTextArea}
+            handleChange={this.handleTextArea}
             placeholder="Enter card info"
           />
           <Input
@@ -130,7 +136,7 @@ class ConnectedAddCard extends React.Component {
             name="tag"
             value={tag}
             onChange={this.handleTag}
-            palceholder="Enter time"
+            placeholder="Enter tags with space"
           />
           <Button
             action={this.handleFormSubmit}
@@ -139,11 +145,7 @@ class ConnectedAddCard extends React.Component {
             style={buttonStyle}
           />
           <Button
-            action={(e) => {
-              e.preventDefault();
-              console.log('clear');
-              clearCard();
-            }}
+            action={this.handleClear}
             type="Clear"
             title="Clear"
             style={buttonStyle}
@@ -154,7 +156,12 @@ class ConnectedAddCard extends React.Component {
   }
 }
 
-/*
+export default connect(
+  mapStatToProps,
+  mapDispatchToProps,
+)(ConnectedAddCard);
+
+/* stateless function
 const AddCard = ({ dispatch }) => {
   let input = {};
   const buttonStyle = {
@@ -175,7 +182,3 @@ const AddCard = ({ dispatch }) => {
 
 export default connect()(AddCard);
 */
-export default connect(
-  mapStatToProps,
-  mapDispatchToProps,
-)(ConnectedAddCard);

@@ -332,11 +332,11 @@ path:hover {
     grid-gap: 1px;
     grid-column: col1 / col2;
     grid-template-columns: [scol1] 0.5fr [scol2] 0.5fr [scolend];
-    grid-template-rows: [srow1] minmax(auto, 1fr) [srow2] minmax(30vh, 30vh) [srowend];
+    grid-template-rows: [srow1] 0.5fr [srow2] 0.5fr [srowend];
 }
 
 .overview {
-    overflow-y: auto;
+    overflow-y: scroll;
     grid-column: scol1 / scol2;
     grid-row: srow1 / srow2;
 }

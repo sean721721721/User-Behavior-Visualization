@@ -18,12 +18,11 @@ const TextArea = (props: TextAreaProps) => {
   } = props;
   return (
     <div className="form-group">
-      <label htmlFor={name} className="form-label">
+      <label className="form-label">
         {title}
       </label>
       <textarea
         className="form-control"
-        id={name}
         name={name}
         rows={rows}
         cols={cols}

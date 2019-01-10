@@ -34,14 +34,6 @@ export const editCard = cardId => ({
 
 export const clearCard = () => ({
   type: CLEAR_CARD,
-  id: nextCardId,
-  text: '',
-  cardprops: {
-    time: '',
-    title: '',
-    description: '',
-    tags: [],
-  },
 });
 
 export const toggleCard = id => ({

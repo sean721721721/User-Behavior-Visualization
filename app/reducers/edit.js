@@ -10,6 +10,13 @@ const Edit = (state = input, action) => {
   // console.log(state);
   // console.log(action);
   switch (action.type) {
+    case 'CLEAR_CARD':
+      return {
+        time: '',
+        title: '',
+        description: '',
+        tags: '',
+      };
     case 'EDIT_TIME':
       return {
         ...state,
