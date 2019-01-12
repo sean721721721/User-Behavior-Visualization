@@ -74,6 +74,7 @@ class Grid extends React.Component {
         },
       },
       cardprops: {
+        id: 0,
         time: '23 Oct 018',
         title: '柯P',
         description: '台北市長柯文哲在PTT上別稱',
@@ -450,7 +451,7 @@ class Grid extends React.Component {
               </div>
               <div className="box postview">
                 <div id="page" />
-                <AddCard card={cardprops} />
+                <AddCard />
                 {/* */}
               </div>
               <div className="box detailview">

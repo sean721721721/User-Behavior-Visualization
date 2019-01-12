@@ -8,17 +8,24 @@ import TextArea from '../components/TextArea';
 import Select from '../components/Select';
 import Button from '../components/Button';
 import {
-  addCard, clearCard, editTime, editTitle, editAbout, editTag,
+  addCard,
+  updateCard,
+  clearCard,
+  editTime,
+  editTitle,
+  editAbout,
+  editTag,
 } from '../actions';
 
 const mapStatToProps = (state) => {
   const { edit: props } = state;
-  // console.log(props);
-  return { card: props };
+  // console.log(state);
+  return { edit: props };
 };
 
 const mapDispatchToProps = dispatch => ({
   addCard: card => dispatch(addCard(card)),
+  updateCard: c => dispatch(updateCard(c)),
   clearCard: () => dispatch(clearCard()),
   editTime: time => dispatch(editTime(time)),
   editTitle: title => dispatch(editTitle(title)),
@@ -30,6 +37,7 @@ class ConnectedAddCard extends React.Component {
     super(props);
 
     this.handleFormSubmit = this.handleFormSubmit.bind(this);
+    this.handleUpdate = this.handleUpdate.bind(this);
     this.handleClear = this.handleClear.bind(this);
     this.handleTime = this.handleTime.bind(this);
     this.handleTitle = this.handleTitle.bind(this);
@@ -39,9 +47,16 @@ class ConnectedAddCard extends React.Component {
 
   handleFormSubmit = (e) => {
     e.preventDefault();
-    const { card, addCard } = this.props;
+    const { edit, addCard } = this.props;
     // console.log(input);
-    addCard(card);
+    addCard(edit);
+  };
+
+  handleUpdate = (e) => {
+    e.preventDefault();
+    const { edit, updateCard } = this.props;
+    console.log(edit);
+    updateCard(edit);
   };
 
   handleClear = (e) => {
@@ -85,7 +100,7 @@ class ConnectedAddCard extends React.Component {
   render() {
     // console.log(this.props);
     const {
-      card: {
+      edit: {
         time, title, description: about, tag,
       },
     } = this.props;
@@ -145,11 +160,12 @@ class ConnectedAddCard extends React.Component {
             style={buttonStyle}
           />
           <Button
-            action={this.handleClear}
-            type="Clear"
-            title="Clear"
+            action={this.handleUpdate}
+            type="Update Card"
+            title="Update"
             style={buttonStyle}
           />
+          <Button action={this.handleClear} type="Clear" title="Clear" style={buttonStyle} />
         </form>
       </div>
     );

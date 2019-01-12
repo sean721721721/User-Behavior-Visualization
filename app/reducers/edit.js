@@ -1,5 +1,6 @@
 // @flow
 const input = {
+  id: '1',
   time: '08 Jan 019',
   title: '柯P',
   description: '台北市長柯文哲在PTT上別稱',
@@ -10,6 +11,19 @@ const Edit = (state = input, action) => {
   // console.log(state);
   // console.log(action);
   switch (action.type) {
+    case 'EDIT_CARD': {
+      return {
+        ...state,
+        id: action.edit.id,
+        time: action.edit.time,
+        title: action.edit.title,
+        description: action.edit.description,
+        tags: action.edit.tags,
+      };
+      /* return state.map(card =>
+        card.id === action.id ? { ...card, cardprops: action.cardprops } : card,
+      ); */
+    }
     case 'CLEAR_CARD':
       return {
         time: '',

@@ -23,13 +23,14 @@ function TagList({ props }: TagListProps) {
 class Card extends React.Component {
   constructor(props) {
     super(props);
-    this.state = props.cardprops;
   }
 
   render() {
     const {
-      time, title, description, tags,
-    } = this.state;
+      cardprops: {
+        time, title, description, tags,
+      },
+    } = this.props;
     return (
       <div className="feed">
         <article className="card">
