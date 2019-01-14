@@ -5,9 +5,11 @@ import Link from '../components/Link';
 
 /* mapStateToProps that describes how to transform the current Redux store state
  into the props you want to pass to a presentational component you are wrapping */
-const mapStateToProps = (state, ownProps) => ({
-  active: ownProps.filter === state.visibilityFilter,
-});
+const mapStateToProps = (state, ownProps) => {
+  return {
+    active: ownProps.filter === state.visibilityFilter,
+  };
+};
 
 /* mapDispatchToProps() that receives the dispatch() method and returns callback props
  that you want to inject into the presentational component */

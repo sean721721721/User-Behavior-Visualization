@@ -15,7 +15,7 @@ const cards = (state = [], action) => {
         {
           id: action.id,
           // edit: action.edit,
-          completed: false,
+          deleted: false,
           time: action.time,
           title: action.title,
           description: action.description,
@@ -30,7 +30,7 @@ const cards = (state = [], action) => {
           ? {
               id: action.id,
               // edit: action.edit,
-              completed: false,
+              deleted: false,
               time: action.time,
               title: action.title,
               description: action.description,
@@ -41,7 +41,7 @@ const cards = (state = [], action) => {
     }
     case 'TOGGLE_CARD':
       return state.map(card =>
-        card.id === action.id ? { ...card, completed: !card.completed } : card,
+        card.id === action.id ? { ...card, deleted: !card.deleted } : card,
       );
     default:
       return state;

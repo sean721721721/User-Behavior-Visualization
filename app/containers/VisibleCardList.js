@@ -9,10 +9,10 @@ const getVisibleCards = (cards, filter) => {
   switch (filter) {
     case VisibilityFilters.SHOW_ALL:
       return cards;
-    case VisibilityFilters.SHOW_COMPLETED:
-      return cards.filter(t => t.completed);
+    case VisibilityFilters.SHOW_DELETED:
+      return cards.filter(t => t.deleted);
     case VisibilityFilters.SHOW_ACTIVE:
-      return cards.filter(t => !t.completed);
+      return cards.filter(t => !t.deleted);
     default:
       throw new Error(`Unknown filter: ${filter}`);
   }

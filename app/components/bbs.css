@@ -532,11 +532,11 @@ img {
 
   .bbs-content,
   #article-polling {
-    font-size: 24px;
+    font-size: 18px; /* 24px*/
   }
 
   .b-ent .board {
-    font-size: 20px;
+    font-size: 14px; /* 20px*/
   }
   .b-ent .board > * {
     box-sizing: border-box;
@@ -558,7 +558,7 @@ img {
   }
 
   .search-bar {
-    font-size: 20px;
+    font-size: 14px; /* 20px*/
   }
 
   .r-ent {
@@ -567,7 +567,7 @@ img {
     background-color: #111;
   }
   .r-ent > * {
-    font-size: 20px;
+    font-size: 14px; /* 20px*/
   }
   .r-ent .title {
     margin: 0 5ex;
@@ -580,7 +580,7 @@ img {
     padding: 0.5em;
   }
   .m-ent > * {
-    font-size: 20px;
+    font-size: 14px; /* 20px*/
   }
 
   .action-bar {

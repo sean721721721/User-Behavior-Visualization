@@ -1,10 +1,10 @@
 // @flow
 const input = {
-  id: '1',
+  id: 1,
   time: '08 Jan 019',
   title: '柯P',
   description: '台北市長柯文哲在PTT上別稱',
-  tags: '人物 政治 台北',
+  tags: [''],
 };
 
 const Edit = (state = input, action) => {
@@ -26,10 +26,11 @@ const Edit = (state = input, action) => {
     }
     case 'CLEAR_CARD':
       return {
+        ...state,
         time: '',
         title: '',
         description: '',
-        tags: '',
+        tags: [''],
       };
     case 'EDIT_TIME':
       return {

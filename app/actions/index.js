@@ -9,6 +9,10 @@ import {
   EDIT_TITLE,
   EDIT_ABOUT,
   EDIT_TAG,
+  SET_VISIBILITY_FILTER,
+  SHOW_ALL,
+  SHOW_DELETED,
+  SHOW_ACTIVE,
 } from '../constants/action-types';
 
 let nextCardId = 0;
@@ -26,25 +30,18 @@ export const addCard = (props) => {
   };
 };
 
-export const updateCard = (card) => {
-  // console.log(card);
-  return {
-    type: UPDATE_CARD,
-    id: card.id,
-    time: card.time,
-    title: card.title,
-    description: card.description,
-    tags: card.tags,
-  };
-};
-
-export const editCard = (edit) => {
-  // console.log(edit);
-  return {
-    type: EDIT_CARD,
-    edit,
-  };
-};
+export const updateCard = card => ({
+  type: UPDATE_CARD,
+  id: card.id,
+  time: card.time,
+  title: card.title,
+  description: card.description,
+  tags: card.tags,
+});
+export const editCard = edit => ({
+  type: EDIT_CARD,
+  edit,
+});
 
 export const clearCard = () => ({
   type: CLEAR_CARD,
@@ -76,12 +73,12 @@ export const editTag = tag => ({
 });
 
 export const setVisibilityFilter = filter => ({
-  type: 'SET_VISIBILITY_FILTER',
+  type: SET_VISIBILITY_FILTER,
   filter,
 });
 
 export const VisibilityFilters = {
-  SHOW_ALL: 'SHOW_ALL',
-  SHOW_COMPLETED: 'SHOW_COMPLETED',
-  SHOW_ACTIVE: 'SHOW_ACTIVE',
+  SHOW_ALL,
+  SHOW_DELETED,
+  SHOW_ACTIVE,
 };

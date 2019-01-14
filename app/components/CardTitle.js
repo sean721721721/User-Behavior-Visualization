@@ -1,31 +1,37 @@
 // @flow
 import React from 'react';
 import PropTypes from 'prop-types';
+// import './switch.css';
 
 const CardTitle = ({
-  id, onClick, onEdit, completed, title,
+  id, onClick, onEdit, deleted, title,
 }) => (
   <div className="cardtitle">
-    <p>{id}</p>
+    <button type="button" onClick={onEdit}>
+      {id}
+      {' '}
+      {title}
+    </button>
     <button
       type="button"
       onClick={onClick}
       style={{
-        textDecoration: completed ? 'line-through' : 'none',
+        textDecoration: deleted ? 'line-through' : 'none',
       }}
     >
-      {title}
+      Delete
     </button>
-    <button type="button" onClick={onEdit}>
-      Edit
-    </button>
+    {/* <label className="switch" id="active">
+      {deleted ? <input type="checkbox" checkd /> : <input type="checkbox"/>}
+      <span className="slider round" />
+    </label> */}
   </div>
 );
 
 CardTitle.propTypes = {
   onClick: PropTypes.func.isRequired,
-  completed: PropTypes.bool.isRequired,
-  id: PropTypes.string.isRequired,
+  deleted: PropTypes.bool.isRequired,
+  id: PropTypes.number.isRequired,
 };
 
 export default CardTitle;

@@ -41,13 +41,11 @@ class Card extends React.Component {
                 <h2 className="card-title">{title}</h2>
               </header>
               <section className="card-excerpt">
-                <h2>:D</h2>
+                {/* <h2>:D</h2> */}
                 <p>{description}</p>
               </section>
             </div>
-            <footer className="card-meta">
-              <TagList props={tags} />
-            </footer>
+            <footer className="card-meta"><TagList props={tags} /></footer>
           </div>
         </article>
       </div>

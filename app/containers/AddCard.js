@@ -1,7 +1,6 @@
 // @flow
 import React from 'react';
 import { connect } from 'react-redux';
-// import TextareaAutosize from 'react-autosize-textarea';
 import CheckBox from '../components/CheckBox';
 import Input from '../components/Input';
 import TextArea from '../components/TextArea';
@@ -126,16 +125,6 @@ class ConnectedAddCard extends React.Component {
             onChange={this.handleTitle}
             placeholder="Enter time"
           />
-          {/* <TextareaAutosize
-          defaultValue="Church-key flannel bicycle rights,
-           tofu tacos before they sold out polaroid for free"
-          theme={{
-            textarea: {
-              fontSize: '18px',
-              borderColor: 'green',
-            },
-          }}
-        /> */}
           <TextArea
             title="About"
             name="cardInfo"
@@ -153,19 +142,14 @@ class ConnectedAddCard extends React.Component {
             onChange={this.handleTag}
             placeholder="Enter tags with space"
           />
-          <Button
-            action={this.handleFormSubmit}
-            type="Add Card"
-            title="Submit"
-            style={buttonStyle}
-          />
+          <Button action={this.handleFormSubmit} type="Add Card" title="Add" style={buttonStyle} />
           <Button
             action={this.handleUpdate}
             type="Update Card"
             title="Update"
             style={buttonStyle}
           />
-          <Button action={this.handleClear} type="Clear" title="Clear" style={buttonStyle} />
+          <Button action={this.handleClear} type="Clear Card" title="Clear" style={buttonStyle} />
         </form>
       </div>
     );

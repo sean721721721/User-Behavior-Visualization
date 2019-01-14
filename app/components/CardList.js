@@ -19,6 +19,7 @@ const CardList = ({
               key={card.id}
               {...card}
               id={card.id}
+              deleted={card.deleted}
               onClick={() => toggleCard(card.id)}
               onEdit={() => editCard(card)}
             />
