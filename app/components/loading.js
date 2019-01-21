@@ -1,7 +1,7 @@
 // @flow
 import React from 'react';
 import PropTypes from 'prop-types';
-import './loading.css';
+import './style/loading.css';
 
 type LoadingProps = {
   isLoading: PropTypes.bool,
