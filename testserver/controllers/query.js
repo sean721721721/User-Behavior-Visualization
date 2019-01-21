@@ -3,7 +3,7 @@ let fs = require('fs');
 /*var MongoClient = require('mongodb').MongoClient,*/
 let assert = require('assert');
 let mongoose = require('mongoose');
-let dl = require('./datalist.js');
+let dl = require('../models/datalist.js');
 let winston = require('winston');
 let db = require('../db');
 
