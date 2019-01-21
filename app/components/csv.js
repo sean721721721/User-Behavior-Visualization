@@ -110,6 +110,46 @@ function AnytoStr(any) {
 
 /**
  *
+ * @param {number} offset
+ */
+function addOffset(offset) {
+  let offsetstr = '';
+  for (let j = 0; j < offset; j += 1) {
+    offsetstr += ',';
+  }
+  return offsetstr;
+}
+
+/**
+ *
+ * @param {array} prop
+ * @param {number} proplength
+ * @param {number} offset
+ * @param {object} propconfig
+ */
+function subCSV(props, proplength, offset, propconfig) {
+  let content = '';
+  const row = props.length;
+  const offsetstr = addOffset(offset);
+  const format = Object.keys(propconfig).filter(prop => propconfig[prop]);
+  // console.log('format', format);
+  const column = format.length;
+  for (let i = 0; i < row; i += 1) {
+    content += offsetstr;
+    for (let j = 0; j < column; j += 1) {
+      content += '"';
+      content += AnytoStr(props[i][format[j]]);
+      content += '",';
+      // }
+    }
+    content += addOffset(proplength - offset - column);
+    content += '\n';
+  }
+  return content;
+}
+
+/**
+ *
  * @param {array} datalist
  * @param {object} config
  */
@@ -181,46 +221,6 @@ function toCSV(datalist, config) {
 }
 
 /**
- *
- * @param {number} offset
- */
-function addOffset(offset) {
-  let offsetstr = '';
-  for (let j = 0; j < offset; j += 1) {
-    offsetstr += ',';
-  }
-  return offsetstr;
-}
-
-/**
- *
- * @param {array} prop
- * @param {number} proplength
- * @param {number} offset
- * @param {object} propconfig
- */
-function subCSV(props, proplength, offset, propconfig) {
-  let content = '';
-  const row = props.length;
-  const offsetstr = addOffset(offset);
-  const format = Object.keys(propconfig).filter(prop => propconfig[prop]);
-  // console.log('format', format);
-  const column = format.length;
-  for (let i = 0; i < row; i += 1) {
-    content += offsetstr;
-    for (let j = 0; j < column; j += 1) {
-      content += '"';
-      content += AnytoStr(props[i][format[j]]);
-      content += '",';
-      // }
-    }
-    content += addOffset(proplength - offset - column);
-    content += '\n';
-  }
-  return content;
-}
-
-/**
  * return maxall value
  * @param {*} datalist
  */
@@ -233,8 +233,34 @@ function maxall(datalist) {
     } = datalist[i];
     if (all > max) max = all;
   }
-  console.log(max);
+  // console.log(max);
   return max;
+}
+
+/**
+ *
+ * @param {array} prop
+ * @param {number} maxcount
+ * @param {object} propconfig
+ */
+function subCSV2(props, maxcount, propconfig) {
+  let content = ',';
+  const row = props.length;
+  const format = Object.keys(propconfig).filter(prop => propconfig[prop]);
+  const column = format.length;
+  for (let x = 0; x < maxcount; x += 1) {
+    // console.log('format', format);
+    for (let i = 0; i < row; i += 1) {
+      for (let j = 0; j < column; j += 1) {
+        content += '"';
+        content += AnytoStr(props[i][format[j]]);
+        content += '",';
+      }
+    }
+  }
+  content += '\n';
+  // console.log(content);
+  return content;
 }
 
 /**
@@ -316,32 +342,6 @@ function toCSV2(datalist, config) {
 }
 
 /**
- *
- * @param {array} prop
- * @param {number} maxcount
- * @param {object} propconfig
- */
-function subCSV2(props, maxcount, propconfig) {
-  let content = ',';
-  const row = props.length;
-  const format = Object.keys(propconfig).filter(prop => propconfig[prop]);
-  const column = format.length;
-  for (let x = 0; x < maxcount; x += 1) {
-    // console.log('format', format);
-    for (let i = 0; i < row; i += 1) {
-      for (let j = 0; j < column; j += 1) {
-        content += '"';
-        content += AnytoStr(props[i][format[j]]);
-        content += '",';
-      }
-    }
-  }
-  content += '\n';
-  // console.log(content);
-  return content;
-}
-
-/**
  * // clear string
  * @param {string} s - string
  * @return {string}
@@ -404,7 +404,7 @@ class CSV extends React.Component {
 
     return (
       <a download={filename} href={bloburl}>
-        <img src={img} className="img-circle" style={style} />
+        <img src={img} className="img-circle" alt="" style={style} />
       </a>
     );
   }

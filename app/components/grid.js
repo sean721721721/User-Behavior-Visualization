@@ -10,7 +10,7 @@ import Footer from './Footer';
 import AddCard from '../containers/AddCard';
 import VisibleCardList from '../containers/VisibleCardList';
 import Loading from './loading';
-import './bbs.css';
+import './style/bbs.css';
 
 class Grid extends React.Component {
   constructor(props) {
@@ -178,26 +178,7 @@ class Grid extends React.Component {
   getFilename() {
     const {
       menuprops: {
-        initParameter: {
-          var1: varname1, min1: minvar1, max1: maxvar1, posttype,
-        },
-        initPage1: {
-          pagename: pagename1,
-          since: date1,
-          until: date2,
-          wordfilter: keyword1,
-          contentfilter: keyword3,
-          idfilter: user1,
-        },
-        initPage2: {
-          pagename: pagename2,
-          since: date3,
-          until: date4,
-          wordfilter: keyword2,
-          contentfilter: keyword4,
-          idfilter: user2,
-        },
-        submitType: type,
+        initPage1: { pagename: pagename1, since: date1, until: date2 },
       },
     } = this.state;
 
@@ -378,8 +359,8 @@ class Grid extends React.Component {
     const {
       menuprops: {
         initDownload: {
-          article_id,
-          article_title,
+          article_id: id,
+          article_title: title,
           author,
           board,
           content,
@@ -389,7 +370,10 @@ class Grid extends React.Component {
             all, boo, count, neutral, push,
           },
           messages: {
-            push_content, push_ipdatetime, push_tag, push_userid,
+            push_content: pushContent,
+            push_ipdatetime: ipdatetime,
+            push_tag: tag,
+            push_userid: userid,
           },
           url,
         },
@@ -397,8 +381,8 @@ class Grid extends React.Component {
     } = this.state;
     // console.log(this.state);
     const array = [];
-    if (article_id) array.push('article_id');
-    if (article_title) array.push('article_title');
+    if (id) array.push('article_id');
+    if (title) array.push('article_title');
     if (author) array.push('author');
     if (board) array.push('board');
     if (content) array.push('content');
@@ -409,10 +393,10 @@ class Grid extends React.Component {
     if (count) array.push('count');
     if (neutral) array.push('neutral');
     if (push) array.push('push');
-    if (push_content) array.push('push_content');
-    if (push_ipdatetime) array.push('push_ipdatetime');
-    if (push_tag) array.push('push_tag');
-    if (push_userid) array.push('push_userid');
+    if (pushContent) array.push('push_content');
+    if (ipdatetime) array.push('push_ipdatetime');
+    if (tag) array.push('push_tag');
+    if (userid) array.push('push_userid');
     if (url) array.push('url');
     // console.log(array);
     return array;
@@ -420,7 +404,7 @@ class Grid extends React.Component {
 
   render() {
     const {
-      isLoading, menuprops, cardprops, postlistprops, postprops,
+      isLoading, menuprops, postlistprops, postprops,
     } = this.state;
     const selectedOptions = this.selectedOptions();
     const filename = this.getFilename();

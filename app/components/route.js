@@ -7,12 +7,12 @@ import {
 import Grid from './grid';
 import Input from './Input';
 import Button from './Button';
-import './login.css';
+import './style/login.css';
 // import LoginTab from './Login';
 
 const Auth = {
-  isAuthenticated: true,
-  // isAuthenticated: false,
+  // isAuthenticated: true,
+  isAuthenticated: false,
   authenticate(cb) {
     this.isAuthenticated = true;
     setTimeout(cb, 100); // async
@@ -23,11 +23,13 @@ const Auth = {
   },
 };
 
+/*
 const AuthButton = withRouter(({ history }) => (Auth.isAuthenticated ? (
   <p>
       Welcome!
     {' '}
     <button
+      type="submit"
       onClick={() => {
         Auth.signout(() => history.push('/'));
       }}
@@ -38,6 +40,7 @@ const AuthButton = withRouter(({ history }) => (Auth.isAuthenticated ? (
 ) : (
   <p>You are not logged in.</p>
 )));
+*/
 
 function PrivateRoute({ component: Component, ...rest }) {
   return (
@@ -55,28 +58,6 @@ function PrivateRoute({ component: Component, ...rest }) {
       ))
       }
     />
-  );
-}
-
-function AuthExample() {
-  const from = { pathname: '/ptttool' };
-  return (
-    <Router>
-      <div>
-        {/* <AuthButton />
-        <ul>
-          <li>
-            <Link to="/login">Public Page</Link>
-          </li>
-          <li>
-            <Link to="/ptttool">Protected Page</Link>
-          </li>
-        </ul> */}
-        <Redirect to={from} />
-        <Route path="/login" component={LoginTab} />
-        <PrivateRoute path="/ptttool" component={Protected} />
-      </div>
-    </Router>
   );
 }
 
@@ -123,8 +104,8 @@ class LoginTab extends React.Component {
   };
 
   handleInput = (e) => {
-    const value = e.target.value;
-    const name = e.target.name;
+    const { value } = e.target;
+    const { name } = e.target;
     this.setState(
       prevState => ({
         ...prevState,
@@ -136,13 +117,16 @@ class LoginTab extends React.Component {
 
   handleSubmit = (e) => {
     e.preventDefault();
-    const userData = this.state.newUser;
+    const { newUser: userData } = this.state;
     this.login();
   };
 
   render() {
-    console.log(this.props);
-    const { from } = this.props.location.state || { from: { pathname: '/' } };
+    // console.log(this.props);
+    const {
+      location: { state },
+    } = this.props;
+    const { from } = state || { from: { pathname: '/' } };
     const { redirectToReferrer, username, password } = this.state;
     const buttonStyle = {};
     // console.log(tab);
@@ -180,7 +164,7 @@ class LoginTab extends React.Component {
                 title="Login"
                 style={buttonStyle}
               />
-              <a href="#">Lost your password?</a>
+              <a href="/#">Lost your password?</a>
               <a href="/register">Register</a>
             </div>
           </form>
@@ -200,6 +184,28 @@ function Public() {
 
 function Protected() {
   return <Grid />;
+}
+
+function AuthExample() {
+  const from = { pathname: '/ptttool' };
+  return (
+    <Router>
+      <div>
+        {/* <AuthButton />
+        <ul>
+          <li>
+            <Link to="/login">Public Page</Link>
+          </li>
+          <li>
+            <Link to="/ptttool">Protected Page</Link>
+          </li>
+        </ul> */}
+        <Redirect to={from} />
+        <Route path="/login" component={LoginTab} />
+        <PrivateRoute path="/ptttool" component={Protected} />
+      </div>
+    </Router>
+  );
 }
 
 export default AuthExample;

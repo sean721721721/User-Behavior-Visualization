@@ -14,12 +14,13 @@ const CheckBox = (props: CheckBoxProps) => {
   } = props;
   return (
     <div className="form-group">
+      {/* eslint-disable-next-line jsx-a11y/label-has-for */}
       <label htmlFor={name} className="form-label">
         {title}
       </label>
       <div className="checkbox">
         {options.map(option => (
-          <label key={option} className="checkbox-inline">
+          <label htmlFor={name} key={option} className="checkbox-inline">
             <input
               id={name}
               name={name}

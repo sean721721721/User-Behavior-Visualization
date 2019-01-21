@@ -3,63 +3,56 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import Checkbox from './CheckBox';
 
-class DownloadTab extends React.Component {
-  constructor(props) {
-    super(props);
-    this.state = props.config;
-  }
-
-  render() {
-    // const { config } = this.state;
-    const { show, onChange, config, handleDT ,selectedOptions } = this.props;
-    // const selectedOptions = this.selectedOptions();
-    const options = [
-      'article_id',
-      'article_title',
-      'author',
-      'board',
-      'content',
-      'date',
-      'ip',
-      'all',
-      'boo',
-      'count',
-      'neutral',
-      'push',
-      'push_content',
-      'push_ipdatetime',
-      'push_tag',
-      'push_userid',
-      'url',
-    ];
-    if (show) {
-      return (
-        <div id="Download" className="tabcontent">
-          <span
-            className="topright"
-            role="button"
-            tabIndex="0"
-            onClick={onChange}
-            onKeyDown={onChange}
-          >
-            x
-          </span>
-          <div id="csv">
-            <Checkbox
-              name="csv format"
-              title="csv format"
-              options={options}
-              handleChange={handleDT}
-              selectedOptions={selectedOptions}
-              // checked={this.checked()}
-            />
-          </div>
+const DownloadTab = ({
+  show, onChange, handleDT, selectedOptions,
+}) => {
+  // const selectedOptions = this.selectedOptions();
+  const options = [
+    'article_id',
+    'article_title',
+    'author',
+    'board',
+    'content',
+    'date',
+    'ip',
+    'all',
+    'boo',
+    'count',
+    'neutral',
+    'push',
+    'push_content',
+    'push_ipdatetime',
+    'push_tag',
+    'push_userid',
+    'url',
+  ];
+  if (show) {
+    return (
+      <div id="Download" className="tabcontent">
+        <span
+          className="topright"
+          role="button"
+          tabIndex="0"
+          onClick={onChange}
+          onKeyDown={onChange}
+        >
+          x
+        </span>
+        <div id="csv">
+          <Checkbox
+            name="csv format"
+            title="csv format"
+            options={options}
+            handleChange={handleDT}
+            selectedOptions={selectedOptions}
+            // checked={this.checked()}
+          />
         </div>
-      );
-    }
-    return null;
+      </div>
+    );
   }
-}
+  return null;
+};
 
 DownloadTab.defaultProps = {};
 DownloadTab.propTypes = {

@@ -19,17 +19,17 @@ const Input = (props: InputProps) => {
     <div className="form-group">
       <label htmlFor={name} className="form-label">
         {title}
+        <input
+          className="form-control"
+          id={name}
+          name={name}
+          type={inputtype}
+          value={value}
+          onChange={handleChange}
+          placeholder={placeholder}
+          {...props}
+        />
       </label>
-      <input
-        className="form-control"
-        id={name}
-        name={name}
-        type={inputtype}
-        value={value}
-        onChange={handleChange}
-        placeholder={placeholder}
-        {...props}
-      />
     </div>
   );
 };
