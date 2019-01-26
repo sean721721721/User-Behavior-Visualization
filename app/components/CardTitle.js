@@ -30,8 +30,10 @@ const CardTitle = ({
 
 CardTitle.propTypes = {
   onClick: PropTypes.func.isRequired,
+  onEdit: PropTypes.func.isRequired,
   deleted: PropTypes.bool.isRequired,
   id: PropTypes.number.isRequired,
+  title: PropTypes.string.isRequired,
 };
 
 export default CardTitle;

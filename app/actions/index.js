@@ -13,7 +13,29 @@ import {
   SHOW_ALL,
   SHOW_DELETED,
   SHOW_ACTIVE,
+  CARD_FETCH_SUCCEEDED,
+  CARD_FETCH_FAILED,
+  CARD_FETCH_REQUESTED,
+  CARD_FETCH_CANCEL,
 } from '../constants/action-types';
+
+export const fetchSucceeded = response => ({
+  type: CARD_FETCH_SUCCEEDED,
+  response,
+});
+
+export const fetchFailed = error => ({
+  type: CARD_FETCH_FAILED,
+  error,
+});
+
+export const fetchRequested = () => ({
+  type: CARD_FETCH_REQUESTED,
+});
+
+export const fetchCancel = () => ({
+  typr: CARD_FETCH_CANCEL,
+});
 
 let nextCardId = 0;
 export const addCard = (props) => {

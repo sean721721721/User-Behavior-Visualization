@@ -21,6 +21,10 @@ const getVisibleCards = (cards, filter) => {
 const mapStateToProps = (state) => {
   // console.log(state);
   return {
+    fetch: {
+      isFetching: false,
+      cards: [],
+    },
     cards: getVisibleCards(state.cards, state.visibilityFilter),
     edit: state.edit,
   };

@@ -1,13 +1,13 @@
 // @flow
 import React from 'react';
 import PropTypes from 'prop-types';
-import './card.css';
+import './style/card.css';
 
 type TagListProps = {
   props: PropTypes.array,
 };
 
-function TagList({ props }: TagListProps) {
+const TagList = ({ props }: TagListProps) => {
   const list = props;
   const listTags = list.map((tags, i) => {
     const url = `/tag/${{ tags }}`;
@@ -18,40 +18,33 @@ function TagList({ props }: TagListProps) {
     );
   });
   return <span className="card-author">{listTags}</span>;
-}
+};
 
-class Card extends React.Component {
-  constructor(props) {
-    super(props);
-  }
-
-  render() {
-    const {
-      cardprops: {
-        time, title, description, tags,
-      },
-    } = this.props;
-    return (
-      <div className="feed">
-        <article className="card">
-          <div className="card-content">
-            <div className="card-content-link" href="url">
-              <header className="card-header">
-                <span>{time}</span>
-                <h2 className="card-title">{title}</h2>
-              </header>
-              <section className="card-excerpt">
-                {/* <h2>:D</h2> */}
-                <p>{description}</p>
-              </section>
-            </div>
-            <footer className="card-meta"><TagList props={tags} /></footer>
-          </div>
-        </article>
+const Card = ({
+  cardprops: {
+    time, title, description, tags,
+  },
+}) => (
+  <div className="feed">
+    <article className="card">
+      <div className="card-content">
+        <div className="card-content-link" href="url">
+          <header className="card-header">
+            <span>{time}</span>
+            <h2 className="card-title">{title}</h2>
+          </header>
+          <section className="card-excerpt">
+            {/* <h2>:D</h2> */}
+            <p>{description}</p>
+          </section>
+        </div>
+        <footer className="card-meta">
+          <TagList props={tags} />
+        </footer>
       </div>
-    );
-  }
-}
+    </article>
+  </div>
+);
 
 Card.defaultProps = {
   cardprops: {
