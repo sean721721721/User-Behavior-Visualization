@@ -8,7 +8,8 @@ import PostPage from './postpage';
 import Post from './post';
 import Footer from './Footer';
 import AddCard from '../containers/AddCard';
-import VisibleCardList from '../containers/VisibleCardList';
+import AsyncApp from '../containers/AsyncApp';
+// import VisibleCardList from '../containers/VisibleCardList';
 import Loading from './loading';
 import './style/bbs.css';
 
@@ -428,8 +429,8 @@ class Grid extends React.Component {
                 <div id="over" />
                 <div id="select" />
                 <Loading isLoading={isLoading} />
-                <VisibleCardList />
-                {/* */}
+                <AsyncApp />
+                {/* <VisibleCardList /> */}
                 <Footer />
                 {/* */}
               </div>

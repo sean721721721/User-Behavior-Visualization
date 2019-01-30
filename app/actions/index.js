@@ -17,6 +17,9 @@ import {
   CARD_FETCH_FAILED,
   CARD_FETCH_REQUESTED,
   CARD_FETCH_CANCEL,
+  CARD_SAVE,
+  CARD_SAVE_SUCCEEDED,
+  CARD_SAVE_FAILED,
 } from '../constants/action-types';
 
 export const fetchSucceeded = response => ({
@@ -34,7 +37,21 @@ export const fetchRequested = () => ({
 });
 
 export const fetchCancel = () => ({
-  typr: CARD_FETCH_CANCEL,
+  type: CARD_FETCH_CANCEL,
+});
+
+export const saveCards = () => ({
+  type: CARD_SAVE,
+});
+
+export const saveSucceeded = lastUpdate => ({
+  type: CARD_SAVE_SUCCEEDED,
+  lastUpdate,
+});
+
+export const saveFailed = error => ({
+  type: CARD_SAVE_FAILED,
+  error,
 });
 
 let nextCardId = 0;
@@ -60,6 +77,7 @@ export const updateCard = card => ({
   description: card.description,
   tags: card.tags,
 });
+
 export const editCard = edit => ({
   type: EDIT_CARD,
   edit,
