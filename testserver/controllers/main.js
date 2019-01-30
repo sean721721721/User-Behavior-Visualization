@@ -1,23 +1,25 @@
-/* eslint-disable */
-//var express = require('express');
-//var router = express.Router();
-var bodyParser = require('body-parser');
-const path = require('path');
-var query = require('./query.js');
+/* eslint-env node */
+/* eslint-disable no-console */
+const bodyParser = require('body-parser');
+// const path = require('path');
 const querystring = require('querystring');
-var should = require('should');
+const should = require('should'); /* eslint-disable-line no-unused-vars, bugged */
+const passport = require('passport');
+const LocalStrategy = require('passport-local').Strategy;
+const Account = require('../models/account');
+const Card = require('../models/card');
+const query = require('./query.js');
+const getcardlist = require('./getcardlist');
+const savecardlist = require('./savecardlist');
 
 // create application/json parser
-var jsonParser = bodyParser.json();
+const jsonParser = bodyParser.json();
+
 // create application/x-www-form-urlencoded parser
-var urlencodedParser = bodyParser.urlencoded({
+const urlencodedParser = bodyParser.urlencoded({
   extended: false,
 });
-//
-var textParser = bodyParser.text();
-
-var passport = require('passport');
-var LocalStrategy = require('passport-local').Strategy;
+// const textParser = bodyParser.text();
 
 function querytoParams(req, prop) {
   if (req.query[prop]) {
@@ -25,12 +27,13 @@ function querytoParams(req, prop) {
   }
 }
 
+// querytoparams and set hasquery prop
 function urlhandle(req, res, next) {
   console.log('urlhandle ', req.query);
-  var hasquery = false;
-  //var postid = req.params.postid;
-  let props = Object.keys(req.query);
-  let l = props.length;
+  let hasquery = false;
+  // var postid = req.params.postid;
+  const props = Object.keys(req.query);
+  const l = props.length;
   if (l > 0) hasquery = true;
   for (let i = 0; i < l; i += 1) {
     querytoParams(req, props[i], hasquery);
@@ -46,18 +49,18 @@ function urlhandle(req, res, next) {
       _id: 1,
     };
   }
-  if (req.query['postid']) {
-    req.params.postid = req.query['postid'];
+  if (req.query.postid) {
+    req.params.postid = req.query.postid;
     hasquery = true;
   }
   req.query.hasquery = hasquery;
-  //console.log(req.params);
+  // console.log(req.params);
   next();
 }
 
 function redirecturl(req, res) {
-  var body = req.body;
-  const query = querystring.stringify({
+  const { body } = req;
+  const querystr = querystring.stringify({
     minlike: body.minlike,
     maxlike: body.maxlike,
     mincomment: body.mincomment,
@@ -77,7 +80,7 @@ function redirecturl(req, res) {
     keyword4: body.keyword4,
     co: body.co,
   });
-  res.redirect('/query?' + query);
+  res.redirect(`/query?${querystr}`);
 }
 
 function authurl(req, res, next) {
@@ -89,11 +92,12 @@ function authurl(req, res, next) {
   next();
 }
 
-module.exports = function(app) {
+const main = function main(app) {
   /*
    * passort settings
    */
   app.use(
+    /* eslint-disable-next-line global-require */
     require('express-session')({
       secret: 'keyboard cat',
       resave: true,
@@ -103,16 +107,15 @@ module.exports = function(app) {
 
   app.use(passport.initialize());
   app.use(passport.session());
-  // passport config
 
-  var Account = require('../models/account');
+  // passport config
   passport.use(new LocalStrategy(Account.authenticate()));
   passport.serializeUser(Account.serializeUser());
   passport.deserializeUser(Account.deserializeUser());
 
-  app.param('postid', function(req, res, next, postid) {
+  app.param('postid', (req, res, next, postid) => {
     req.postid = postid;
-    //console.log(postid);
+    // console.log(postid);
     next();
   });
 
@@ -120,7 +123,7 @@ module.exports = function(app) {
 
   app.post('/vis', urlencodedParser, redirecturl);
 
-  /*app.get('/', function(req, res) {
+  /* app.get('/', function(req, res) {
     if (req.session.passport && req.session.passport.user !== undefined) {
       res.send('index.html');
     } else {
@@ -136,19 +139,41 @@ module.exports = function(app) {
       });
     }
     console.log(' passport: ', req.session.passport);
-  });*/
+  }); */
 
   // ajax getting data for the web
-  app.get('/searching', urlencodedParser, urlhandle, async function(req, res) {
+  app.get('/searching', urlencodedParser, urlhandle, async (req, res) => {
     try {
-      //console.log(req.query);
-      //if (req.session.passport.user == "villager") {
-      //console.log(req);
-      var result = await query.callback(req, res);
+      // console.log(req.query);
+      // if (req.session.passport.user == "villager") {
+      // console.log(req);
+      const result = await query.callback(req, res);
       result.title = 'search';
-      //console.log(result);
+      // console.log(result);
       res.send(result);
-      //}
+      // }
+    } catch (err) {
+      console.log(err);
+    }
+  });
+
+  // fetch getting card data
+  app.get('/cardlist', urlencodedParser, async (req, res) => {
+    try {
+      console.log('get cardlist');
+      const result = await getcardlist.callback(req, res);
+      res.send(result);
+    } catch (err) {
+      console.log(err);
+    }
+  });
+
+  app.post('/savecard', jsonParser, async (req, res) => {
+    // console.log('savecard', req.body.cards);
+    try {
+      const result = await savecardlist.callback(req);
+      console.log(result);
+      res.send(result);
     } catch (err) {
       console.log(err);
     }
@@ -162,15 +187,17 @@ module.exports = function(app) {
       title: 'Register',
     });
   });
-
-  app.post('/register', urlencodedParser, function(req, res, next) {
+  */
+  // what dose the account variable do ?
+  app.post('/register', urlencodedParser, (req, res, next) => {
     console.log(req.body);
     Account.register(
       new Account({
         username: req.body.username,
       }),
       req.body.password,
-      function(err, account) {
+      (err, account) => {
+        console.log(account);
         if (err) {
           console.log(err.message);
           return res.render('error', {
@@ -179,20 +206,20 @@ module.exports = function(app) {
             error: err.message,
           });
         }
-
-        passport.authenticate('local')(req, res, function() {
-          req.session.save(function(err) {
+        return passport.authenticate('local')(req, res, () => {
+          req.session.save((err, account) => {
+            console.log(account);
             if (err) {
               return next(err);
             }
             console.log('register');
-            res.redirect('/');
+            return res.redirect('/');
           });
         });
       },
     );
   });
-  */
+
   /*
   app.get('/login', function(req, res) {
     //console.log(res);
@@ -212,39 +239,37 @@ module.exports = function(app) {
     }),
     (req, res, next) => {
       console.log(req.body);
-      req.session.save(err => {
+      req.session.save((err) => {
         if (err) {
           console.log(err);
           return next(err);
         }
-        Account.findOne(
-          {
-            username: req.body.username,
-          },
-          (err, account) => {
-            console.log(account);
-            account.username.should.eql(req.body.username);
-            console.log('   username: ', account.username);
-            console.log('login');
-            //res.redirect('/');
-            const Auth = {
-              isAuthenticated: true,
-            };
-            res.send(Auth);
-          },
-        );
+        return Account.findOne({
+          username: req.body.username,
+        }).exec((error, account) => {
+          console.log(account);
+          account.username.should.be.eql(req.body.username);
+          console.log('  user: ', account.username, 'login');
+          // res.redirect('/');
+          const Auth = {
+            isAuthenticated: true,
+          };
+          res.send(Auth);
+        });
       });
     },
   );
 
   app.get('/logout', (req, res, next) => {
     req.logout();
-    req.session.save(err => {
+    req.session.save((err) => {
       if (err) {
         return next(err);
       }
       console.log('logout');
-      res.redirect('/');
+      return res.redirect('/');
     });
   });
 };
+
+module.exports = main;
