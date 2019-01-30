@@ -19,12 +19,10 @@ echo "dirpath: $dirpath"
 echo "loop: $loop"
 echo "begin index: $bi"
 echo "end index: $ei"
-dir=./ptt-web-crawler
 args="$dirpath"
 space=" "
-cd "$dir"
 declare -i to=15
-echo "$to"
+echo "timeout: $to"
 for((i=0;i<$loop;i++))
 do
     ni=$((($bi + $n) - 1))
@@ -37,10 +35,10 @@ do
     #args=("$args$space$i")
     echo "folder: $folder"
     python -m "PttWebCrawler" -b "$bn" -i "$bi" "$ni" -dp "$folder" -to "$to"
-    node "../lib/ptttomongo.js" "$dirpath" "$bn" "$i"
+    node "../testserver/lib/ptttomongo.js" "$dirpath" "$bn" "$i"
     bi=$(($ni + 1))
 done
 cd ..
-echo "$args"
+#echo "$args"
 #node ./server/ptttomongo.js "$args"
 exit 0
