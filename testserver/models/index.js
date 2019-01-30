@@ -1,7 +1,9 @@
-/* eslint-disable */
-module.exports = function (app) {
-    var files = []; //["post", "account"];
-    files.forEach(function (file) {
-        require("./" + file)(app);
-    });
+/* eslint-env node */
+const model = function model(app) {
+  const files = []; // ["post", "account"];
+  files.forEach((file) => {
+    require(`./${file}`)(app);
+  });
 };
+
+module.exports = model;
