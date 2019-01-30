@@ -72,6 +72,9 @@ typings/
 # Serverless directories
 .serverless
 
+# DB config
+testserver/config.js
+
 # Others
 ptt-web-crawler/
 outsource

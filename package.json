@@ -5,6 +5,7 @@
   "private": true,
   "dependencies": {
     "@babel/polyfill": "^7.2.5",
+    "body-parser": "^1.18.3",
     "cors": "^2.8.5",
     "d3": "^5.7.0",
     "express-session": "^1.15.6",
