@@ -66,8 +66,10 @@ class Async extends React.Component {
 
     return (
       <div>
-        <VisibleCardList />
+        {isFetching && cards.length === 0 && <h2>Loading...</h2>}
+        {!isFetching && cards.length === 0 && <h2>Empty.</h2>}
         <p>
+          {<span>Cards: </span>}
           {lastUpdated && (
             <span>
               Last updated at
@@ -78,7 +80,7 @@ class Async extends React.Component {
           )}
           {!isFetching && (
             <button type="button" onClick={this.handleRefreshClick}>
-              Refresh
+              Load
             </button>
           )}
           {
@@ -87,13 +89,7 @@ class Async extends React.Component {
             </button>
           }
         </p>
-        {isFetching && cards.length === 0 && <h2>Loading...</h2>}
-        {!isFetching && cards.length === 0 && <h2>Empty.</h2>}
-        {cards.length > 0 && (
-          <div style={{ opacity: isFetching ? 0.5 : 1 }}>
-            <p> posts</p>
-          </div>
-        )}
+        <VisibleCardList />
       </div>
     );
   }

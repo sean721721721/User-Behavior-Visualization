@@ -135,6 +135,7 @@ class Grid extends React.Component {
             目前可以確定的就是滑蓋、前鏡頭2400萬畫素、無線充電更快(可能到10W?) 然後有960fps的慢動作
             (我對小米錄影不期不待就是了) 還有5G網路 --`,
         url: 'https://www.ptt.cc/bbs/MobileComm/M.1540446065.A.825.html',
+        ip: '0.0.0.0',
         messages: [
           {
             push_tag: '→',
@@ -155,6 +156,11 @@ class Grid extends React.Component {
             push_ipdatetime: '10/25 13:42',
           },
         ],
+        message_count: {
+          push: 10,
+          boo: 9,
+          neutral: 8,
+        },
       },
     };
 
@@ -442,14 +448,7 @@ class Grid extends React.Component {
               <div className="box detailview">
                 <div className="btn-postgroup" />
                 <div className="btn-usergroup" />
-                <PostPage
-                  postlistprops={postlistprops}
-                  downloadprops={menuprops.initDownload}
-                  filename={filename}
-                  onChange={this.changePost}
-                  previousPage={this.previousPage}
-                  nextPage={this.nextPage}
-                />
+                <Post postprops={postprops} />
                 <div id="detail" />
               </div>
             </div>
@@ -457,7 +456,14 @@ class Grid extends React.Component {
               <div id="userdeg">
                 <div id="olbutton" />
               </div>
-              <Post postprops={postprops} />
+              <PostPage
+                postlistprops={postlistprops}
+                downloadprops={menuprops.initDownload}
+                filename={filename}
+                onChange={this.changePost}
+                previousPage={this.previousPage}
+                nextPage={this.nextPage}
+              />
             </div>
           </div>
         </Provider>

@@ -63,9 +63,18 @@ class Post extends React.Component {
   render() {
     const {
       postprops: {
-        author, board, article_title: title, date, content, url: href, messages: push,
+        author,
+        board,
+        article_title: title,
+        date,
+        content,
+        ip,
+        url: href,
+        messages: push,
+        message_count: { push: pushcount, boo, neutral },
       },
     } = this.props;
+    console.log(this.props);
     return (
       <div id="main-container">
         <div id="main-content" className="bbs-screen bbs-content">
@@ -90,7 +99,10 @@ class Post extends React.Component {
             <span className="article-meta-value">{date}</span>
           </div>
           <p>{content}</p>
-          <span className="f2">※ 發信站: 批踢踢實業坊(ptt.cc), 來自: 36.237.159.224</span>
+          <span className="f2">
+            ※ 發信站: 批踢踢實業坊(ptt.cc), 來自:
+            {ip}
+          </span>
           <span className="f2">
             <p>※ 文章網址:</p>
             <a href={href} target="_blank" rel="noopener noreferrer">
@@ -98,7 +110,14 @@ class Post extends React.Component {
             </a>
           </span>
           <PushList props={push} />
-          <div className="pwe-push-statistics">推噓文統計：推=137, 噓=2, →=134</div>
+          <div className="pwe-push-statistics">
+            推噓文統計：推=
+            {pushcount}
+, 噓=
+            {boo}
+, →=
+            {neutral}
+          </div>
         </div>
       </div>
     );
