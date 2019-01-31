@@ -34,28 +34,43 @@ const logger = winston.createLogger({
 });
 
 function save(files) {
-  // console.log('savecards', files);
+  console.log('savecards', files);
   const savecard = Object.assign({}, files);
   // console.log(files.articles[j]);
   const query = {
     title: files.title,
   };
   // console.log(query);
+  if (!files.deleted) {
+    return new Promise((resolve, reject) => {
+      cardlist.replaceOne(
+        query,
+        files,
+        {
+          upsert: true,
+        },
+        (err, savecard, numAffected) => {
+          console.log(err, savecard, numAffected);
+          if (err) {
+            logger.log('warn', `did not save card: ${files.title}`);
+            reject(err);
+          }
+          resolve('true');
+        },
+      );
+    }).catch((err) => {
+      logger.log('error', err);
+    });
+  }
   return new Promise((resolve, reject) => {
-    cardlist.replaceOne(
-      query,
-      files,
-      {
-        upsert: true,
-      },
-      (err, savecard, numAffected) => {
-        if (err) {
-          logger.log('warn', `did not save post: ${files}`);
-          reject(err);
-        }
-        resolve('true');
-      },
-    );
+    cardlist.findOneAndDelete(query, files, (err, savecard, numAffected) => {
+      console.log(err, savecard, numAffected);
+      if (err) {
+        logger.log('warn', `did not remove card: ${files.title}`);
+        reject(err);
+      }
+      resolve('true');
+    });
   }).catch((err) => {
     logger.log('error', err);
   });
