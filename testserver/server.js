@@ -68,7 +68,7 @@ console.log('settings loaded');
  * Serve the files on port xxxx.
  */
 if (os.platform() === 'linux') {
-  app.set('port', process.env.PORT || 3000);
+  app.set('port', process.env.PORT || 3001);
 } else {
   app.set('port', process.env.PORT || 8000);
 }

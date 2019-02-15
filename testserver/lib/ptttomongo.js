@@ -107,7 +107,7 @@ var options = {
 
 // Using `mongoose.connect`...
 mongoose.connect(
-  'mongodb://villager:4given4get@localhost:27017/ptt?authSource=admin',
+  'mongodb://sean721721721:629629629@localhost:27017/ptt?authSource=admin',
   options,
 );
 let db = mongoose.connection;
