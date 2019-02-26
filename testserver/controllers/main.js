@@ -153,6 +153,7 @@ const main = function main(app) {
       res.send(result);
       // }
     } catch (err) {
+      res.send(err);
       console.log(err);
     }
   });
