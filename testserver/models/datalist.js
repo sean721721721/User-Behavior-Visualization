@@ -373,46 +373,48 @@ function newshare_db(files, userobj) {
 }
 
 //slow code, need to improve
+// let bindpostlist = function bindpostlist(qobj1, ptt) {
+//     console.log('check377');
+//     const time = process.hrtime();
+//     function postobj(obj) {
+//         for (prop in obj) {
+//             if (prop.match(/^(id)$/)) {
+//                 if (ptt) {
+//                     obj[prop] = obj.article_id;
+//                 } else {
+//                     obj[prop] = obj.id;
+//                 }
+//             }
+//         }
+//         let posts = obj;
+//         return posts;
+//     }
+//     let list = [];
+//     let l1 = qobj1.length;
+//     let pagea = [];
+//     let test = [[],[]];
+//     for (let i = 0; i < l1; i++) {
+//         let post = postobj(qobj1[i]);
+//         pagea.push(post);
+//     }
+//     list.push(pagea);
+//     pagea = jb.cut(pagea, function () {
+//         for(i=0;i<pagea.length;i++){
+//             console.log('pagea:',pagea[i].word);
+//             test[0][i] = pagea[i].word; 
+//         }
+//         // testlist.push(pagea);
+//     });
+//     // for return single page query faster
+//     console.log("postlen: " + (list[0].length));
+//     const diff = process.hrtime(time);
+//     console.log(`bindpostlist() Benchmark took ${diff[0] * NS_PER_SEC + diff[1]} nanoseconds`);
+//     return [list,test];
+// }
 let bindpostlist = function bindpostlist(qobj1, qobj2, ptt) {
     const time = process.hrtime();
 
     function postobj(obj) {
-        /*var posts = {};
-        for (prop in obj) {
-            //posts[prop] = obj[prop];
-            if (ptt) {
-                if (prop.match(/^(article_id|article_title|author|board|content|date|ip|message_count|word)$/)) {
-                    posts[prop] = obj[prop];
-                } else {
-                    var messages = {};
-                    for (prop in obj.messages) {
-                        if (prop.match(/^(push_content|push_ipdatetime|push_tag|push_userid)$/)) {
-                            messages[prop] = obj.messages[prop];
-                        }
-                    }
-                    posts.messages = messages;
-                }
-            } else {
-                if (prop.match(/^(id|created_time|type|message|from|shares|attachments|sharedposts|word)$/)) {
-                    posts[prop] = obj[prop];
-                } else {
-                    var reactions = {};
-                    for (prop in obj.reactions) {
-                        if (prop.match(/^(like|love|haha|wow|angry|sad|thankful)$/)) {
-                            reactions[prop] = obj.reactions[prop];
-                        }
-                    }
-                    posts.reactions = reactions;
-                    var comments = {};
-                    for (prop in obj.comments) {
-                        if (prop.match(/^(context|created_time|summary)$/)) {
-                            comments[prop] = obj.comments[prop];
-                        }
-                    }
-                    posts.comments = comments;
-                }
-            }
-        }*/
         for (prop in obj) {
             if (prop.match(/^(id)$/)) {
                 if (ptt) {
@@ -423,26 +425,6 @@ let bindpostlist = function bindpostlist(qobj1, qobj2, ptt) {
             }
         }
         let posts = obj;
-        //delete posts.comments;
-        //delete posts.reactions;
-        /*
-        var reactions = {};
-        for (prop in obj.reactions) {
-            if (prop === "list") {
-                reactions[prop] = obj.reactions[prop];
-                delete reactions.list;
-            }
-        }
-        console.log(reactions)
-        posts.reactions = reactions;
-        var comments = {};
-        for (prop in obj.comments) {
-            if (prop === "context") {
-                comments[prop] = obj.comments[prop];
-                delete comments.context;
-            }
-        }
-        posts.comments = comments;*/
         return posts;
     }
     let list = [];
@@ -450,14 +432,17 @@ let bindpostlist = function bindpostlist(qobj1, qobj2, ptt) {
     let l2 = qobj2.length;
     let pagea = [];
     let pageb = [];
+    let test = [[],[]];
     for (let i = 0; i < l1; i++) {
         let post = postobj(qobj1[i]);
         pagea.push(post);
     }
     list.push(pagea);
-    /*pagea = jb.cut(pagea, function () {
-        // console.log(pagea);
-    });*/
+    pagea = jb.cut(pagea, function () {
+        for(i=0;i<pagea.length;i++){
+            test[0][i] = pagea[i].word; 
+        }
+    });
     // for return single page query faster
     if (qobj1 !== qobj2) {
         for (let i = 0; i < l2; i++) {
@@ -476,16 +461,23 @@ let bindpostlist = function bindpostlist(qobj1, qobj2, ptt) {
             }
         }
         list.push(pageb);
-        /*pageb = jb.cut(pageb, function () {
-            // console.log(pageb);
-        });*/
+        pageb = jb.cut(pageb, function () {
+            for(i=0;i<pageb.length;i++){
+                test[1][i] = pageb[i].word; 
+            }
+        });
     } else {
         list.push(pagea);
-    }
+        for(i=0;i<pagea.length;i++){
+            test[0][i] = pagea[i].word; 
+            }
+        }   
+    
     console.log("postlen: " + (list[0].length + list[1].length));
     const diff = process.hrtime(time);
     console.log(`bindpostlist() Benchmark took ${diff[0] * NS_PER_SEC + diff[1]} nanoseconds`);
-    return list;
+    console.log(test);
+    return [list,test];
 }
 
 //bind two userlist

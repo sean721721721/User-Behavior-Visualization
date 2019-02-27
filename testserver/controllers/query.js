@@ -126,12 +126,12 @@ let queryobj = function queryobj(req, res, time1, time2, userid, tkeyword, ckeyw
       if (!req.params.mincomment) {
         req.params.mincomment = 0;
       }
-      queryobj['comments.summary'] = {
+      queryobj['message_count.all'] = {
         $gte: Number(req.params.mincomment),
         $lt: Number(req.params.maxcomment),
       };
     } else {
-      queryobj['comments.summary'] = {
+      queryobj['message_count.all'] = {
         $gte: Number(req.params.mincomment),
       };
     }
@@ -374,6 +374,10 @@ let callback = function callback(req, res) {
           resolve(
             findquery(page1, queryobj1, ptt, limit, sort).then(res => {
               console.log('q1 lenght: ' + res.result.length);
+              let datalist = dl.bindpostlist(res.result, ptt);
+              // let postlist = datalist[0];
+              let wordlist = datalist[1];
+              // console.log('postlist:',datalist);
               //let ul1 = dl.newualist(result, ptt);
               /*let postlist = dl.bindpostlist(res, res, ptt);
               let user = Object.values(ul1);
@@ -392,7 +396,7 @@ let callback = function callback(req, res) {
                             data: [postlist, oldata, sortdata],
                         };
                         return queryresult;*/
-              return { list: [res.result, []], previous: [res.previous], next: [res.next] };
+              return { list: [res.result, [wordlist]], previous: [res.previous], next: [res.next] };
             }),
           );
         } else if (!isEmpty(queryobj2)) {

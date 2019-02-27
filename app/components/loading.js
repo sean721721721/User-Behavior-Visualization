@@ -5,11 +5,24 @@ import './style/loading.css';
 
 type LoadingProps = {
   isLoading: PropTypes.bool,
+  responseError: PropTypes.bool,
+  errorType:PropTypes.string,
 };
 
 const Loading = (props: LoadingProps) => {
-  const { isLoading } = props;
-  if (isLoading) {
+  const { isLoading, responseError, errorType } = props;
+  console.log(props);
+  if(responseError){
+    return (
+      <div className="wrapperresponding">
+        <div className="responseerror">
+          <span id="x">X</span>
+        </div>
+        <p  className= "text">{errorType.message}</p>
+      </div>
+    );
+  }
+  else if (isLoading) {
     return (
       <div className="wrapperloading">
         <div className="loading up" />

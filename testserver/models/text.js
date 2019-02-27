@@ -95,7 +95,7 @@ var cut = function cut(posts, callback) {
             }
             //temp = temp.replace(/[\ |\~|\`|\!|\@|\#|\$|\%|\^|\&|\*|\(|\)|\-|\_|\+|\=|\||\\|\[|\]|\{|\}|\;|\:|\"|\'|\,|\<|\.|\>|\/|\?]/g,'');
             var message_length = str.length;
-            str = nodejieba.extract(str, 10);
+            str = nodejieba.extract(str, 50);
             //test.push(word[0]);
             /*result.push({
                 "id": data[i].id,
@@ -126,7 +126,7 @@ var cut = function cut(posts, callback) {
             }
             //temp = temp.replace(/[\ |\~|\`|\!|\@|\#|\$|\%|\^|\&|\*|\(|\)|\-|\_|\+|\=|\||\\|\[|\]|\{|\}|\;|\:|\"|\'|\,|\<|\.|\>|\/|\?]/g,'');
             var message_length = str.length;
-            str = nodejieba.extract(str, 10);
+            str = nodejieba.extract(str, 50);
             var post = data[i];
             post.word = filter(http,str);
             result.push(post);

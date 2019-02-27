@@ -23,6 +23,8 @@ class Grid extends React.Component {
       items: [],
       */
       isLoading: false,
+      responseError:false,
+      errorType: "",
       menuprops: {
         initParameter: {
           var1: 'reaction',
@@ -245,17 +247,55 @@ class Grid extends React.Component {
 
   handleSubmit(e) {
     e.preventDefault();
-    this.setState(prevState => ({ ...prevState, isLoading: true }));
+    this.setState(prevState => ({ ...prevState, isLoading: true, responseError: false, errorType:"" }));
     const url = encodeURI(this.getReqstr());
     const myRequest = new Request(url, {
       method: 'get',
     });
+    // fetch(myRequest)
+    //   .then(res => res.json())
+    //   .then((res) => {
+    //     console.log(res);
+    //     this.changeList(res, 0);
+    //   });
     fetch(myRequest)
-      .then(res => res.json())
-      .then((res) => {
+      .then(function(response) {
+        if (response.status >= 200 && response.status < 300) {
+            console.log(response.status);
+            console.log(response);
+            return response.json();
+        } else {
+            var error = new Error(response.statusText)
+            error.response = response;
+            throw error;
+        }
+      })
+      .then(res => {
         console.log(res);
-        this.changeList(res, 0);
+        console.log('done!');
+        if(res.title === 'search'){
+          this.changeList(res, 0);
+        }
+        else{
+          var error = {
+            message: "Fail to fetch"
+          }
+          throw error;
+        }
+        // data 才是實際的 JSON 資料
+      })
+      .catch(error => {
+          console.log('Error');
+          this.setState(prevState => ({ ...prevState, responseError: true,errorType : error }));
+          console.log(error);
       });
+      // .then(function(errorData){
+      //   console.log(errorData);
+      //     // errorData 裡面才是實際的 JSON 資料
+      // });
+  }
+  setResponseError(){
+    this.setState(prevState => ({ ...prevState, responseError: true }));
   }
 
   changePost(e, props) {
@@ -411,7 +451,7 @@ class Grid extends React.Component {
 
   render() {
     const {
-      isLoading, menuprops, postlistprops, postprops,
+      isLoading, responseError, errorType, menuprops, postlistprops, postprops,
     } = this.state;
     const selectedOptions = this.selectedOptions();
     const filename = this.getFilename();
@@ -434,7 +474,7 @@ class Grid extends React.Component {
                 <div id="template" className="slider__list" />
                 <div id="over" />
                 <div id="select" />
-                <Loading isLoading={isLoading} />
+                <Loading isLoading={isLoading} responseError ={responseError} errorType ={errorType} />
                 <AsyncApp />
                 {/* <VisibleCardList /> */}
                 <Footer />
