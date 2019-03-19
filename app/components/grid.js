@@ -4,6 +4,7 @@ import Lodash from 'lodash';
 import { Provider } from 'react-redux';
 import store from '../store/index';
 import Menu from './menu';
+import Termlist from './termlist';
 import PostPage from './postpage';
 import Post from './post';
 import Footer from './Footer';
@@ -82,6 +83,11 @@ class Grid extends React.Component {
         title: '柯P',
         description: '台北市長柯文哲在PTT上別稱',
         tags: ['人物', '政治', '台北'],
+      },
+      termlistprops:{
+        list:[
+          [' ',0]
+        ]
       },
       postlistprops: {
         list: [
@@ -310,6 +316,9 @@ class Grid extends React.Component {
     const { list, next, previous } = datalist;
     this.setState(prevState => ({
       ...prevState,
+      termlistprops:{
+        list: list[collection+1][0],
+      },
       postlistprops: {
         list: list[collection],
         previous: previous[collection],
@@ -451,7 +460,7 @@ class Grid extends React.Component {
 
   render() {
     const {
-      isLoading, responseError, errorType, menuprops, postlistprops, postprops,
+      isLoading, responseError, errorType, menuprops,termlistprops,postlistprops, postprops,
     } = this.state;
     const selectedOptions = this.selectedOptions();
     const filename = this.getFilename();
@@ -484,6 +493,9 @@ class Grid extends React.Component {
                 <div id="page" />
                 <AddCard />
                 {/* */}
+              </div>
+              <div className="box termview">
+                <Termlist termlistprops={termlistprops.list} />
               </div>
               <div className="box detailview">
                 <div className="btn-postgroup" />

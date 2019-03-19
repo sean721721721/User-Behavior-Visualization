@@ -331,7 +331,7 @@ path:hover {
     display: grid;
     grid-gap: 1px;
     grid-column: col1 / col2;
-    grid-template-columns: [scol1] 0.5fr [scol2] 0.5fr [scolend];
+    grid-template-columns: [scol1] 0.333fr [scol2] 0.333fr [scol3] 0.333fr [scolend];
     grid-template-rows: [srow1] minmax(auto, 50vh) [srow2] minmax(30vh, 40vh) [srowend];
 }
 
@@ -342,7 +342,13 @@ path:hover {
 }
 
 .postview {
-    grid-column: scol2 / scolend;
+    grid-column: scol2 / scol3;
+    grid-row: srow1 / srow2;
+}
+
+.termview {
+    overflow-y: scroll;
+    grid-column: scol3 / scolend;
     grid-row: srow1 / srow2;
 }
 

@@ -396,7 +396,7 @@ let callback = function callback(req, res) {
                             data: [postlist, oldata, sortdata],
                         };
                         return queryresult;*/
-              return { list: [res.result, [wordlist]], previous: [res.previous], next: [res.next] };
+              return { list: [res.result, wordlist], previous: [res.previous], next: [res.next] };
             }),
           );
         } else if (!isEmpty(queryobj2)) {

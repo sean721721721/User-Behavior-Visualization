@@ -476,10 +476,38 @@ let bindpostlist = function bindpostlist(qobj1, qobj2, ptt) {
     console.log("postlen: " + (list[0].length + list[1].length));
     const diff = process.hrtime(time);
     console.log(`bindpostlist() Benchmark took ${diff[0] * NS_PER_SEC + diff[1]} nanoseconds`);
-    console.log(test);
-    return [list,test];
+    //console.log(test);
+    let termfreq = [];
+    for(i=0;i<test.length;i++){
+        termfreq.push(termfreqency(test[i]));
+    }
+    termfreq.push(test);
+    // console.log(termfreq[0]);
+    return [list,termfreq];
 }
 
+let termfreqency = function termfreqency(terms){
+    let postlen = terms.length;
+    let termfreq = {};
+    for(i=0;i<postlen;i++){
+        for(j=0;j<terms[i].length;j++){
+            if(!termfreq.hasOwnProperty(terms[i][j].word)){
+                termfreq[terms[i][j].word] = 1;
+            }else{
+                termfreq[terms[i][j].word]++;
+            }
+        }
+    }
+    let sortable =[];
+    for(let word in termfreq){
+        sortable.push([word, termfreq[word]]);
+    }
+    sortable.sort(function(a,b){
+        return b[1] - a[1];
+    })
+    //console.log('termfreq: ',termfreq);
+    return sortable;
+}
 //bind two userlist
 let binduserobj = function binduserobj(userobj1, userobj2, user, tuser) {
     const time = process.hrtime();
