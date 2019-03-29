@@ -5,6 +5,11 @@ const listStyle = {
   display: 'inline-block',
 };
 
+const tableStyle = {
+  color: 'black',
+  background: 'white',
+};
+
 function Term(props) {
     // console.log(props.terms);
   const termsRanking = (
@@ -14,11 +19,10 @@ function Term(props) {
         1: count,
       } = termfreq;
       return (
-        <ul key={i.toString()}>
-          <li style={listStyle} key={i.toString()}>
-            <p>{term}: {count}</p>
-          </li>
-        </ul>
+        <tr key={i.toString()}>
+          <td>{term}</td>
+          <td>{count}</td>
+        </tr>
       );
     })
   );
@@ -40,7 +44,17 @@ class Termlist extends React.Component {
     // console.log(termpair);
     return (
       <div id="termlist">
-        <Term terms={termpair} />
+        <table>
+          <thead style={tableStyle}>
+            <tr>
+              <th>Term</th>
+              <th>Count</th>
+            </tr>
+          </thead>
+          <tbody>
+            <Term terms={termpair} />
+          </tbody>
+        </table>
       </div>
     );
   }

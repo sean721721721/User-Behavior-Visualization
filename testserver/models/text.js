@@ -78,11 +78,27 @@ var cut = function cut(posts, callback) {
     var data = posts;
     var result = [];
     //var test =[];
-    var pattern = new RegExp("[`~!@#$^&*()=|{}':;',\\[\\].<>/?~！@#￥……&*（）&;|{}【】‘；：”“'。，、？ ↵「」]");
+    var pattern = new RegExp("[`~!@#$^&*()=|{}':;',\\[\\].<>/?~！@#￥……&*（）&;|{}【】‘《》；：”“'。，、？ ↵「」]");
     var http = new RegExp(/http/);
     console.log(pattern);
     var p = 0,
         time = posts.length;
+    // var termTable = [];
+    // for(var i = 0;i < data.length;i++){
+    //     if (data[i].content) {
+    //         var temp1 = data[i].content;
+    //         var str1 = "";
+    //         for (var j = 0; j < temp1.length; j++) {
+    //             str1 += temp1.substr(j, 1).replace(pattern, "");
+    //         }
+    //         str1 = nodejieba.cut(str1);
+    //         var testPost = data[i];
+    //         testPost.word = filter(http,str1);
+    //         termTable.push(testPost.word);
+    //         console.log('result: ',termTable);
+    //     }
+    // }
+
     for (var i = 0; i < data.length; i++) {
 
         if (data[i].message) {
@@ -126,7 +142,8 @@ var cut = function cut(posts, callback) {
             }
             //temp = temp.replace(/[\ |\~|\`|\!|\@|\#|\$|\%|\^|\&|\*|\(|\)|\-|\_|\+|\=|\||\\|\[|\]|\{|\}|\;|\:|\"|\'|\,|\<|\.|\>|\/|\?]/g,'');
             var message_length = str.length;
-            str = nodejieba.extract(str, 50);
+            str = nodejieba.extract(str, 100);
+            // str = nodejieba.cut(str);
             var post = data[i];
             post.word = filter(http,str);
             result.push(post);
