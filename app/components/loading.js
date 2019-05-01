@@ -11,7 +11,7 @@ type LoadingProps = {
 
 const Loading = (props: LoadingProps) => {
   const { isLoading, responseError, errorType } = props;
-  console.log(props);
+  // console.log(props);
   if(responseError){
     return (
       <div className="wrapperresponding">

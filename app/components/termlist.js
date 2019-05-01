@@ -1,25 +1,39 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 
-const listStyle = {
-  display: 'inline-block',
+const trStyle = {
+  color: 'white',
+  background: '#333',
 };
 
-const tableStyle = {
-  color: 'black',
+const trStyle1 = {
+  color: '#444',
   background: 'white',
 };
 
+const trStyle2 = {
+  color: '#444',
+  background: 'lightgrey',
+};
+
 function Term(props) {
-    // console.log(props.terms);
+  console.log(props.terms);
   const termsRanking = (
     props.terms.map((termfreq, i) => {
       const {
         0: term,
         1: count,
       } = termfreq;
+      if (i % 2 === 0) {
+        return (
+          <tr id={i} key={i.toString()} style={trStyle1}>
+            <td>{term}</td>
+            <td>{count}</td>
+          </tr>
+        );
+      }
       return (
-        <tr key={i.toString()}>
+        <tr id={i} key={i.toString()} style={trStyle2}>
           <td>{term}</td>
           <td>{count}</td>
         </tr>
@@ -45,8 +59,8 @@ class Termlist extends React.Component {
     return (
       <div id="termlist">
         <table>
-          <thead style={tableStyle}>
-            <tr>
+          <thead>
+            <tr style={trStyle}>
               <th>Term</th>
               <th>Count</th>
             </tr>

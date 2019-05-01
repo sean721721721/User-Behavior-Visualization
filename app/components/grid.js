@@ -267,7 +267,7 @@ class Grid extends React.Component {
     fetch(myRequest)
       .then(function(response) {
         if (response.status >= 200 && response.status < 300) {
-            console.log(response.status);
+            // console.log(response.status);
             console.log(response);
             return response.json();
         } else {
@@ -278,7 +278,7 @@ class Grid extends React.Component {
       })
       .then(res => {
         console.log(res);
-        console.log('done!');
+        // console.log('done!');
         if(res.title === 'search'){
           this.changeList(res, 0);
         }
@@ -515,6 +515,7 @@ class Grid extends React.Component {
                 onChange={this.changePost}
                 previousPage={this.previousPage}
                 nextPage={this.nextPage}
+                postCount={postlistprops.list.length}
               />
             </div>
           </div>

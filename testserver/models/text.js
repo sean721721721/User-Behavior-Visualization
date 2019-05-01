@@ -142,7 +142,7 @@ var cut = function cut(posts, callback) {
             }
             //temp = temp.replace(/[\ |\~|\`|\!|\@|\#|\$|\%|\^|\&|\*|\(|\)|\-|\_|\+|\=|\||\\|\[|\]|\{|\}|\;|\:|\"|\'|\,|\<|\.|\>|\/|\?]/g,'');
             var message_length = str.length;
-            str = nodejieba.extract(str, 100);
+            str = nodejieba.extract(str, 50);
             // str = nodejieba.cut(str);
             var post = data[i];
             post.word = filter(http,str);

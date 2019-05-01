@@ -14,7 +14,9 @@ const PostPage = (props) => {
     onChange,
     previousPage,
     nextPage,
+    postCount,
   } = props;
+  console.log(props);
   return (
     <div id="main-container">
       <div className="action-bar">
@@ -34,6 +36,9 @@ const PostPage = (props) => {
             最新
           </a>
         </div>
+      </div>
+      <div id="post-Count" style={{float:'right'}}>
+        Total Post: {postCount}
       </div>
       <div className="r-list-container">
         <List list={list} downloadprops={downloadprops} onChange={onChange} />
@@ -121,6 +126,7 @@ PostPage.propTypes = {
   onChange: PropTypes.func.isRequired,
   previousPage: PropTypes.func.isRequired,
   nextPage: PropTypes.func.isRequired,
+  postCount: PropTypes.number.isRequired,
 };
 
 export default PostPage;

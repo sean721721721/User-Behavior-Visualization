@@ -473,10 +473,7 @@ let bindpostlist = function bindpostlist(qobj1, qobj2, ptt) {
             }
         }   
     
-    console.log("postlen: " + (list[0].length + list[1].length));
-    const diff = process.hrtime(time);
-    console.log(`bindpostlist() Benchmark took ${diff[0] * NS_PER_SEC + diff[1]} nanoseconds`);
-    // console.log(test);
+
     let termfreq = [];
     // let tf_idfList = [];
     // for(i=0;i<test.length;i++){
@@ -487,8 +484,12 @@ let bindpostlist = function bindpostlist(qobj1, qobj2, ptt) {
     }
     termfreq.push(test);
     // console.log(termfreq[0]);
+    console.log("postlen: " + (list[0].length + list[1].length));
+    const diff = process.hrtime(time);
+    console.log(`bindpostlist() Benchmark took ${diff[0] * NS_PER_SEC + diff[1]} nanoseconds`);
     return [list,termfreq];
 }
+
 let tf_idf = function tf_idf(terms){
     // console.log(terms);
     let postlen = terms.length;
@@ -529,18 +530,21 @@ let tf_idf = function tf_idf(terms){
     console.log('termfreq1: ',sortable);
     return postTermFreq;
 }
+
 let termfreqency = function termfreqency(terms){
-    let postlen = terms.length;
     let termfreq = {};
-    for(i=0;i<postlen;i++){
-        for(j=0;j<terms[i].length;j++){
-            if(!termfreq.hasOwnProperty(terms[i][j].word)){
-                termfreq[terms[i][j].word] = 1;
-            }else{
-                termfreq[terms[i][j].word]++;
-            }
+    terms.forEach(function (term){
+        if(term != null){
+            term.forEach(function(wordPair){
+                if(!termfreq.hasOwnProperty(wordPair.word)){
+                    termfreq[wordPair.word] = 1;
+                }
+                else{
+                    termfreq[wordPair.word]++;
+                }
+            })
         }
-    }
+    })
     let sortable =[];
     for(let word in termfreq){
         sortable.push([word, termfreq[word]]);
