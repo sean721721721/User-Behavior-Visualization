@@ -433,6 +433,8 @@ let bindpostlist = function bindpostlist(qobj1, qobj2, ptt) {
     let pagea = [];
     let pageb = [];
     let test = [[],[]];
+    let titleTest = [[],[]];
+    let message_count = [[],[]];
     for (let i = 0; i < l1; i++) {
         let post = postobj(qobj1[i]);
         pagea.push(post);
@@ -441,6 +443,8 @@ let bindpostlist = function bindpostlist(qobj1, qobj2, ptt) {
     pagea = jb.cut(pagea, function () {
         for(i=0;i<pagea.length;i++){
             test[0][i] = pagea[i].word; 
+            titleTest[0][i] = pagea[i].titleWord;
+            message_count[0][i] = pagea[i].message_count;
         }
     });
     // for return single page query faster
@@ -463,31 +467,72 @@ let bindpostlist = function bindpostlist(qobj1, qobj2, ptt) {
         list.push(pageb);
         pageb = jb.cut(pageb, function () {
             for(i=0;i<pageb.length;i++){
-                test[1][i] = pageb[i].word; 
+                test[1][i] = pageb[i].word;
+                titleTest[1][i] = pageb[i].titleWord;
+                message_count[1][i] = pageb[i].message_count; 
             }
         });
     } else {
         list.push(pagea);
         for(i=0;i<pagea.length;i++){
             test[0][i] = pagea[i].word; 
+            titleTest[0][i] = pagea[i].titleWord;
+            message_count[0][i] = pagea[i].message_count;
             }
         }   
     
-
     let termfreq = [];
-    // let tf_idfList = [];
-    // for(i=0;i<test.length;i++){
-    //     tf_idfList.push(tf_idf(test[i]));
-    // }    
+    let titleCount = [];
+    
+    //termfrequency
     for(i=0;i<test.length;i++){
         termfreq.push(termfreqency(test[i]));
     }
     termfreq.push(test);
+    //title term score
+    for(i=0;i<titleTest.length;i++){ 
+        titleCount.push(titleScore(titleTest[i], message_count[i]));
+    }
+
     // console.log(termfreq[0]);
     console.log("postlen: " + (list[0].length + list[1].length));
     const diff = process.hrtime(time);
     console.log(`bindpostlist() Benchmark took ${diff[0] * NS_PER_SEC + diff[1]} nanoseconds`);
-    return [list,termfreq];
+    return [list,termfreq,titleCount];
+}
+
+let titleScore = function titleScore(terms, message_count){
+    let titleScore = {};
+    let i =0;
+
+    terms.forEach(function (term){
+        if(term != null){
+            let flag = 0;
+            term.forEach(function(wordPair){
+                if(wordPair.word == 'Re'){
+                    flag = 1;
+                }
+                if(flag == 0){
+                    if(!titleScore.hasOwnProperty(wordPair.word)){
+                        titleScore[wordPair.word] = message_count[i].push-message_count[i].boo;
+                    }
+                    else{
+                        titleScore[wordPair.word] += (message_count[i].push-message_count[i].boo);
+                    }
+                }
+            })
+        }
+        i++;
+    })
+
+    let sortable =[];
+    for(let word in titleScore){
+        sortable.push([word, titleScore[word]]);
+    }
+    sortable.sort(function(a,b){
+        return b[1] - a[1];
+    })
+    return sortable;
 }
 
 let tf_idf = function tf_idf(terms){

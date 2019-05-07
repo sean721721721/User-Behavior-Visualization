@@ -13,6 +13,7 @@ import AsyncApp from '../containers/AsyncApp';
 // import VisibleCardList from '../containers/VisibleCardList';
 import Loading from './loading';
 import './style/bbs.css';
+import App from './vis';
 
 class Grid extends React.Component {
   constructor(props) {
@@ -479,6 +480,9 @@ class Grid extends React.Component {
         <Provider store={store}>
           <div className="grid1">
             <div className="grid2">
+              <div>
+                {/* <App /> */}
+              </div>
               <div className="box overview">
                 <div id="template" className="slider__list" />
                 <div id="over" />

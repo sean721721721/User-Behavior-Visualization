@@ -133,19 +133,28 @@ var cut = function cut(posts, callback) {
 
             next();
 
-        } else if (data[i].content) {
-            var temp = data[i].content;
-            var str = "";
-            for (var j = 0; j < temp.length; j++) {
-
-                str += temp.substr(j, 1).replace(pattern, "");
+        } else if (data[i].content && data[i].article_title) {
+    
+            var tempWord = data[i].content;
+            var tempTitle = data[i].article_title;
+            var wordStr = "";
+            var titleStr = "";
+            //content
+            for (var j = 0; j < tempWord.length; j++) {
+                wordStr += tempWord.substr(j, 1).replace(pattern, "");
             }
-            //temp = temp.replace(/[\ |\~|\`|\!|\@|\#|\$|\%|\^|\&|\*|\(|\)|\-|\_|\+|\=|\||\\|\[|\]|\{|\}|\;|\:|\"|\'|\,|\<|\.|\>|\/|\?]/g,'');
-            var message_length = str.length;
-            str = nodejieba.extract(str, 50);
-            // str = nodejieba.cut(str);
+            //article_title
+            for (var j = 0; j < tempTitle.length; j++) {
+                titleStr += tempTitle.substr(j, 1).replace(pattern, "");
+            }
+            //tempWord = tempWord.replace(/[\ |\~|\`|\!|\@|\#|\$|\%|\^|\&|\*|\(|\)|\-|\_|\+|\=|\||\\|\[|\]|\{|\}|\;|\:|\"|\'|\,|\<|\.|\>|\/|\?]/g,'');
+            var message_length = wordStr.length;
+            wordStr = nodejieba.extract(wordStr, 50);
+            titleStr = nodejieba.extract(titleStr, 20);
+            // wordStr = nodejieba.cut(wordStr);
             var post = data[i];
-            post.word = filter(http,str);
+            post.word = filter(http,wordStr);
+            post.titleWord = filter(http,titleStr);
             result.push(post);
 
             next();

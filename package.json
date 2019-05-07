@@ -5,6 +5,7 @@
   "private": true,
   "dependencies": {
     "@babel/polyfill": "^7.2.5",
+    "antd": "^3.16.6",
     "body-parser": "^1.18.3",
     "cors": "^2.8.5",
     "d3": "^5.7.0",
@@ -23,6 +24,7 @@
     "react-redux": "^5.1.1",
     "react-router": "^4.3.1",
     "react-router-dom": "^4.3.1",
+    "react-router-redux": "^4.0.8",
     "redux": "^4.0.1",
     "redux-saga": "^0.16.2",
     "should": "^13.2.3",

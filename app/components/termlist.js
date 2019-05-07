@@ -17,7 +17,6 @@ const trStyle2 = {
 };
 
 function Term(props) {
-  console.log(props.terms);
   const termsRanking = (
     props.terms.map((termfreq, i) => {
       const {

@@ -4,6 +4,8 @@ import PropTypes from 'prop-types';
 import Button from './Button';
 import CSV from './csv';
 
+const maxPostLength = 100;
+
 const buttonStyle = {
   margin: '1px 5px 1px 5px',
 };
@@ -12,6 +14,7 @@ class List extends React.Component {
   constructor(props) {
     super(props);
     this.buttonSubmit = this.buttonSubmit.bind(this);
+    this.sortPost = this.sortPost.bind(this);
   }
 
   buttonSubmit(e, props) {
@@ -19,10 +22,19 @@ class List extends React.Component {
     onChange(e, props);
   }
 
+  sortPost(list){
+    list.sort(function(a,b){
+        return Math.abs(b.message_count.count) - Math.abs(a.message_count.count);
+    })
+    list = list.slice(0,maxPostLength);
+    return list;
+  }
+
   render() {
     const { list, downloadprops } = this.props;
     // console.log(downloadprops);
-    const posts = list.map((post, i) => {
+    const fixedList = this.sortPost(list);
+    const posts = fixedList.map((post, i) => {
       const {
         message_count: { count },
         url: href,

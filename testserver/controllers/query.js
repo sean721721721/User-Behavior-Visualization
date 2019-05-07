@@ -377,6 +377,7 @@ let callback = function callback(req, res) {
               let datalist = dl.bindpostlist(res.result, ptt);
               // let postlist = datalist[0];
               let wordlist = datalist[1];
+              let titleWordList = datalist[2];
               // console.log('postlist:',datalist);
               //let ul1 = dl.newualist(result, ptt);
               /*let postlist = dl.bindpostlist(res, res, ptt);
@@ -396,7 +397,7 @@ let callback = function callback(req, res) {
                             data: [postlist, oldata, sortdata],
                         };
                         return queryresult;*/
-              return { list: [res.result, wordlist], previous: [res.previous], next: [res.next] };
+              return { list: [res.result, wordlist, titleWordList], previous: [res.previous], next: [res.next] };
             }),
           );
         } else if (!isEmpty(queryobj2)) {
