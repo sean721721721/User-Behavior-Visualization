@@ -16,14 +16,14 @@ bi=6000
 #"Please input end page index: "
 ei=6002
 #"Please input pttdata directory path(ex: ../pttdata/boardname): "
-dirpath=/home/villager/test/pttdata/NBA
+dirpath=/home/github/test/pttdata/NBA
 DATE=`date '+%d-%H-%M'`
 loop=$(((($ei - $bi) / $n) + 1))
 echo "dirpath: $dirpath"
 echo "loop: $loop"
 echo "begin index: $bi"
 echo "end index: $ei"
-dir=/home/villager/test/testserver/ptt-web-crawler
+dir=/home/github/test/testserver/ptt-web-crawler
 args="$bn-$DATE"
 space=" "
 declare -i to=15
@@ -40,8 +40,8 @@ do
     #args=("$args$space$i")
     echo "folder: $folder"
     echo "mongofolder:" "../pttdata/$args"
-    python /home/villager/test/testserver/ptt-web-crawler/PttWebCrawler/crawler.py -b "$bn" -i "$bi" "$ni" -dp "$folder" -to "$to"
-    node "/home/villager/test/testserver/lib/ptttomongo.js" "../pttdata/$args" "$bn" "$i"
+    python /home/github/test/testserver/ptt-web-crawler/PttWebCrawler/crawler.py -b "$bn" -i "$bi" "$ni" -dp "$folder" -to "$to"
+    node "/home/github/test/testserver/lib/ptttomongo.js" "../pttdata/$args" "$bn" "$i"
     bi=$(($ni + 1))
 done
 cd ..

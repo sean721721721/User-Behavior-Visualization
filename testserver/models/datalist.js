@@ -444,7 +444,7 @@ let bindpostlist = function bindpostlist(qobj1, qobj2, ptt) {
         for(i=0;i<pagea.length;i++){
             test[0][i] = pagea[i].word; 
             titleTest[0][i] = pagea[i].titleWord;
-            message_count[0][i] = pagea[i].message_count;
+            // message_count[0][i] = pagea[i].message_count;
         }
     });
     // for return single page query faster
@@ -469,7 +469,6 @@ let bindpostlist = function bindpostlist(qobj1, qobj2, ptt) {
             for(i=0;i<pageb.length;i++){
                 test[1][i] = pageb[i].word;
                 titleTest[1][i] = pageb[i].titleWord;
-                message_count[1][i] = pageb[i].message_count; 
             }
         });
     } else {
@@ -477,7 +476,6 @@ let bindpostlist = function bindpostlist(qobj1, qobj2, ptt) {
         for(i=0;i<pagea.length;i++){
             test[0][i] = pagea[i].word; 
             titleTest[0][i] = pagea[i].titleWord;
-            message_count[0][i] = pagea[i].message_count;
             }
         }   
     
@@ -489,17 +487,64 @@ let bindpostlist = function bindpostlist(qobj1, qobj2, ptt) {
         termfreq.push(termfreqency(test[i]));
     }
     termfreq.push(test);
+    
     //title term score
-    for(i=0;i<titleTest.length;i++){ 
-        titleCount.push(titleScore(titleTest[i], message_count[i]));
-    }
+    /*for(i=0;i<titleTest.length;i++){ 
+        titleCount.push(titleScore(titleTest[i], list[0][i].message_count));
+    }*/
 
-    // console.log(termfreq[0]);
+    //title terms relationshipt between userID
+    for(i=0;i<titleTest.length;i++){ 
+        titleCount.push(titleUser(titleTest[i], list[i]));
+    }
+    //console.log(titleCount);
     console.log("postlen: " + (list[0].length + list[1].length));
     const diff = process.hrtime(time);
     console.log(`bindpostlist() Benchmark took ${diff[0] * NS_PER_SEC + diff[1]} nanoseconds`);
     return [list,termfreq,titleCount];
 }
+
+//userId's relationship with title word
+let titleUser = function titleUser(terms, posts){  
+
+    let userlist = {};
+    let i =0;
+    let articleIndex = [];
+    terms.forEach(function (term){
+        if(term != null){
+            let flag = 0;
+            term.forEach(function(wordPair){
+                if(wordPair.word == 'Re'){
+                    flag = 1;
+                }
+                if(flag == 0){
+                    if(!userlist.hasOwnProperty(wordPair.word)){
+                        userlist[wordPair.word] = [posts[i].author];
+                        articleIndex[wordPair.word] = [i];
+                    }
+                    else{
+                        userlist[wordPair.word].push(posts[i].author);
+                        articleIndex[wordPair.word].push(i);
+                    }
+                }
+                flag = 0;
+            })
+        }
+        i++;
+    })
+
+    let keysSorted = Object.keys(userlist).sort(function(a,b){
+        return userlist[b].length - userlist[a].length;
+    })
+
+    let sortedUserList = [];
+    for(let j=0;j<keysSorted.length;j++){
+        sortedUserList.push([keysSorted[j],userlist[keysSorted[j]],articleIndex[keysSorted[j]]]);       
+    }
+
+    return sortedUserList;
+}
+
 
 let titleScore = function titleScore(terms, message_count){
     let titleScore = {};

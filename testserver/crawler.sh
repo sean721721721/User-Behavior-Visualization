@@ -34,7 +34,7 @@ do
     folder=($dirpath/$i)
     #args=("$args$space$i")
     echo "folder: $folder"
-    python -m "PttWebCrawler" -b "$bn" -i "$bi" "$ni" -dp "$folder" -to "$to"
+    python ptt-web-crawler/PttWebCrawler/crawler.py -b "$bn" -i "$bi" "$ni" -dp "$folder" -to "$to"
     node "../testserver/lib/ptttomongo.js" "$dirpath" "$bn" "$i"
     bi=$(($ni + 1))
 done

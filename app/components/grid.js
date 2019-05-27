@@ -13,7 +13,7 @@ import AsyncApp from '../containers/AsyncApp';
 // import VisibleCardList from '../containers/VisibleCardList';
 import Loading from './loading';
 import './style/bbs.css';
-import App from './vis';
+import Graph from './vis';
 
 class Grid extends React.Component {
   constructor(props) {
@@ -39,11 +39,11 @@ class Grid extends React.Component {
         },
         initPage1: {
           pagename: 'Gossiping',
-          since: '2018-06-01',
-          until: '2018-06-10',
+          since: '2019-05-01',
+          until: '2019-05-02',
           wordfilter: '丁守中',
           idfilter: '',
-          contentfilter: '柯文哲',
+          contentfilter: '',
         },
         initPage2: {
           pagename: 'Gossiping',
@@ -89,6 +89,12 @@ class Grid extends React.Component {
         list:[
           [' ',0]
         ]
+      },
+      visprops:{
+        list: {
+          "nodes":[{"id":"","group":1}],
+          "link":[{"source": "", "target": "", "value": 1}]
+        },
       },
       postlistprops: {
         list: [
@@ -320,6 +326,9 @@ class Grid extends React.Component {
       termlistprops:{
         list: list[collection+1][0],
       },
+      visprops:{
+        list: list[collection+2][0],
+      },
       postlistprops: {
         list: list[collection],
         previous: previous[collection],
@@ -461,11 +470,12 @@ class Grid extends React.Component {
 
   render() {
     const {
-      isLoading, responseError, errorType, menuprops,termlistprops,postlistprops, postprops,
+      isLoading, responseError, errorType, menuprops, termlistprops, visprops, postlistprops, postprops,
     } = this.state;
     const selectedOptions = this.selectedOptions();
     const filename = this.getFilename();
     console.log(filename);
+    // console.log(visprops);
     return (
       <div className="grid">
         <Menu
@@ -480,9 +490,6 @@ class Grid extends React.Component {
         <Provider store={store}>
           <div className="grid1">
             <div className="grid2">
-              <div>
-                {/* <App /> */}
-              </div>
               <div className="box overview">
                 <div id="template" className="slider__list" />
                 <div id="over" />
@@ -507,6 +514,9 @@ class Grid extends React.Component {
                 <Post postprops={postprops} />
                 <div id="detail" />
               </div>
+            </div>
+            <div className="graph">
+                <Graph visprops={visprops.list}/>
             </div>
             <div className="box userview" id="table">
               <div id="userdeg">

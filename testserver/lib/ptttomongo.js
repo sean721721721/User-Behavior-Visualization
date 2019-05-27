@@ -215,7 +215,10 @@ let board = process.argv.shift();
 let root = '../pttdata/' + path;
 let folders = process.argv;
 logger.log('info', path + ' ' + board + ' ' + folders);
-//var folders = ['30', '31', '32', '33', '34', '35', '36', '37', '38']; // 'Tech_Job', 'Gossiping', 'Soft_Job'];
+// folders = []; // 'Tech_Job', 'Gossiping', 'Soft_Job'];
+// for(let i =51;i<81;i++){
+//   folders.push(i);
+// }
 //folders.forEach(folder => {
 //var root = "../pttdata/Gossiping";
 readfolder();

@@ -78,6 +78,11 @@ let queryobj = function queryobj(req, res, time1, time2, userid, tkeyword, ckeyw
     }
   }
   if (tkeyword !== undefined) {
+    for(let i=0;i<tkeyword.length;i++)
+      if(tkeyword[i] == '[' || tkeyword[i] == ']'){
+        tkeyword = tkeyword.slice(0,i) + "\\" + tkeyword.slice(i,tkeyword.length)
+        i=i+2
+      }
     queryobj['article_title'] = {
       $regex: tkeyword,
     };

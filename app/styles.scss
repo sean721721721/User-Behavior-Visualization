@@ -237,7 +237,7 @@ div.tab button.active {
 }
 
 .tabcontent input {
-    width: 100px;
+    width: 130px;
 }
 
 /* Style the close button */
@@ -350,6 +350,11 @@ path:hover {
     overflow-y: scroll;
     grid-column: scol3 / scolend;
     grid-row: srow1 / srow2;
+}
+
+.graph {
+    grid-column: col1 / colend;
+    grid-row:none;
 }
 
 .detailview {
