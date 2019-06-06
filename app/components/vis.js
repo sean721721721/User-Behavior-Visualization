@@ -343,7 +343,7 @@ const graph = {
     {'source': 'Mme.Hucheloup', 'target': 'Enjolras', 'value': 1}
   ]
 }
-const SetNumOfNodes = 100;
+const SetNumOfNodes = 200;
 class Graph extends Component {
   constructor(props) {
     super(props);
@@ -362,7 +362,7 @@ class Graph extends Component {
     let props = this.props.visprops;
     let set={'nodes': [], 'links': []};
     let link, node, links, nodes;
-
+    let initLinks = [];
     let removeWords=['新聞','八卦','幹嘛']
     let keys = Object.keys(props);
 
@@ -374,14 +374,14 @@ class Graph extends Component {
         })
         if(existKey === undefined){
           if(!removeWords.includes(props[i][0])){
-            set.nodes.push({id: props[i][0], articleIndex:props[i][2], group: 1, tag: 0, size: 5+Math.log2(props[i][1].length)});
+            set.nodes.push({id: props[i][0], children:props[i][1], _children:[], articleIndex:props[i][2], group: 1, tag: 0, size: 5+Math.log2(props[i][1].length)});
             props[i][1].forEach(function(id){
               let existId = set.nodes.find(function(ele){
                 return ele.id === id;
               })
               if(existId === undefined){
-                if(id != null)
-                  set.nodes.push({id: id, group: 2, tag: 0, size: 5});
+                // if(id != null)
+                //   set.nodes.push({id: id, group: 2, tag: 0, size: 5});
               }
             })
           }
@@ -391,48 +391,53 @@ class Graph extends Component {
 
     //title words links by articleIndex
     let groupedWords = [];
-    for(let i=0;i<Math.min(props.length,SetNumOfNodes);i++){
-      if(props[i][0] != null){
-        props[i][1].forEach(function(id){
-          if(id != null){
-            let existLink = set.links.find(function(ele){
-              return ele.source === id && ele.target === props[i][0];
-            })
-            if(existLink === undefined){
-                if(!removeWords.includes(props[i][0])){
-                  set.links.push({source: id,target:props[i][0], tag: 0, value: 1});
+    let max = Math.min(props.length,SetNumOfNodes);
+    for(let i=0;i < max-1;i++){
+      if(props[i][0] != null && !removeWords.includes(props[i][0])){
+        for(let j=i+1;j<max;j++){
+          let count =0;
+          if(props[j][0] != null && !removeWords.includes(props[j][0])){
+            props[i][1].forEach(function(id_1){
+              props[j][1].forEach(function(id_2){
+                if(id_1 != null && id_2 != null){
+                  if(id_1 == id_2)
+                    count++;
                 }
-            }else{
-              existLink.value++;
-              //console.log(existLink);
-            }
+              })
+            })
           }
-        })
+          if(count != 0){
+            set.links.push({source: props[i][0],target:props[j][0], 
+                      tag: 0, value: count});
+            initLinks.push({source: props[i][0],target:props[j][0], 
+                      tag: 0, value: count})
+          }
+        }
       }
     }
 
     //Links setting
-    for(let i=0;i<Math.min(props.length,SetNumOfNodes);i++){
-      if(props[i][0] != null){
-        props[i][1].forEach(function(id){
-          if(id != null){
-            let existLink = set.links.find(function(ele){
-              return ele.source === id && ele.target === props[i][0];
-            })
-            if(existLink === undefined){
-                if(!removeWords.includes(props[i][0])){
-                  set.links.push({source: id,target:props[i][0], tag: 0, value: 1});
-                }
-            }else{
-              existLink.value++;
-              //console.log(existLink);
-            }
-          }
-        })
-      }
-    }
-
-    const width=900,height=700;
+    // for(let i=0;i<Math.min(props.length,SetNumOfNodes);i++){
+    //   if(props[i][0] != null){
+    //     props[i][1].forEach(function(id){
+    //       if(id != null){
+    //         let existLink = set.links.find(function(ele){
+    //           return ele.source === id && ele.target === props[i][0];
+    //         })
+    //         if(existLink === undefined){
+    //             if(!removeWords.includes(props[i][0])){
+    //               set.links.push({source: id,target:props[i][0], tag: 0, value: 1});
+    //             }
+    //         }else{
+    //           existLink.value++;
+    //           //console.log(existLink);
+    //         }
+    //       }
+    //     })
+    //   }
+    // }
+    console.log(set);
+    const width=900,height=900;
     var svg = d3.select(this.refs.chart)
       .select('svg');
       
@@ -450,14 +455,14 @@ class Graph extends Component {
     color(1);
     var simulation = d3.forceSimulation()
         .force('link', d3.forceLink().id(function(d) { return d.id; }))
-        .force('charge', d3.forceManyBody().strength(-30))
+        .force('charge', d3.forceManyBody().strength(-100))
         .force('center', d3.forceCenter(width / 2, height / 2));
 
     update();
     
     function update(){
       
-      // console.log(set);
+      console.log(set);
       
       nodes = set.nodes;
       links = set.links;
@@ -473,7 +478,7 @@ class Graph extends Component {
           .append('line')
           .attr('class', 'links')
           .attr('stroke','#999')
-          .attr('stroke-width', function(d) { return Math.sqrt(d.value); });
+          .attr('stroke-width', 1);
       
       link = linkEnter.merge(link)
       var node = svg.selectAll('g')
@@ -491,11 +496,37 @@ class Graph extends Component {
                 .on('end', dragended));
         //.on('mouseover', mouseOver(.2))
         //.on('mouseout', mouseOut);
-    
+      
+      nodeEnter
+        .append('defs')
+        .append('pattern')
+        .attr('id', function(d,i){
+          return 'pic_user';
+        })
+        .attr('height',60)
+        .attr('width',60)
+        .attr('x',0)
+        .attr('y',0)
+        .append('image')
+        .attr('xlink:href','https://i.imgur.com/jTUiJ1l.png')
+        .attr('height',10)
+        .attr('width',10)
+        .attr('x',0)
+        .attr('y',0);
+
+
+      
       var circles = nodeEnter.append('circle')
         .attr('r', function(d){ return d.size; })
-        .attr('fill', function(d) { return color(d.group); })
-        .attr('stroke','white')
+        .attr('fill', function(d) { 
+          if(d.group==1)
+            return color(d.group)
+          return "url(#pic_user)"; })
+        .attr('stroke',function(d){
+          if(d.group==1)
+            return 'white';
+          return '#ff7f0e';
+          })
         .attr('stroke-width',0.9)
         .attr('stroke-opacity',1);
   
@@ -526,7 +557,7 @@ class Graph extends Component {
 
       simulation.force('link')
             .links(set.links)
-            .distance(function(d){return 30/d.value});
+            .distance(function(d){return 50/d.value});
     
 
       function ticked() {
@@ -551,6 +582,7 @@ class Graph extends Component {
         if (d3.event.defaultPrevented) return; // dragged
       
         if(d.tag==0){
+          d3.select(this).select('circle').attr('stroke','red');
           //console.log(d);
           //console.log(d.tag);        
             // check all other nodes to see if they're connected
@@ -576,57 +608,103 @@ class Graph extends Component {
             }
             return 1;
           });
-          node.selectAll('circle').style('fill',function(o){
-            if(o.tag !=0){
-              console.log(d,o);
-              if(isConnected(d,o)){
-                //o.tag++;
-                if(o.group == 2)
-                  return 'red';
-              }
-            }
-            if(o.group==1)
-              return '#1f77b4';
-            return '#ff7f0e';
-          })
+          // node.selectAll('circle').style('fill',function(o){
+          //   if(o.tag !=0){
+          //     console.log(d,o);
+          //     if(isConnected(d,o)){
+          //       //o.tag++;
+          //       if(o.group == 2)
+          //         return 'red';
+          //     }
+          //   }
+          //   if(o.group==1)
+          //     return '#1f77b4';
+          //   return '#ff7f0e';
+          // })
           node.selectAll('text').style('visibility',function(o){
             if(o.tag==0){
               if(isConnected(d, o)){
-                o.tag++;
+                //o.tag++;
                 return 'visible';
               }
             }
           });
             // also style link accordingly
-          link.style('stroke-opacity', function(o) {
-            //console.log(o);
-            if(o.tag==0){
-              if(o.source === d || o.target === d){
-                return 1;
+          // link.style('stroke-opacity', function(o) {
+          //   //console.log(o);
+          //   if(o.tag==0){
+          //     if(o.source === d || o.target === d){
+          //       return 1;
+          //     }
+          //     return 0.2;
+          //   }
+          //   return 1;
+          // });
+          // link.style('stroke', function(o){
+          //   if(o.tag==0){
+          //     if(o.source === d || o.target === d){
+          //       o.tag++;
+          //       return o.source.colour;
+          //     }
+          //     return '#ddd';
+          //   }
+          //   return o.source.colour;
+          // });
+
+          d.children.forEach(function(id_1){
+            if(id_1 != null){
+            	const checkUserId = obj => obj.id === id_1;
+
+							if(!set.nodes.some(checkUserId)){
+                /* console.log(id_1) */
+                set.nodes.forEach(function(node){
+                  /* console.log(node) */
+                  if(node.children){
+                    node.children.forEach(function(id_2){
+                      if(id_1 == id_2)
+                        set.links.push({source: id_1,target:node.id, tag: 1, value: 1});
+                    })
+                  }
+                })
+                let existId = set.nodes.find(function(ele){
+                  return ele.id === id_1;
+                })
+                if(existId == undefined)
+                  set.nodes.push({id: id_1, group: 2, tag: 1, size: 5});
+                set.links.push({source: id_1,target:d, tag: 1, value: 1});
               }
-              return 0.2;
             }
-            return 1;
-          });
-          link.style('stroke', function(o){
-            if(o.tag==0){
-              if(o.source === d || o.target === d){
-                o.tag++;
-                return o.source.colour;
-              }
-              return '#ddd';
-            }
-            return o.source.colour;
-          });
+          })
+          
           d.tag=1;
         }else{
-          //console.log(d.tag);
+          d3.select(this).select('circle').attr('stroke','white');
+          d.children.forEach(function(id_1){
+            if(id_1 != null){
+              set.nodes.forEach(function(node){
+                if(node.id == id_1){
+                  delete set.nodes[set.nodes.indexOf(node)];
+                }               
+              })
+              let length = set.links.length
+              for(let i =0;i<length;i++){
+              			let pos = set.links.map(function(e) { return e.source.id; }).indexOf(id_1)
+                    if(pos != -1){
+                      set.links.splice(pos,1)
+                    }
+              }
+            }
+          }) 
+          
+          set.nodes = set.nodes.filter(function(){return true});
+        	set.links = set.links.filter(function(){return true});
+          
+          //mouseOut();
           d.tag=0;
-          mouseOut();
-  
         }
+
         update();
-        simulation.restart();
+        
       }
 
       function mouseOut() {
@@ -854,7 +932,7 @@ class Graph extends Component {
  
   render(){
     return <div id={'#' + this.props.id}>
-      <div ref='chart'><svg width='100%' height='700px'></svg></div>
+      <div ref='chart'><svg width='100%' height='900px'></svg></div>
     </div>
   }
 }
