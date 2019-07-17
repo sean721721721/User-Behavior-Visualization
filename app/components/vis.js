@@ -1,10 +1,10 @@
 import React, { Component } from 'react';
-import PropTypes from 'prop-types';
-//import { connect } from 'react-redux';
-//import { push } from 'react-router-redux';
+// import PropTypes from 'prop-types';
+// import { connect } from 'react-redux';
+// import { push } from 'react-router-redux';
 import * as d3 from 'd3';
-import { max } from 'moment';
-//import { Row, Form } from 'antd';
+// import { max } from 'moment';
+// import { Row, Form } from 'antd';
 
 const graph = {
   nodes: [
@@ -343,7 +343,7 @@ const graph = {
     {'source': 'Mme.Hucheloup', 'target': 'Enjolras', 'value': 1}
   ]
 }
-const SetNumOfNodes = 200;
+const SetNumOfNodes = 50;
 class Graph extends Component {
   constructor(props) {
     super(props);
@@ -374,7 +374,8 @@ class Graph extends Component {
         })
         if(existKey === undefined){
           if(!removeWords.includes(props[i][0])){
-            set.nodes.push({id: props[i][0], children:props[i][1], _children:[], articleIndex:props[i][2], group: 1, tag: 0, size: 5+Math.log2(props[i][1].length)});
+            set.nodes.push({id: props[i][0], children:props[i][1], _children:[], articleIndex:props[i][2], 
+                            group: 1, tag: 0, size: 5+Math.log2(props[i][1].length)});
             props[i][1].forEach(function(id){
               let existId = set.nodes.find(function(ele){
                 return ele.id === id;
@@ -408,7 +409,7 @@ class Graph extends Component {
           }
           if(count != 0){
             set.links.push({source: props[i][0],target:props[j][0], 
-                      tag: 0, value: count});
+                      tag: 0,color: '#d9d9d9 ', value: count});
             initLinks.push({source: props[i][0],target:props[j][0], 
                       tag: 0, value: count})
           }
@@ -477,7 +478,7 @@ class Graph extends Component {
       let linkEnter = link.enter()
           .append('line')
           .attr('class', 'links')
-          .attr('stroke','#999')
+          .attr('stroke',function(d){return d.color})
           .attr('stroke-width', 1);
       
       link = linkEnter.merge(link)
@@ -555,7 +556,8 @@ class Graph extends Component {
             .nodes(set.nodes)
             .on('tick', ticked);
 
-      simulation.force('link')
+      simulation.alphaDecay(0.01)
+            .force('link')
             .links(set.links)
             .distance(function(d){return 50/d.value});
     
@@ -662,7 +664,7 @@ class Graph extends Component {
                   if(node.children){
                     node.children.forEach(function(id_2){
                       if(id_1 == id_2)
-                        set.links.push({source: id_1,target:node.id, tag: 1, value: 1});
+                        set.links.push({source: id_1,target:node.id, tag: 1, color: '#ffbb78 ', value: 10});
                     })
                   }
                 })
@@ -670,8 +672,8 @@ class Graph extends Component {
                   return ele.id === id_1;
                 })
                 if(existId == undefined)
-                  set.nodes.push({id: id_1, group: 2, tag: 1, size: 5});
-                set.links.push({source: id_1,target:d, tag: 1, value: 1});
+                  set.nodes.push({id: id_1, group: 2, tag: 1, x: d.x, y: d.y, size: 5});
+                set.links.push({source: id_1,target:d, color: '#ffbb78', tag: 1, value: 1});
               }
             }
           })
@@ -679,6 +681,11 @@ class Graph extends Component {
           d.tag=1;
         }else{
           d3.select(this).select('circle').attr('stroke','white');
+
+          node.style('fill-opacity', function(o) {
+            return 1;
+          });
+          
           d.children.forEach(function(id_1){
             if(id_1 != null){
               set.nodes.forEach(function(node){

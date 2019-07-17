@@ -1,3 +1,5 @@
+/* eslint-disable no-console */
+/* eslint-disable max-len */
 // @flow
 import React from 'react';
 import Lodash from 'lodash';
@@ -25,8 +27,8 @@ class Grid extends React.Component {
       items: [],
       */
       isLoading: false,
-      responseError:false,
-      errorType: "",
+      responseError: false,
+      errorType: '',
       menuprops: {
         initParameter: {
           var1: 'reaction',
@@ -85,15 +87,15 @@ class Grid extends React.Component {
         description: '台北市長柯文哲在PTT上別稱',
         tags: ['人物', '政治', '台北'],
       },
-      termlistprops:{
-        list:[
-          [' ',0]
-        ]
+      termlistprops: {
+        list: [
+          [' ', 0],
+        ],
       },
-      visprops:{
+      visprops: {
         list: {
-          "nodes":[{"id":"","group":1}],
-          "link":[{"source": "", "target": "", "value": 1}]
+          nodes: [{ id: '', group: 1 }],
+          link: [{ source: '', target: '', value: 1 }],
         },
       },
       postlistprops: {
@@ -258,21 +260,27 @@ class Grid extends React.Component {
     return str;
   }
 
+  setResponseError() {
+    this.setState(prevState => ({ ...prevState, responseError: true }));
+  }
+
   handleSubmit(e) {
     e.preventDefault();
-    this.setState(prevState => ({ ...prevState, isLoading: true, responseError: false, errorType:"" }));
+    this.setState(prevState => ({
+      ...prevState, isLoading: true, responseError: false, errorType: '',
+    }));
     const url = encodeURI(this.getReqstr());
     const myRequest = new Request(url, {
       method: 'get',
     });
-    // fetch(myRequest)
-    //   .then(res => res.json())
-    //   .then((res) => {
-    //     console.log(res);
-    //     this.changeList(res, 0);
-    //   });
+      // fetch(myRequest)
+      //   .then(res => res.json())
+      //   .then((res) => {
+      //     console.log(res);
+      //     this.changeList(res, 0);
+      //   });
     fetch(myRequest)
-      .then(function(response) {
+      .then((response) => {
         if (response.status >= 200 && response.status < 300) {
             // console.log(response.status);
             console.log(response);
@@ -283,32 +291,28 @@ class Grid extends React.Component {
             throw error;
         }
       })
-      .then(res => {
+      .then((res) => {
         console.log(res);
         // console.log('done!');
-        if(res.title === 'search'){
+        if (res.title === 'search') {
           this.changeList(res, 0);
-        }
-        else{
-          var error = {
-            message: "Fail to fetch"
-          }
+        } else {
+          const error = {
+            message: 'Fail to fetch',
+          };
           throw error;
         }
         // data 才是實際的 JSON 資料
       })
-      .catch(error => {
-          console.log('Error');
-          this.setState(prevState => ({ ...prevState, responseError: true,errorType : error }));
-          console.log(error);
+      .catch((error) => {
+        console.log('Error');
+        this.setState(prevState => ({ ...prevState, responseError: true, errorType: error }));
+        console.log(error);
       });
-      // .then(function(errorData){
-      //   console.log(errorData);
-      //     // errorData 裡面才是實際的 JSON 資料
-      // });
-  }
-  setResponseError(){
-    this.setState(prevState => ({ ...prevState, responseError: true }));
+    // .then(function(errorData){
+    //   console.log(errorData);
+    //     // errorData 裡面才是實際的 JSON 資料
+    // });
   }
 
   changePost(e, props) {
@@ -323,11 +327,11 @@ class Grid extends React.Component {
     const { list, next, previous } = datalist;
     this.setState(prevState => ({
       ...prevState,
-      termlistprops:{
-        list: list[collection+1][0],
+      termlistprops: {
+        list: list[collection + 1][0],
       },
-      visprops:{
-        list: list[collection+2][0],
+      visprops: {
+        list: list[collection + 2][0],
       },
       postlistprops: {
         list: list[collection],
@@ -494,7 +498,7 @@ class Grid extends React.Component {
                 <div id="template" className="slider__list" />
                 <div id="over" />
                 <div id="select" />
-                <Loading isLoading={isLoading} responseError ={responseError} errorType ={errorType} />
+                <Loading isLoading={isLoading} responseError={responseError} errorType={errorType} />
                 <AsyncApp />
                 {/* <VisibleCardList /> */}
                 <Footer />
@@ -516,7 +520,7 @@ class Grid extends React.Component {
               </div>
             </div>
             <div className="graph">
-                <Graph visprops={visprops.list}/>
+              <Graph visprops={visprops.list} />
             </div>
             <div className="box userview" id="table">
               <div id="userdeg">

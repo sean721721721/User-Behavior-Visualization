@@ -1,7 +1,7 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 
-const maxTermNum = 100;
+const maxTermNum = 1000;
 
 const trStyle = {
   color: 'white',
@@ -19,7 +19,7 @@ const trStyle2 = {
 };
 
 function Term(props) {
-  const fixedterms = props.terms.slice(0, maxTermNum); 
+  const fixedterms = props.terms.slice(0, maxTermNum);
   const termsRanking = (
     fixedterms.map((termfreq, i) => {
       const {
