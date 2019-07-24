@@ -370,15 +370,15 @@ class Graph extends Component {
     for(let i=0;i<Math.min(props.length,SetNumOfNodes);i++){
       if(props[i][0] != null){
         let existKey = set.nodes.find(function(ele){
-          return ele.id === props[i][0];
+          return ele.titleTerm === props[i][0];
         })
         if(existKey === undefined){
           if(!removeWords.includes(props[i][0])){
-            set.nodes.push({id: props[i][0], children:props[i][1], _children:[], articleIndex:props[i][2], 
-                            group: 1, tag: 0, size: 5+Math.log2(props[i][1].length)});
-            props[i][1].forEach(function(id){
+            set.nodes.push({titleTerm: props[i][0], children:props[i][1], _children:[], articleIndex:props[i][2], 
+                            group: 1, tag: 0, connected: -1, size: 5+Math.log2(props[i][1].length)});
+            props[i][1].forEach(function(titleTerm){
               let existId = set.nodes.find(function(ele){
-                return ele.id === id;
+                return ele.titleTerm === titleTerm;
               })
               if(existId === undefined){
                 // if(id != null)
@@ -439,7 +439,7 @@ class Graph extends Component {
     // }
     console.log(set);
     const width=900,height=900;
-    var svg = d3.select(this.refs.chart)
+    let svg = d3.select(this.refs.titleUserView)
       .select('svg');
       
     svg.selectAll('*').remove();
@@ -452,10 +452,10 @@ class Graph extends Component {
       svg.attr('transform', d3.event.transform);
     } 
 
-    var color = d3.scaleOrdinal(d3.schemeCategory10 );
+    let color = d3.scaleOrdinal(d3.schemeCategory10 );
     color(1);
-    var simulation = d3.forceSimulation()
-        .force('link', d3.forceLink().id(function(d) { return d.id; }))
+    let simulation = d3.forceSimulation()
+        .force('link', d3.forceLink().id(function(d) { return d.titleTerm; }))
         .force('charge', d3.forceManyBody().strength(-100))
         .force('center', d3.forceCenter(width / 2, height / 2));
 
@@ -468,28 +468,31 @@ class Graph extends Component {
       nodes = set.nodes;
       links = set.links;
             
-      //  var g =svg.append('g')
+      //  let g =svg.append('g')
       //     .attr('class', 'everything')
 
-      var link = svg.selectAll('line')
+      let link = svg.selectAll('line')
                     .data(set.links);
       link.exit().remove();
       
       let linkEnter = link.enter()
           .append('line')
           .attr('class', 'links')
+          .style('z-index',-1)
           .attr('stroke',function(d){return d.color})
           .attr('stroke-width', 1);
       
       link = linkEnter.merge(link)
-      var node = svg.selectAll('g')
+      svg.selectAll('g').remove()
+      let node = svg.selectAll('g')
                     .data(set.nodes);
       
-      node.exit().remove();  
-  
+      // node.exit().remove();  
+      // let node = svg.selectAll('g').data(set.nodes)
       let nodeEnter = node.enter()
         .append('g')
         .attr('class', 'nodes')
+        .style('z-index',1)
         .on('click', clicked)
         .call(d3.drag()
                 .on('start', dragstarted)
@@ -517,26 +520,34 @@ class Graph extends Component {
 
 
       
-      var circles = nodeEnter.append('circle')
+      let circles = nodeEnter.append('circle')
         .attr('r', function(d){ return d.size; })
         .attr('fill', function(d) { 
           if(d.group==1)
             return color(d.group)
           return "url(#pic_user)"; })
-        .attr('stroke',function(d){
+        .style('fill-opacity', function(d) {
           if(d.group==1)
-            return 'white';
-          return '#ff7f0e';
+            return d.connected == 0 ? 0.1 : 1
+          return 1
+        })
+        .attr('stroke',function(d){
+          if(d.group == 1){
+            if(d.tag == 1)
+              return 'red'
+            return 'white'
+          }
+          return '#ff7f0e'
           })
         .attr('stroke-width',0.9)
         .attr('stroke-opacity',1);
   
-      // var zoom_handler = d3.zoom()
+      // let zoom_handler = d3.zoom()
       //       .on('zoom', zoom_actions);
       // zoom_handler(svg);
-      var lables = nodeEnter.append('text')
+      let lables = nodeEnter.append('text')
         .text(function(d) {
-          return d.id;
+          return d.titleTerm;
         })
         .attr('font-family', 'sans-serif')
         .attr('font-size',' 10px')
@@ -549,17 +560,18 @@ class Graph extends Component {
         .attr('x', 0)
         .attr('y', 0);
       nodeEnter.append('title')
-        .text(function(d) { return d.id; });
+        .text(function(d) { return d.titleTerm; });
   
       node = nodeEnter.merge(node);
       simulation
             .nodes(set.nodes)
             .on('tick', ticked);
 
-      simulation.alphaDecay(0.01)
+      simulation.alphaDecay(0.005)
             .force('link')
             .links(set.links)
-            .distance(function(d){return 50/d.value});
+            .distance(function(d){return 300/d.value})
+            // .strength(1);
     
 
       function ticked() {
@@ -582,80 +594,26 @@ class Graph extends Component {
         //console.log('clicked');
         //console.log(d.tag);
         if (d3.event.defaultPrevented) return; // dragged
-      
+        
+        node.data(set.nodes, function(o) {
+            if (isConnected(d, o)) {
+              if (o.connected <= 0){
+                o.connected = 1
+              } else{
+                o.connected++
+              }
+            } else {
+              if (o.connected == -1)
+                o.connected = 0
+            }
+        })
+
         if(d.tag==0){
           d3.select(this).select('circle').attr('stroke','red');
-          //console.log(d);
-          //console.log(d.tag);        
-            // check all other nodes to see if they're connected
-            // to this one. if so, keep the opacity at 1, otherwise
-            // fade
-          node.selectAll('circles').style('stroke-opacity', function(o) {
-            if(o.tag==0){
-              if(isConnected(d,o)){
-                //o.tag=1;
-                return 1;
-              }
-              return 0.2;
-            }
-            return 1;
-          });
-          node.style('fill-opacity', function(o) {
-            if(o.tag==0){  
-              if(isConnected(d,o)){
-                //o.tag=1;
-                return 1;
-              }
-              return 0.2;
-            }
-            return 1;
-          });
-          // node.selectAll('circle').style('fill',function(o){
-          //   if(o.tag !=0){
-          //     console.log(d,o);
-          //     if(isConnected(d,o)){
-          //       //o.tag++;
-          //       if(o.group == 2)
-          //         return 'red';
-          //     }
-          //   }
-          //   if(o.group==1)
-          //     return '#1f77b4';
-          //   return '#ff7f0e';
-          // })
-          node.selectAll('text').style('visibility',function(o){
-            if(o.tag==0){
-              if(isConnected(d, o)){
-                //o.tag++;
-                return 'visible';
-              }
-            }
-          });
-            // also style link accordingly
-          // link.style('stroke-opacity', function(o) {
-          //   //console.log(o);
-          //   if(o.tag==0){
-          //     if(o.source === d || o.target === d){
-          //       return 1;
-          //     }
-          //     return 0.2;
-          //   }
-          //   return 1;
-          // });
-          // link.style('stroke', function(o){
-          //   if(o.tag==0){
-          //     if(o.source === d || o.target === d){
-          //       o.tag++;
-          //       return o.source.colour;
-          //     }
-          //     return '#ddd';
-          //   }
-          //   return o.source.colour;
-          // });
 
           d.children.forEach(function(id_1){
             if(id_1 != null){
-            	const checkUserId = obj => obj.id === id_1;
+            	const checkUserId = obj => obj.titleTerm === id_1;
 
 							if(!set.nodes.some(checkUserId)){
                 /* console.log(id_1) */
@@ -664,16 +622,22 @@ class Graph extends Component {
                   if(node.children){
                     node.children.forEach(function(id_2){
                       if(id_1 == id_2)
-                        set.links.push({source: id_1,target:node.id, tag: 1, color: '#ffbb78 ', value: 10});
+                        set.links.push({source: id_1,target:node.titleTerm, tag: 1, color: '#ffbb78 ', value: 1000000});
                     })
                   }
                 })
                 let existId = set.nodes.find(function(ele){
-                  return ele.id === id_1;
+                  return ele.titleTerm === id_1;
                 })
                 if(existId == undefined)
-                  set.nodes.push({id: id_1, group: 2, tag: 1, x: d.x, y: d.y, size: 5});
-                set.links.push({source: id_1,target:d, color: '#ffbb78', tag: 1, value: 1});
+                  set.nodes.push({titleTerm: id_1, group: 2, tag: 1, connected: 1, x: d.x, y: d.y, size: 5});
+                set.links.push({source: id_1,target:d, color: '#ffbb78', tag: 1, value: 1000000});
+              } else {
+
+                let index = set.nodes.findIndex(function(node){
+                  return node.titleTerm == id_1
+                })
+                set.nodes[index].connected++
               }
             }
           })
@@ -681,37 +645,58 @@ class Graph extends Component {
           d.tag=1;
         }else{
           d3.select(this).select('circle').attr('stroke','white');
-
-          node.style('fill-opacity', function(o) {
-            return 1;
-          });
           
+          node.data(set.nodes, function(o) {
+            if (isConnected(d, o)) {
+              o.connected--
+            }
+          })
+        
+          // node.style('fill-opacity', function(o) {
+          //   return 1;
+          // });
+
           d.children.forEach(function(id_1){
             if(id_1 != null){
+              let index_1 = set.nodes.findIndex(function(node){
+                if (node == undefined)
+                  return -1
+                return node.titleTerm == id_1
+              })
+              //console.log(id_1, index_1)
+              set.nodes[index_1].connected--
+
               set.nodes.forEach(function(node){
-                if(node.id == id_1){
+                if(node.titleTerm == id_1 && node.connected <= 0){
                   delete set.nodes[set.nodes.indexOf(node)];
+                  set.nodes = set.nodes.filter(function(){return true});
                 }               
               })
               let length = set.links.length
               for(let i =0;i<length;i++){
-              			let pos = set.links.map(function(e) { return e.source.id; }).indexOf(id_1)
-                    if(pos != -1){
-                      set.links.splice(pos,1)
-                    }
+              	let pos = set.links.map(function(e) { return e.source.titleTerm; }).indexOf(id_1)
+                if(pos != -1){
+                  let index_2 = set.nodes.findIndex(function(node){
+                    if (node == undefined)
+                      return -1
+                    return node.titleTerm == id_1
+                  })
+                  if(index_2 == -1 ){
+                    set.links.splice(pos,1)
+                  } else if (set.nodes[index_2] == undefined){
+                    set.links.splice(pos,1)
+                  } 
+                }
               }
             }
           }) 
           
           set.nodes = set.nodes.filter(function(){return true});
-        	set.links = set.links.filter(function(){return true});
-          
+        	set.links = set.links.filter(function(){return true});          
           //mouseOut();
           d.tag=0;
         }
-
-        update();
-        
+        update();        
       }
 
       function mouseOut() {
@@ -738,7 +723,7 @@ class Graph extends Component {
       }
     }
     // build a dictionary of nodes that are linked
-    var linkedByIndex = {};
+    let linkedByIndex = {};
     links.forEach(function(d) {
         linkedByIndex[d.source.index + ',' + d.target.index] = 1;
     });
@@ -800,6 +785,74 @@ class Graph extends Component {
       d.fy = null;
     }
   
+  //Table with inline Bar chart
+
+  let chartWidth = "100px";
+    
+  // Setup the scale for the values for display, use abs max as max value
+  let x = d3.scaleLinear()
+      .domain([0, d3.max(set.nodes, function(d) { return d.children.length })])
+      .range(["0%", "100%"]);
+  let rightSvg = d3.select(this.refs.titleUserView)
+    .select('#barChart')
+  
+  rightSvg.selectAll('*').remove()
+  
+  let table = rightSvg.append('foreignObject')
+    .attr('width','100%')
+    .attr('height','100%')
+    .style('overflow-y','scroll')
+    .append('xhtml:table');
+  let th = table.append("tr")
+  
+  th.append('td').attr('class', 'data name')
+    .text('Title Term')
+  th.append('td').attr('class', 'data name')
+    .text('# of User')
+  
+  // Create a table with rows and bind a data row to each table row
+  let tr = table.selectAll("tr.data")
+      .data(set.nodes)
+    .enter()
+      .append("tr")
+      .attr("class", "datarow");
+  
+  // Set the even columns
+  d3.selectAll(".datarow").filter(":nth-child(even)")
+    .style("background", "whitesmoke")
+  
+  
+  // Create the name column
+  tr.append("td").attr("class", "data name")
+      .text(function(d) { return d.titleTerm });
+      
+  // Create the percent value column
+  tr.append("td").attr("class", "data value")
+      .text(function(d) { return d.children.length })
+  // Create a column at the beginning of the table for the chart
+  let chart = tr.append("td").attr("class", "chart")
+  	.attr("width", chartWidth)
+    .attr('padding-bottom','2px')
+    .attr('padding-top','2px');
+  
+  // Create the div structure of the chart
+  chart.append("div")
+    .style('height','17px')
+    .attr("class", "chart")
+  	.style('float','left')
+    .style('width','50%')
+  	.append("div")
+    .style('height','17px')
+  	.attr("class", "positive");
+    
+  // Creates the positive div bar
+  tr.select("div.positive")
+    .style("width", "0%")
+    .style("background-color",'steelblue')
+    .transition()
+    .duration(500)
+    .style("width", function(d) { 
+        return d.children.length > 0 ? x(d.children.length) : "0%"; });
   /*let set = {
       'name':'',
       'children':[{'name':'','size':1000}]
@@ -823,19 +876,19 @@ class Graph extends Component {
 
     let root = set;
     const width=900,height=700;
-    var svg = d3.select(this.refs.chart)
+    let svg = d3.select(this.refs.chart)
       .select('svg');
     
     svg.selectAll('*').remove();
 
-    var color = d3.scaleOrdinal(d3.schemeCategory10 );
+    let color = d3.scaleOrdinal(d3.schemeCategory10 );
     color(1);
-    var force = d3.forceSimulation()
+    let force = d3.forceSimulation()
         .force('link', d3.forceLink().id(function(d) { return d.id; }))
         .force('charge', d3.forceManyBody().strength(-30))
         .force('center', d3.forceCenter(width / 2, height / 2));
 
-    var link = svg.selectAll('.link'),
+    let link = svg.selectAll('.link'),
         node = svg.selectAll('.node');
 
     root = set;
@@ -843,11 +896,11 @@ class Graph extends Component {
 
     force.on('tick',tick);
     function update() {
-      var hierarchy = d3.hierarchy(root);
-      var tree = d3.tree();
-      var links = tree(hierarchy).links();
+      let hierarchy = d3.hierarchy(root);
+      let tree = d3.tree();
+      let links = tree(hierarchy).links();
 
-      var nodes = flatten(root);
+      let nodes = flatten(root);
           //links = d3.tree().links(nodes);
       console.log(nodes);
       console.log(hierarchy);
@@ -919,7 +972,7 @@ class Graph extends Component {
 
     // Returns a list of all nodes under the root.
     function flatten(root) {
-      var nodes = [], i = 0;
+      let nodes = [], i = 0;
 
       function recurse(node) {
         if (node.children) node.children.forEach(recurse);
@@ -939,7 +992,10 @@ class Graph extends Component {
  
   render(){
     return <div id={'#' + this.props.id}>
-      <div ref='chart'><svg width='100%' height='900px'></svg></div>
+      <div ref='titleUserView'>
+        <svg width='80%' height='900px'></svg>
+        <svg id='barChart' width='20%' height='900px'></svg>
+      </div>
     </div>
   }
 }
