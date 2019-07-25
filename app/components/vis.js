@@ -343,7 +343,7 @@ const graph = {
     {'source': 'Mme.Hucheloup', 'target': 'Enjolras', 'value': 1}
   ]
 }
-const SetNumOfNodes = 50;
+const SetNumOfNodes = 100;
 class Graph extends Component {
   constructor(props) {
     super(props);
@@ -456,9 +456,10 @@ class Graph extends Component {
     color(1);
     let simulation = d3.forceSimulation()
         .force('link', d3.forceLink().id(function(d) { return d.titleTerm; }))
-        .force('charge', d3.forceManyBody().strength(-100))
+        .force('charge', d3.forceManyBody().strength(-150))
         .force('center', d3.forceCenter(width / 2, height / 2));
 
+    let conutOfClickedNode = 0;
     update();
     
     function update(){
@@ -557,8 +558,8 @@ class Graph extends Component {
             return 'visible';
           return 'hidden';
         })
-        .attr('x', 0)
-        .attr('y', 0);
+        .attr('x', function(d){ return -d.size})
+        .attr('y', function(d){return d.size + 7});
       nodeEnter.append('title')
         .text(function(d) { return d.titleTerm; });
   
@@ -591,21 +592,26 @@ class Graph extends Component {
       }
 
       function clicked(d, i) {
-        //console.log('clicked');
+        console.log('clicked');
         //console.log(d.tag);
         if (d3.event.defaultPrevented) return; // dragged
         
-        node.data(set.nodes, function(o) {
-            if (isConnected(d, o)) {
-              if (o.connected <= 0){
-                o.connected = 1
-              } else{
-                o.connected++
-              }
-            } else {
-              if (o.connected == -1)
-                o.connected = 0
-            }
+        set.nodes.forEach(function(node){
+          if (isConnected(d, node)) {
+                  console.log(d,node)
+                  if (node.connected <= 0){
+                    //console.log(o.connected)
+                    node.connected = 1
+                    //console.log(o.connected)
+                  } else{
+                    //console.log(o.connected)
+                    node.connected++
+                    //console.log(o.connected)
+                  }
+                } else {
+                  if (node.connected == -1)
+                  node.connected = 0
+                }
         })
 
         if(d.tag==0){
@@ -643,12 +649,21 @@ class Graph extends Component {
           })
           
           d.tag=1;
+          conutOfClickedNode++
         }else{
           d3.select(this).select('circle').attr('stroke','white');
           
           node.data(set.nodes, function(o) {
             if (isConnected(d, o)) {
-              o.connected--
+              let index_0 = set.nodes.findIndex(function(node){
+                if (node == undefined)
+                  return -1
+                return node.titleTerm == o.titleTerm 
+              })
+              //console.log(id_1, index_1)
+              set.nodes[index_0].connected--
+              console.log(set.nodes[index_0].connected)
+
             }
           })
         
@@ -692,7 +707,15 @@ class Graph extends Component {
           }) 
           
           set.nodes = set.nodes.filter(function(){return true});
-        	set.links = set.links.filter(function(){return true});          
+          set.links = set.links.filter(function(){return true});      
+          
+          conutOfClickedNode--
+
+          if(conutOfClickedNode==0){
+            set.nodes.forEach(function(node){
+              node.connected = -1
+            })
+          }
           //mouseOut();
           d.tag=0;
         }
