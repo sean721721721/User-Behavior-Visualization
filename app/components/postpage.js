@@ -20,7 +20,7 @@ const PostPage = (props) => {
   return (
     <div id="main-container">
       <div className="action-bar">
-        <CSV filename={filename} post={list} config={downloadprops} />
+        {/* <CSV filename={filename} post={list} config={downloadprops} /> */}
         <div className="btn-group btn-group-dir">
           <a className="btn-selected" href="/bbs/MobileComm/index.html">
             看板

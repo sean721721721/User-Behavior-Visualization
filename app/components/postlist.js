@@ -60,7 +60,7 @@ class List extends React.Component {
               title="Go"
               type="button"
             />
-            <CSV filename={filename} post={postarr} config={downloadprops} />
+            {/* <CSV filename={filename} post={postarr} config={downloadprops} /> */}
             <a href={href} target="_blank" rel="noopener noreferrer">
               {title}
             </a>

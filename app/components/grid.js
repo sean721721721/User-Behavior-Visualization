@@ -1,3 +1,4 @@
+/* eslint-disable no-unused-vars */
 /* eslint-disable no-console */
 /* eslint-disable max-len */
 // @flow
@@ -16,6 +17,7 @@ import AsyncApp from '../containers/AsyncApp';
 import Loading from './loading';
 import './style/bbs.css';
 import Graph from './vis';
+import GateKeeper from './GateKeeper';
 
 class Grid extends React.Component {
   constructor(props) {
@@ -90,6 +92,28 @@ class Grid extends React.Component {
       termlistprops: {
         list: [
           [' ', 0],
+        ],
+      },
+      gatekeeperprops: {
+        ptt: [
+          { id: 0, value: 0.5, date: '2019-05-01T04:25:50.000Z' },
+          { id: 1, value: 0.7, date: '2019-05-02T04:25:50.000Z' },
+          { id: 2, value: 1.0, date: '2019-05-03T04:25:50.000Z' },
+          { id: 3, value: 0.1, date: '2019-05-04T04:25:50.000Z' },
+          { id: 4, value: 0.2, date: '2019-05-05T04:25:50.000Z' },
+          { id: 5, value: 0.5, date: '2019-05-06T04:25:50.000Z' },
+          { id: 6, value: 0.3, date: '2019-05-07T04:25:50.000Z' },
+          { id: 7, value: 0.4, date: '2019-05-08T04:25:50.000Z' },
+          { id: 8, value: 0.6, date: '2019-05-09T04:25:50.000Z' },
+          { id: 9, value: 0.8, date: '2019-05-10T04:25:50.000Z' },
+        ],
+        news: [
+          { id: 0, value: 0.9, date: '2019-04-26T04:25:50.000Z' },
+          { id: 1, value: 1.0, date: '2019-04-27T04:25:50.000Z' },
+          { id: 1, value: 0.4, date: '2019-04-28T04:25:50.000Z' },
+          { id: 2, value: 1.0, date: '2019-04-29T04:25:50.000Z' },
+          { id: 3, value: 0.51, date: '2019-04-30T04:25:50.000Z' },
+          { id: 4, value: 0.50, date: '2019-05-08T04:25:50.000Z' },
         ],
       },
       visprops: {
@@ -282,14 +306,13 @@ class Grid extends React.Component {
     fetch(myRequest)
       .then((response) => {
         if (response.status >= 200 && response.status < 300) {
-            // console.log(response.status);
-            console.log(response);
-            return response.json();
-        } else {
-            var error = new Error(response.statusText)
-            error.response = response;
-            throw error;
+          // console.log(response.status);
+          console.log(response);
+          return response.json();
         }
+        const error = new Error(response.statusText);
+        error.response = response;
+        throw error;
       })
       .then((res) => {
         console.log(res);
@@ -474,7 +497,7 @@ class Grid extends React.Component {
 
   render() {
     const {
-      isLoading, responseError, errorType, menuprops, termlistprops, visprops, postlistprops, postprops,
+      isLoading, responseError, errorType, menuprops, termlistprops, gatekeeperprops, visprops, postlistprops, postprops,
     } = this.state;
     const selectedOptions = this.selectedOptions();
     const filename = this.getFilename();
@@ -494,21 +517,22 @@ class Grid extends React.Component {
         <Provider store={store}>
           <div className="grid1">
             <div className="grid2">
-              <div className="box overview">
+              <div className="box gateKeeperview">
+                <GateKeeper gatekeeperprops={gatekeeperprops} />
+              </div>
+              {/* <div className="box overview">
                 <div id="template" className="slider__list" />
                 <div id="over" />
                 <div id="select" />
                 <Loading isLoading={isLoading} responseError={responseError} errorType={errorType} />
                 <AsyncApp />
-                {/* <VisibleCardList /> */}
+                <VisibleCardList />
                 <Footer />
-                {/* */}
               </div>
               <div className="box postview">
                 <div id="page" />
                 <AddCard />
-                {/* */}
-              </div>
+              </div> */}
               <div className="box termview">
                 <Termlist termlistprops={termlistprops.list} />
               </div>

@@ -294,17 +294,6 @@ let findquery = async function findquery(page, queryobj, ptt, limit, sort) {
   } else {
     query = pagepost
       .find(queryobj)
-      /*, function (err, pagepost) {
-                    //logger.log('info',pagepost);
-                    console.log('query: ', queryobj);
-                    return pagepost;
-                })
-                .then(pagepost=>{
-                    return pagepost;
-                })
-                .catch(err=>{
-                    console.log(err);
-                })*/
       .sort(sort)
       .limit(limit);
   }
@@ -379,54 +368,26 @@ let callback = function callback(req, res) {
           resolve(
             findquery(page1, queryobj1, ptt, limit, sort).then(res => {
               console.log('q1 lenght: ' + res.result.length);
+              // console.log('res.result', res.result);
               let datalist = dl.bindpostlist(res.result, ptt);
               // let postlist = datalist[0];
               let wordlist = datalist[1];
               let titleWordList = datalist[2];
-              // console.log('postlist:',datalist);
-              //let ul1 = dl.newualist(result, ptt);
-              /*let postlist = dl.bindpostlist(res, res, ptt);
-              let user = Object.values(ul1);
-                        let userlist = dl.binduserobj(ul1, ul1, user, user);
-                        let oldata = dl.overlap(userlist, 'all');
-                        console.log('All');
-                        oldata = dl.olresult(oldata);
-                        let sortdata = dl.sortdegree(oldata);
-                        let queryresult = {
-                            title: 'query',
-                            query: req.params,
-                            summary: [
-                                [result.length, result.length, result.length * 2],
-                                [user.length, user.length, user.length * 2]
-                            ],
-                            data: [postlist, oldata, sortdata],
-                        };
-                        return queryresult;*/
+              // Remove article content
+              res.result.forEach(function(result){
+                result.content = '';
+                result.messages.forEach(function(message){
+                message.push_content = '';
+                })
+              })
+
+
               return { list: [res.result, wordlist, titleWordList], previous: [res.previous], next: [res.next] };
             }),
           );
         } else if (!isEmpty(queryobj2)) {
           resolve(
             findquery(page2, queryobj2, ptt, limit, sort).then(res => {
-              //console.log('q2 lenght: ' + res.length);
-              //let ul2 = dl.newualist(result, ptt);
-              /*let postlist = dl.bindpostlist(res, res, ptt);
-              let user = Object.values(ul2);
-                        let userlist = dl.binduserobj(ul2, ul2, user, user);
-                        let oldata = dl.overlap(userlist, 'all');
-                        console.log('All');
-                        oldata = dl.olresult(oldata);
-                        let sortdata = dl.sortdegree(oldata);
-                        let queryresult = {
-                            title: 'query',
-                            query: req.params,
-                            summary: [
-                                [result.length, result.length, result.length * 2],
-                                [user.length, user.length, user.length * 2]
-                            ],
-                            data: [postlist, oldata, sortdata],
-                        };
-                        return queryresult;*/
               return { list: [[], res.result], previous: [res.previous], next: [res.next] };
             }),
           );
@@ -451,40 +412,6 @@ let callback = function callback(req, res) {
         .then(res => {
           console.log('q1 lenght: ' + res[0].result.length);
           console.log('q2 lenght: ' + res[1].result.length);
-          //let ul1 = dl.newualist(result[0], ptt);
-          //let ul2 = dl.newualist(result[1], ptt);
-          /*let postlist = dl.bindpostlist(res[0].result, res[1].result, ptt);
-          let user = Object.values(ul1);
-                    let tuser = Object.values(ul2);
-                    let userlist = dl.binduserobj(ul1, ul2, user, tuser);
-                    let oldata = userlist;
-                    if (req.params.co === 'Co reaction') {
-                        oldata = dl.overlap(userlist, 'like');
-                    }
-                    if (req.params.co === 'Co comment') {
-                        oldata = dl.overlap(userlist, 'comment');
-                    }
-                    if (req.params.co === 'Co share') {
-                        oldata = dl.overlap(userlist, 'share');
-                    }
-                    if (req.params.co === 'All') {
-                        oldata = dl.overlap(userlist, 'all');
-                    }
-                    console.log(req.params.co);
-                    oldata = dl.olresult(oldata);
-                    let sortdata = dl.sortdegree(oldata);
-                    let queryresult = {
-                        title: 'query',
-                        query: req.params,
-                        summary: [
-                            [result[0].length, result[1].length, result[0].length + result[1].length],
-                            [user.length, tuser.length, userlist.length]
-                        ],
-                        data: [postlist, oldata, sortdata],
-                    };
-                    //console.log(queryresult);
-                    return queryresult;*/
-          //console.log(postlist.length);
           return {
             list: [res[0].result, res[1].result],
             previous: [res[0].previous, res[1].previous],
@@ -540,35 +467,16 @@ let mapreduce = function mapreduce(queryobj) {
 
     values.forEach(function(value) {
       reducedObject.likes += value.likes;
-      /*reducedObject.like += value.like;
-            reducedObject.love += value.love;
-            reducedObject.haha += value.haha;
-            reducedObject.wow += value.wow;
-            reducedObject.angry += value.angry;
-            reducedObject.sad += value.sad;*/
     });
     return reducedObject;
   };
-  /*
-    o.finalizeFunction = function (key, reducedValue) {
-    
-        if (reducedValue.count > 0)
-            reducedValue.avg_time = reducedValue.total_time / reducedValue.count;
-    
-        return reducedValue;
-    };
-    */
+
   o.query = queryobj;
 
   o.out = {
     reduce: 'session_stat',
   };
-  /*{
-        query: queryobj,
-        out: {
-            reduce: "session_stat"
-        },
-    }*/
+
   let result = pagepost.mapReduce(o, function(err, res) {
     if (err) console.log(err);
     console.log(res);

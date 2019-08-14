@@ -1,3 +1,8 @@
+/* eslint-disable react/prop-types */
+/* eslint-disable no-unused-vars */
+/* eslint-disable no-use-before-define */
+/* eslint-disable camelcase */
+/* eslint-disable no-param-reassign */
 import React, { Component } from 'react';
 // import PropTypes from 'prop-types';
 // import { connect } from 'react-redux';
@@ -6,418 +11,101 @@ import * as d3 from 'd3';
 // import { max } from 'moment';
 // import { Row, Form } from 'antd';
 
-const graph = {
-  nodes: [
-    {id: 'Myriel', group: 1},
-    {id: 'Napoleon', group: 1},
-    {id: 'Mlle.Baptistine', group: 1},
-    {id: 'Mme.Magloire', group: 1},
-    {id: 'CountessdeLo', group: 1},
-    {id: 'Geborand', group: 1},
-    {id: 'Champtercier', group: 1},
-    {id: 'Cravatte', group: 1},
-    {id: 'Count', group: 1},
-    {id: 'OldMan', group: 1},
-    {id: 'Labarre', group: 2},
-    {id: 'Valjean', group: 2},
-    {id: 'Marguerite', group: 3},
-    {id: 'Mme.deR', group: 2},
-    {id: 'Isabeau', group: 2},
-    {id: 'Gervais', group: 2},
-    {id: 'Tholomyes', group: 3},
-    {id: 'Listolier', group: 3},
-    {id: 'Fameuil', group: 3},
-    {id: 'Blacheville', group: 3},
-    {id: 'Favourite', group: 3},
-    {id: 'Dahlia', group: 3},
-    {id: 'Zephine', group: 3},
-    {id: 'Fantine', group: 3},
-    {id: 'Mme.Thenardier', group: 4},
-    {id: 'Thenardier', group: 4},
-    {id: 'Cosette', group: 5},
-    {id: 'Javert', group: 4},
-    {id: 'Fauchelevent', group: 0},
-    {id: 'Bamatabois', group: 2},
-    {id: 'Perpetue', group: 3},
-    {id: 'Simplice', group: 2},
-    {id: 'Scaufflaire', group: 2},
-    {id: 'Woman1', group: 2},
-    {id: 'Judge', group: 2},
-    {id: 'Champmathieu', group: 2},
-    {id: 'Brevet', group: 2},
-    {id: 'Chenildieu', group: 2},
-    {id: 'Cochepaille', group: 2},
-    {id: 'Pontmercy', group: 4},
-    {id: 'Boulatruelle', group: 6},
-    {id: 'Eponine', group: 4},
-    {id: 'Anzelma', group: 4},
-    {id: 'Woman2', group: 5},
-    {id: 'MotherInnocent', group: 0},
-    {id: 'Gribier', group: 0},
-    {id: 'Jondrette', group: 7},
-    {id: 'Mme.Burgon', group: 7},
-    {id: 'Gavroche', group: 8},
-    {id: 'Gillenormand', group: 5},
-    {id: 'Magnon', group: 5},
-    {id: 'Mlle.Gillenormand', group: 5},
-    {id: 'Mme.Pontmercy', group: 5},
-    {id: 'Mlle.Vaubois', group: 5},
-    {id: 'Lt.Gillenormand', group: 5},
-    {id: 'Marius', group: 8},
-    {id: 'BaronessT', group: 5},
-    {id: 'Mabeuf', group: 8},
-    {id: 'Enjolras', group: 8},
-    {id: 'Combeferre', group: 8},
-    {id: 'Prouvaire', group: 8},
-    {id: 'Feuilly', group: 8},
-    {id: 'Courfeyrac', group: 8},
-    {id: 'Bahorel', group: 8},
-    {id: 'Bossuet', group: 8},
-    {id: 'Joly', group: 8},
-    {id: 'Grantaire', group: 8},
-    {id: 'MotherPlutarch', group: 9},
-    {id: 'Gueulemer', group: 4},
-    {id: 'Babet', group: 4},
-    {id: 'Claquesous', group: 4},
-    {id: 'Montparnasse', group: 4},
-    {id: 'Toussaint', group: 5},
-    {id: 'Child1', group: 10},
-    {id: 'Child2', group: 10},
-    {id: 'Brujon', group: 4},
-    {id: 'Mme.Hucheloup', group: 8}
-  ],
-  'links': [
-    {'source': 'Napoleon', 'target': 'Myriel', 'value': 1},
-    {'source': 'Mlle.Baptistine', 'target': 'Myriel', 'value': 8},
-    {'source': 'Mme.Magloire', 'target': 'Myriel', 'value': 10},
-    {'source': 'Mme.Magloire', 'target': 'Mlle.Baptistine', 'value': 6},
-    {'source': 'CountessdeLo', 'target': 'Myriel', 'value': 1},
-    {'source': 'Geborand', 'target': 'Myriel', 'value': 1},
-    {'source': 'Champtercier', 'target': 'Myriel', 'value': 1},
-    {'source': 'Cravatte', 'target': 'Myriel', 'value': 1},
-    {'source': 'Count', 'target': 'Myriel', 'value': 2},
-    {'source': 'OldMan', 'target': 'Myriel', 'value': 1},
-    {'source': 'Valjean', 'target': 'Labarre', 'value': 1},
-    {'source': 'Valjean', 'target': 'Mme.Magloire', 'value': 3},
-    {'source': 'Valjean', 'target': 'Mlle.Baptistine', 'value': 3},
-    {'source': 'Valjean', 'target': 'Myriel', 'value': 5},
-    {'source': 'Marguerite', 'target': 'Valjean', 'value': 1},
-    {'source': 'Mme.deR', 'target': 'Valjean', 'value': 1},
-    {'source': 'Isabeau', 'target': 'Valjean', 'value': 1},
-    {'source': 'Gervais', 'target': 'Valjean', 'value': 1},
-    {'source': 'Listolier', 'target': 'Tholomyes', 'value': 4},
-    {'source': 'Fameuil', 'target': 'Tholomyes', 'value': 4},
-    {'source': 'Fameuil', 'target': 'Listolier', 'value': 4},
-    {'source': 'Blacheville', 'target': 'Tholomyes', 'value': 4},
-    {'source': 'Blacheville', 'target': 'Listolier', 'value': 4},
-    {'source': 'Blacheville', 'target': 'Fameuil', 'value': 4},
-    {'source': 'Favourite', 'target': 'Tholomyes', 'value': 3},
-    {'source': 'Favourite', 'target': 'Listolier', 'value': 3},
-    {'source': 'Favourite', 'target': 'Fameuil', 'value': 3},
-    {'source': 'Favourite', 'target': 'Blacheville', 'value': 4},
-    {'source': 'Dahlia', 'target': 'Tholomyes', 'value': 3},
-    {'source': 'Dahlia', 'target': 'Listolier', 'value': 3},
-    {'source': 'Dahlia', 'target': 'Fameuil', 'value': 3},
-    {'source': 'Dahlia', 'target': 'Blacheville', 'value': 3},
-    {'source': 'Dahlia', 'target': 'Favourite', 'value': 5},
-    {'source': 'Zephine', 'target': 'Tholomyes', 'value': 3},
-    {'source': 'Zephine', 'target': 'Listolier', 'value': 3},
-    {'source': 'Zephine', 'target': 'Fameuil', 'value': 3},
-    {'source': 'Zephine', 'target': 'Blacheville', 'value': 3},
-    {'source': 'Zephine', 'target': 'Favourite', 'value': 4},
-    {'source': 'Zephine', 'target': 'Dahlia', 'value': 4},
-    {'source': 'Fantine', 'target': 'Tholomyes', 'value': 3},
-    {'source': 'Fantine', 'target': 'Listolier', 'value': 3},
-    {'source': 'Fantine', 'target': 'Fameuil', 'value': 3},
-    {'source': 'Fantine', 'target': 'Blacheville', 'value': 3},
-    {'source': 'Fantine', 'target': 'Favourite', 'value': 4},
-    {'source': 'Fantine', 'target': 'Dahlia', 'value': 4},
-    {'source': 'Fantine', 'target': 'Zephine', 'value': 4},
-    {'source': 'Fantine', 'target': 'Marguerite', 'value': 2},
-    {'source': 'Fantine', 'target': 'Valjean', 'value': 9},
-    {'source': 'Mme.Thenardier', 'target': 'Fantine', 'value': 2},
-    {'source': 'Mme.Thenardier', 'target': 'Valjean', 'value': 7},
-    {'source': 'Thenardier', 'target': 'Mme.Thenardier', 'value': 13},
-    {'source': 'Thenardier', 'target': 'Fantine', 'value': 1},
-    {'source': 'Thenardier', 'target': 'Valjean', 'value': 12},
-    {'source': 'Cosette', 'target': 'Mme.Thenardier', 'value': 4},
-    {'source': 'Cosette', 'target': 'Valjean', 'value': 31},
-    {'source': 'Cosette', 'target': 'Tholomyes', 'value': 1},
-    {'source': 'Cosette', 'target': 'Thenardier', 'value': 1},
-    {'source': 'Javert', 'target': 'Valjean', 'value': 17},
-    {'source': 'Javert', 'target': 'Fantine', 'value': 5},
-    {'source': 'Javert', 'target': 'Thenardier', 'value': 5},
-    {'source': 'Javert', 'target': 'Mme.Thenardier', 'value': 1},
-    {'source': 'Javert', 'target': 'Cosette', 'value': 1},
-    {'source': 'Fauchelevent', 'target': 'Valjean', 'value': 8},
-    {'source': 'Fauchelevent', 'target': 'Javert', 'value': 1},
-    {'source': 'Bamatabois', 'target': 'Fantine', 'value': 1},
-    {'source': 'Bamatabois', 'target': 'Javert', 'value': 1},
-    {'source': 'Bamatabois', 'target': 'Valjean', 'value': 2},
-    {'source': 'Perpetue', 'target': 'Fantine', 'value': 1},
-    {'source': 'Simplice', 'target': 'Perpetue', 'value': 2},
-    {'source': 'Simplice', 'target': 'Valjean', 'value': 3},
-    {'source': 'Simplice', 'target': 'Fantine', 'value': 2},
-    {'source': 'Simplice', 'target': 'Javert', 'value': 1},
-    {'source': 'Scaufflaire', 'target': 'Valjean', 'value': 1},
-    {'source': 'Woman1', 'target': 'Valjean', 'value': 2},
-    {'source': 'Woman1', 'target': 'Javert', 'value': 1},
-    {'source': 'Judge', 'target': 'Valjean', 'value': 3},
-    {'source': 'Judge', 'target': 'Bamatabois', 'value': 2},
-    {'source': 'Champmathieu', 'target': 'Valjean', 'value': 3},
-    {'source': 'Champmathieu', 'target': 'Judge', 'value': 3},
-    {'source': 'Champmathieu', 'target': 'Bamatabois', 'value': 2},
-    {'source': 'Brevet', 'target': 'Judge', 'value': 2},
-    {'source': 'Brevet', 'target': 'Champmathieu', 'value': 2},
-    {'source': 'Brevet', 'target': 'Valjean', 'value': 2},
-    {'source': 'Brevet', 'target': 'Bamatabois', 'value': 1},
-    {'source': 'Chenildieu', 'target': 'Judge', 'value': 2},
-    {'source': 'Chenildieu', 'target': 'Champmathieu', 'value': 2},
-    {'source': 'Chenildieu', 'target': 'Brevet', 'value': 2},
-    {'source': 'Chenildieu', 'target': 'Valjean', 'value': 2},
-    {'source': 'Chenildieu', 'target': 'Bamatabois', 'value': 1},
-    {'source': 'Cochepaille', 'target': 'Judge', 'value': 2},
-    {'source': 'Cochepaille', 'target': 'Champmathieu', 'value': 2},
-    {'source': 'Cochepaille', 'target': 'Brevet', 'value': 2},
-    {'source': 'Cochepaille', 'target': 'Chenildieu', 'value': 2},
-    {'source': 'Cochepaille', 'target': 'Valjean', 'value': 2},
-    {'source': 'Cochepaille', 'target': 'Bamatabois', 'value': 1},
-    {'source': 'Pontmercy', 'target': 'Thenardier', 'value': 1},
-    {'source': 'Boulatruelle', 'target': 'Thenardier', 'value': 1},
-    {'source': 'Eponine', 'target': 'Mme.Thenardier', 'value': 2},
-    {'source': 'Eponine', 'target': 'Thenardier', 'value': 3},
-    {'source': 'Anzelma', 'target': 'Eponine', 'value': 2},
-    {'source': 'Anzelma', 'target': 'Thenardier', 'value': 2},
-    {'source': 'Anzelma', 'target': 'Mme.Thenardier', 'value': 1},
-    {'source': 'Woman2', 'target': 'Valjean', 'value': 3},
-    {'source': 'Woman2', 'target': 'Cosette', 'value': 1},
-    {'source': 'Woman2', 'target': 'Javert', 'value': 1},
-    {'source': 'MotherInnocent', 'target': 'Fauchelevent', 'value': 3},
-    {'source': 'MotherInnocent', 'target': 'Valjean', 'value': 1},
-    {'source': 'Gribier', 'target': 'Fauchelevent', 'value': 2},
-    {'source': 'Mme.Burgon', 'target': 'Jondrette', 'value': 1},
-    {'source': 'Gavroche', 'target': 'Mme.Burgon', 'value': 2},
-    {'source': 'Gavroche', 'target': 'Thenardier', 'value': 1},
-    {'source': 'Gavroche', 'target': 'Javert', 'value': 1},
-    {'source': 'Gavroche', 'target': 'Valjean', 'value': 1},
-    {'source': 'Gillenormand', 'target': 'Cosette', 'value': 3},
-    {'source': 'Gillenormand', 'target': 'Valjean', 'value': 2},
-    {'source': 'Magnon', 'target': 'Gillenormand', 'value': 1},
-    {'source': 'Magnon', 'target': 'Mme.Thenardier', 'value': 1},
-    {'source': 'Mlle.Gillenormand', 'target': 'Gillenormand', 'value': 9},
-    {'source': 'Mlle.Gillenormand', 'target': 'Cosette', 'value': 2},
-    {'source': 'Mlle.Gillenormand', 'target': 'Valjean', 'value': 2},
-    {'source': 'Mme.Pontmercy', 'target': 'Mlle.Gillenormand', 'value': 1},
-    {'source': 'Mme.Pontmercy', 'target': 'Pontmercy', 'value': 1},
-    {'source': 'Mlle.Vaubois', 'target': 'Mlle.Gillenormand', 'value': 1},
-    {'source': 'Lt.Gillenormand', 'target': 'Mlle.Gillenormand', 'value': 2},
-    {'source': 'Lt.Gillenormand', 'target': 'Gillenormand', 'value': 1},
-    {'source': 'Lt.Gillenormand', 'target': 'Cosette', 'value': 1},
-    {'source': 'Marius', 'target': 'Mlle.Gillenormand', 'value': 6},
-    {'source': 'Marius', 'target': 'Gillenormand', 'value': 12},
-    {'source': 'Marius', 'target': 'Pontmercy', 'value': 1},
-    {'source': 'Marius', 'target': 'Lt.Gillenormand', 'value': 1},
-    {'source': 'Marius', 'target': 'Cosette', 'value': 21},
-    {'source': 'Marius', 'target': 'Valjean', 'value': 19},
-    {'source': 'Marius', 'target': 'Tholomyes', 'value': 1},
-    {'source': 'Marius', 'target': 'Thenardier', 'value': 2},
-    {'source': 'Marius', 'target': 'Eponine', 'value': 5},
-    {'source': 'Marius', 'target': 'Gavroche', 'value': 4},
-    {'source': 'BaronessT', 'target': 'Gillenormand', 'value': 1},
-    {'source': 'BaronessT', 'target': 'Marius', 'value': 1},
-    {'source': 'Mabeuf', 'target': 'Marius', 'value': 1},
-    {'source': 'Mabeuf', 'target': 'Eponine', 'value': 1},
-    {'source': 'Mabeuf', 'target': 'Gavroche', 'value': 1},
-    {'source': 'Enjolras', 'target': 'Marius', 'value': 7},
-    {'source': 'Enjolras', 'target': 'Gavroche', 'value': 7},
-    {'source': 'Enjolras', 'target': 'Javert', 'value': 6},
-    {'source': 'Enjolras', 'target': 'Mabeuf', 'value': 1},
-    {'source': 'Enjolras', 'target': 'Valjean', 'value': 4},
-    {'source': 'Combeferre', 'target': 'Enjolras', 'value': 15},
-    {'source': 'Combeferre', 'target': 'Marius', 'value': 5},
-    {'source': 'Combeferre', 'target': 'Gavroche', 'value': 6},
-    {'source': 'Combeferre', 'target': 'Mabeuf', 'value': 2},
-    {'source': 'Prouvaire', 'target': 'Gavroche', 'value': 1},
-    {'source': 'Prouvaire', 'target': 'Enjolras', 'value': 4},
-    {'source': 'Prouvaire', 'target': 'Combeferre', 'value': 2},
-    {'source': 'Feuilly', 'target': 'Gavroche', 'value': 2},
-    {'source': 'Feuilly', 'target': 'Enjolras', 'value': 6},
-    {'source': 'Feuilly', 'target': 'Prouvaire', 'value': 2},
-    {'source': 'Feuilly', 'target': 'Combeferre', 'value': 5},
-    {'source': 'Feuilly', 'target': 'Mabeuf', 'value': 1},
-    {'source': 'Feuilly', 'target': 'Marius', 'value': 1},
-    {'source': 'Courfeyrac', 'target': 'Marius', 'value': 9},
-    {'source': 'Courfeyrac', 'target': 'Enjolras', 'value': 17},
-    {'source': 'Courfeyrac', 'target': 'Combeferre', 'value': 13},
-    {'source': 'Courfeyrac', 'target': 'Gavroche', 'value': 7},
-    {'source': 'Courfeyrac', 'target': 'Mabeuf', 'value': 2},
-    {'source': 'Courfeyrac', 'target': 'Eponine', 'value': 1},
-    {'source': 'Courfeyrac', 'target': 'Feuilly', 'value': 6},
-    {'source': 'Courfeyrac', 'target': 'Prouvaire', 'value': 3},
-    {'source': 'Bahorel', 'target': 'Combeferre', 'value': 5},
-    {'source': 'Bahorel', 'target': 'Gavroche', 'value': 5},
-    {'source': 'Bahorel', 'target': 'Courfeyrac', 'value': 6},
-    {'source': 'Bahorel', 'target': 'Mabeuf', 'value': 2},
-    {'source': 'Bahorel', 'target': 'Enjolras', 'value': 4},
-    {'source': 'Bahorel', 'target': 'Feuilly', 'value': 3},
-    {'source': 'Bahorel', 'target': 'Prouvaire', 'value': 2},
-    {'source': 'Bahorel', 'target': 'Marius', 'value': 1},
-    {'source': 'Bossuet', 'target': 'Marius', 'value': 5},
-    {'source': 'Bossuet', 'target': 'Courfeyrac', 'value': 12},
-    {'source': 'Bossuet', 'target': 'Gavroche', 'value': 5},
-    {'source': 'Bossuet', 'target': 'Bahorel', 'value': 4},
-    {'source': 'Bossuet', 'target': 'Enjolras', 'value': 10},
-    {'source': 'Bossuet', 'target': 'Feuilly', 'value': 6},
-    {'source': 'Bossuet', 'target': 'Prouvaire', 'value': 2},
-    {'source': 'Bossuet', 'target': 'Combeferre', 'value': 9},
-    {'source': 'Bossuet', 'target': 'Mabeuf', 'value': 1},
-    {'source': 'Bossuet', 'target': 'Valjean', 'value': 1},
-    {'source': 'Joly', 'target': 'Bahorel', 'value': 5},
-    {'source': 'Joly', 'target': 'Bossuet', 'value': 7},
-    {'source': 'Joly', 'target': 'Gavroche', 'value': 3},
-    {'source': 'Joly', 'target': 'Courfeyrac', 'value': 5},
-    {'source': 'Joly', 'target': 'Enjolras', 'value': 5},
-    {'source': 'Joly', 'target': 'Feuilly', 'value': 5},
-    {'source': 'Joly', 'target': 'Prouvaire', 'value': 2},
-    {'source': 'Joly', 'target': 'Combeferre', 'value': 5},
-    {'source': 'Joly', 'target': 'Mabeuf', 'value': 1},
-    {'source': 'Joly', 'target': 'Marius', 'value': 2},
-    {'source': 'Grantaire', 'target': 'Bossuet', 'value': 3},
-    {'source': 'Grantaire', 'target': 'Enjolras', 'value': 3},
-    {'source': 'Grantaire', 'target': 'Combeferre', 'value': 1},
-    {'source': 'Grantaire', 'target': 'Courfeyrac', 'value': 2},
-    {'source': 'Grantaire', 'target': 'Joly', 'value': 2},
-    {'source': 'Grantaire', 'target': 'Gavroche', 'value': 1},
-    {'source': 'Grantaire', 'target': 'Bahorel', 'value': 1},
-    {'source': 'Grantaire', 'target': 'Feuilly', 'value': 1},
-    {'source': 'Grantaire', 'target': 'Prouvaire', 'value': 1},
-    {'source': 'MotherPlutarch', 'target': 'Mabeuf', 'value': 3},
-    {'source': 'Gueulemer', 'target': 'Thenardier', 'value': 5},
-    {'source': 'Gueulemer', 'target': 'Valjean', 'value': 1},
-    {'source': 'Gueulemer', 'target': 'Mme.Thenardier', 'value': 1},
-    {'source': 'Gueulemer', 'target': 'Javert', 'value': 1},
-    {'source': 'Gueulemer', 'target': 'Gavroche', 'value': 1},
-    {'source': 'Gueulemer', 'target': 'Eponine', 'value': 1},
-    {'source': 'Babet', 'target': 'Thenardier', 'value': 6},
-    {'source': 'Babet', 'target': 'Gueulemer', 'value': 6},
-    {'source': 'Babet', 'target': 'Valjean', 'value': 1},
-    {'source': 'Babet', 'target': 'Mme.Thenardier', 'value': 1},
-    {'source': 'Babet', 'target': 'Javert', 'value': 2},
-    {'source': 'Babet', 'target': 'Gavroche', 'value': 1},
-    {'source': 'Babet', 'target': 'Eponine', 'value': 1},
-    {'source': 'Claquesous', 'target': 'Thenardier', 'value': 4},
-    {'source': 'Claquesous', 'target': 'Babet', 'value': 4},
-    {'source': 'Claquesous', 'target': 'Gueulemer', 'value': 4},
-    {'source': 'Claquesous', 'target': 'Valjean', 'value': 1},
-    {'source': 'Claquesous', 'target': 'Mme.Thenardier', 'value': 1},
-    {'source': 'Claquesous', 'target': 'Javert', 'value': 1},
-    {'source': 'Claquesous', 'target': 'Eponine', 'value': 1},
-    {'source': 'Claquesous', 'target': 'Enjolras', 'value': 1},
-    {'source': 'Montparnasse', 'target': 'Javert', 'value': 1},
-    {'source': 'Montparnasse', 'target': 'Babet', 'value': 2},
-    {'source': 'Montparnasse', 'target': 'Gueulemer', 'value': 2},
-    {'source': 'Montparnasse', 'target': 'Claquesous', 'value': 2},
-    {'source': 'Montparnasse', 'target': 'Valjean', 'value': 1},
-    {'source': 'Montparnasse', 'target': 'Gavroche', 'value': 1},
-    {'source': 'Montparnasse', 'target': 'Eponine', 'value': 1},
-    {'source': 'Montparnasse', 'target': 'Thenardier', 'value': 1},
-    {'source': 'Toussaint', 'target': 'Cosette', 'value': 2},
-    {'source': 'Toussaint', 'target': 'Javert', 'value': 1},
-    {'source': 'Toussaint', 'target': 'Valjean', 'value': 1},
-    {'source': 'Child1', 'target': 'Gavroche', 'value': 2},
-    {'source': 'Child2', 'target': 'Gavroche', 'value': 2},
-    {'source': 'Child2', 'target': 'Child1', 'value': 3},
-    {'source': 'Brujon', 'target': 'Babet', 'value': 3},
-    {'source': 'Brujon', 'target': 'Gueulemer', 'value': 3},
-    {'source': 'Brujon', 'target': 'Thenardier', 'value': 3},
-    {'source': 'Brujon', 'target': 'Gavroche', 'value': 1},
-    {'source': 'Brujon', 'target': 'Eponine', 'value': 1},
-    {'source': 'Brujon', 'target': 'Claquesous', 'value': 1},
-    {'source': 'Brujon', 'target': 'Montparnasse', 'value': 1},
-    {'source': 'Mme.Hucheloup', 'target': 'Bossuet', 'value': 1},
-    {'source': 'Mme.Hucheloup', 'target': 'Joly', 'value': 1},
-    {'source': 'Mme.Hucheloup', 'target': 'Grantaire', 'value': 1},
-    {'source': 'Mme.Hucheloup', 'target': 'Bahorel', 'value': 1},
-    {'source': 'Mme.Hucheloup', 'target': 'Courfeyrac', 'value': 1},
-    {'source': 'Mme.Hucheloup', 'target': 'Gavroche', 'value': 1},
-    {'source': 'Mme.Hucheloup', 'target': 'Enjolras', 'value': 1}
-  ]
-}
 const SetNumOfNodes = 100;
 class Graph extends Component {
   constructor(props) {
     super(props);
+    this.myRef = React.createRef();
     this.state = props;
   }
+
   componentDidMount() {
     console.log('componentDidMount');
   }
+
   componentDidUpdate() {
     this.drawwithlabels();
     console.log('componentDidUpdate');
   }
 
-  drawwithlabels(){
+  drawwithlabels() {
     console.log(this.props);
-    let props = this.props.visprops;
-    let set={'nodes': [], 'links': []};
-    let link, node, links, nodes;
-    let initLinks = [];
-    let removeWords=['新聞','八卦','幹嘛']
-    let keys = Object.keys(props);
+    const { visprops: props } = this.props;
+    const set = { nodes: [], links: [] };
+    let link;
+    let node;
+    let links;
+    let nodes;
+    const initLinks = [];
+    const removeWords = ['新聞', '八卦', '幹嘛'];
+    // const keys = Object.keys(props);
 
-    //Nodes setting
-    for(let i=0;i<Math.min(props.length,SetNumOfNodes);i++){
-      if(props[i][0] != null){
-        let existKey = set.nodes.find(function(ele){
-          return ele.titleTerm === props[i][0];
-        })
-        if(existKey === undefined){
-          if(!removeWords.includes(props[i][0])){
-            set.nodes.push({titleTerm: props[i][0], children:props[i][1], _children:[], articleIndex:props[i][2], 
-                            group: 1, tag: 0, connected: -1, size: 5+Math.log2(props[i][1].length)});
-            props[i][1].forEach(function(titleTerm){
-              let existId = set.nodes.find(function(ele){
-                return ele.titleTerm === titleTerm;
-              })
-              if(existId === undefined){
+    // Nodes setting
+    for (let i = 0; i < Math.min(props.length, SetNumOfNodes); i += 1) {
+      if (props[i][0] != null) {
+        const existKey = set.nodes.find(ele => ele.titleTerm === props[i][0]);
+        if (existKey === undefined) {
+          if (!removeWords.includes(props[i][0])) {
+            set.nodes.push({
+              titleTerm: props[i][0],
+              children: props[i][1],
+              _children: [],
+              articleIndex: props[i][2],
+              group: 1,
+              tag: 0,
+              connected: -1,
+              size: 5 + Math.log2(props[i][1].length),
+            });
+            props[i][1].forEach((titleTerm) => {
+              const existId = set.nodes.find(ele => ele.titleTerm === titleTerm);
+              if (existId === undefined) {
                 // if(id != null)
                 //   set.nodes.push({id: id, group: 2, tag: 0, size: 5});
               }
-            })
-          }
-        }
-      }      
-    }
-
-    //title words links by articleIndex
-    let groupedWords = [];
-    let max = Math.min(props.length,SetNumOfNodes);
-    for(let i=0;i < max-1;i++){
-      if(props[i][0] != null && !removeWords.includes(props[i][0])){
-        for(let j=i+1;j<max;j++){
-          let count =0;
-          if(props[j][0] != null && !removeWords.includes(props[j][0])){
-            props[i][1].forEach(function(id_1){
-              props[j][1].forEach(function(id_2){
-                if(id_1 != null && id_2 != null){
-                  if(id_1 == id_2)
-                    count++;
-                }
-              })
-            })
-          }
-          if(count != 0){
-            set.links.push({source: props[i][0],target:props[j][0], 
-                      tag: 0,color: '#d9d9d9 ', value: count});
-            initLinks.push({source: props[i][0],target:props[j][0], 
-                      tag: 0, value: count})
+            });
           }
         }
       }
     }
 
-    //Links setting
+    // title words links by articleIndex
+    const groupedWords = [];
+    const max = Math.min(props.length, SetNumOfNodes);
+    for (let i = 0; i < max - 1; i += 1) {
+      if (props[i][0] != null && !removeWords.includes(props[i][0])) {
+        for (let j = i + 1; j < max; j += 1) {
+          let count = 0;
+          if (props[j][0] != null && !removeWords.includes(props[j][0])) {
+            props[i][1].forEach((id1) => {
+              props[j][1].forEach((id2) => {
+                if (id1 != null && id2 != null) {
+                  if (id1 === id2) {
+                    count += 1;
+                  }
+                }
+              });
+            });
+          }
+          if (count !== 0) {
+            set.links.push({
+              source: props[i][0],
+              target: props[j][0],
+              tag: 0,
+              color: '#d9d9d9 ',
+              value: count,
+            });
+            initLinks.push({
+              source: props[i][0],
+              target: props[j][0],
+              tag: 0,
+              value: count,
+            });
+          }
+        }
+      }
+    }
+
+    // Links setting
     // for(let i=0;i<Math.min(props.length,SetNumOfNodes);i++){
     //   if(props[i][0] != null){
     //     props[i][1].forEach(function(id){
@@ -437,359 +125,343 @@ class Graph extends Component {
     //     })
     //   }
     // }
-    console.log(set);
-    const width=900,height=900;
-    let svg = d3.select(this.refs.titleUserView)
+    // console.log(set);
+    const width = 900;
+    const height = 900;
+    let svg = d3.select(this.myRef.current)
       .select('svg');
-      
+
     svg.selectAll('*').remove();
-    
-    svg = svg.call(d3.zoom().scaleExtent([1 / 2, 8]).on('zoom', zoomed))
-        .append('g')
-        .attr('transform', 'translate(40,0)');
-    
+
     function zoomed() {
       svg.attr('transform', d3.event.transform);
-    } 
+    }
 
-    let color = d3.scaleOrdinal(d3.schemeCategory10 );
+    svg = svg.call(d3.zoom().scaleExtent([1 / 2, 8]).on('zoom', zoomed))
+      .append('g')
+      .attr('transform', 'translate(40,0)');
+
+    const color = d3.scaleOrdinal(d3.schemeCategory10);
     color(1);
-    let simulation = d3.forceSimulation()
-        .force('link', d3.forceLink().id(function(d) { return d.titleTerm; }))
-        .force('charge', d3.forceManyBody().strength(-150))
-        .force('center', d3.forceCenter(width / 2, height / 2));
+    const simulation = d3.forceSimulation()
+      .force('link', d3.forceLink().id(d => d.titleTerm))
+      .force('charge', d3.forceManyBody().strength(-150))
+      .force('center', d3.forceCenter(width / 2, height / 2));
 
     let conutOfClickedNode = 0;
     update();
-    
-    function update(){
-      
-      console.log(set);
-      
-      nodes = set.nodes;
-      links = set.links;
-            
+
+    function update() {
+      // console.log(set);
+      ({ nodes, links } = set);
       //  let g =svg.append('g')
       //     .attr('class', 'everything')
 
-      let link = svg.selectAll('line')
-                    .data(set.links);
+      link = svg.selectAll('line')
+        .data(set.links);
       link.exit().remove();
-      
-      let linkEnter = link.enter()
-          .append('line')
-          .attr('class', 'links')
-          .style('z-index',-1)
-          .attr('stroke',function(d){return d.color})
-          .attr('stroke-width', 1);
-      
-      link = linkEnter.merge(link)
-      svg.selectAll('g').remove()
-      let node = svg.selectAll('g')
-                    .data(set.nodes);
-      
-      // node.exit().remove();  
+      const linkEnter = link.enter()
+        .append('line')
+        .attr('class', 'links')
+        .style('z-index', -1)
+        .attr('stroke', d => d.color)
+        .attr('stroke-width', 1);
+      link = linkEnter.merge(link);
+      svg.selectAll('g').remove();
+      node = svg.selectAll('g')
+        .data(set.nodes);
+      // node.exit().remove();
       // let node = svg.selectAll('g').data(set.nodes)
-      let nodeEnter = node.enter()
+      const nodeEnter = node.enter()
         .append('g')
         .attr('class', 'nodes')
-        .style('z-index',1)
+        .style('z-index', 1)
         .on('click', clicked)
         .call(d3.drag()
-                .on('start', dragstarted)
-                .on('drag', dragged)
-                .on('end', dragended));
-        //.on('mouseover', mouseOver(.2))
-        //.on('mouseout', mouseOut);
-      
+          .on('start', dragstarted)
+          .on('drag', dragged)
+          .on('end', dragended));
+        // .on('mouseover', mouseOver(.2))
+        // .on('mouseout', mouseOut);
       nodeEnter
         .append('defs')
         .append('pattern')
-        .attr('id', function(d,i){
-          return 'pic_user';
-        })
-        .attr('height',60)
-        .attr('width',60)
-        .attr('x',0)
-        .attr('y',0)
+        .attr('id', 'pic_user')
+        .attr('height', 60)
+        .attr('width', 60)
+        .attr('x', 0)
+        .attr('y', 0)
         .append('image')
-        .attr('xlink:href','https://i.imgur.com/jTUiJ1l.png')
-        .attr('height',10)
-        .attr('width',10)
-        .attr('x',0)
-        .attr('y',0);
-
-
-      
-      let circles = nodeEnter.append('circle')
-        .attr('r', function(d){ return d.size; })
-        .attr('fill', function(d) { 
-          if(d.group==1)
-            return color(d.group)
-          return "url(#pic_user)"; })
-        .style('fill-opacity', function(d) {
-          if(d.group==1)
-            return d.connected == 0 ? 0.1 : 1
-          return 1
-        })
-        .attr('stroke',function(d){
-          if(d.group == 1){
-            if(d.tag == 1)
-              return 'red'
-            return 'white'
+        .attr('xlink:href', 'https://i.imgur.com/jTUiJ1l.png')
+        .attr('height', 10)
+        .attr('width', 10)
+        .attr('x', 0)
+        .attr('y', 0);
+      const circles = nodeEnter.append('circle')
+        .attr('r', d => d.size)
+        .attr('fill', (d) => {
+          if (d.group === 1) {
+            return color(d.group);
           }
-          return '#ff7f0e'
-          })
-        .attr('stroke-width',0.9)
-        .attr('stroke-opacity',1);
-  
+          return 'url(#pic_user)';
+        })
+        .style('fill-opacity', (d) => {
+          if (d.group === 1) {
+            return d.connected === 0 ? 0.1 : 1;
+          }
+          return 1;
+        })
+        .attr('stroke', (d) => {
+          if (d.group === 1) {
+            if (d.tag === 1) {
+              return 'red';
+            }
+            return 'white';
+          }
+          return '#ff7f0e';
+        })
+        .attr('stroke-width', 0.9)
+        .attr('stroke-opacity', 1);
       // let zoom_handler = d3.zoom()
       //       .on('zoom', zoom_actions);
       // zoom_handler(svg);
-      let lables = nodeEnter.append('text')
-        .text(function(d) {
-          return d.titleTerm;
-        })
+      const lables = nodeEnter.append('text')
+        .text(d => d.titleTerm)
         .attr('font-family', 'sans-serif')
-        .attr('font-size',' 10px')
-        .attr('color','#000')
-        .attr('visibility',function(d){
-          if(d.group == 1)
+        .attr('font-size', ' 10px')
+        .attr('color', '#000')
+        .attr('visibility', (d) => {
+          if (d.group === 1) {
             return 'visible';
+          }
           return 'hidden';
         })
-        .attr('x', function(d){ return -d.size})
-        .attr('y', function(d){return d.size + 7});
+        .attr('x', d => -d.size)
+        .attr('y', d => d.size + 7);
       nodeEnter.append('title')
-        .text(function(d) { return d.titleTerm; });
-  
+        .text(d => d.titleTerm);
       node = nodeEnter.merge(node);
       simulation
-            .nodes(set.nodes)
-            .on('tick', ticked);
+        .nodes(set.nodes)
+        .on('tick', ticked);
 
       simulation.alphaDecay(0.005)
-            .force('link')
-            .links(set.links)
-            .distance(function(d){return 300/d.value})
-            // .strength(1);
-    
-
+        .force('link')
+        .links(set.links)
+        .distance(d => 300 / d.value);
+      // .strength(1);
       function ticked() {
         link
-            .attr('x1', function(d) { return d.source.x; })
-            .attr('y1', function(d) { return d.source.y; })
-            .attr('x2', function(d) { return d.target.x; })
-            .attr('y2', function(d) { return d.target.y; });
+          .attr('x1', d => d.source.x)
+          .attr('y1', d => d.source.y)
+          .attr('x2', d => d.target.x)
+          .attr('y2', d => d.target.y);
         node
-            .attr('transform', function(d) {
-              return 'translate(' + d.x + ',' + d.y + ')';
-            })
-        }
-
-      function zoom_actions(){
-        g.attr('transform', d3.event.transform);
+          .attr('transform', d => `translate( ${d.x}, ${d.y})`);
       }
 
-      function clicked(d, i) {
+      function clicked(d) {
         console.log('clicked');
-        //console.log(d.tag);
         if (d3.event.defaultPrevented) return; // dragged
-        
-        set.nodes.forEach(function(node){
-          if (isConnected(d, node)) {
-                  console.log(d,node)
-                  if (node.connected <= 0){
-                    //console.log(o.connected)
-                    node.connected = 1
-                    //console.log(o.connected)
-                  } else{
-                    //console.log(o.connected)
-                    node.connected++
-                    //console.log(o.connected)
+        set.nodes.forEach((_node) => {
+          if (isConnected(d, _node)) {
+            // console.log(d, _node);
+            if (_node.connected <= 0) {
+              _node.connected = 1;
+            } else {
+              _node.connected += 1;
+            }
+          } else if (_node.connected === -1) {
+            _node.connected = 0;
+          }
+        });
+
+        if (d.tag === 0) {
+          d3.select(this).select('circle').attr('stroke', 'red');
+
+          d.children.forEach((id_1) => {
+            if (id_1 != null) {
+              const checkUserId = obj => obj.titleTerm === id_1;
+
+              if (!set.nodes.some(checkUserId)) {
+                set.nodes.forEach((_node) => {
+                  if (_node.children) {
+                    _node.children.forEach((id_2) => {
+                      if (id_1 === id_2) {
+                        set.links.push({
+                          source: id_1,
+                          target: _node.titleTerm,
+                          tag: 1,
+                          color: '#ffbb78 ',
+                          value: 1000000,
+                        });
+                      }
+                    });
                   }
-                } else {
-                  if (node.connected == -1)
-                  node.connected = 0
+                });
+                const existId = set.nodes.find(ele => ele.titleTerm === id_1);
+                if (existId === undefined) {
+                  set.nodes.push({
+                    titleTerm: id_1,
+                    group: 2,
+                    tag: 1,
+                    connected: 1,
+                    x: d.x,
+                    y: d.y,
+                    size: 5,
+                  });
                 }
-        })
-
-        if(d.tag==0){
-          d3.select(this).select('circle').attr('stroke','red');
-
-          d.children.forEach(function(id_1){
-            if(id_1 != null){
-            	const checkUserId = obj => obj.titleTerm === id_1;
-
-							if(!set.nodes.some(checkUserId)){
-                /* console.log(id_1) */
-                set.nodes.forEach(function(node){
-                  /* console.log(node) */
-                  if(node.children){
-                    node.children.forEach(function(id_2){
-                      if(id_1 == id_2)
-                        set.links.push({source: id_1,target:node.titleTerm, tag: 1, color: '#ffbb78 ', value: 1000000});
-                    })
-                  }
-                })
-                let existId = set.nodes.find(function(ele){
-                  return ele.titleTerm === id_1;
-                })
-                if(existId == undefined)
-                  set.nodes.push({titleTerm: id_1, group: 2, tag: 1, connected: 1, x: d.x, y: d.y, size: 5});
-                set.links.push({source: id_1,target:d, color: '#ffbb78', tag: 1, value: 1000000});
+                set.links.push({
+                  source: id_1,
+                  target: d,
+                  color: '#ffbb78',
+                  tag: 1,
+                  value: 1000000,
+                });
               } else {
-
-                let index = set.nodes.findIndex(function(node){
-                  return node.titleTerm == id_1
-                })
-                set.nodes[index].connected++
+                const index = set.nodes.findIndex(_node => _node.titleTerm === id_1);
+                set.nodes[index].connected += 1;
               }
             }
-          })
-          
-          d.tag=1;
-          conutOfClickedNode++
-        }else{
-          d3.select(this).select('circle').attr('stroke','white');
-          
-          node.data(set.nodes, function(o) {
+          });
+          d.tag = 1;
+          conutOfClickedNode += 1;
+        } else {
+          d3.select(this).select('circle').attr('stroke', 'white');
+          node.data(set.nodes, (o) => {
             if (isConnected(d, o)) {
-              let index_0 = set.nodes.findIndex(function(node){
-                if (node == undefined)
-                  return -1
-                return node.titleTerm == o.titleTerm 
-              })
-              //console.log(id_1, index_1)
-              set.nodes[index_0].connected--
-              console.log(set.nodes[index_0].connected)
-
+              const index_0 = set.nodes.findIndex((_node) => {
+                if (_node === undefined) {
+                  return -1;
+                }
+                return _node.titleTerm === o.titleTerm;
+              });
+              // console.log(id_1, index_1)
+              set.nodes[index_0].connected -= 1;
+              // console.log(set.nodes[index_0].connected);
             }
-          })
-        
+          });
+
           // node.style('fill-opacity', function(o) {
           //   return 1;
           // });
 
-          d.children.forEach(function(id_1){
-            if(id_1 != null){
-              let index_1 = set.nodes.findIndex(function(node){
-                if (node == undefined)
-                  return -1
-                return node.titleTerm == id_1
-              })
-              //console.log(id_1, index_1)
-              set.nodes[index_1].connected--
+          d.children.forEach((id_1) => {
+            if (id_1 != null) {
+              const index_1 = set.nodes.findIndex((_node) => {
+                if (_node === undefined) {
+                  return -1;
+                }
+                return _node.titleTerm === id_1;
+              });
+              // console.log(id_1, index_1)
+              set.nodes[index_1].connected -= 1;
 
-              set.nodes.forEach(function(node){
-                if(node.titleTerm == id_1 && node.connected <= 0){
-                  delete set.nodes[set.nodes.indexOf(node)];
-                  set.nodes = set.nodes.filter(function(){return true});
-                }               
-              })
-              let length = set.links.length
-              for(let i =0;i<length;i++){
-              	let pos = set.links.map(function(e) { return e.source.titleTerm; }).indexOf(id_1)
-                if(pos != -1){
-                  let index_2 = set.nodes.findIndex(function(node){
-                    if (node == undefined)
-                      return -1
-                    return node.titleTerm == id_1
-                  })
-                  if(index_2 == -1 ){
-                    set.links.splice(pos,1)
-                  } else if (set.nodes[index_2] == undefined){
-                    set.links.splice(pos,1)
-                  } 
+              set.nodes.forEach((_node) => {
+                if (_node.titleTerm === id_1 && _node.connected <= 0) {
+                  delete set.nodes[set.nodes.indexOf(_node)];
+                  set.nodes = set.nodes.filter(() => true);
+                }
+              });
+              const length = set.links.length();
+              for (let j = 0; j < length; j += 1) {
+                const pos = set.links.map(e => e.source.titleTerm).indexOf(id_1);
+                if (pos !== -1) {
+                  const index_2 = set.nodes.findIndex((_node) => {
+                    if (_node === undefined) {
+                      return -1;
+                    }
+                    return _node.titleTerm === id_1;
+                  });
+                  if (index_2 === -1) {
+                    set.links.splice(pos, 1);
+                  } else if (set.nodes[index_2] === undefined) {
+                    set.links.splice(pos, 1);
+                  }
                 }
               }
             }
-          }) 
-          
-          set.nodes = set.nodes.filter(function(){return true});
-          set.links = set.links.filter(function(){return true});      
-          
-          conutOfClickedNode--
-
-          if(conutOfClickedNode==0){
-            set.nodes.forEach(function(node){
-              node.connected = -1
-            })
-          }
-          //mouseOut();
-          d.tag=0;
-        }
-        update();        
-      }
-
-      function mouseOut() {
-        node.style('stroke-opacity', function(d){
-          d.tag=0;
-          return 1
-        });
-        node.style('fill-opacity', 1);
-        node.selectAll('text').style('visibility',function(d){
-          if(d.group == 1)
-            return 'visible';
-          return 'hidden';
-        });
-        node.selectAll('circle').style('fill',function(d){
-          if(d.group ==2)
-            return '#ff7f0e';
-          return '1f77b4';
           });
-        link.style('stroke-opacity', 1);
-        link.style('stroke', function(d){
-          d.tag=0;
-          return '#ddd';
-        });
+
+          set.nodes = set.nodes.filter(() => true);
+          set.links = set.links.filter(() => true);
+          conutOfClickedNode -= 1;
+
+          if (conutOfClickedNode === 0) {
+            set.nodes.forEach((_node) => {
+              _node.connected = -1;
+              // console.log(_node.connected);
+            });
+          }
+          // mouseOut();
+          d.tag = 0;
+        }
+        update();
       }
+
+      // function mouseOut() {
+      //   node.style('stroke-opacity', (d) => {
+      //     d.tag=0;
+      //     return 1;
+      //   });
+      //   node.style('fill-opacity', 1);
+      //   node.selectAll('text').style('visibility', (d) => {
+      //     if(d.group === 1)
+      //       return 'visible';
+      //     return 'hidden';
+      //   });
+      //   node.selectAll('circle').style('fill', (d) => {
+      //     if (d.group === 2) {
+      //       return '#ff7f0e';
+      //     }
+      //     return '1f77b4';
+      //     });
+      //   link.style('stroke-opacity', 1);
+      //   link.style('stroke', (d) => {
+      //     d.tag=0;
+      //     return '#ddd';
+      //   });
+      // }
     }
     // build a dictionary of nodes that are linked
-    let linkedByIndex = {};
-    links.forEach(function(d) {
-        linkedByIndex[d.source.index + ',' + d.target.index] = 1;
+    const linkedByIndex = {};
+    links.forEach((d) => {
+      linkedByIndex[`${d.source.index},${d.target.index}`] = 1;
     });
 
     // check the dictionary to see if nodes are linked
     function isConnected(a, b) {
-      //console.log(a,b);
-      // if(b.tag==1){
-      //   //console.log('tag==1');
-      //   return true;
-      // }
-      return linkedByIndex[a.index + ',' + b.index] || linkedByIndex[b.index + ',' + a.index] || a.index == b.index;
+      return linkedByIndex[`${a.index},${b.index}`] || linkedByIndex[`${b.index},${a.index}`] || a.index === b.index;
     }
 
     // fade nodes on hover
-    function mouseOver(opacity) {
-        return function(d) {
-            // check all other nodes to see if they're connected
-            // to this one. if so, keep the opacity at 1, otherwise
-            // fade
-            node.selectAll('circles').style('stroke-opacity', function(o) {
-              let thisOpacity = isConnected(d, o) ? 1 : opacity;
-              return thisOpacity;
-            });
-            node.style('fill-opacity', function(o) {
-              let thisOpacity = isConnected(d, o) ? 1 : opacity;
-              return thisOpacity;
-            });
+    // function mouseOver(opacity) {
+    //     return (d) =>  {
+    //         // check all other nodes to see if they're connected
+    //         // to this one. if so, keep the opacity at 1, otherwise
+    //         // fade
+    //         node.selectAll('circles').style('stroke-opacity', function(o) {
+    //           let thisOpacity = isConnected(d, o) ? 1 : opacity;
+    //           return thisOpacity;
+    //         });
+    //         node.style('fill-opacity', function(o) {
+    //           let thisOpacity = isConnected(d, o) ? 1 : opacity;
+    //           return thisOpacity;
+    //         });
 
-            node.selectAll('text').style('visibility',function(o){
-                
-              if(isConnected(d, o) || o.tag != 0)
-                return 'visible';
-            });
-            // also style link accordingly
-            link.style('stroke-opacity', function(o) {
-                return o.source === d || o.target === d ? 1 : opacity;
-            });
-            link.style('stroke', function(o){
-                return o.source === d || o.target === d ? o.source.colour : '#ddd';
-            });
-        };
-    }
+    //         node.selectAll('text').style('visibility',function(o){
+    //           if(isConnected(d, o) || o.tag != 0)
+    //             return 'visible';
+    //         });
+    //         // also style link accordingly
+    //         link.style('stroke-opacity', function(o) {
+    //             return o.source === d || o.target === d ? 1 : opacity;
+    //         });
+    //         link.style('stroke', function(o){
+    //             return o.source === d || o.target === d ? o.source.colour : '#ddd';
+    //         });
+    //     };
+    // }
 
     function dragstarted(d) {
       if (!d3.event.active) simulation.alphaTarget(0.3).restart();
@@ -807,80 +479,78 @@ class Graph extends Component {
       d.fx = null;
       d.fy = null;
     }
-  
-  //Table with inline Bar chart
 
-  let chartWidth = "100px";
-    
-  // Setup the scale for the values for display, use abs max as max value
-  let x = d3.scaleLinear()
-      .domain([0, d3.max(set.nodes, function(d) { return d.children.length })])
-      .range(["0%", "100%"]);
-  let rightSvg = d3.select(this.refs.titleUserView)
-    .select('#barChart')
-  
-  rightSvg.selectAll('*').remove()
-  
-  let table = rightSvg.append('foreignObject')
-    .attr('width','100%')
-    .attr('height','100%')
-    .style('overflow-y','scroll')
-    .append('xhtml:table');
-  let th = table.append("tr")
-  
-  th.append('td').attr('class', 'data name')
-    .text('Title Term')
-  th.append('td').attr('class', 'data name')
-    .text('# of User')
-  
-  // Create a table with rows and bind a data row to each table row
-  let tr = table.selectAll("tr.data")
+    // Table with inline Bar chart
+
+    const chartWidth = '100px';
+
+    // Setup the scale for the values for display, use abs max as max value
+    const x = d3.scaleLinear()
+      .domain([0, d3.max(set.nodes, d => d.children.length)])
+      .range(['0%', '100%']);
+    const rightSvg = d3.select(this.myRef.current)
+      .select('#barChart');
+
+    rightSvg.selectAll('*').remove();
+
+    const table = rightSvg.append('foreignObject')
+      .attr('width', '100%')
+      .attr('height', '100%')
+      .style('overflow-y', 'scroll')
+      .append('xhtml:table');
+    const th = table.append('tr');
+
+    th.append('td').attr('class', 'data name')
+      .text('Title Term');
+    th.append('td').attr('class', 'data name')
+      .text('# of User');
+
+    // Create a table with rows and bind a data row to each table row
+    const tr = table.selectAll('tr.data')
       .data(set.nodes)
-    .enter()
-      .append("tr")
-      .attr("class", "datarow");
-  
-  // Set the even columns
-  d3.selectAll(".datarow").filter(":nth-child(even)")
-    .style("background", "whitesmoke")
-  
-  
-  // Create the name column
-  tr.append("td").attr("class", "data name")
-      .text(function(d) { return d.titleTerm });
-      
-  // Create the percent value column
-  tr.append("td").attr("class", "data value")
-      .text(function(d) { return d.children.length })
-  // Create a column at the beginning of the table for the chart
-  let chart = tr.append("td").attr("class", "chart")
-  	.attr("width", chartWidth)
-    .attr('padding-bottom','2px')
-    .attr('padding-top','2px');
-  
-  // Create the div structure of the chart
-  chart.append("div")
-    .style('height','17px')
-    .attr("class", "chart")
-  	.style('float','left')
-    .style('width','50%')
-  	.append("div")
-    .style('height','17px')
-  	.attr("class", "positive");
-    
-  // Creates the positive div bar
-  tr.select("div.positive")
-    .style("width", "0%")
-    .style("background-color",'steelblue')
-    .transition()
-    .duration(500)
-    .style("width", function(d) { 
-        return d.children.length > 0 ? x(d.children.length) : "0%"; });
-  /*let set = {
+      .enter()
+      .append('tr')
+      .attr('class', 'datarow');
+
+    // Set the even columns
+    d3.selectAll('.datarow').filter(':nth-child(even)')
+      .style('background', 'whitesmoke');
+
+    // Create the name column
+    tr.append('td').attr('class', 'data name')
+      .text(d => d.titleTerm);
+
+    // Create the percent value column
+    tr.append('td').attr('class', 'data value')
+      .text(d => d.children.length);
+    // Create a column at the beginning of the table for the chart
+    const chart = tr.append('td').attr('class', 'chart')
+      .attr('width', chartWidth)
+      .attr('padding-bottom', '2px')
+      .attr('padding-top', '2px');
+
+    // Create the div structure of the chart
+    chart.append('div')
+      .style('height', '17px')
+      .attr('class', 'chart')
+      .style('float', 'left')
+      .style('width', '50%')
+      .append('div')
+      .style('height', '17px')
+      .attr('class', 'positive');
+
+    // Creates the positive div bar
+    tr.select('div.positive')
+      .style('width', '0%')
+      .style('background-color', 'steelblue')
+      .transition()
+      .duration(500)
+      .style('width', d => (d.children.length > 0 ? x(d.children.length) : '0%'));
+  /* let set = {
       'name':'',
       'children':[{'name':'','size':1000}]
     }
-    
+
     let removeWords=['新聞','八卦','幹嘛']
     let keys = Object.keys(props);
 
@@ -890,10 +560,18 @@ class Graph extends Component {
           if(!removeWords.includes(props[i][0])){
             props[i][1].forEach(function(id){
               if(id != null)
-                set['children'].push({name: props[i][0], children: [{name:id, group: 2, tag: 0, size: 1000}]});
-            }) 
+                set['children'].push({
+                  name: props[i][0],
+                  children: [{
+                    name:id,
+                    group: 2,
+                    tag: 0,
+                    size: 1000
+                  }]
+                });
+            })
         }
-      }      
+      }
     }
     console.log(set);
 
@@ -901,13 +579,13 @@ class Graph extends Component {
     const width=900,height=700;
     let svg = d3.select(this.refs.chart)
       .select('svg');
-    
+
     svg.selectAll('*').remove();
 
     let color = d3.scaleOrdinal(d3.schemeCategory10 );
     color(1);
     let force = d3.forceSimulation()
-        .force('link', d3.forceLink().id(function(d) { return d.id; }))
+        .force('link', d3.forceLink().id((d) =>  { return d.id; }))
         .force('charge', d3.forceManyBody().strength(-30))
         .force('center', d3.forceCenter(width / 2, height / 2));
 
@@ -933,7 +611,7 @@ class Graph extends Component {
           .force('link', d3.forceLink(links).distance(70));
 
       // Update the links…
-      link = link.data(links, function(d) { return d.target.id; });
+      link = link.data(links, (d) =>  { return d.target.id; });
 
       // Exit any old links.
       link.exit().remove();
@@ -941,13 +619,13 @@ class Graph extends Component {
       // Enter any new links.
       link.enter().insert('line', '.node')
           .attr('class', 'link')
-          .attr('x1', function(d) { return d.source.x; })
-          .attr('y1', function(d) { return d.source.y; })
-          .attr('x2', function(d) { return d.target.x; })
-          .attr('y2', function(d) { return d.target.y; });
+          .attr('x1', (d) =>  { return d.source.x; })
+          .attr('y1', (d) =>  { return d.source.y; })
+          .attr('x2', (d) =>  { return d.target.x; })
+          .attr('y2', (d) =>  { return d.target.y; });
 
       // Update the nodes…
-      node = node.data(nodes, function(d) { return d.id; }).style('fill', color);
+      node = node.data(nodes, (d) =>  { return d.id; }).style('fill', color);
 
       // Exit any old nodes.
       node.exit().remove();
@@ -955,21 +633,21 @@ class Graph extends Component {
       // Enter any new nodes.
       node.enter().append('circle')
           .attr('class', 'node')
-          .attr('cx', function(d) { return d.x; })
-          .attr('cy', function(d) { return d.y; })
-          .attr('r', function(d) { return Math.sqrt(d.size) / 10 || 4.5; })
+          .attr('cx', (d) =>  { return d.x; })
+          .attr('cy', (d) =>  { return d.y; })
+          .attr('r', (d) =>  { return Math.sqrt(d.size) / 10 || 4.5; })
           .style('fill', color)
           .on('click', click);
           //.call(force.drag);
     }
 
     function tick() {
-      link.attr('x1', function(d) { return d.source.x; })
-          .attr('y1', function(d) { return d.source.y; })
-          .attr('x2', function(d) { return d.target.x; })
-          .attr('y2', function(d) { return d.target.y; });
+      link.attr('x1', (d) =>  { return d.source.x; })
+          .attr('y1', (d) =>  { return d.source.y; })
+          .attr('x2', (d) =>  { return d.target.x; })
+          .attr('y2', (d) =>  { return d.target.y; });
 
-      node.attr('transform', function(d) {
+      node.attr('transform', (d) =>  {
             return 'translate(' + d.x + ',' + d.y + ')';
           })
     }
@@ -1005,24 +683,21 @@ class Graph extends Component {
 
       recurse(root);
       return nodes;
-    }*/
-    
-  
-  
-  
+    } */
   }
-  
- 
-  render(){
-    return <div id={'#' + this.props.id}>
-      <div ref='titleUserView'>
-        <svg width='80%' height='900px'></svg>
-        <svg id='barChart' width='20%' height='900px'></svg>
+
+  render() {
+    // const myRef = 'titleUserView';
+    const { id } = this.props;
+    return (
+      <div id={`#${id}`}>
+        <div ref={this.myRef}>
+          <svg width="80%" height="900px" />
+          <svg id="barChart" width="20%" height="900px" />
+        </div>
       </div>
-    </div>
+    );
   }
 }
-
-
 
 export default Graph;

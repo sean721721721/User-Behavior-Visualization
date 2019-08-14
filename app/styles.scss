@@ -346,6 +346,11 @@ path:hover {
     grid-row: srow1 / srow2;
 }
 
+.gateKeeperview {
+    grid-column: scol1 / scol3;
+    grid-row: srow1 / srow2;
+}
+
 .termview {
     overflow-y: scroll;
     grid-column: scol3 / scolend;
