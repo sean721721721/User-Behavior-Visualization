@@ -497,7 +497,7 @@ let bindpostlist = function bindpostlist(qobj1, qobj2, ptt) {
     for(i=0;i<titleTest.length;i++){ 
         titleCount.push(titleUser(titleTest[i], list[i]));
     }
-    //console.log(titleCount);
+    // console.log(titleTest);
     console.log("postlen: " + (list[0].length + list[1].length));
     const diff = process.hrtime(time);
     console.log(`bindpostlist() Benchmark took ${diff[0] * NS_PER_SEC + diff[1]} nanoseconds`);
@@ -510,6 +510,7 @@ let titleUser = function titleUser(terms, posts){
     let userlist = {};
     let i =0;
     let articleIndex = [];
+    let articlePostTime = [];
     terms.forEach(function (term){
         if(term != null){
             let flag = 0;
@@ -521,10 +522,12 @@ let titleUser = function titleUser(terms, posts){
                     if(!userlist.hasOwnProperty(wordPair.word)){
                         userlist[wordPair.word] = [posts[i].author];
                         articleIndex[wordPair.word] = [i];
+                        articlePostTime[wordPair.word] = [posts[i].date];
                     }
                     else{
                         userlist[wordPair.word].push(posts[i].author);
                         articleIndex[wordPair.word].push(i);
+                        articlePostTime[wordPair.word].push(posts[i].date);
                     }
                 }
                 flag = 0;
@@ -539,9 +542,9 @@ let titleUser = function titleUser(terms, posts){
 
     let sortedUserList = [];
     for(let j=0;j<keysSorted.length;j++){
-        sortedUserList.push([keysSorted[j],userlist[keysSorted[j]],articleIndex[keysSorted[j]]]);       
+        sortedUserList.push([keysSorted[j], userlist[keysSorted[j]], articleIndex[keysSorted[j]], articlePostTime[keysSorted[j]]]);       
     }
-
+    
     return sortedUserList;
 }
 

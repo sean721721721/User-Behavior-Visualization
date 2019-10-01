@@ -74,7 +74,7 @@ class Post extends React.Component {
         message_count: { push: pushcount, boo, neutral },
       },
     } = this.props;
-    console.log(this.props);
+    // console.log(this.props);
     return (
       <div id="main-container">
         <div id="main-content" className="bbs-screen bbs-content">

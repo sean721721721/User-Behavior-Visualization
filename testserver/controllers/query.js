@@ -369,18 +369,19 @@ let callback = function callback(req, res) {
             findquery(page1, queryobj1, ptt, limit, sort).then(res => {
               console.log('q1 lenght: ' + res.result.length);
               // console.log('res.result', res.result);
-              let datalist = dl.bindpostlist(res.result, ptt);
-              // let postlist = datalist[0];
-              let wordlist = datalist[1];
-              let titleWordList = datalist[2];
               // Remove article content
               res.result.forEach(function(result){
-                result.content = '';
+                result.content = ' ';
                 result.messages.forEach(function(message){
                 message.push_content = '';
                 })
               })
 
+              let datalist = dl.bindpostlist(res.result, ptt);
+              // let postlist = datalist[0];
+              let wordlist = datalist[1];
+              let titleWordList = datalist[2];
+              
 
               return { list: [res.result, wordlist, titleWordList], previous: [res.previous], next: [res.next] };
             }),

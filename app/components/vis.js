@@ -16,19 +16,20 @@ class Graph extends Component {
   constructor(props) {
     super(props);
     this.myRef = React.createRef();
-    this.state = props;
+    this.state = { ...props };
   }
 
   componentDidMount() {
-    console.log('componentDidMount');
+    console.log('vis_DidMount');
   }
 
   componentDidUpdate() {
     this.drawwithlabels();
-    console.log('componentDidUpdate');
+    console.log('vis_DidUpdate');
   }
 
   drawwithlabels() {
+    // props[i][0]== userID, props[i][1]== articleIndex, props[i][0]== articlePostTime;
     console.log(this.props);
     const { visprops: props } = this.props;
     const set = { nodes: [], links: [] };
@@ -36,9 +37,64 @@ class Graph extends Component {
     let node;
     let links;
     let nodes;
+    const userList = [{ id: '', count: 0, term: [] }];
     const initLinks = [];
     const removeWords = ['新聞', '八卦', '幹嘛'];
-    // const keys = Object.keys(props);
+
+    // props combine any titleterms with the equal users
+
+    for (let i = 0; i < props.length - 1; i += 1) {
+      for (let j = i + 1; j < props.length; j += 1) {
+        let numOfSameUser = 0;
+        for (let k = 0; k < props[i][1].length; k += 1) {
+          const findTheSameUser = props[j][1].includes(props[i][1][k]);
+          if (findTheSameUser) {
+            numOfSameUser += 1;
+          }
+        }
+        if (numOfSameUser === props[i][1].length && numOfSameUser === props[j][1].length) {
+          // console.log(numOfSameUser, props[i][1], props[j][1]);
+          const addingTerm = ` ${props[j][0]}`;
+          props[i][0] += addingTerm;
+          props.splice(j, 1);
+          j -= 1;
+        }
+      }
+    }
+
+    for (let i = 0; i < props.length - 1; i += 1) {
+      props[i][1] = [...new Set(props[i][1])];
+      props[i][1].sort();
+      // console.log(i);
+    }
+    console.log(props);
+    console.log(props.length);
+
+    // for (let i = 0; i < props.length; i += 1) {
+    //   console.log(i);
+    //   for (let l = 0; l < props[i][1].length; l += 1) {
+    //     let unique = 1;
+    //     let index = l;
+    //     for (let j = l + 1; j < props[i][1].length; j += 1) {
+    //       for (let k = 0; k < props.length; k += 1) {
+    //         if (k !== i && props[k][1].includes(props[i][1][j])) {
+    //           console.log(`not unique! i = ${i}, j = ${j}, k = ${k} `);
+    //           unique = 0;
+    //           break;
+    //         }
+    //         console.log(props[k][0]);
+    //       }
+    //       if (unique === 1) {
+    //         console.log('unique!');
+    //         props[i][1][index] += props[i][1][j];
+    //         console.log(props[i][1][index], props[i][1][j]);
+    //         props[i][1].splice(j, 1);
+    //       }
+    //     }
+    //   }
+    // }
+
+    console.log(props);
 
     // Nodes setting
     for (let i = 0; i < Math.min(props.length, SetNumOfNodes); i += 1) {
@@ -51,6 +107,8 @@ class Graph extends Component {
               children: props[i][1],
               _children: [],
               articleIndex: props[i][2],
+              date: props[i][3],
+              community: [['', 0]],
               group: 1,
               tag: 0,
               connected: -1,
@@ -68,64 +126,218 @@ class Graph extends Component {
       }
     }
 
-    // title words links by articleIndex
-    const groupedWords = [];
-    const max = Math.min(props.length, SetNumOfNodes);
-    for (let i = 0; i < max - 1; i += 1) {
-      if (props[i][0] != null && !removeWords.includes(props[i][0])) {
-        for (let j = i + 1; j < max; j += 1) {
-          let count = 0;
-          if (props[j][0] != null && !removeWords.includes(props[j][0])) {
-            props[i][1].forEach((id1) => {
-              props[j][1].forEach((id2) => {
-                if (id1 != null && id2 != null) {
-                  if (id1 === id2) {
-                    count += 1;
-                  }
-                }
-              });
-            });
-          }
-          if (count !== 0) {
-            set.links.push({
-              source: props[i][0],
-              target: props[j][0],
-              tag: 0,
-              color: '#d9d9d9 ',
-              value: count,
-            });
-            initLinks.push({
-              source: props[i][0],
-              target: props[j][0],
-              tag: 0,
-              value: count,
-            });
-          }
+    for (let i = 0; i < set.nodes.length - 1; i += 1) {
+      set.nodes[i].children.sort();
+    }
+
+    // 1st round merging nodes
+
+    // for (let i = 0; i < set.nodes.length - 1; i += 1) {
+    //   for (let j = i + 1; j < set.nodes.length; j += 1) {
+    //     let numOfSameUsers = 0;
+    //     if (set.nodes[i].children.length === set.nodes[j].children.length) {
+    //       for (let k = 0; k < set.nodes[i].children.length; k += 1) {
+    //         const haveTheSameUsers = set.nodes[j].children.includes(set.nodes[i].children[k]);
+    //         if (haveTheSameUsers) {
+    //           numOfSameUsers += 1;
+    //         }
+    //       }
+    //       if (numOfSameUsers === set.nodes[i].children.length) {
+    //         const addingTerm = ` ${set.nodes[j].titleTerm}`;
+    //         set.nodes[i].titleTerm += addingTerm;
+    //         set.nodes.splice(j, 1);
+    //         j -= 1;
+    //       }
+    //     }
+    //   }
+    // }
+
+    // Computing user list
+
+    for (let i = 0; i <= set.nodes.length; i += 1) {
+      if (set.nodes[i]) {
+        if (set.nodes[i].children) {
+          set.nodes[i].children.forEach((userId) => {
+            const existedUser = userList.find(x => x.id === userId);
+            if (existedUser) {
+              existedUser.term.push(set.nodes[i].titleTerm);
+              existedUser.count += 1;
+            } else {
+              userList.push({ id: userId, count: 1, term: [set.nodes[i].titleTerm] });
+            }
+          });
         }
       }
     }
 
-    // Links setting
-    // for(let i=0;i<Math.min(props.length,SetNumOfNodes);i++){
-    //   if(props[i][0] != null){
-    //     props[i][1].forEach(function(id){
-    //       if(id != null){
-    //         let existLink = set.links.find(function(ele){
-    //           return ele.source === id && ele.target === props[i][0];
-    //         })
-    //         if(existLink === undefined){
-    //             if(!removeWords.includes(props[i][0])){
-    //               set.links.push({source: id,target:props[i][0], tag: 0, value: 1});
+    console.log(userList);
+
+    // Find all of users with only one term, then merge them
+
+    // console.log(userList.filter(x => x.count === 1));
+    // const userListWithCountEqualsOne = userList.filter(x => x.count === 1); // array
+    // console.log(set.nodes, userListWithCountEqualsOne);
+    // for (let i = 0; i < userListWithCountEqualsOne.length - 1; i += 1) {
+    //   let userListWithSameTerm = set.nodes.filter(
+    //     x => x.titleTerm === userListWithCountEqualsOne[i].term[0],
+    //   );
+    //   console.log(userListWithSameTerm);
+    //   let firstSameUser = userListWithSameTerm[0].children.find(
+    //     x => x === userListWithCountEqualsOne[0].id,
+    //   );
+    //   firstSameUser = 0;
+    //   console.log(userListWithSameTerm, firstSameUser);
+    //   userListWithCountEqualsOne.forEach((user) => {
+    //     let userToBeMerged = userListWithSameTerm[0].children.filter(x => x === user.id);
+    //     firstSameUser += userToBeMerged;
+    //     console.log(userToBeMerged, firstSameUser, set.nodes);
+    //   })
+    // }
+
+
+    // 2nd round merging nodes
+    for (let i = 0; i < set.nodes.length - 1; i += 1) {
+      set.nodes.children = [...new Set(set.nodes.children)];
+      for (let j = i + 1; j < set.nodes.length; j += 1) {
+        let numOfSameUsers = 0;
+        // console.log(i, j);
+        for (let k = 0; k < set.nodes[i].children.length; k += 1) {
+          const haveTheSameUsers = set.nodes[j].children.includes(set.nodes[i].children[k]);
+          if (haveTheSameUsers) {
+            numOfSameUsers += 1;
+          }
+        }
+        // console.log(numOfSameUsers, set.nodes[i].titleTerm, set.nodes[j].titleTerm,
+        //   set.nodes[i].children.length, set.nodes[j].children.length);
+        if (numOfSameUsers >= set.nodes[j].children.length) {
+          // console.log('#ofuser == set.node[j].children.length');
+          // console.log(set.nodes[i].titleTerm, set.nodes[j].titleTerm);
+          set.nodes[i].children.push(set.nodes[j]);
+          set.nodes.splice(j, 1);
+          j -= 1;
+        }
+      }
+    }
+
+    // compute how many same users each term has
+
+    for (let i = 0; i < set.nodes.length - 1; i += 1) {
+      for (let j = i + 1; j < set.nodes.length; j += 1) {
+        let numOfSameUsers = 0;
+        let largestNumOfSameUsers = 0;
+        // let term = '';
+        for (let k = 0; k < set.nodes[i].children.length; k += 1) {
+          const haveTheSameUsers = set.nodes[j].children.includes(set.nodes[i].children[k]);
+          if (haveTheSameUsers) {
+            numOfSameUsers += 1;
+          }
+        }
+        if (numOfSameUsers > set.nodes[i].community[0][1]) {
+          set.nodes[i].community[0][0] = set.nodes[j].titleTerm;
+          set.nodes[i].community[0][1] = numOfSameUsers;
+          // set.nodes.splice(j, 1);
+          // j -= 1;
+        } else if (numOfSameUsers === set.nodes[i].community[0][1]) {
+          set.nodes[i].community.push([set.nodes[j].titleTerm, numOfSameUsers]);
+        }
+      }
+    }
+
+    console.log(set);
+
+
+    // title words links by articleIndex
+    const groupedWords = [];
+    const max = Math.min(props.length, SetNumOfNodes);
+    for (let i = 0; i < set.nodes.length - 1; i += 1) {
+      for (let j = 0; j < set.nodes.length; j += 1) {
+        let count = 0;
+        set.nodes[i].children.forEach((id1) => {
+          if (set.nodes[j].children.includes(id1)) {
+            count += 1;
+          }
+        });
+        if (count !== 0) {
+          set.links.push({
+            source: set.nodes[i].titleTerm,
+            target: set.nodes[j].titleTerm,
+            tag: 0,
+            color: '#d9d9d9 ',
+            value: count,
+          });
+          initLinks.push({
+            source: set.nodes[i].titleTerm,
+            target: set.nodes[j].titleTerm,
+            tag: 0,
+            value: count,
+          });
+        }
+      }
+    }
+    // for (let i = 0; i < max - 1; i += 1) {
+    //   if (props[i][0] != null && !removeWords.includes(props[i][0])) {
+    //     for (let j = i + 1; j < max; j += 1) {
+    //       let count = 0;
+    //       if (props[j][0] != null && !removeWords.includes(props[j][0])) {
+    //         props[i][1].forEach((id1) => {
+    //           props[j][1].forEach((id2) => {
+    //             if (id1 != null && id2 != null) {
+    //               if (id1 === id2) {
+    //                 count += 1;
+    //               }
     //             }
-    //         }else{
-    //           existLink.value++;
-    //           //console.log(existLink);
-    //         }
+    //           });
+    //         });
     //       }
-    //     })
+    //       if (count !== 0) {
+    //         set.links.push({
+    //           source: props[i][0],
+    //           target: props[j][0],
+    //           tag: 0,
+    //           color: '#d9d9d9 ',
+    //           value: count,
+    //         });
+    //         initLinks.push({
+    //           source: props[i][0],
+    //           target: props[j][0],
+    //           tag: 0,
+    //           value: count,
+    //         });
+    //       }
+    //     }
     //   }
     // }
-    // console.log(set);
+
+    console.log(set);
+
+    const someData = [];
+    let postCount;
+    for (let i = 0; i < 365; i += 1) {
+      const currentDate = new Date();
+      currentDate.setDate(currentDate.getDate() + i - 233);
+      someData.push({
+        date: currentDate,
+        value: 0,
+        group: currentDate.getMonth(),
+      });
+    }
+
+    if (props[0]) {
+      postCount = props[0][3].length;
+    }
+    console.log(`posCount: ${postCount}`);
+    for (let i = 0; i < postCount; i += 1) {
+      someData.find((x) => {
+        const xMonth = x.date.getMonth();
+        const dataMonth = new Date(props[0][3][i]).getMonth();
+        const xDate = x.date.getDate();
+        const dataDate = new Date(props[0][3][i]).getDate();
+        return xMonth === dataMonth && xDate === dataDate;
+      }).value += 1;
+    }
+
+    // console.log(someData);
+
     const width = 900;
     const height = 900;
     let svg = d3.select(this.myRef.current)
@@ -149,16 +361,30 @@ class Graph extends Component {
       .force('center', d3.forceCenter(width / 2, height / 2));
 
     let conutOfClickedNode = 0;
+
+    // Table with inline Bar chart
+
+    const chartWidth = '100px';
+
+    // Setup the scale for the values for display, use abs max as max value
+    const x = d3.scaleLinear()
+      .domain([0, d3.max(set.nodes, d => d.children.length)])
+      .range(['0%', '100%']);
+    const rightSvg = d3.select(this.myRef.current)
+      .select('#barChart');
+
     update();
 
     function update() {
-      // console.log(set);
+      console.log(set);
       ({ nodes, links } = set);
       //  let g =svg.append('g')
       //     .attr('class', 'everything')
 
       link = svg.selectAll('line')
         .data(set.links);
+      console.log(set);
+
       link.exit().remove();
       const linkEnter = link.enter()
         .append('line')
@@ -170,6 +396,8 @@ class Graph extends Component {
       svg.selectAll('g').remove();
       node = svg.selectAll('g')
         .data(set.nodes);
+      console.log(link);
+      console.log(set);
       // node.exit().remove();
       // let node = svg.selectAll('g').data(set.nodes)
       const nodeEnter = node.enter()
@@ -200,19 +428,19 @@ class Graph extends Component {
       const circles = nodeEnter.append('circle')
         .attr('r', d => d.size)
         .attr('fill', (d) => {
-          if (d.group === 1) {
+          if (d.group !== 2) {
             return color(d.group);
           }
           return 'url(#pic_user)';
         })
         .style('fill-opacity', (d) => {
-          if (d.group === 1) {
+          if (d.group !== 2) {
             return d.connected === 0 ? 0.1 : 1;
           }
           return 1;
         })
         .attr('stroke', (d) => {
-          if (d.group === 1) {
+          if (d.group !== 2) {
             if (d.tag === 1) {
               return 'red';
             }
@@ -231,7 +459,7 @@ class Graph extends Component {
         .attr('font-size', ' 10px')
         .attr('color', '#000')
         .attr('visibility', (d) => {
-          if (d.group === 1) {
+          if (d.group !== 2) {
             return 'visible';
           }
           return 'hidden';
@@ -241,6 +469,9 @@ class Graph extends Component {
       nodeEnter.append('title')
         .text(d => d.titleTerm);
       node = nodeEnter.merge(node);
+
+      console.log(set);
+
       simulation
         .nodes(set.nodes)
         .on('tick', ticked);
@@ -250,6 +481,221 @@ class Graph extends Component {
         .links(set.links)
         .distance(d => 300 / d.value);
       // .strength(1);
+      console.log(set.links);
+
+      rightSvg.selectAll('*').remove();
+
+      const table = rightSvg.append('foreignObject')
+        .attr('width', '100%')
+        .attr('height', '100%')
+        .style('overflow-y', 'scroll')
+        .append('xhtml:table');
+      const th = table.append('tr');
+
+      th.append('td').attr('class', 'data name')
+        .text('Title Term');
+      th.append('td').attr('class', 'data name')
+        .text('# of User');
+
+      // Create a table with rows and bind a data row to each table row
+      const tr = table.selectAll('tr.data')
+        .data(set.nodes)
+        .enter()
+        .append('tr')
+        .attr('class', 'datarow')
+        .style('border', (d) => {
+          if (d.tag === 1) {
+            return '2px black solid';
+          }
+          // if (d.connected === 1) {
+          //   return '2px red solid';
+          // }
+          return 'none';
+        })
+        .on('click', clicked);
+
+      // Set the even columns
+      d3.selectAll('.datarow').filter(':nth-child(even)')
+        .style('background', 'whitesmoke');
+
+      // Create the name column
+      tr.append('td').attr('class', 'data name')
+        .text(d => d.titleTerm);
+
+      // Create the percent value column
+      tr.append('td').attr('class', 'data value')
+        .text((d) => {
+          if (d.children === undefined) {
+            return 0;
+          }
+          return d.children.length;
+        });
+      // Create a column at the beginning of the table for the chart
+      const chart = tr.append('td').attr('class', 'chart')
+        .attr('width', chartWidth)
+        .attr('padding-bottom', '2px')
+        .attr('padding-top', '2px');
+
+      // Create the div structure of the chart
+      chart.append('div')
+        .style('height', '17px')
+        .attr('class', 'chart')
+        .style('float', 'left')
+        .style('width', '50%')
+        .append('div')
+        .style('height', '17px')
+        .attr('class', 'positive');
+
+      // Creates the positive div bar
+      tr.select('div.positive')
+        .style('width', '0%')
+        .style('background-color', 'steelblue')
+        .transition()
+        .duration(500)
+        .style('width', (d) => {
+          if (d.children !== undefined) {
+            if (d.children.length > 0) {
+              return x(d.children.length);
+            }
+          }
+          return '0%';
+        });
+      // Spiral Display
+
+      const start = 0;
+      const end = 2.25;
+      const numSpirals = 3;
+      const margin = {
+        top: 50, bottom: 50, left: 50, right: 50,
+      };
+
+      const theta = r => numSpirals * Math.PI * r;
+
+      // used to assign nodes color by group
+      // const color = d3.scaleOrdinal(d3.schemeCategory10);
+
+      const r = d3.min([500, 500]) / 2 - 40;
+
+      const radius = d3.scaleLinear()
+        .domain([start, end])
+        .range([40, r]);
+
+      const points = d3.range(start, end + 0.001, (end - start) / 1000);
+
+      const spiral = d3.radialLine()
+        .curve(d3.curveCardinal)
+        .angle(theta)
+        .radius(radius);
+
+      const path = svg.attr('transform', `translate(${width / 4},${height / 4})`)
+        .append('path')
+        .datum(points)
+        .attr('id', 'spiral')
+        .attr('d', spiral)
+        .style('fill', 'none')
+        .style('stroke', 'steelblue');
+
+      const spiralLength = path.node().getTotalLength();
+      const N = 365;
+      const barWidth = (spiralLength / N) - 1;
+
+
+      const timeScale = d3.scaleTime()
+        .domain(d3.extent(someData, d => d.date))
+        .range([0, spiralLength]);
+
+      // yScale for the bar height
+      const yScale = d3.scaleLinear()
+        .domain([0, d3.max(someData, d => d.value)])
+        .range([0, (r / numSpirals) - 30]);
+
+      svg.selectAll('rect')
+        .data(someData)
+        .enter()
+        .append('rect')
+        .attr('x', (d, i) => {
+          const linePer = timeScale(d.date);
+          const posOnLine = path.node().getPointAtLength(linePer);
+          const angleOnLine = path.node().getPointAtLength(linePer - barWidth);
+
+          d.linePer = linePer; // % distance are on the spiral
+          d.x = posOnLine.x; // x postion on the spiral
+          d.y = posOnLine.y; // y position on the spiral
+
+          // angle at the spiral position
+          d.a = (Math.atan2(angleOnLine.y, angleOnLine.x) * 180 / Math.PI) - 90;
+          return d.x;
+        })
+        .attr('y', d => d.y)
+        .attr('width', barWidth)
+        .attr('height', d => yScale(d.value))
+        .style('fill', d => color(d.group))
+        .style('stroke', 'none')
+        .attr('transform', d => `rotate(${d.a},${d.x},${d.y})`);
+
+      // add date labels
+      const tF = d3.timeFormat('%b %Y');
+      const firstInMonth = {};
+
+      svg.selectAll('text')
+        .data(someData)
+        .enter()
+        .append('text')
+        .attr('dy', 10)
+        .style('text-anchor', 'start')
+        .style('font', '10px arial')
+        .append('textPath')
+      // only add for the first of each month
+        .filter((d) => {
+          const sd = tF(d.date);
+          if (!firstInMonth[sd]) {
+            firstInMonth[sd] = 1;
+            return true;
+          }
+          return false;
+        })
+        .text(d => tF(d.date))
+        // place text along spiral
+        .attr('xlink:href', '#spiral')
+        .style('fill', 'grey')
+        .attr('startOffset', d => `${(d.linePer / spiralLength) * 100}%`);
+
+
+      const tooltip = d3.select('#chart')
+        .append('div')
+        .attr('class', 'tooltip');
+
+      tooltip.append('div')
+        .attr('class', 'date');
+      tooltip.append('div')
+        .attr('class', 'value');
+
+      svg.selectAll('rect')
+        .on('mouseover', (d) => {
+          tooltip.select('.date').html(`Date: <b>${d.date.toDateString()}</b>`);
+          tooltip.select('.value').html(`Value: <b>${Math.round(d.value * 100) / 100}<b>`);
+
+          d3.select(this)
+            .style('fill', '#FFFFFF')
+            .style('stroke', '#000000')
+            .style('stroke-width', '2px');
+
+          tooltip.style('display', 'block');
+          tooltip.style('opacity', 2);
+        })
+        .on('mousemove', (d) => {
+          tooltip.style('top', `${d3.event.layerY + 10}px`)
+            .style('left', `${d3.event.layerX - 25}px`);
+        })
+        .on('mouseout', (d) => {
+          d3.selectAll('rect')
+            .style('fill', color(d.group))
+            .style('stroke', 'none');
+
+          tooltip.style('display', 'none');
+          tooltip.style('opacity', 0);
+        });
+
       function ticked() {
         link
           .attr('x1', d => d.source.x)
@@ -281,8 +727,31 @@ class Graph extends Component {
 
           d.children.forEach((id_1) => {
             if (id_1 != null) {
-              const checkUserId = obj => obj.titleTerm === id_1;
+              if (typeof id_1 !== 'string') {
+                set.nodes.push({
+                  titleTerm: id_1.titleTerm,
+                  group: 3,
+                  children: id_1.children,
+                  tag: 0,
+                  connected: -1,
+                  x: d.x,
+                  y: d.y,
+                  size: 5 + Math.log2(id_1.children.length),
+                });
+                set.links.push({
+                  source: id_1.titleTerm,
+                  target: d,
+                  color: '#ffbb78',
+                  tag: 0,
+                  value: 10,
+                });
+              }
+            }
+          });
 
+          d.children.forEach((id_1) => {
+            if (id_1 != null && typeof id_1 === 'string') {
+              const checkUserId = obj => obj.titleTerm === id_1;
               if (!set.nodes.some(checkUserId)) {
                 set.nodes.forEach((_node) => {
                   if (_node.children) {
@@ -301,8 +770,11 @@ class Graph extends Component {
                 });
                 const existId = set.nodes.find(ele => ele.titleTerm === id_1);
                 if (existId === undefined) {
+                  const { count } = userList.find(user => user.id === id_1);
                   set.nodes.push({
                     titleTerm: id_1,
+                    parentNode: d.titleTerm,
+                    count,
                     group: 2,
                     tag: 1,
                     connected: 1,
@@ -324,6 +796,26 @@ class Graph extends Component {
               }
             }
           });
+          // set.links = removeDuplicates(set.links, 'source');
+          // console.log(set.links);
+          // let nodeToBeMerged = set.nodes.filter(_node => _node.parentNode === d.titleTerm);
+          // nodeToBeMerged = nodeToBeMerged.filter(_node => _node.count === 1);
+          // // set.nodes.find(_node => _node.titleTerm === nodeToBeMerged.titleTerm)
+          // console.log(nodeToBeMerged);
+          // for (let i = 1; i <= nodeToBeMerged.length - 1; i += 1) {
+          //   // set.nodes.find(_node => _node.titleTerm === nodeToBeMerged.titleTerm).titleTerm
+          //   const linkToBeMerged = set.links.filter(
+          //     _link => _link.source === nodeToBeMerged[0].titleTerm,
+          //   );
+          //   console.log(linkToBeMerged);
+          //   nodeToBeMerged[0].titleTerm += nodeToBeMerged[i].titleTerm;
+          //   linkToBeMerged[0].source += nodeToBeMerged[i].titleTerm;
+          //   // linkToBeMerged[1].source += nodeToBeMerged[i].titleTerm;
+          // }
+          // console.log(set);
+          // console.log(nodeToBeMerged);
+
+
           d.tag = 1;
           conutOfClickedNode += 1;
         } else {
@@ -363,7 +855,8 @@ class Graph extends Component {
                   set.nodes = set.nodes.filter(() => true);
                 }
               });
-              const length = set.links.length();
+
+              const { length } = set.links;
               for (let j = 0; j < length; j += 1) {
                 const pos = set.links.map(e => e.source.titleTerm).indexOf(id_1);
                 if (pos !== -1) {
@@ -396,6 +889,7 @@ class Graph extends Component {
           // mouseOut();
           d.tag = 0;
         }
+        console.log('done!');
         update();
       }
 
@@ -480,210 +974,10 @@ class Graph extends Component {
       d.fy = null;
     }
 
-    // Table with inline Bar chart
-
-    const chartWidth = '100px';
-
-    // Setup the scale for the values for display, use abs max as max value
-    const x = d3.scaleLinear()
-      .domain([0, d3.max(set.nodes, d => d.children.length)])
-      .range(['0%', '100%']);
-    const rightSvg = d3.select(this.myRef.current)
-      .select('#barChart');
-
-    rightSvg.selectAll('*').remove();
-
-    const table = rightSvg.append('foreignObject')
-      .attr('width', '100%')
-      .attr('height', '100%')
-      .style('overflow-y', 'scroll')
-      .append('xhtml:table');
-    const th = table.append('tr');
-
-    th.append('td').attr('class', 'data name')
-      .text('Title Term');
-    th.append('td').attr('class', 'data name')
-      .text('# of User');
-
-    // Create a table with rows and bind a data row to each table row
-    const tr = table.selectAll('tr.data')
-      .data(set.nodes)
-      .enter()
-      .append('tr')
-      .attr('class', 'datarow');
-
-    // Set the even columns
-    d3.selectAll('.datarow').filter(':nth-child(even)')
-      .style('background', 'whitesmoke');
-
-    // Create the name column
-    tr.append('td').attr('class', 'data name')
-      .text(d => d.titleTerm);
-
-    // Create the percent value column
-    tr.append('td').attr('class', 'data value')
-      .text(d => d.children.length);
-    // Create a column at the beginning of the table for the chart
-    const chart = tr.append('td').attr('class', 'chart')
-      .attr('width', chartWidth)
-      .attr('padding-bottom', '2px')
-      .attr('padding-top', '2px');
-
-    // Create the div structure of the chart
-    chart.append('div')
-      .style('height', '17px')
-      .attr('class', 'chart')
-      .style('float', 'left')
-      .style('width', '50%')
-      .append('div')
-      .style('height', '17px')
-      .attr('class', 'positive');
-
-    // Creates the positive div bar
-    tr.select('div.positive')
-      .style('width', '0%')
-      .style('background-color', 'steelblue')
-      .transition()
-      .duration(500)
-      .style('width', d => (d.children.length > 0 ? x(d.children.length) : '0%'));
-  /* let set = {
-      'name':'',
-      'children':[{'name':'','size':1000}]
+    function removeDuplicates(array, key) {
+      const lookup = new Set();
+      return array.filter(obj => !lookup.has(obj[key]) && lookup.add(obj[key]));
     }
-
-    let removeWords=['新聞','八卦','幹嘛']
-    let keys = Object.keys(props);
-
-    //Nodes setting
-    for(let i=0;i<Math.min(props.length,SetNumOfNodes);i++){
-      if(props[i][0] != null){
-          if(!removeWords.includes(props[i][0])){
-            props[i][1].forEach(function(id){
-              if(id != null)
-                set['children'].push({
-                  name: props[i][0],
-                  children: [{
-                    name:id,
-                    group: 2,
-                    tag: 0,
-                    size: 1000
-                  }]
-                });
-            })
-        }
-      }
-    }
-    console.log(set);
-
-    let root = set;
-    const width=900,height=700;
-    let svg = d3.select(this.refs.chart)
-      .select('svg');
-
-    svg.selectAll('*').remove();
-
-    let color = d3.scaleOrdinal(d3.schemeCategory10 );
-    color(1);
-    let force = d3.forceSimulation()
-        .force('link', d3.forceLink().id((d) =>  { return d.id; }))
-        .force('charge', d3.forceManyBody().strength(-30))
-        .force('center', d3.forceCenter(width / 2, height / 2));
-
-    let link = svg.selectAll('.link'),
-        node = svg.selectAll('.node');
-
-    root = set;
-    update();
-
-    force.on('tick',tick);
-    function update() {
-      let hierarchy = d3.hierarchy(root);
-      let tree = d3.tree();
-      let links = tree(hierarchy).links();
-
-      let nodes = flatten(root);
-          //links = d3.tree().links(nodes);
-      console.log(nodes);
-      console.log(hierarchy);
-      console.log(links);
-      // Restart the force layout.
-      force.nodes(nodes)
-          .force('link', d3.forceLink(links).distance(70));
-
-      // Update the links…
-      link = link.data(links, (d) =>  { return d.target.id; });
-
-      // Exit any old links.
-      link.exit().remove();
-
-      // Enter any new links.
-      link.enter().insert('line', '.node')
-          .attr('class', 'link')
-          .attr('x1', (d) =>  { return d.source.x; })
-          .attr('y1', (d) =>  { return d.source.y; })
-          .attr('x2', (d) =>  { return d.target.x; })
-          .attr('y2', (d) =>  { return d.target.y; });
-
-      // Update the nodes…
-      node = node.data(nodes, (d) =>  { return d.id; }).style('fill', color);
-
-      // Exit any old nodes.
-      node.exit().remove();
-
-      // Enter any new nodes.
-      node.enter().append('circle')
-          .attr('class', 'node')
-          .attr('cx', (d) =>  { return d.x; })
-          .attr('cy', (d) =>  { return d.y; })
-          .attr('r', (d) =>  { return Math.sqrt(d.size) / 10 || 4.5; })
-          .style('fill', color)
-          .on('click', click);
-          //.call(force.drag);
-    }
-
-    function tick() {
-      link.attr('x1', (d) =>  { return d.source.x; })
-          .attr('y1', (d) =>  { return d.source.y; })
-          .attr('x2', (d) =>  { return d.target.x; })
-          .attr('y2', (d) =>  { return d.target.y; });
-
-      node.attr('transform', (d) =>  {
-            return 'translate(' + d.x + ',' + d.y + ')';
-          })
-    }
-
-    // Color leaf nodes orange, and packages white or blue.
-    function color(d) {
-      return d._children ? '#3182bd' : d.children ? '#c6dbef' : '#fd8d3c';
-    }
-
-    // Toggle children on click.
-    function click(d) {
-      if (!d3.event.defaultPrevented) {
-        if (d.children) {
-          d._children = d.children;
-          d.children = null;
-        } else {
-          d.children = d._children;
-          d._children = null;
-        }
-        update();
-      }
-    }
-
-    // Returns a list of all nodes under the root.
-    function flatten(root) {
-      let nodes = [], i = 0;
-
-      function recurse(node) {
-        if (node.children) node.children.forEach(recurse);
-        if (!node.id) node.id = ++i;
-        nodes.push(node);
-      }
-
-      recurse(root);
-      return nodes;
-    } */
   }
 
   render() {

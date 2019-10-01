@@ -349,6 +349,7 @@ class Grid extends React.Component {
   changeList(datalist, collection) {
     const { list, next, previous } = datalist;
     this.setState(prevState => ({
+      isLoading: false,
       ...prevState,
       termlistprops: {
         list: list[collection + 1][0],
@@ -363,7 +364,7 @@ class Grid extends React.Component {
       },
     }));
     console.log('change');
-    this.setState(prevState => ({ ...prevState, isLoading: false }));
+    // this.setState(prevState => ({ ...prevState, isLoading: false }));
   }
 
   previousPage(e) {
@@ -502,7 +503,7 @@ class Grid extends React.Component {
     const selectedOptions = this.selectedOptions();
     const filename = this.getFilename();
     console.log(filename);
-    // console.log(visprops);
+    console.log(this.state);
     return (
       <div className="grid">
         <Menu

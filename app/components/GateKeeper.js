@@ -8,28 +8,49 @@ class GateKeeper extends Component {
   constructor(props) {
     super(props);
     this.myRef = React.createRef();
-    this.state = props;
+    this.state = { ...props };
+    // this.randomDate = this.randomDate.bind(this);
   }
 
   componentDidMount() {
-    console.log('componentDidMount');
+    console.log('GateKeeperDidMount');
   }
 
   componentDidUpdate() {
     this.drawwithlabels();
-    console.log('componentDidUpdate');
+    console.log('GateKeeperDidUpdate');
   }
+
+  randomDate = (start, end) => new Date(start.getTime() + Math.random()
+                                          * (end.getTime() - start.getTime()));
 
   drawwithlabels() {
     const { gatekeeperprops } = this.state;
     const { ptt, news } = gatekeeperprops;
-    console.log(news, ptt);
+    // console.log(news, ptt);
+
+    for (let i = 7; i < 100; i += 1) {
+      ptt.push({
+        id: i,
+        value: Math.random(),
+        date: this.randomDate(new Date(2018, 0, 1), new Date()),
+      });
+    }
+
     const svg = d3.select(this.myRef.current)
       .select('svg');
     const width = document.getElementById('gate').clientWidth;
     // const height = document.getElementById('gate').clientHeight;
-    const min = new Date('2019-04-25T04:25:50.000Z');
-    const max = new Date('2019-05-10T04:30:50.000Z');
+    console.log(ptt);
+    let min = new Date('2019-04-25T04:25:50.000Z');
+    let max = new Date('2019-05-10T04:30:50.000Z');
+    let tmp = 0;
+    for (let i = 0; i < ptt.length; i += 1) {
+      tmp = new Date(ptt[i].date);
+      if (tmp < min) min = tmp;
+      if (tmp > max) max = tmp;
+    }
+    console.log(min, max);
     const xScale = d3.scaleTime().domain([min, max]).range([0, 100]);
     const colorScale = d3.scaleLinear().domain([0, 1]).range([0.0, 0.5]);
     const color = d3.interpolateSinebow;
@@ -58,7 +79,7 @@ class GateKeeper extends Component {
       .attr('font-size', '24px')
       .attr('x', '50%')
       .attr('y', '10%')
-      .text('Date: ');
+      .text('');
 
     function update() {
       svg.selectAll('*').remove();
@@ -108,130 +129,150 @@ class GateKeeper extends Component {
         .attr('height', 40)
         .attr('transform', 'scale(3,1)');
 
-      const x = d3.scaleLinear().range([0, 300]);
-      x.domain([0, 1]);
+      const x = d3.scaleLinear().range([0, 100]);
+      x.domain([1, 0]);
+
+      const y = d3.scaleTime().range([0, 300]);
+      y.domain([min, max]);
 
       const pttScores = spectrums.selectAll('line').data(ptt);
-      pttScores.enter().append('line')
-        .attr('transform', 'translate(110,0)')
-        .attr('x1', d => x(d.value))
-        .attr('x2', d => x(d.value))
-        .attr('y1', '345')
-        .attr('y2', '355')
-        // .attr('visibility', (d) => {
-        //   if (new Date(d.date) <= new Date(time)) {
-        //     return 'none';
-        //   }
-        //   return 'hidden';
-        // })
-        .style('stroke', (d) => {
-          let diff = Math.abs(new Date(d.date) - new Date(time));
-          diff /= (max - min);
-          return color(colorScale(diff));
-        })
-        .style('stroke-width', 2);
+      // pttScores.enter().append('line')
+      //   .attr('transform', 'translate(110,0)')
+      //   .attr('x1', d => x(d.value))
+      //   .attr('x2', d => x(d.value))
+      //   .attr('y1', '345')
+      //   .attr('y2', '355')
+      //   // .attr('visibility', (d) => {
+      //   //   if (new Date(d.date) <= new Date(time)) {
+      //   //     return 'none';
+      //   //   }
+      //   //   return 'hidden';
+      //   // })
+      //   .style('stroke', (d) => {
+      //     let diff = Math.abs(new Date(d.date) - new Date(time));
+      //     diff /= (max - min);
+      //     return color(colorScale(diff));
+      //   })
+      //   .style('stroke-width', 2);
+
+      pttScores.enter()
+        .append('circle')
+        .attr('transform', 'translate(110,306)')
+        .attr('cy', d => x(d.value))
+        .attr('cx', d => y(new Date(d.date)))
+        .attr('r', 2)
+        .style('fill', 'red');
 
       const newsScores = pttScores;
+      // newsScores.data(news).enter()
+      //   .append('line')
+      //   .attr('transform', 'translate(110,0)')
+      //   .attr('x1', d => x(d.value))
+      //   .attr('x2', d => x(d.value))
+      //   .attr('y1', d => 200 + y(new Date(d.date)))
+      //   .attr('y2', '195')
+      //   .style('stroke', (d) => {
+      //     let diff = Math.abs(new Date(d.date) - new Date(time));
+      //     diff /= (max - min);
+      //     return color(colorScale(diff));
+      //   })
+      //   .style('stroke-width', 2);
+
       newsScores.data(news).enter()
-        .append('line')
-        .attr('transform', 'translate(110,0)')
-        .attr('x1', d => x(d.value))
-        .attr('x2', d => x(d.value))
-        .attr('y1', '185')
-        .attr('y2', '195')
-        // .attr('visibility', (d) => {
-        //   if (new Date(d.date) <= new Date(time)) {
-        //     return 'none';
-        //   }
-        //   return 'hidden';
-        // })
-        .style('stroke', (d) => {
-          let diff = Math.abs(new Date(d.date) - new Date(time));
-          diff /= (max - min);
-          return color(colorScale(diff));
-        })
-        .style('stroke-width', 2);
+        .append('circle')
+        .attr('transform', 'translate(110,146)')
+        .attr('cy', d => x(d.value))
+        .attr('cx', d => y(new Date(d.date)))
+        .attr('r', 2)
+        .style('fill', 'red');
 
-      const newsSpectrum = spectrums.append('g').attr('transform', 'translate(110,0)');
-      newsSpectrum.append('line')
-        .attr('x1', x(0) - 1)
-        .attr('x2', x(0) - 1)
-        .attr('y1', '185')
-        .attr('y2', '195')
-        .style('stroke', 'black')
-        .style('stroke-width', 2);
+      // const newsSpectrum = spectrums.append('g').attr('transform', 'translate(110,0)');
+      // newsSpectrum.append('line')
+      //   .attr('x1', x(0) - 1)
+      //   .attr('x2', x(0) - 1)
+      //   .attr('y1', '185')
+      //   .attr('y2', '195')
+      //   .style('stroke', 'black')
+      //   .style('stroke-width', 2);
 
-      newsSpectrum.append('line')
-        .attr('x1', x(1) + 1)
-        .attr('x2', x(1) + 1)
-        .attr('y1', '185')
-        .attr('y2', '195')
-        .style('stroke', 'black')
-        .style('stroke-width', 2);
+      // newsSpectrum.append('line')
+      //   .attr('x1', x(1) + 1)
+      //   .attr('x2', x(1) + 1)
+      //   .attr('y1', '185')
+      //   .attr('y2', '195')
+      //   .style('stroke', 'black')
+      //   .style('stroke-width', 2);
 
-      newsSpectrum.append('line')
-        .attr('x1', x(0) - 1)
-        .attr('x2', x(1) + 1)
-        .attr('y1', '185')
-        .attr('y2', '185')
-        .style('stroke', 'black')
-        .style('stroke-width', 2);
+      // newsSpectrum.append('line')
+      //   .attr('x1', x(0) - 1)
+      //   .attr('x2', x(1) + 1)
+      //   .attr('y1', '185')
+      //   .attr('y2', '185')
+      //   .style('stroke', 'black')
+      //   .style('stroke-width', 2);
 
-      newsSpectrum.append('line')
-        .attr('x1', x(0) - 1)
-        .attr('x2', x(1) + 1)
-        .attr('y1', '195')
-        .attr('y2', '195')
-        .style('stroke', 'black')
-        .style('stroke-width', 2);
+      // newsSpectrum.append('line')
+      //   .attr('x1', x(0) - 1)
+      //   .attr('x2', x(1) + 1)
+      //   .attr('y1', '195')
+      //   .attr('y2', '195')
+      //   .style('stroke', 'black')
+      //   .style('stroke-width', 2);
 
-      const pttSpectrum = spectrums.append('g').attr('transform', 'translate(110,0)');
-      pttSpectrum.append('line')
-        .attr('x1', x(0) - 1)
-        .attr('x2', x(0) - 1)
-        .attr('y1', '345')
-        .attr('y2', '355')
-        .style('stroke', 'black')
-        .style('stroke-width', 2);
+      // const pttSpectrum = spectrums.append('g').attr('transform', 'translate(110,0)');
+      // pttSpectrum.append('line')
+      //   .attr('x1', x(0) - 1)
+      //   .attr('x2', x(0) - 1)
+      //   .attr('y1', '345')
+      //   .attr('y2', '355')
+      //   .style('stroke', 'black')
+      //   .style('stroke-width', 2);
 
-      pttSpectrum.append('line')
-        .attr('x1', x(1) + 1)
-        .attr('x2', x(1) + 1)
-        .attr('y1', '345')
-        .attr('y2', '355')
-        .style('stroke', 'black')
-        .style('stroke-width', 2);
+      // pttSpectrum.append('line')
+      //   .attr('x1', x(1) + 1)
+      //   .attr('x2', x(1) + 1)
+      //   .attr('y1', '345')
+      //   .attr('y2', '355')
+      //   .style('stroke', 'black')
+      //   .style('stroke-width', 2);
 
-      pttSpectrum.append('line')
-        .attr('x1', x(0) - 1)
-        .attr('x2', x(1) + 1)
-        .attr('y1', '345')
-        .attr('y2', '345')
-        .style('stroke', 'black')
-        .style('stroke-width', 2);
+      // pttSpectrum.append('line')
+      //   .attr('x1', x(0) - 1)
+      //   .attr('x2', x(1) + 1)
+      //   .attr('y1', '345')
+      //   .attr('y2', '345')
+      //   .style('stroke', 'black')
+      //   .style('stroke-width', 2);
 
-      pttSpectrum.append('line')
-        .attr('x1', x(0) - 1)
-        .attr('x2', x(1) + 1)
-        .attr('y1', '355')
-        .attr('y2', '355')
-        .style('stroke', 'black')
-        .style('stroke-width', 2);
+      // pttSpectrum.append('line')
+      //   .attr('x1', x(0) - 1)
+      //   .attr('x2', x(1) + 1)
+      //   .attr('y1', '355')
+      //   .attr('y2', '355')
+      //   .style('stroke', 'black')
+      //   .style('stroke-width', 2);
 
       // Add the x Axis
       const axisX = spectrums;
+      const axisY = spectrums;
+
+      axisY.append('g')
+        .attr('transform', 'translate(110,306)')
+        .call(d3.axisLeft(x));
+
+      axisY.append('g')
+        .attr('transform', 'translate(110,146)')
+        .call(d3.axisLeft(x));
 
       axisX.append('g')
-        .attr('transform', 'translate(110,356)')
-        .call(d3.axisBottom(x))
-        .attr('fill', 'none')
-        .attr('stroke', 'black');
-
+        .attr('transform', 'translate(110,406)')
+        .call(d3.axisBottom(y).ticks(d3.timeDay))
+        .call(d3.axisBottom(y).tickFormat(d3.timeFormat('%m/%d')));
       axisX.append('g')
-        .attr('transform', 'translate(110,196)')
-        .call(d3.axisBottom(x))
-        .attr('fill', 'none')
-        .attr('stroke', 'black');
+        .attr('transform', 'translate(110,246)')
+        .call(d3.axisBottom(y).tickFormat(d3.timeFormat('%m/%d')));
+
+      axisY.attr('color', 'black');
 
       // text label for the x axis
       spectrums.append('text')

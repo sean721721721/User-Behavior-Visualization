@@ -16,7 +16,7 @@ const PostPage = (props) => {
     nextPage,
     postCount,
   } = props;
-  console.log(props);
+  // console.log(props);
   return (
     <div id="main-container">
       <div className="action-bar">
