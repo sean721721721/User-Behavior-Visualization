@@ -117,10 +117,7 @@ class Grid extends React.Component {
         ],
       },
       visprops: {
-        list: {
-          nodes: [{ id: '', group: 1 }],
-          link: [{ source: '', target: '', value: 1 }],
-        },
+        list: [],
       },
       postlistprops: {
         list: [

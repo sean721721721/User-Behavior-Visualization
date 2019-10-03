@@ -37,9 +37,14 @@ class Graph extends Component {
     let node;
     let links;
     let nodes;
-    const userList = [{ id: '', count: 0, term: [] }];
+    let userList = [{ id: '', count: 0, term: [] }];
+    const propsUserList = [{ id: '', count: 0, term: [] }];
     const initLinks = [];
     const removeWords = ['新聞', '八卦', '幹嘛'];
+
+    // Splice props to match properly size
+
+    props.splice(SetNumOfNodes);
 
     // props combine any titleterms with the equal users
 
@@ -62,6 +67,14 @@ class Graph extends Component {
       }
     }
 
+    for (let i = 0; i < removeWords.length; i += 1) {
+      const index = props.findIndex(x => x[0] === removeWords[i]);
+      console.log(index);
+      if (index !== -1) {
+        props.splice(index, 1);
+      }
+    }
+
     for (let i = 0; i < props.length - 1; i += 1) {
       props[i][1] = [...new Set(props[i][1])];
       props[i][1].sort();
@@ -70,23 +83,82 @@ class Graph extends Component {
     console.log(props);
     console.log(props.length);
 
-    // for (let i = 0; i < props.length; i += 1) {
-    //   console.log(i);
-    //   for (let l = 0; l < props[i][1].length; l += 1) {
+    // Computing props user list
+
+    for (let i = 0; i < props.length; i += 1) {
+      if (props[i][1]) {
+        props[i][1].forEach((userId) => {
+          const existedUser = propsUserList.find(x => x.id === userId);
+          if (existedUser) {
+            existedUser.term.push(props[i][0]);
+            existedUser.count += 1;
+          } else {
+            propsUserList.push({
+              id: userId,
+              size: 1,
+              merge: 1,
+              count: 1,
+              term: [props[i][0]],
+            });
+          }
+        });
+      }
+    }
+    console.log(propsUserList);
+
+    // props[i][1]=['id', 'id'] => props[i][1]=[{id:, count:, ... }]
+
+    for (let i = 0; i < props.length; i += 1) {
+      propsUserList.forEach((x) => {
+        const index = props[i][1].findIndex(user => user === x.id);
+        if (index !== -1) {
+          props[i][1].splice(index, 1);
+          props[i][1].push(x);
+        }
+      });
+    }
+    console.log(props);
+
+    // Combine all user with count == 1
+
+    for (let i = 0; i < props.length; i += 1) {
+      userList = props[i][1].filter(x => x.count === 1);
+      console.log(userList);
+      let temp = '';
+      let size = 0;
+      for (let j = 1; j < userList.length; j += 1) {
+        temp += ` ${userList[j].id}`;
+        size += 1;
+        const deleteIndex = props[i][1].findIndex(x => x.id === userList[j].id);
+        props[i][1].splice(deleteIndex, 1);
+      }
+      if (userList.length > 0) {
+        userList[0].id += temp;
+        userList[0].size += size;
+        userList[0].merge += 1;
+      }
+    }
+    console.log(props);
+
+
+    // for (let i = 0; i < props.length; i += 1) { // i == which term
+    //   console.log(`${props[i][0]} round ${i}`);
+    //   for (let l = 0; l < props[i][1].length; l += 1) { // l == the user which other nodes will be merge to
     //     let unique = 1;
     //     let index = l;
     //     for (let j = l + 1; j < props[i][1].length; j += 1) {
     //       for (let k = 0; k < props.length; k += 1) {
     //         if (k !== i && props[k][1].includes(props[i][1][j])) {
-    //           console.log(`not unique! i = ${i}, j = ${j}, k = ${k} `);
+    //           console.log(`${props[i][1][j]} not unique in ${props[k][0]}! i = ${i}, j = ${j}, k = ${k} `);
     //           unique = 0;
     //           break;
     //         }
-    //         console.log(props[k][0]);
+    //         // console.log(props[k][0]);
     //       }
     //       if (unique === 1) {
     //         console.log('unique!');
     //         props[i][1][index] += props[i][1][j];
+    //         console.log(props[i][0]);
     //         console.log(props[i][1][index], props[i][1][j]);
     //         props[i][1].splice(j, 1);
     //       }
@@ -94,7 +166,7 @@ class Graph extends Component {
     //   }
     // }
 
-    console.log(props);
+    // console.log(props);
 
     // Nodes setting
     for (let i = 0; i < Math.min(props.length, SetNumOfNodes); i += 1) {
@@ -727,7 +799,8 @@ class Graph extends Component {
 
           d.children.forEach((id_1) => {
             if (id_1 != null) {
-              if (typeof id_1 !== 'string') {
+              if (id_1.titleTerm !== undefined) {
+                // console.log(id_1.titleTerm);
                 set.nodes.push({
                   titleTerm: id_1.titleTerm,
                   group: 3,
@@ -750,15 +823,16 @@ class Graph extends Component {
           });
 
           d.children.forEach((id_1) => {
-            if (id_1 != null && typeof id_1 === 'string') {
-              const checkUserId = obj => obj.titleTerm === id_1;
+            if (id_1 != null && id_1.id !== undefined) {
+              // console.log(id_1.id);
+              const checkUserId = obj => obj.titleTerm === id_1.id;
               if (!set.nodes.some(checkUserId)) {
                 set.nodes.forEach((_node) => {
                   if (_node.children) {
                     _node.children.forEach((id_2) => {
-                      if (id_1 === id_2) {
+                      if (id_1.id === id_2.id) {
                         set.links.push({
-                          source: id_1,
+                          source: id_1.id,
                           target: _node.titleTerm,
                           tag: 1,
                           color: '#ffbb78 ',
@@ -768,30 +842,30 @@ class Graph extends Component {
                     });
                   }
                 });
-                const existId = set.nodes.find(ele => ele.titleTerm === id_1);
+                const existId = set.nodes.find(ele => ele.titleTerm === id_1.id);
                 if (existId === undefined) {
-                  const { count } = userList.find(user => user.id === id_1);
+                  // const { count } = userList.find(user => user.id === id_1.id);
                   set.nodes.push({
-                    titleTerm: id_1,
+                    titleTerm: id_1.id,
                     parentNode: d.titleTerm,
-                    count,
+                    count: id_1.count,
                     group: 2,
                     tag: 1,
                     connected: 1,
                     x: d.x,
                     y: d.y,
-                    size: 5,
+                    size: 5 * id_1.merge,
                   });
                 }
                 set.links.push({
-                  source: id_1,
+                  source: id_1.id,
                   target: d,
                   color: '#ffbb78',
                   tag: 1,
                   value: 1000000,
                 });
               } else {
-                const index = set.nodes.findIndex(_node => _node.titleTerm === id_1);
+                const index = set.nodes.findIndex(_node => _node.titleTerm === id_1.id);
                 set.nodes[index].connected += 1;
               }
             }
