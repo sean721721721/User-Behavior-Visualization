@@ -510,12 +510,13 @@ class Graph extends Component {
         .attr('class', 'nodes')
         .style('z-index', 1)
         .on('click', clicked)
+        .on('mouseover', mouseOver(0.2))
+        .on('mouseout', mouseOut)
         .call(d3.drag()
           .on('start', dragstarted)
           .on('drag', dragged)
           .on('end', dragended));
-        // .on('mouseover', mouseOver(.2))
-        // .on('mouseout', mouseOut);
+
       nodeEnter
         .append('defs')
         .append('pattern')
@@ -1020,29 +1021,30 @@ class Graph extends Component {
         update();
       }
 
-      // function mouseOut() {
-      //   node.style('stroke-opacity', (d) => {
-      //     d.tag=0;
-      //     return 1;
-      //   });
-      //   node.style('fill-opacity', 1);
-      //   node.selectAll('text').style('visibility', (d) => {
-      //     if(d.group === 1)
-      //       return 'visible';
-      //     return 'hidden';
-      //   });
-      //   node.selectAll('circle').style('fill', (d) => {
-      //     if (d.group === 2) {
-      //       return '#ff7f0e';
-      //     }
-      //     return '1f77b4';
-      //     });
-      //   link.style('stroke-opacity', 1);
-      //   link.style('stroke', (d) => {
-      //     d.tag=0;
-      //     return '#ddd';
-      //   });
-      // }
+      function mouseOut() {
+        node.style('stroke-opacity', (d) => {
+          d.tag = 0;
+          return 1;
+        });
+        node.style('fill-opacity', 1);
+        node.selectAll('text').style('visibility', (d) => {
+          if (d.group === 1) {
+            return 'visible';
+          }
+          // return 'hidden';
+        });
+        node.selectAll('circle').style('fill', (d) => {
+          if (d.group === 2) {
+            return '#ff7f0e';
+          }
+          return '1f77b4';
+        });
+        link.style('stroke-opacity', 1);
+        link.style('stroke', (d) => {
+          d.tag = 0;
+          return '#ddd';
+        });
+      }
     }
     // build a dictionary of nodes that are linked
     const linkedByIndex = {};
@@ -1056,33 +1058,29 @@ class Graph extends Component {
     }
 
     // fade nodes on hover
-    // function mouseOver(opacity) {
-    //     return (d) =>  {
-    //         // check all other nodes to see if they're connected
-    //         // to this one. if so, keep the opacity at 1, otherwise
-    //         // fade
-    //         node.selectAll('circles').style('stroke-opacity', function(o) {
-    //           let thisOpacity = isConnected(d, o) ? 1 : opacity;
-    //           return thisOpacity;
-    //         });
-    //         node.style('fill-opacity', function(o) {
-    //           let thisOpacity = isConnected(d, o) ? 1 : opacity;
-    //           return thisOpacity;
-    //         });
-
-    //         node.selectAll('text').style('visibility',function(o){
-    //           if(isConnected(d, o) || o.tag != 0)
-    //             return 'visible';
-    //         });
-    //         // also style link accordingly
-    //         link.style('stroke-opacity', function(o) {
-    //             return o.source === d || o.target === d ? 1 : opacity;
-    //         });
-    //         link.style('stroke', function(o){
-    //             return o.source === d || o.target === d ? o.source.colour : '#ddd';
-    //         });
-    //     };
-    // }
+    function mouseOver(opacity) {
+      return (d) => {
+        // check all other nodes to see if they're connected
+        // to this one. if so, keep the opacity at 1, otherwise
+        // fade
+        // node.selectAll('circles').style('stroke-opacity', (o) => {
+        //   let thisOpacity = isConnected(d, o) ? 1 : opacity;
+        //   return thisOpacity;
+        // });
+        // node.style('fill-opacity', (o) => {
+        //   let thisOpacity = isConnected(d, o) ? 1 : opacity;
+        //   return thisOpacity;
+        // });
+        node.selectAll('text').style('visibility', (o) => {
+          if (isConnected(d, o) || o.tag !== 0) {
+            return 'visible';
+          }
+        });
+        // also style link accordingly
+        link.style('stroke-opacity', o => (o.source === d || o.target === d ? 1 : opacity));
+        link.style('stroke', o => (o.source === d || o.target === d ? o.source.colour : '#ddd'));
+      };
+    }
 
     function dragstarted(d) {
       if (!d3.event.active) simulation.alphaTarget(0.3).restart();
