@@ -95,7 +95,7 @@ class Graph extends Component {
           } else {
             propsUserList.push({
               id: userId,
-              size: 1,
+              numOfUsr: 1,
               merge: 1,
               count: 1,
               term: [props[i][0]],
@@ -104,6 +104,7 @@ class Graph extends Component {
         });
       }
     }
+    
     console.log(propsUserList);
 
     // props[i][1]=['id', 'id'] => props[i][1]=[{id:, count:, ... }]
@@ -117,6 +118,8 @@ class Graph extends Component {
         }
       });
     }
+    const copyprops = props.slice(0);
+    console.log(copyprops);
     console.log(props);
 
     // Combine all user with count == 1
@@ -134,8 +137,37 @@ class Graph extends Component {
       }
       if (userList.length > 0) {
         userList[0].id += temp;
-        userList[0].size += size;
-        userList[0].merge += 1;
+        userList[0].numOfUsr += size;
+        userList[0].merge = 2;
+      }
+    }
+    const hasMergedId = [];
+    for (let i = 0; i < props.length; i += 1) { // which title
+      for (let j = 0; j < props[i][1].length - 1; j += 1) {
+        for (let k = j + 1; k < props[i][1].length; k += 1) {
+          let equal = 1;
+          console.log(props[i][1][j].id, props[i][1][k].id);
+          if (props[i][1][j].count === props[i][1][k].count) {
+            for (let l = 0; l < props[i][1][j].term.length; l += 1) {
+              if (!props[i][1][k].term.includes(props[i][1][j].term[l])) {
+                console.log(`${props[i][1][j].id} is not equal to ${props[i][1][k].id}`);
+                equal = 0;
+                break;
+              }
+            }
+            if (equal === 1) {
+              if (!hasMergedId.includes(props[i][1][k].id)) {
+                console.log(`${props[i][1][j].id} is equal to ${props[i][1][k].id}`);
+                props[i][1][j].id += props[i][1][k].id;
+                hasMergedId.push(props[i][1][k].id);
+                props[i][1][j].merge = 2;
+                props[i][1][j].numOfUsr += 1;
+              }
+              props[i][1].splice(k, 1);
+              k -= 1;
+            }
+          }
+        }
       }
     }
 
@@ -269,28 +301,28 @@ class Graph extends Component {
 
 
     // 2nd round merging nodes
-    for (let i = 0; i < set.nodes.length - 1; i += 1) {
-      set.nodes.children = [...new Set(set.nodes.children)];
-      for (let j = i + 1; j < set.nodes.length; j += 1) {
-        let numOfSameUsers = 0;
-        // console.log(i, j);
-        for (let k = 0; k < set.nodes[i].children.length; k += 1) {
-          const haveTheSameUsers = set.nodes[j].children.includes(set.nodes[i].children[k]);
-          if (haveTheSameUsers) {
-            numOfSameUsers += 1;
-          }
-        }
-        // console.log(numOfSameUsers, set.nodes[i].titleTerm, set.nodes[j].titleTerm,
-        //   set.nodes[i].children.length, set.nodes[j].children.length);
-        if (numOfSameUsers >= set.nodes[j].children.length) {
-          // console.log('#ofuser == set.node[j].children.length');
-          // console.log(set.nodes[i].titleTerm, set.nodes[j].titleTerm);
-          set.nodes[i].children.push(set.nodes[j]);
-          set.nodes.splice(j, 1);
-          j -= 1;
-        }
-      }
-    }
+    // for (let i = 0; i < set.nodes.length - 1; i += 1) {
+    //   set.nodes.children = [...new Set(set.nodes.children)];
+    //   for (let j = i + 1; j < set.nodes.length; j += 1) {
+    //     let numOfSameUsers = 0;
+    //     // console.log(i, j);
+    //     for (let k = 0; k < set.nodes[i].children.length; k += 1) {
+    //       const haveTheSameUsers = set.nodes[j].children.includes(set.nodes[i].children[k]);
+    //       if (haveTheSameUsers) {
+    //         numOfSameUsers += 1;
+    //       }
+    //     }
+    //     // console.log(numOfSameUsers, set.nodes[i].titleTerm, set.nodes[j].titleTerm,
+    //     //   set.nodes[i].children.length, set.nodes[j].children.length);
+    //     if (numOfSameUsers >= set.nodes[j].children.length) {
+    //       // console.log('#ofuser == set.node[j].children.length');
+    //       // console.log(set.nodes[i].titleTerm, set.nodes[j].titleTerm);
+    //       set.nodes[i].children.push(set.nodes[j]);
+    //       set.nodes.splice(j, 1);
+    //       j -= 1;
+    //     }
+    //   }
+    // }
 
     // compute how many same users each term has
 
@@ -504,6 +536,9 @@ class Graph extends Component {
           if (d.group !== 2) {
             return color(d.group);
           }
+          if (d.merge > 1) {
+            return color(d.group);
+          }
           return 'url(#pic_user)';
         })
         .style('fill-opacity', (d) => {
@@ -527,18 +562,33 @@ class Graph extends Component {
       //       .on('zoom', zoom_actions);
       // zoom_handler(svg);
       const lables = nodeEnter.append('text')
-        .text(d => d.titleTerm)
+        .text((d) => {
+          if (d.merge > 1) {
+            return d.numOfUsr;
+          }
+          return d.titleTerm;
+        })
         .attr('font-family', 'sans-serif')
         .attr('font-size', ' 10px')
         .attr('color', '#000')
         .attr('visibility', (d) => {
-          if (d.group !== 2) {
+          if (d.group !== 2 || d.merge > 1) {
             return 'visible';
           }
           return 'hidden';
         })
-        .attr('x', d => -d.size)
-        .attr('y', d => d.size + 7);
+        .attr('x', (d) => {
+          if (d.merge > 1) {
+            return -3;
+          }
+          return -d.size;
+        })
+        .attr('y', (d) => {
+          if (d.merge > 1) {
+            return 3;
+          }
+          return d.size + 7;
+        });
       nodeEnter.append('title')
         .text(d => d.titleTerm);
       node = nodeEnter.merge(node);
@@ -853,6 +903,8 @@ class Graph extends Component {
                     group: 2,
                     tag: 1,
                     connected: 1,
+                    merge: id_1.merge,
+                    numOfUsr: id_1.numOfUsr,
                     x: d.x,
                     y: d.y,
                     size: 5 * id_1.merge,
