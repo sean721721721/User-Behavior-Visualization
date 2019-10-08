@@ -29,7 +29,7 @@ class Page extends React.Component {
     const {
       show,
       init: {
-        pagename, since, until, wordfilter, idfilter, contentfilter,
+        pagename, since, until, wordfilter, authorfilter, idfilter, contentfilter,
       },
       onChange,
       handlePT,
@@ -111,6 +111,17 @@ class Page extends React.Component {
               />
             </label>
             <label htmlFor="x">
+              author filter:
+              <input
+                type="authorid1"
+                name="authorfilter"
+                id="authorid1"
+                placeholder="authorid"
+                value={authorfilter}
+                onChange={handlePT}
+              />
+            </label>
+            <label htmlFor="x">
               userid filter:
               <input
                 type="userid1"
@@ -149,6 +160,7 @@ Page.propTypes = {
     until: PropTypes.string,
     wordfilter: PropTypes.string,
     idfilter: PropTypes.string,
+    authorfilter: PropTypes.string,
     contentfilter: PropTypes.string,
   }).isRequired,
   onChange: PropTypes.func.isRequired,

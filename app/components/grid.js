@@ -48,6 +48,7 @@ class Grid extends React.Component {
           wordfilter: '丁守中',
           idfilter: '',
           contentfilter: '',
+          authorfilter: '',
         },
         initPage2: {
           pagename: 'Gossiping',
@@ -244,6 +245,7 @@ class Grid extends React.Component {
           wordfilter: keyword1,
           contentfilter: keyword3,
           idfilter: user1,
+          authorfilter: author1,
         },
         initPage2: {
           pagename: pagename2,
@@ -265,6 +267,7 @@ class Grid extends React.Component {
     const strtime1 = `time1=${date1}` || '';
     const strtime2 = `time2=${date2}` || '';
     const struser1 = `user1=${user1}` || '';
+    const strauthor1 = `author1=${author1}` || '';
     const strkeyword1 = `keyword1=${keyword1}` || '';
     const strkeyword3 = `keyword3=${keyword3}` || '';
     const strpage2 = `page2=${pagename2}` || '';
@@ -276,7 +279,7 @@ class Grid extends React.Component {
     const strco = `co=${type}` || '';
     const searchurl = '/searching?';
     const str = `${searchurl + strminvar1}&${strmaxvar1}&${strposttype}&`
-      + `${strpage1}&${strtime1}&${strtime2}&${struser1}&${strkeyword1}&${strkeyword3}&`
+      + `${strpage1}&${strtime1}&${strtime2}&${strauthor1}&${struser1}&${strkeyword1}&${strkeyword3}&`
       + `${strpage2}&${strtime3}&${strtime4}&${struser2}&${strkeyword2}&${strkeyword4}&${strco}`;
     return str;
   }

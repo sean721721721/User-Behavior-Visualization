@@ -37,7 +37,7 @@ let logger = winston.createLogger({
   exitOnError: false,
 });
 
-let queryobj = function queryobj(req, res, time1, time2, userid, tkeyword, ckeyword) {
+let queryobj = function queryobj(req, res, time1, time2, authorid, userid, tkeyword, ckeyword) {
   let queryobj = {};
   if (req.params.posttype) {
     if (req.params.posttype === 'PTT') {
@@ -89,6 +89,9 @@ let queryobj = function queryobj(req, res, time1, time2, userid, tkeyword, ckeyw
   }
   if (userid !== undefined) {
     queryobj['messages.push_userid'] = userid;
+  }
+  if (authorid !== undefined) {
+    queryobj['author'] = authorid;
   }
   if (req.params.postid) {
     queryobj['id'] = req.params.postid;
@@ -289,6 +292,7 @@ let findquery = async function findquery(page, queryobj, ptt, limit, sort) {
   //return Query(queryobj, options, pagepost, page);
   // console.log(page, pagepost);
   let query;
+  console.log(queryobj);
   if (limit < 0) {
     query = pagepost.find(queryobj).sort(sort);
   } else {
@@ -335,6 +339,7 @@ let callback = function callback(req, res) {
     console.log('go db');
     let page1 = req.params.page1;
     let user1 = req.params.user1;
+    let author1 = req.params.author1;
     let keyword1 = req.params.keyword1;
     let keyword3 = req.params.keyword3;
     let page2 = req.params.page2;
@@ -345,7 +350,7 @@ let callback = function callback(req, res) {
     let time2 = req.params.time2;
     let time3 = req.params.time3;
     let time4 = req.params.time4;
-    let queryobj1 = queryobj(req, res, time1, time2, user1, keyword1, keyword3);
+    let queryobj1 = queryobj(req, res, time1, time2, author1, user1, keyword1, keyword3);
     let queryobj2 = queryobj(req, res, time3, time4, user2, keyword2, keyword4);
     let samequery =
       page1 === page2 &&

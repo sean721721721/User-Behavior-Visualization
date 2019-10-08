@@ -138,6 +138,7 @@ class Graph extends Component {
         userList[0].merge += 1;
       }
     }
+
     console.log(props);
 
 
