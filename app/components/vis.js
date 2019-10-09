@@ -113,7 +113,7 @@ class Graph extends Component {
         });
       }
     }
-    
+
     console.log(propsUserList);
 
     // props[i][1]=['id', 'id'] => props[i][1]=[{id:, count:, ... }]
@@ -132,7 +132,7 @@ class Graph extends Component {
     console.log(props);
 
     // Combine all user with count == 1
-
+    const findIndex = (array, num) => array.findIndex(x => x.id === num);
     for (let i = 0; i < props.length; i += 1) {
       userList = props[i][1].filter(x => x.count === 1);
       // console.log(userList);
@@ -141,7 +141,8 @@ class Graph extends Component {
       for (let j = 1; j < userList.length; j += 1) {
         temp += ` ${userList[j].id}`;
         size += 1;
-        const deleteIndex = props[i][1].findIndex(x => x.id === userList[j].id);
+        const deleteIndex = findIndex(props[i][1], userList[j].id);
+        // const deleteIndex = props[i][1].findIndex(x => x.id === userList[j].id);
         props[i][1].splice(deleteIndex, 1);
       }
       if (userList.length > 0) {
@@ -182,13 +183,15 @@ class Graph extends Component {
 
     // for (let i = 0; i < props.length; i += 1) { // i == which term
     //   console.log(`${props[i][0]} round ${i}`);
-    //   for (let l = 0; l < props[i][1].length; l += 1) { // l == the user which other nodes will be merge to
+    //   for (let l = 0; l < props[i][1].length; l += 1) {
+    // l == the user which other nodes will be merge to
     //     let unique = 1;
     //     let index = l;
     //     for (let j = l + 1; j < props[i][1].length; j += 1) {
     //       for (let k = 0; k < props.length; k += 1) {
     //         if (k !== i && props[k][1].includes(props[i][1][j])) {
-    //           console.log(`${props[i][1][j]} not unique in ${props[k][0]}! i = ${i}, j = ${j}, k = ${k} `);
+    //           console.log(`${props[i][1][j]} not unique in ${props[k][0]}!
+    //                        i = ${i}, j = ${j}, k = ${k} `);
     //           unique = 0;
     //           break;
     //         }
@@ -333,7 +336,7 @@ class Graph extends Component {
     for (let i = 0; i < set.nodes.length - 1; i += 1) {
       for (let j = i + 1; j < set.nodes.length; j += 1) {
         let numOfSameUsers = 0;
-        let largestNumOfSameUsers = 0;
+        const largestNumOfSameUsers = 0;
         // let term = '';
         for (let k = 0; k < set.nodes[i].children.length; k += 1) {
           const haveTheSameUsers = set.nodes[j].children.includes(set.nodes[i].children[k]);
