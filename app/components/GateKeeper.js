@@ -41,7 +41,7 @@ class GateKeeper extends Component {
       .select('svg');
     const width = document.getElementById('gate').clientWidth;
     // const height = document.getElementById('gate').clientHeight;
-    console.log(ptt);
+    // console.log(ptt);
     let min = new Date('2019-04-25T04:25:50.000Z');
     let max = new Date('2019-05-10T04:30:50.000Z');
     let tmp = 0;
@@ -50,7 +50,7 @@ class GateKeeper extends Component {
       if (tmp < min) min = tmp;
       if (tmp > max) max = tmp;
     }
-    console.log(min, max);
+    // console.log(min, max);
     const xScale = d3.scaleTime().domain([min, max]).range([0, 100]);
     const colorScale = d3.scaleLinear().domain([0, 1]).range([0.0, 0.5]);
     const color = d3.interpolateSinebow;

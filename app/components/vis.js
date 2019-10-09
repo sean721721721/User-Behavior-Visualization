@@ -3,7 +3,7 @@
 /* eslint-disable no-use-before-define */
 /* eslint-disable camelcase */
 /* eslint-disable no-param-reassign */
-import React, { Component } from 'react';
+import React, { Component, PureComponent } from 'react';
 // import PropTypes from 'prop-types';
 // import { connect } from 'react-redux';
 // import { push } from 'react-router-redux';
@@ -23,15 +23,27 @@ class Graph extends Component {
     console.log('vis_DidMount');
   }
 
-  componentDidUpdate() {
+  // componentDidUpdate() {
+  //   this.drawwithlabels();
+  //   console.log('vis_DidUpdate');
+  // }
+
+  shouldComponentUpdate(nextProps, nextState) {
+    if (JSON.stringify(this.props) === JSON.stringify(nextProps)) {
+      console.log('vis not update !');
+      return false;
+    }
+    console.log('vis update !');
+    this.props = nextProps;
     this.drawwithlabels();
-    console.log('vis_DidUpdate');
+    return true;
   }
 
   drawwithlabels() {
     // props[i][0]== userID, props[i][1]== articleIndex, props[i][0]== articlePostTime;
     console.log(this.props);
-    const { visprops: props } = this.props;
+    const { visprops } = this.props;
+    const props = JSON.parse(JSON.stringify(visprops)); // clone props;
     const set = { nodes: [], links: [] };
     let link;
     let node;
@@ -69,7 +81,6 @@ class Graph extends Component {
 
     for (let i = 0; i < removeWords.length; i += 1) {
       const index = props.findIndex(x => x[0] === removeWords[i]);
-      console.log(index);
       if (index !== -1) {
         props.splice(index, 1);
       }
@@ -78,10 +89,8 @@ class Graph extends Component {
     for (let i = 0; i < props.length - 1; i += 1) {
       props[i][1] = [...new Set(props[i][1])];
       props[i][1].sort();
-      // console.log(i);
     }
-    console.log(props);
-    console.log(props.length);
+    // console.log(props.length);
 
     // Computing props user list
 
@@ -118,7 +127,7 @@ class Graph extends Component {
         }
       });
     }
-    const copyprops = props.slice(0);
+    const copyprops = JSON.parse(JSON.stringify(props));
     console.log(copyprops);
     console.log(props);
 
@@ -126,7 +135,7 @@ class Graph extends Component {
 
     for (let i = 0; i < props.length; i += 1) {
       userList = props[i][1].filter(x => x.count === 1);
-      console.log(userList);
+      // console.log(userList);
       let temp = '';
       let size = 0;
       for (let j = 1; j < userList.length; j += 1) {
@@ -146,18 +155,18 @@ class Graph extends Component {
       for (let j = 0; j < props[i][1].length - 1; j += 1) {
         for (let k = j + 1; k < props[i][1].length; k += 1) {
           let equal = 1;
-          console.log(props[i][1][j].id, props[i][1][k].id);
+          // console.log(props[i][1][j].id, props[i][1][k].id);
           if (props[i][1][j].count === props[i][1][k].count) {
             for (let l = 0; l < props[i][1][j].term.length; l += 1) {
               if (!props[i][1][k].term.includes(props[i][1][j].term[l])) {
-                console.log(`${props[i][1][j].id} is not equal to ${props[i][1][k].id}`);
+                // console.log(`${props[i][1][j].id} is not equal to ${props[i][1][k].id}`);
                 equal = 0;
                 break;
               }
             }
             if (equal === 1) {
               if (!hasMergedId.includes(props[i][1][k].id)) {
-                console.log(`${props[i][1][j].id} is equal to ${props[i][1][k].id}`);
+                // console.log(`${props[i][1][j].id} is equal to ${props[i][1][k].id}`);
                 props[i][1][j].id += props[i][1][k].id;
                 hasMergedId.push(props[i][1][k].id);
                 props[i][1][j].merge = 2;
@@ -170,9 +179,6 @@ class Graph extends Component {
         }
       }
     }
-
-    console.log(props);
-
 
     // for (let i = 0; i < props.length; i += 1) { // i == which term
     //   console.log(`${props[i][0]} round ${i}`);
@@ -275,8 +281,6 @@ class Graph extends Component {
       }
     }
 
-    console.log(userList);
-
     // Find all of users with only one term, then merge them
 
     // console.log(userList.filter(x => x.count === 1));
@@ -347,9 +351,6 @@ class Graph extends Component {
         }
       }
     }
-
-    console.log(set);
-
 
     // title words links by articleIndex
     const groupedWords = [];
@@ -430,7 +431,7 @@ class Graph extends Component {
     if (props[0]) {
       postCount = props[0][3].length;
     }
-    console.log(`posCount: ${postCount}`);
+    // console.log(`posCount: ${postCount}`);
     for (let i = 0; i < postCount; i += 1) {
       someData.find((x) => {
         const xMonth = x.date.getMonth();
@@ -488,7 +489,6 @@ class Graph extends Component {
 
       link = svg.selectAll('line')
         .data(set.links);
-      console.log(set);
 
       link.exit().remove();
       const linkEnter = link.enter()
@@ -501,8 +501,6 @@ class Graph extends Component {
       svg.selectAll('g').remove();
       node = svg.selectAll('g')
         .data(set.nodes);
-      console.log(link);
-      console.log(set);
       // node.exit().remove();
       // let node = svg.selectAll('g').data(set.nodes)
       const nodeEnter = node.enter()
@@ -594,8 +592,6 @@ class Graph extends Component {
         .text(d => d.titleTerm);
       node = nodeEnter.merge(node);
 
-      console.log(set);
-
       simulation
         .nodes(set.nodes)
         .on('tick', ticked);
@@ -605,7 +601,6 @@ class Graph extends Component {
         .links(set.links)
         .distance(d => 300 / d.value);
       // .strength(1);
-      console.log(set.links);
 
       rightSvg.selectAll('*').remove();
 
