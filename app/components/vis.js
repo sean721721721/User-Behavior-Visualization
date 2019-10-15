@@ -417,7 +417,7 @@ class Graph extends Component {
     //   }
     // }
 
-    console.log(set);
+    // console.log(set);
 
     const someData = [];
     let postCount;
@@ -446,6 +446,14 @@ class Graph extends Component {
     }
 
     // console.log(someData);
+
+
+    const pi = Math.PI;
+    const arc = d3.arc()
+      .innerRadius(10)
+      .outerRadius(15)
+      .startAngle(45 * (pi / 180))
+      .endAngle(3);
 
     const width = 900;
     const height = 900;
@@ -532,6 +540,11 @@ class Graph extends Component {
         .attr('width', 10)
         .attr('x', 0)
         .attr('y', 0);
+
+      nodeEnter.append('path')
+        .attr('d', arc)
+        .attr('fill', 'red');
+
       const circles = nodeEnter.append('circle')
         .attr('r', d => d.size)
         .attr('fill', (d) => {
@@ -607,216 +620,225 @@ class Graph extends Component {
 
       rightSvg.selectAll('*').remove();
 
-      const table = rightSvg.append('foreignObject')
-        .attr('width', '100%')
-        .attr('height', '100%')
-        .style('overflow-y', 'scroll')
-        .append('xhtml:table');
-      const th = table.append('tr');
+      drawTable();
 
-      th.append('td').attr('class', 'data name')
-        .text('Title Term');
-      th.append('td').attr('class', 'data name')
-        .text('# of User');
+      drawSpiral();
 
-      // Create a table with rows and bind a data row to each table row
-      const tr = table.selectAll('tr.data')
-        .data(set.nodes)
-        .enter()
-        .append('tr')
-        .attr('class', 'datarow')
-        .style('border', (d) => {
-          if (d.tag === 1) {
-            return '2px black solid';
-          }
-          // if (d.connected === 1) {
-          //   return '2px red solid';
-          // }
-          return 'none';
-        })
-        .on('click', clicked);
+      function drawTable() {
+        const table = rightSvg.append('foreignObject')
+          .attr('width', '100%')
+          .attr('height', '100%')
+          .style('overflow-y', 'scroll')
+          .append('xhtml:table');
+        const th = table.append('tr');
 
-      // Set the even columns
-      d3.selectAll('.datarow').filter(':nth-child(even)')
-        .style('background', 'whitesmoke');
+        th.append('td').attr('class', 'data name')
+          .text('Title Term');
+        th.append('td').attr('class', 'data name')
+          .text('# of User');
 
-      // Create the name column
-      tr.append('td').attr('class', 'data name')
-        .text(d => d.titleTerm);
-
-      // Create the percent value column
-      tr.append('td').attr('class', 'data value')
-        .text((d) => {
-          if (d.children === undefined) {
-            return 0;
-          }
-          return d.children.length;
-        });
-      // Create a column at the beginning of the table for the chart
-      const chart = tr.append('td').attr('class', 'chart')
-        .attr('width', chartWidth)
-        .attr('padding-bottom', '2px')
-        .attr('padding-top', '2px');
-
-      // Create the div structure of the chart
-      chart.append('div')
-        .style('height', '17px')
-        .attr('class', 'chart')
-        .style('float', 'left')
-        .style('width', '50%')
-        .append('div')
-        .style('height', '17px')
-        .attr('class', 'positive');
-
-      // Creates the positive div bar
-      tr.select('div.positive')
-        .style('width', '0%')
-        .style('background-color', 'steelblue')
-        .transition()
-        .duration(500)
-        .style('width', (d) => {
-          if (d.children !== undefined) {
-            if (d.children.length > 0) {
-              return x(d.children.length);
+        // Create a table with rows and bind a data row to each table row
+        const tr = table.selectAll('tr.data')
+          .data(set.nodes)
+          .enter()
+          .append('tr')
+          .attr('class', 'datarow')
+          .style('border', (d) => {
+            if (d.tag === 1) {
+              return '2px black solid';
             }
-          }
-          return '0%';
-        });
-      // Spiral Display
+            // if (d.connected === 1) {
+            //   return '2px red solid';
+            // }
+            return 'none';
+          })
+          .on('click', clicked);
 
-      const start = 0;
-      const end = 2.25;
-      const numSpirals = 3;
-      const margin = {
-        top: 50, bottom: 50, left: 50, right: 50,
-      };
+        // Set the even columns
+        d3.selectAll('.datarow').filter(':nth-child(even)')
+          .style('background', 'whitesmoke');
 
-      const theta = r => numSpirals * Math.PI * r;
+        // Create the name column
+        tr.append('td').attr('class', 'data name')
+          .text(d => d.titleTerm);
 
-      // used to assign nodes color by group
-      // const color = d3.scaleOrdinal(d3.schemeCategory10);
+        // Create the percent value column
+        tr.append('td').attr('class', 'data value')
+          .text((d) => {
+            if (d.children === undefined) {
+              return 0;
+            }
+            return d.children.length;
+          });
+        // Create a column at the beginning of the table for the chart
+        const chart = tr.append('td').attr('class', 'chart')
+          .attr('width', chartWidth)
+          .attr('padding-bottom', '2px')
+          .attr('padding-top', '2px');
 
-      const r = d3.min([500, 500]) / 2 - 40;
+        // Create the div structure of the chart
+        chart.append('div')
+          .style('height', '17px')
+          .attr('class', 'chart')
+          .style('float', 'left')
+          .style('width', '50%')
+          .append('div')
+          .style('height', '17px')
+          .attr('class', 'positive');
 
-      const radius = d3.scaleLinear()
-        .domain([start, end])
-        .range([40, r]);
+        // Creates the positive div bar
+        tr.select('div.positive')
+          .style('width', '0%')
+          .style('background-color', 'steelblue')
+          .transition()
+          .duration(500)
+          .style('width', (d) => {
+            if (d.children !== undefined) {
+              if (d.children.length > 0) {
+                return x(d.children.length);
+              }
+            }
+            return '0%';
+          });
+      }
 
-      const points = d3.range(start, end + 0.001, (end - start) / 1000);
+      function drawSpiral() {
+        // Spiral Display
 
-      const spiral = d3.radialLine()
-        .curve(d3.curveCardinal)
-        .angle(theta)
-        .radius(radius);
+        const start = 0;
+        const end = 2.25;
+        const numSpirals = 3;
+        const margin = {
+          top: 50, bottom: 50, left: 50, right: 50,
+        };
 
-      const path = svg.attr('transform', `translate(${width / 4},${height / 4})`)
-        .append('path')
-        .datum(points)
-        .attr('id', 'spiral')
-        .attr('d', spiral)
-        .style('fill', 'none')
-        .style('stroke', 'steelblue');
+        const theta = r => numSpirals * Math.PI * r;
 
-      const spiralLength = path.node().getTotalLength();
-      const N = 365;
-      const barWidth = (spiralLength / N) - 1;
+        // used to assign nodes color by group
+        // const color = d3.scaleOrdinal(d3.schemeCategory10);
 
+        const r = d3.min([500, 500]) / 2 - 40;
 
-      const timeScale = d3.scaleTime()
-        .domain(d3.extent(someData, d => d.date))
-        .range([0, spiralLength]);
+        const radius = d3.scaleLinear()
+          .domain([start, end])
+          .range([40, r]);
 
-      // yScale for the bar height
-      const yScale = d3.scaleLinear()
-        .domain([0, d3.max(someData, d => d.value)])
-        .range([0, (r / numSpirals) - 30]);
+        const points = d3.range(start, end + 0.001, (end - start) / 1000);
 
-      svg.selectAll('rect')
-        .data(someData)
-        .enter()
-        .append('rect')
-        .attr('x', (d, i) => {
-          const linePer = timeScale(d.date);
-          const posOnLine = path.node().getPointAtLength(linePer);
-          const angleOnLine = path.node().getPointAtLength(linePer - barWidth);
+        const spiral = d3.radialLine()
+          .curve(d3.curveCardinal)
+          .angle(theta)
+          .radius(radius);
 
-          d.linePer = linePer; // % distance are on the spiral
-          d.x = posOnLine.x; // x postion on the spiral
-          d.y = posOnLine.y; // y position on the spiral
+        const path = svg.attr('transform', `translate(${width / 4},${height / 4})`)
+          .append('path')
+          .datum(points)
+          .attr('id', 'spiral')
+          .attr('d', spiral)
+          .style('fill', 'none')
+          .style('stroke', 'steelblue');
 
-          // angle at the spiral position
-          d.a = (Math.atan2(angleOnLine.y, angleOnLine.x) * 180 / Math.PI) - 90;
-          return d.x;
-        })
-        .attr('y', d => d.y)
-        .attr('width', barWidth)
-        .attr('height', d => yScale(d.value))
-        .style('fill', d => color(d.group))
-        .style('stroke', 'none')
-        .attr('transform', d => `rotate(${d.a},${d.x},${d.y})`);
-
-      // add date labels
-      const tF = d3.timeFormat('%b %Y');
-      const firstInMonth = {};
-
-      svg.selectAll('text')
-        .data(someData)
-        .enter()
-        .append('text')
-        .attr('dy', 10)
-        .style('text-anchor', 'start')
-        .style('font', '10px arial')
-        .append('textPath')
-      // only add for the first of each month
-        .filter((d) => {
-          const sd = tF(d.date);
-          if (!firstInMonth[sd]) {
-            firstInMonth[sd] = 1;
-            return true;
-          }
-          return false;
-        })
-        .text(d => tF(d.date))
-        // place text along spiral
-        .attr('xlink:href', '#spiral')
-        .style('fill', 'grey')
-        .attr('startOffset', d => `${(d.linePer / spiralLength) * 100}%`);
+        const spiralLength = path.node().getTotalLength();
+        const N = 365;
+        const barWidth = (spiralLength / N) - 1;
 
 
-      const tooltip = d3.select('#chart')
-        .append('div')
-        .attr('class', 'tooltip');
+        const timeScale = d3.scaleTime()
+          .domain(d3.extent(someData, d => d.date))
+          .range([0, spiralLength]);
 
-      tooltip.append('div')
-        .attr('class', 'date');
-      tooltip.append('div')
-        .attr('class', 'value');
+        // yScale for the bar height
+        const yScale = d3.scaleLinear()
+          .domain([0, d3.max(someData, d => d.value)])
+          .range([0, (r / numSpirals) - 30]);
 
-      svg.selectAll('rect')
-        .on('mouseover', (d) => {
-          tooltip.select('.date').html(`Date: <b>${d.date.toDateString()}</b>`);
-          tooltip.select('.value').html(`Value: <b>${Math.round(d.value * 100) / 100}<b>`);
+        svg.selectAll('rect')
+          .data(someData)
+          .enter()
+          .append('rect')
+          .attr('x', (d, i) => {
+            const linePer = timeScale(d.date);
+            const posOnLine = path.node().getPointAtLength(linePer);
+            const angleOnLine = path.node().getPointAtLength(linePer - barWidth);
 
-          d3.select(this)
-            .style('fill', '#FFFFFF')
-            .style('stroke', '#000000')
-            .style('stroke-width', '2px');
+            d.linePer = linePer; // % distance are on the spiral
+            d.x = posOnLine.x; // x postion on the spiral
+            d.y = posOnLine.y; // y position on the spiral
 
-          tooltip.style('display', 'block');
-          tooltip.style('opacity', 2);
-        })
-        .on('mousemove', (d) => {
-          tooltip.style('top', `${d3.event.layerY + 10}px`)
-            .style('left', `${d3.event.layerX - 25}px`);
-        })
-        .on('mouseout', (d) => {
-          d3.selectAll('rect')
-            .style('fill', color(d.group))
-            .style('stroke', 'none');
+            // angle at the spiral position
+            d.a = (Math.atan2(angleOnLine.y, angleOnLine.x) * 180 / Math.PI) - 90;
+            return d.x;
+          })
+          .attr('y', d => d.y)
+          .attr('width', barWidth)
+          .attr('height', d => yScale(d.value))
+          .style('fill', d => color(d.group))
+          .style('stroke', 'none')
+          .attr('transform', d => `rotate(${d.a},${d.x},${d.y})`);
 
-          tooltip.style('display', 'none');
-          tooltip.style('opacity', 0);
-        });
+        // add date labels
+        const tF = d3.timeFormat('%b %Y');
+        const firstInMonth = {};
+
+        svg.selectAll('text')
+          .data(someData)
+          .enter()
+          .append('text')
+          .attr('dy', 10)
+          .style('text-anchor', 'start')
+          .style('font', '10px arial')
+          .append('textPath')
+        // only add for the first of each month
+          .filter((d) => {
+            const sd = tF(d.date);
+            if (!firstInMonth[sd]) {
+              firstInMonth[sd] = 1;
+              return true;
+            }
+            return false;
+          })
+          .text(d => tF(d.date))
+          // place text along spiral
+          .attr('xlink:href', '#spiral')
+          .style('fill', 'grey')
+          .attr('startOffset', d => `${(d.linePer / spiralLength) * 100}%`);
+
+
+        const tooltip = d3.select('#chart')
+          .append('div')
+          .attr('class', 'tooltip');
+
+        tooltip.append('div')
+          .attr('class', 'date');
+        tooltip.append('div')
+          .attr('class', 'value');
+
+        svg.selectAll('rect')
+          .on('mouseover', (d) => {
+            tooltip.select('.date').html(`Date: <b>${d.date.toDateString()}</b>`);
+            tooltip.select('.value').html(`Value: <b>${Math.round(d.value * 100) / 100}<b>`);
+
+            d3.select(this)
+              .style('fill', '#FFFFFF')
+              .style('stroke', '#000000')
+              .style('stroke-width', '2px');
+
+            tooltip.style('display', 'block');
+            tooltip.style('opacity', 2);
+          })
+          .on('mousemove', (d) => {
+            tooltip.style('top', `${d3.event.layerY + 10}px`)
+              .style('left', `${d3.event.layerX - 25}px`);
+          })
+          .on('mouseout', (d) => {
+            d3.selectAll('rect')
+              .style('fill', color(d.group))
+              .style('stroke', 'none');
+
+            tooltip.style('display', 'none');
+            tooltip.style('opacity', 0);
+          });
+      }
 
       function ticked() {
         link
@@ -967,16 +989,18 @@ class Graph extends Component {
           d.children.forEach((id_1) => {
             if (id_1 != null) {
               const index_1 = set.nodes.findIndex((_node) => {
+                console.log(_node, id_1);
                 if (_node === undefined) {
                   return -1;
                 }
-                return _node.titleTerm === id_1;
+                return _node.titleTerm === id_1.id;
               });
               // console.log(id_1, index_1)
+              console.log(set.nodes, index_1);
               set.nodes[index_1].connected -= 1;
 
               set.nodes.forEach((_node) => {
-                if (_node.titleTerm === id_1 && _node.connected <= 0) {
+                if (_node.titleTerm === id_1.id && _node.connected <= 0) {
                   delete set.nodes[set.nodes.indexOf(_node)];
                   set.nodes = set.nodes.filter(() => true);
                 }
@@ -984,13 +1008,13 @@ class Graph extends Component {
 
               const { length } = set.links;
               for (let j = 0; j < length; j += 1) {
-                const pos = set.links.map(e => e.source.titleTerm).indexOf(id_1);
+                const pos = set.links.map(e => e.source.titleTerm).indexOf(id_1.id);
                 if (pos !== -1) {
                   const index_2 = set.nodes.findIndex((_node) => {
                     if (_node === undefined) {
                       return -1;
                     }
-                    return _node.titleTerm === id_1;
+                    return _node.titleTerm === id_1.id;
                   });
                   if (index_2 === -1) {
                     set.links.splice(pos, 1);
@@ -1025,12 +1049,7 @@ class Graph extends Component {
           return 1;
         });
         node.style('fill-opacity', 1);
-        node.selectAll('text').style('visibility', (d) => {
-          if (d.group === 1) {
-            return 'visible';
-          }
-          // return 'hidden';
-        });
+        node.selectAll('text').style('visibility', d => (d.group === 2 ? 'hidden' : 'visible'));
         node.selectAll('circle').style('fill', (d) => {
           if (d.group === 2) {
             return '#ff7f0e';
@@ -1073,6 +1092,7 @@ class Graph extends Component {
           if (isConnected(d, o) || o.tag !== 0) {
             return 'visible';
           }
+          return 'hidden';
         });
         // also style link accordingly
         link.style('stroke-opacity', o => (o.source === d || o.target === d ? 1 : opacity));

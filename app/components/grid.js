@@ -517,11 +517,11 @@ class Grid extends React.Component {
         />
         <Provider store={store}>
           <div className="grid1">
-            <div className="grid2">
+            {/* <div className="grid2">
               <div className="box gateKeeperview">
                 <GateKeeper gatekeeperprops={gatekeeperprops} />
               </div>
-              {/* <div className="box overview">
+              { <div className="box overview">
                 <div id="template" className="slider__list" />
                 <div id="over" />
                 <div id="select" />
@@ -533,7 +533,7 @@ class Grid extends React.Component {
               <div className="box postview">
                 <div id="page" />
                 <AddCard />
-              </div> */}
+              </div> }
               <div className="box termview">
                 <Termlist termlistprops={termlistprops.list} />
               </div>
@@ -543,11 +543,11 @@ class Grid extends React.Component {
                 <Post postprops={postprops} />
                 <div id="detail" />
               </div>
-            </div>
+            </div> */}
             <div className="graph">
               <Graph visprops={visprops.list} />
             </div>
-            <div className="box userview" id="table">
+            {/* <div className="box userview" id="table">
               <div id="userdeg">
                 <div id="olbutton" />
               </div>
@@ -560,7 +560,7 @@ class Grid extends React.Component {
                 nextPage={this.nextPage}
                 postCount={postlistprops.list.length}
               />
-            </div>
+            </div> */}
           </div>
         </Provider>
       </div>
