@@ -388,7 +388,7 @@ let callback = function callback(req, res) {
               let titleWordList = datalist[2];
               
 
-              return { list: [res.result, wordlist, titleWordList], previous: [res.previous], next: [res.next] };
+              return { list: [res.result, wordlist, titleWordList, queryobj1.date], previous: [res.previous], next: [res.next] };
             }),
           );
         } else if (!isEmpty(queryobj2)) {

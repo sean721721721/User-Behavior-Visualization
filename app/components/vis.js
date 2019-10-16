@@ -43,6 +43,12 @@ class Graph extends Component {
     // props[i][0]== userID, props[i][1]== articleIndex, props[i][0]== articlePostTime;
     console.log(this.props);
     const { visprops } = this.props;
+    const { date } = this.props;
+    console.log(date);
+    const startDate = new Date(date.$gte);
+    const endDate = new Date(date.$lt);
+    const timePeriod = endDate - startDate;
+    console.log(startDate, endDate);
     const props = JSON.parse(JSON.stringify(visprops)); // clone props;
     const set = { nodes: [], links: [] };
     let link;
@@ -449,11 +455,6 @@ class Graph extends Component {
 
 
     const pi = Math.PI;
-    const arc = d3.arc()
-      .innerRadius(10)
-      .outerRadius(15)
-      .startAngle(45 * (pi / 180))
-      .endAngle(3);
 
     const width = 900;
     const height = 900;
@@ -542,7 +543,20 @@ class Graph extends Component {
         .attr('y', 0);
 
       nodeEnter.append('path')
-        .attr('d', arc)
+        .attr('d', (d) => {
+          const erliestTime = new Date(d.date[0]);
+          const latestTime = new Date(d.date[d.date.length - 1]);
+          console.log(erliestTime, startDate);
+          console.log(latestTime - startDate);
+          console.log(endDate - startDate);
+          console.log(timePeriod);
+          const arc = d3.arc()
+            .innerRadius(10)
+            .outerRadius(15)
+            .startAngle(((erliestTime - startDate) / timePeriod) * 360 * (pi / 180))
+            .endAngle(((latestTime - startDate) / timePeriod) * 360 * (pi / 180));
+          return arc();
+        })
         .attr('fill', 'red');
 
       const circles = nodeEnter.append('circle')
