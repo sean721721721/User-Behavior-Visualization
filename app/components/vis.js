@@ -164,23 +164,25 @@ class Graph extends Component {
           let equal = 1;
           // console.log(props[i][1][j].id, props[i][1][k].id);
           if (props[i][1][j].count === props[i][1][k].count) {
-            for (let l = 0; l < props[i][1][j].term.length; l += 1) {
-              if (!props[i][1][k].term.includes(props[i][1][j].term[l])) {
-                // console.log(`${props[i][1][j].id} is not equal to ${props[i][1][k].id}`);
-                equal = 0;
-                break;
+            if (props[i][1][j].term) {
+              for (let l = 0; l < props[i][1][j].term.length; l += 1) {
+                if (!props[i][1][k].term.includes(props[i][1][j].term[l])) {
+                  // console.log(`${props[i][1][j].id} is not equal to ${props[i][1][k].id}`);
+                  equal = 0;
+                  break;
+                }
               }
-            }
-            if (equal === 1) {
-              if (!hasMergedId.includes(props[i][1][k].id)) {
-                // console.log(`${props[i][1][j].id} is equal to ${props[i][1][k].id}`);
-                props[i][1][j].id += props[i][1][k].id;
-                hasMergedId.push(props[i][1][k].id);
-                props[i][1][j].merge = 2;
-                props[i][1][j].numOfUsr += 1;
+              if (equal === 1) {
+                if (!hasMergedId.includes(props[i][1][k].id)) {
+                  // console.log(`${props[i][1][j].id} is equal to ${props[i][1][k].id}`);
+                  props[i][1][j].id += props[i][1][k].id;
+                  hasMergedId.push(props[i][1][k].id);
+                  props[i][1][j].merge = 2;
+                  props[i][1][j].numOfUsr += 1;
+                }
+                props[i][1].splice(k, 1);
+                k -= 1;
               }
-              props[i][1].splice(k, 1);
-              k -= 1;
             }
           }
         }
@@ -544,20 +546,40 @@ class Graph extends Component {
 
       nodeEnter.append('path')
         .attr('d', (d) => {
-          const erliestTime = new Date(d.date[0]);
-          const latestTime = new Date(d.date[d.date.length - 1]);
-          console.log(erliestTime, startDate);
-          console.log(latestTime - startDate);
-          console.log(endDate - startDate);
-          console.log(timePeriod);
-          const arc = d3.arc()
-            .innerRadius(10)
-            .outerRadius(15)
-            .startAngle(((erliestTime - startDate) / timePeriod) * 360 * (pi / 180))
-            .endAngle(((latestTime - startDate) / timePeriod) * 360 * (pi / 180));
-          return arc();
+          if (d.group === 1) {
+            const erliestTime = new Date(d.date[0]);
+            const latestTime = new Date(d.date[d.date.length - 1]);
+            const arc = d3.arc()
+              .innerRadius(10)
+              .outerRadius(11)
+              .startAngle(((erliestTime - startDate) / timePeriod) * 360 * (pi / 180))
+              .endAngle(((latestTime - startDate) / timePeriod) * 360 * (pi / 180));
+            return arc();
+          }
+          // return 'M0';
         })
         .attr('fill', 'red');
+
+      const line = nodeEnter.selectAll('line')
+        .data((d) => {
+          if (d.group === 1) {
+            return d.date;
+          }
+          return d;
+        })
+        .enter()
+        .append('line')
+        .attr('transform', (d) => {
+          const erliestTime = new Date(d);
+          const rotate = `rotate(${((erliestTime - startDate) / timePeriod) * 360})`;
+          return rotate;
+        })
+        .attr('x1', 0)
+        .attr('y1', -10)
+        .attr('x2', 0)
+        .attr('y2', -15)
+        .style('stroke', 'blue')
+        .style('stroke-width', '1px');
 
       const circles = nodeEnter.append('circle')
         .attr('r', d => d.size)
@@ -1063,7 +1085,7 @@ class Graph extends Component {
           return 1;
         });
         node.style('fill-opacity', 1);
-        node.selectAll('text').style('visibility', d => (d.group === 2 ? 'hidden' : 'visible'));
+        node.selectAll('text').style('visibility', d => (d.group === 2 ? 'visible' : 'visible'));
         node.selectAll('circle').style('fill', (d) => {
           if (d.group === 2) {
             return '#ff7f0e';
