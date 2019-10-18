@@ -477,7 +477,7 @@ class Graph extends Component {
     color(1);
     const simulation = d3.forceSimulation()
       .force('link', d3.forceLink().id(d => d.titleTerm))
-      .force('charge', d3.forceManyBody().strength(-150))
+      .force('charge', d3.forceManyBody().strength(-300))
       .force('center', d3.forceCenter(width / 2, height / 2));
 
     let conutOfClickedNode = 0;
@@ -500,19 +500,21 @@ class Graph extends Component {
       ({ nodes, links } = set);
       //  let g =svg.append('g')
       //     .attr('class', 'everything')
-
+      svg.selectAll('g').remove();
+      // const linkGroup = svg.append('g').append('line');
       link = svg.selectAll('line')
         .data(set.links);
 
       link.exit().remove();
       const linkEnter = link.enter()
+        // .append('g')
         .append('line')
         .attr('class', 'links')
         .style('z-index', -1)
         .attr('stroke', d => d.color)
         .attr('stroke-width', 1);
       link = linkEnter.merge(link);
-      svg.selectAll('g').remove();
+      // svg.selectAll('g').remove();
       node = svg.selectAll('g')
         .data(set.nodes);
       // node.exit().remove();
@@ -550,35 +552,41 @@ class Graph extends Component {
             const erliestTime = new Date(d.date[0]);
             const latestTime = new Date(d.date[d.date.length - 1]);
             const arc = d3.arc()
-              .innerRadius(10)
-              .outerRadius(11)
+              .innerRadius(20)
+              .outerRadius(21)
               .startAngle(((erliestTime - startDate) / timePeriod) * 360 * (pi / 180))
               .endAngle(((latestTime - startDate) / timePeriod) * 360 * (pi / 180));
             return arc();
           }
           // return 'M0';
         })
-        .attr('fill', 'red');
+        .attr('fill', 'darkgray');
 
-      const line = nodeEnter.selectAll('line')
-        .data((d) => {
-          if (d.group === 1) {
-            return d.date;
-          }
-          return d;
-        })
+      const timeline = nodeEnter.selectAll('circle');
+      console.log(timeline);
+
+      timeline.data((d) => {
+        console.log(d);
+        if (d.group === 1) {
+          return d.date;
+        }
+        return d;
+      })
         .enter()
+        .append('g')
+        // .selectAll('line')
         .append('line')
         .attr('transform', (d) => {
+          console.log(d);
           const erliestTime = new Date(d);
           const rotate = `rotate(${((erliestTime - startDate) / timePeriod) * 360})`;
           return rotate;
         })
         .attr('x1', 0)
-        .attr('y1', -10)
+        .attr('y1', -20)
         .attr('x2', 0)
-        .attr('y2', -15)
-        .style('stroke', 'blue')
+        .attr('y2', -25)
+        .style('stroke', 'green')
         .style('stroke-width', '1px');
 
       const circles = nodeEnter.append('circle')
@@ -658,7 +666,7 @@ class Graph extends Component {
 
       drawTable();
 
-      drawSpiral();
+      // drawSpiral();
 
       function drawTable() {
         const table = rightSvg.append('foreignObject')

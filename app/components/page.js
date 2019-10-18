@@ -105,7 +105,7 @@ class Page extends React.Component {
                 type="keyword1"
                 name="wordfilter"
                 id="keyword1"
-                placeholder="keyword"
+                placeholder="keyword ex: 總統|大選"
                 value={wordfilter}
                 onChange={handlePT}
               />
