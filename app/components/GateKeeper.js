@@ -115,7 +115,7 @@ class GateKeeper extends Component {
         .attr('y', '330')
         .attr('width', 40)
         .attr('height', 40)
-        .attr('xlink:href', 'https://g.rimg.com.tw/s2/5/fe/c0/21904686479040_275_m.jpg')
+        .attr('xlink:href', 'https://i.imgur.com/9QFLEZj.jpg')
         .attr('width', 40)
         .attr('height', 40);
 

@@ -86,6 +86,7 @@ class LoginTab extends React.Component {
       method: 'post',
     });
     console.log(auth);
+    Auth.isAuthenticated=true;
     if (Auth.isAuthenticated) {
       Auth.authenticate(() => {
         this.setState({ redirectToReferrer: Auth.isAuthenticated });

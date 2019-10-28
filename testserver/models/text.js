@@ -46,19 +46,19 @@ if (os.platform() === "linux") {
         dict: nodejieba.DEFAULT_DICT,
         hmmDict: nodejieba.DEFAULT_HMM_DICT,
         //userDict: "d:/project/server/big_dict.utf8", //windows
-        userDict: "/home/sean/github/PageVis/controllers/big_dict.utf8", //linux        
+        userDict: "C:/Users/admin/Desktop/VisProject/controllers/big_dict.utf8", //linux        
         idfDict: nodejieba.DEFAULT_IDF_DICT,
         //stopWordDict: "d:/project/server/stop_dict.utf8" //windows
-        stopWordDict: "/home/sean/github/PageVis/controllers/stop_dict.utf8" //linux    
+        stopWordDict: "C:/Users/admin/Desktop/VisProject/controllers/stop_dict.utf8" //linux    
     });
 } else {
     nodejieba.load({
         dict: nodejieba.DEFAULT_DICT,
         hmmDict: nodejieba.DEFAULT_HMM_DICT,
-        userDict: "F:/PageVis/PageVis/controllers/big_dict.utf8", //windows
+        userDict: "C:/Users/admin/Desktop/VisProject/controllers/big_dict.utf8", //windows
         //userDict: "/Users/guojiankai/Project/server/big_dict.utf8", //mac        
         idfDict: nodejieba.DEFAULT_IDF_DICT,
-        stopWordDict: "F:/PageVis/PageVis/controllers/stop_dict.utf8" //windows
+        stopWordDict: "C:/Users/admin/Desktop/VisProject/controllers/stop_dict.utf8" //windows
         //stopWordDict: "/Users/guojiankai/Project/server/stop_dict.utf8" //mac    
     });
 }

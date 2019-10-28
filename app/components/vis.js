@@ -41,14 +41,14 @@ class Graph extends Component {
 
   drawwithlabels() {
     // props[i][0]== userID, props[i][1]== articleIndex, props[i][0]== articlePostTime;
-    console.log(this.props);
+    // console.log(this.props);
     const { visprops } = this.props;
     const { date } = this.props;
-    console.log(date);
+    // console.log(date);
     const startDate = new Date(date.$gte);
     const endDate = new Date(date.$lt);
     const timePeriod = endDate - startDate;
-    console.log(startDate, endDate);
+    // console.log(startDate, endDate);
     const props = JSON.parse(JSON.stringify(visprops)); // clone props;
     const set = { nodes: [], links: [] };
     let link;
@@ -120,7 +120,7 @@ class Graph extends Component {
       }
     }
 
-    console.log(propsUserList);
+    // console.log(propsUserList);
 
     // props[i][1]=['id', 'id'] => props[i][1]=[{id:, count:, ... }]
 
@@ -134,8 +134,8 @@ class Graph extends Component {
       });
     }
     const copyprops = JSON.parse(JSON.stringify(props));
-    console.log(copyprops);
-    console.log(props);
+    // console.log(copyprops);
+    // console.log(props);
 
     // Combine all user with count == 1
     const findIndex = (array, num) => array.findIndex(x => x.id === num);
@@ -563,10 +563,10 @@ class Graph extends Component {
         .attr('fill', 'darkgray');
 
       const timeline = nodeEnter.selectAll('circle');
-      console.log(timeline);
+      // console.log(timeline);
 
       timeline.data((d) => {
-        console.log(d);
+        // console.log(d);
         if (d.group === 1) {
           return d.date;
         }
@@ -577,7 +577,7 @@ class Graph extends Component {
         // .selectAll('line')
         .append('line')
         .attr('transform', (d) => {
-          console.log(d);
+          // console.log(d);
           const erliestTime = new Date(d);
           const rotate = `rotate(${((erliestTime - startDate) / timePeriod) * 360})`;
           return rotate;

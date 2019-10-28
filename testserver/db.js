@@ -17,7 +17,7 @@ let connect = function (config) {
     // Using `mongoose.createConnection`...
     let url1 = "mongodb://" + config.dbUser + ":" + config.dbPwd + "@" + config.db[0];
     let db1 = mongoose.createConnection(url1, options).on("error", function () {
-        console.log("There was an error connecting to the database");
+        console.log("There was an error connecting to the database (db1)");
     }).once("open", function () {
         console.log("connected to " + config.db[0] + " successfully!");
     });
@@ -25,7 +25,8 @@ let connect = function (config) {
     // db1.model(page, schema.postSchema)
     let url2 = "mongodb://" + config.dbUser + ":" + config.dbPwd + "@" + config.db[1];
     db2 = mongoose.createConnection(url2, options).on("error", function () {
-        console.log("There was an error connecting to the database");
+        console.log(url2);
+        console.log("There was an error connecting to the database (db2)");
     }).once("open", function () {
         console.log("connected to " + config.db[1] + " successfully!");
     });
