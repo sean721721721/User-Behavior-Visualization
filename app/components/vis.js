@@ -461,7 +461,7 @@ class Graph extends Component {
     const width = 900;
     const height = 900;
     let svg = d3.select(this.myRef.current)
-      .select('svg');
+      .select('#graph');
 
     svg.selectAll('*').remove();
 
@@ -1040,7 +1040,7 @@ class Graph extends Component {
                 return _node.titleTerm === id_1.id;
               });
               // console.log(id_1, index_1)
-              console.log(set.nodes, index_1);
+              // console.log(set.nodes, index_1);
               set.nodes[index_1].connected -= 1;
 
               set.nodes.forEach((_node) => {
@@ -1089,7 +1089,6 @@ class Graph extends Component {
 
       function mouseOut() {
         node.style('stroke-opacity', (d) => {
-          d.tag = 0;
           return 1;
         });
         node.style('fill-opacity', 1);
@@ -1102,7 +1101,6 @@ class Graph extends Component {
         });
         link.style('stroke-opacity', 1);
         link.style('stroke', (d) => {
-          d.tag = 0;
           return '#ddd';
         });
       }
@@ -1173,8 +1171,8 @@ class Graph extends Component {
     return (
       <div id={`#${id}`}>
         <div ref={this.myRef}>
-          <svg width="80%" height="900px" />
           <svg id="barChart" width="20%" height="900px" />
+          <svg id="graph" width="80%" height="900px" />
         </div>
       </div>
     );
