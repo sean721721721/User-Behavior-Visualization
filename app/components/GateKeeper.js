@@ -29,8 +29,16 @@ class GateKeeper extends Component {
     const { ptt, news } = gatekeeperprops;
     // console.log(news, ptt);
 
-    for (let i = 7; i < 100; i += 1) {
+    for (let i = 7; i < 50; i += 1) {
       ptt.push({
+        id: i,
+        value: Math.random(),
+        date: this.randomDate(new Date(2018, 0, 1), new Date()),
+      });
+    }
+
+    for (let i = 7; i < 50; i += 1) {
+      news.push({
         id: i,
         value: Math.random(),
         date: this.randomDate(new Date(2018, 0, 1), new Date()),

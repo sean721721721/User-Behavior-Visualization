@@ -535,7 +535,7 @@ class Grid extends React.Component {
               {/* <div className="box postview">
                 <div id="page" />
                 <AddCard />
-              </div>  */}
+              </div> */}
               {/* <div className="box termview">
                 <Termlist termlistprops={termlistprops.list} />
               </div> */}

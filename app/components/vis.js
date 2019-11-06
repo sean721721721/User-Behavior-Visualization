@@ -1,3 +1,4 @@
+/* eslint-disable linebreak-style */
 /* eslint-disable react/prop-types */
 /* eslint-disable no-unused-vars */
 /* eslint-disable no-use-before-define */
@@ -490,9 +491,12 @@ class Graph extends Component {
     const x = d3.scaleLinear()
       .domain([0, d3.max(set.nodes, d => d.children.length)])
       .range(['0%', '100%']);
-    const rightSvg = d3.select(this.myRef.current)
+    const leftSvg = d3.select(this.myRef.current)
       .select('#barChart');
-
+    const timeLineSvg = d3.select(this.myRef.current)
+      .select('#timeLine');
+    let heatMapSvg = d3.select(this.myRef.current)
+      .select('#timeLine');
     update();
 
     function update() {
@@ -662,14 +666,15 @@ class Graph extends Component {
         .distance(d => 300 / d.value);
       // .strength(1);
 
-      rightSvg.selectAll('*').remove();
+      leftSvg.selectAll('*').remove();
 
       drawTable();
-
+      // drawTimeLine();
+      drawHeatMap();
       // drawSpiral();
 
       function drawTable() {
-        const table = rightSvg.append('foreignObject')
+        const table = leftSvg.append('foreignObject')
           .attr('width', '100%')
           .attr('height', '100%')
           .style('overflow-y', 'scroll')
@@ -696,6 +701,8 @@ class Graph extends Component {
             // }
             return 'none';
           })
+          .on('mouseover', mouseOver(0.2))
+          .on('mouseout', mouseOut)
           .on('click', clicked);
 
         // Set the even columns
@@ -882,6 +889,134 @@ class Graph extends Component {
             tooltip.style('display', 'none');
             tooltip.style('opacity', 0);
           });
+      }
+
+      function drawTimeLine() {
+        // const { gatekeeperprops } = this.state;
+        // const { ptt, news } = gatekeeperprops;
+        // console.log(news, ptt);
+
+        const xScale = d3.scaleTime().domain([startDate, endDate]).range([0, 100]);
+        const colorScale = d3.scaleLinear().domain([0, 1]).range([0.0, 0.5]);
+        const timeLinecolor = d3.interpolateSinebow;
+
+        // function update() {
+        timeLineSvg.selectAll('*').remove();
+
+        const formatTime = d3.timeFormat('%B %d, %Y');
+        // const g = timeLineSvg.append('foreignObject')
+        //   .attr('width', '100%')
+        //   .attr('height', '100%')
+        //   .style('overflow-y', 'scroll');
+        // const spectrums = g.append('g');
+        const spectrums = timeLineSvg.append('g');
+        // spectrums.attr('transform', `translate(${width / 2 - 270}, -100) scale(1.2,1.2)`);
+        let domainName = [];
+        set.nodes.forEach((term) => {
+          domainName.push(term.titleTerm);
+        });
+
+        const term_y = d3.scalePoint().range([0, domainName.length * 10]);
+        term_y.domain(domainName);
+
+        const date_x = d3.scaleTime().range([0, 900]);
+        date_x.domain([startDate, endDate]);
+        const colors = d3.schemeTableau10;
+        console.log(colors);
+        for (let i = 0; i < domainName.length; i += 1) {
+          const postTime = spectrums.selectAll('line').data(set.nodes[i].date);
+          postTime.enter()
+            .append('circle')
+            .attr('transform', 'translate(110,20)')
+            .attr('cy', (i * 10) + 1)
+            .attr('cx', d => date_x(new Date(d)))
+            .attr('r', 2)
+            .style('fill', colors[((i % 10) + 1)]);
+        }
+        
+
+        // Add the x Axis
+        const axisX = spectrums;
+        const axisY = spectrums;
+
+        axisY.append('g')
+          .attr('transform', 'translate(110,20)')
+          .call(d3.axisLeft(term_y).tickFormat(d => d));
+
+        axisX.append('g')
+          .attr('transform', 'translate(110,17)')
+          .call(d3.axisTop(date_x).tickFormat(d3.timeFormat('%m/%d')));
+
+        axisY.attr('color', 'black');
+      }
+
+      function drawHeatMap() {
+        // set the dimensions and margins of the graph
+        heatMapSvg.selectAll('*').remove();
+        const margin = {
+          top: 30, right: 30, bottom: 30, left: 30,
+        };
+        const heatMapWidth = 450 - margin.left - margin.right;
+        const heatMapHeight = 450 - margin.top - margin.bottom;
+
+        // append the svg object to the body of the page
+        heatMapSvg = heatMapSvg.attr('height', heatMapHeight + margin.top + margin.bottom)
+          .append('g')
+          .attr('transform',
+            `translate(${300}, ${margin.top})`);
+
+        // Labels of row and columns
+        // const myGroups = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J'];
+        const domainName = [];
+        set.nodes.forEach((term) => {
+          domainName.push(term.titleTerm);
+        });
+        // const myVars = ['v1', 'v2', 'v3', 'v4', 'v5', 'v6', 'v7', 'v8', 'v9', 'v10'];
+        // const postDate = [new Date('2019/4/1'), new Date('2019/5/2'), new Date('2019/5/3')];
+        const postDate = [];
+        const currentDate = startDate;
+        while (currentDate <= endDate) {
+          postDate.push(new Date(currentDate));
+          currentDate.setDate(currentDate.getDate() + 1);
+        }
+
+        // Build X scales and axis:
+        const heatMapX = d3.scaleBand()
+          .range([0, heatMapWidth])
+          .domain(postDate)
+          .padding(0.01);
+        heatMapSvg.append('g')
+          .attr('transform', `translate(0, ${heatMapHeight})`)
+          .call(d3.axisBottom(heatMapX).tickFormat(d3.timeFormat('%m/%d')));
+
+        // Build X scales and axis:
+        const heatMapY = d3.scaleBand()
+          .range([heatMapHeight, 0])
+          .domain(domainName)
+          .padding(0.01);
+        heatMapSvg.append('g')
+          .call(d3.axisLeft(heatMapY));
+
+        // Build color scale
+        const myColor = d3.scaleLinear()
+          .range(['white', '#69b3a2'])
+          .domain([1, 100]);
+
+        // Read the data
+
+        heatMapSvg.selectAll()
+          .data([{ group: domainName[0], variable: new Date('2019/5/2'), value: '71' }, { group: domainName[2], variable: new Date('2019/5/3'), value: '11' }])
+          .enter()
+          .append('rect')
+          .attr('x', (d) => {
+            console.log(d.group);
+            heatMapY(d.group);
+          })
+          .attr('y', d => heatMapX(d.variable))
+          .attr('width', heatMapY.bandwidth())
+          .attr('height', heatMapX.bandwidth())
+          .style('fill', d => myColor(d.value));
+        // });
       }
 
       function ticked() {
@@ -1088,9 +1223,7 @@ class Graph extends Component {
       }
 
       function mouseOut() {
-        node.style('stroke-opacity', (d) => {
-          return 1;
-        });
+        node.style('stroke-opacity', d => 1);
         node.style('fill-opacity', 1);
         node.selectAll('text').style('visibility', d => (d.group === 2 ? 'visible' : 'visible'));
         node.selectAll('circle').style('fill', (d) => {
@@ -1100,9 +1233,7 @@ class Graph extends Component {
           return '1f77b4';
         });
         link.style('stroke-opacity', 1);
-        link.style('stroke', (d) => {
-          return '#ddd';
-        });
+        link.style('stroke', d => '#ddd');
       }
     }
     // build a dictionary of nodes that are linked
@@ -1138,7 +1269,7 @@ class Graph extends Component {
         });
         // also style link accordingly
         link.style('stroke-opacity', o => (o.source === d || o.target === d ? 1 : opacity));
-        link.style('stroke', o => (o.source === d || o.target === d ? o.source.colour : '#ddd'));
+        link.style('stroke', o => (o.source === d || o.target === d ? '#2E2E2E' : '#ddd'));
       };
     }
 
@@ -1171,8 +1302,9 @@ class Graph extends Component {
     return (
       <div id={`#${id}`}>
         <div ref={this.myRef}>
-          <svg id="barChart" width="20%" height="900px" />
-          <svg id="graph" width="80%" height="900px" />
+          <svg id="barChart" width="20%" height="700px" />
+          <svg id="graph" width="80%" height="700px" />
+          <svg id="timeLine" width="100%" height="200px" />
         </div>
       </div>
     );
