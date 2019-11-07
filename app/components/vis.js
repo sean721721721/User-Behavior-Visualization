@@ -951,72 +951,85 @@ class Graph extends Component {
       }
 
       function drawHeatMap() {
+        // Labels of row and columns
+        const domainName = [];
+        set.nodes.forEach((term) => {
+          domainName.push(term.titleTerm);
+        });
+
+        const postDate = [];
+        const currentDate = new Date(startDate.toDateString());
+        while (currentDate <= endDate) {
+          postDate.push(new Date(currentDate));
+          currentDate.setDate(currentDate.getDate() + 1);
+        }
+        // console.log(postDate);
+
         // set the dimensions and margins of the graph
         heatMapSvg.selectAll('*').remove();
         const margin = {
           top: 30, right: 30, bottom: 30, left: 30,
         };
-        const heatMapWidth = 450 - margin.left - margin.right;
-        const heatMapHeight = 450 - margin.top - margin.bottom;
+        const heatMapWidth = postDate.length * 30;
+        const heatMapHeight = domainName.length * 30;
 
         // append the svg object to the body of the page
         heatMapSvg = heatMapSvg.attr('height', heatMapHeight + margin.top + margin.bottom)
           .append('g')
           .attr('transform',
-            `translate(${300}, ${margin.top})`);
-
-        // Labels of row and columns
-        // const myGroups = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J'];
-        const domainName = [];
-        set.nodes.forEach((term) => {
-          domainName.push(term.titleTerm);
-        });
-        // const myVars = ['v1', 'v2', 'v3', 'v4', 'v5', 'v6', 'v7', 'v8', 'v9', 'v10'];
-        // const postDate = [new Date('2019/4/1'), new Date('2019/5/2'), new Date('2019/5/3')];
-        const postDate = [];
-        const currentDate = startDate;
-        while (currentDate <= endDate) {
-          postDate.push(new Date(currentDate));
-          currentDate.setDate(currentDate.getDate() + 1);
-        }
+            `translate(${200}, ${margin.top})`);
 
         // Build X scales and axis:
         const heatMapX = d3.scaleBand()
           .range([0, heatMapWidth])
           .domain(postDate)
-          .padding(0.01);
+          .padding(0.1);
         heatMapSvg.append('g')
-          .attr('transform', `translate(0, ${heatMapHeight})`)
-          .call(d3.axisBottom(heatMapX).tickFormat(d3.timeFormat('%m/%d')));
+          // .attr('transform', `translate(0, ${heatMapHeight})`)
+          .call(d3.axisTop(heatMapX).tickFormat(d3.timeFormat('%m/%d')));
 
         // Build X scales and axis:
         const heatMapY = d3.scaleBand()
-          .range([heatMapHeight, 0])
+          .range([0, heatMapHeight])
           .domain(domainName)
-          .padding(0.01);
+          .padding(0.1);
         heatMapSvg.append('g')
           .call(d3.axisLeft(heatMapY));
 
         // Build color scale
-        const myColor = d3.scaleLinear()
-          .range(['white', '#69b3a2'])
-          .domain([1, 100]);
-
-        // Read the data
-
-        heatMapSvg.selectAll()
-          .data([{ group: domainName[0], variable: new Date('2019/5/2'), value: '71' }, { group: domainName[2], variable: new Date('2019/5/3'), value: '11' }])
-          .enter()
-          .append('rect')
-          .attr('x', (d) => {
-            console.log(d.group);
-            heatMapY(d.group);
-          })
-          .attr('y', d => heatMapX(d.variable))
-          .attr('width', heatMapY.bandwidth())
-          .attr('height', heatMapX.bandwidth())
-          .style('fill', d => myColor(d.value));
-        // });
+        // const myColor = d3.scaleLinear()
+        //   .range(['white', '#69b3a2'])
+        //   .domain([1, 100]);
+        const myColor = d3.interpolateRdYlGn;
+        set.nodes.forEach((obj) => {
+          const numOfPostAtDate = {};
+          postDate.forEach((ele) => {
+            numOfPostAtDate[ele] = 0;
+          });
+          obj.date.forEach((ele) => {
+            let postdate = new Date(ele);
+            postdate = new Date(postdate.toDateString());
+            numOfPostAtDate[postdate] += 1;
+          });
+          // console.log(numOfPostAtDate);
+          heatMapSvg.selectAll()
+            .data(obj.date)
+            .enter()
+            .append('rect')
+            .attr('x', (d) => {
+              const post_Date = new Date(d);
+              return heatMapX(new Date(post_Date.toDateString()));
+            })
+            .attr('y', d => heatMapY(obj.titleTerm))
+            .attr('width', heatMapX.bandwidth())
+            .attr('height', heatMapY.bandwidth())
+            .style('fill', (d) => {
+              let postdate = new Date(d);
+              postdate = new Date(postdate.toDateString());
+              const percentage = numOfPostAtDate[postdate] / 100;
+              return myColor(0.5 - (percentage / 2));
+            });
+        });
       }
 
       function ticked() {
