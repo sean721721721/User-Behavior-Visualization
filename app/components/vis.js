@@ -470,7 +470,12 @@ class Graph extends Component {
       svg.attr('transform', d3.event.transform);
     }
 
-    svg = svg.call(d3.zoom().scaleExtent([1 / 2, 8]).on('zoom', zoomed))
+    function heatMapZoomed() {
+      heatMapSvg.attr('transform', d3.event.transform);
+    }
+
+    svg = svg
+      .call(d3.zoom().scaleExtent([1 / 2, 8]).on('zoom', zoomed))
       .append('g')
       .attr('transform', 'translate(40,0)');
 
@@ -496,7 +501,8 @@ class Graph extends Component {
     const timeLineSvg = d3.select(this.myRef.current)
       .select('#timeLine');
     let heatMapSvg = d3.select(this.myRef.current)
-      .select('#timeLine');
+      .select('#timeLine')
+      .call(d3.zoom().scaleExtent([1 / 2, 8]).on('zoom', heatMapZoomed));
     update();
 
     function update() {
@@ -975,6 +981,7 @@ class Graph extends Component {
 
         // append the svg object to the body of the page
         heatMapSvg = heatMapSvg.attr('height', heatMapHeight + margin.top + margin.bottom)
+          // .attr('width', heatMapWidth + margin.left + margin.right + 200)
           .append('g')
           .attr('transform',
             `translate(${200}, ${margin.top})`);
@@ -986,6 +993,10 @@ class Graph extends Component {
           .padding(0.1);
         heatMapSvg.append('g')
           // .attr('transform', `translate(0, ${heatMapHeight})`)
+          .call(d3.drag()
+            .on('start', dragstarted)
+            .on('drag', dragged)
+            .on('end', dragended))
           .call(d3.axisTop(heatMapX).tickFormat(d3.timeFormat('%m/%d')));
 
         // Build X scales and axis:
@@ -994,6 +1005,7 @@ class Graph extends Component {
           .domain(domainName)
           .padding(0.1);
         heatMapSvg.append('g')
+          .attr('class', 'axisY')
           .call(d3.axisLeft(heatMapY));
 
         // Build color scale
@@ -1001,6 +1013,7 @@ class Graph extends Component {
         //   .range(['white', '#69b3a2'])
         //   .domain([1, 100]);
         const myColor = d3.interpolateRdYlGn;
+
         set.nodes.forEach((obj) => {
           const numOfPostAtDate = {};
           postDate.forEach((ele) => {
@@ -1030,6 +1043,8 @@ class Graph extends Component {
               return myColor(0.5 - (percentage / 2));
             });
         });
+        heatMapSvg.select('.axisY')
+          .attr('font-size', '15px');
       }
 
       function ticked() {
@@ -1312,12 +1327,17 @@ class Graph extends Component {
   render() {
     // const myRef = 'titleUserView';
     const { id } = this.props;
+    const timelineStyle = {
+      overflow: 'scroll',
+    } 
     return (
       <div id={`#${id}`}>
         <div ref={this.myRef}>
           <svg id="barChart" width="20%" height="700px" />
           <svg id="graph" width="80%" height="700px" />
-          <svg id="timeLine" width="100%" height="200px" />
+          <div>
+            <svg id="timeLine" width="100%" height="600px" />
+          </div>
         </div>
       </div>
     );
