@@ -139,22 +139,30 @@ var cut = function cut(posts, callback) {
             var tempTitle = data[i].article_title;
             var wordStr = "";
             var titleStr = "";
+            var cutWordStr = "";
+            var cutTitleStr = "";
             //content
             for (var j = 0; j < tempWord.length; j++) {
                 wordStr += tempWord.substr(j, 1).replace(pattern, "");
+                cutWordStr += tempWord.substr(j, 1).replace(pattern, "");
+                
             }
             //article_title
             for (var j = 0; j < tempTitle.length; j++) {
                 titleStr += tempTitle.substr(j, 1).replace(pattern, "");
+                cutTitleStr += tempTitle.substr(j, 1).replace(pattern, "");
             }
             //tempWord = tempWord.replace(/[\ |\~|\`|\!|\@|\#|\$|\%|\^|\&|\*|\(|\)|\-|\_|\+|\=|\||\\|\[|\]|\{|\}|\;|\:|\"|\'|\,|\<|\.|\>|\/|\?]/g,'');
             var message_length = wordStr.length;
+            cutTitleStr = nodejieba.cut(cutTitleStr);
             wordStr = nodejieba.extract(wordStr, 50);
             titleStr = nodejieba.extract(titleStr, 20);
-            // wordStr = nodejieba.cut(wordStr);
+            wordStr = nodejieba.cut(wordStr);
             var post = data[i];
             post.word = filter(http,wordStr);
             post.titleWord = filter(http,titleStr);
+            post.cuttedWord = wordStr;
+            post.cuttedTitleWord = cutTitleStr;
             result.push(post);
 
             next();

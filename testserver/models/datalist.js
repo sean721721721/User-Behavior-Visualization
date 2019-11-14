@@ -434,6 +434,7 @@ let bindpostlist = function bindpostlist(qobj1, qobj2, ptt) {
     let pageb = [];
     let test = [[],[]];
     let titleTest = [[],[]];
+    let titleWord = [];
     let message_count = [[],[]];
     for (let i = 0; i < l1; i++) {
         let post = postobj(qobj1[i]);
@@ -444,6 +445,7 @@ let bindpostlist = function bindpostlist(qobj1, qobj2, ptt) {
         for(i=0;i<pagea.length;i++){
             test[0][i] = pagea[i].word; 
             titleTest[0][i] = pagea[i].titleWord;
+            titleWord.push(pagea[i].cuttedTitleWord);
             // message_count[0][i] = pagea[i].message_count;
         }
     });
@@ -469,6 +471,7 @@ let bindpostlist = function bindpostlist(qobj1, qobj2, ptt) {
             for(i=0;i<pageb.length;i++){
                 test[1][i] = pageb[i].word;
                 titleTest[1][i] = pageb[i].titleWord;
+                // titleWord.push(pageb[i].cuttedTitleWord)
             }
         });
     } else {
@@ -476,6 +479,7 @@ let bindpostlist = function bindpostlist(qobj1, qobj2, ptt) {
         for(i=0;i<pagea.length;i++){
             test[0][i] = pagea[i].word; 
             titleTest[0][i] = pagea[i].titleWord;
+            // titleWord.push(pagea[i].cuttedTitleWord)
             }
         }   
     
@@ -487,6 +491,14 @@ let bindpostlist = function bindpostlist(qobj1, qobj2, ptt) {
         termfreq.push(termfreqency(test[i]));
     }
     termfreq.push(test);
+
+    let articleCuttedWord = [];
+    for(let i = 0; i < titleWord.length; i += 1){
+        articleCuttedWord.push([[]]);
+        for(let j = 0; j < titleWord[i].length; j += 1){
+            articleCuttedWord[i][0] += ` ${titleWord[i][j]}`;
+        }
+    }
     
     //title term score
     /*for(i=0;i<titleTest.length;i++){ 
@@ -497,11 +509,11 @@ let bindpostlist = function bindpostlist(qobj1, qobj2, ptt) {
     for(i=0;i<titleTest.length;i++){ 
         titleCount.push(titleUser(titleTest[i], list[i]));
     }
-    // console.log(titleTest);
+
     console.log("postlen: " + (list[0].length + list[1].length));
     const diff = process.hrtime(time);
     console.log(`bindpostlist() Benchmark took ${diff[0] * NS_PER_SEC + diff[1]} nanoseconds`);
-    return [list,termfreq,titleCount];
+    return [list,termfreq,titleCount, articleCuttedWord];
 }
 
 //userId's relationship with title word

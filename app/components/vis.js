@@ -9,8 +9,10 @@ import React, { Component, PureComponent } from 'react';
 // import { connect } from 'react-redux';
 // import { push } from 'react-router-redux';
 import * as d3 from 'd3';
+// import * as sententree from 'sententree';
 // import { max } from 'moment';
 // import { Row, Form } from 'antd';
+import Chart from 'react-google-charts';
 
 const SetNumOfNodes = 100;
 class Graph extends Component {
@@ -18,6 +20,7 @@ class Graph extends Component {
     super(props);
     this.myRef = React.createRef();
     this.state = { ...props };
+    this.drawWordTree = this.drawWordTree.bind(this);
   }
 
   componentDidMount() {
@@ -45,6 +48,7 @@ class Graph extends Component {
     // console.log(this.props);
     const { visprops } = this.props;
     const { date } = this.props;
+    const { word } = this.props;
     // console.log(date);
     const startDate = new Date(date.$gte);
     const endDate = new Date(date.$lt);
@@ -190,35 +194,6 @@ class Graph extends Component {
       }
     }
 
-    // for (let i = 0; i < props.length; i += 1) { // i == which term
-    //   console.log(`${props[i][0]} round ${i}`);
-    //   for (let l = 0; l < props[i][1].length; l += 1) {
-    // l == the user which other nodes will be merge to
-    //     let unique = 1;
-    //     let index = l;
-    //     for (let j = l + 1; j < props[i][1].length; j += 1) {
-    //       for (let k = 0; k < props.length; k += 1) {
-    //         if (k !== i && props[k][1].includes(props[i][1][j])) {
-    //           console.log(`${props[i][1][j]} not unique in ${props[k][0]}!
-    //                        i = ${i}, j = ${j}, k = ${k} `);
-    //           unique = 0;
-    //           break;
-    //         }
-    //         // console.log(props[k][0]);
-    //       }
-    //       if (unique === 1) {
-    //         console.log('unique!');
-    //         props[i][1][index] += props[i][1][j];
-    //         console.log(props[i][0]);
-    //         console.log(props[i][1][index], props[i][1][j]);
-    //         props[i][1].splice(j, 1);
-    //       }
-    //     }
-    //   }
-    // }
-
-    // console.log(props);
-
     // Nodes setting
     for (let i = 0; i < Math.min(props.length, SetNumOfNodes); i += 1) {
       if (props[i][0] != null) {
@@ -253,28 +228,6 @@ class Graph extends Component {
       set.nodes[i].children.sort();
     }
 
-    // 1st round merging nodes
-
-    // for (let i = 0; i < set.nodes.length - 1; i += 1) {
-    //   for (let j = i + 1; j < set.nodes.length; j += 1) {
-    //     let numOfSameUsers = 0;
-    //     if (set.nodes[i].children.length === set.nodes[j].children.length) {
-    //       for (let k = 0; k < set.nodes[i].children.length; k += 1) {
-    //         const haveTheSameUsers = set.nodes[j].children.includes(set.nodes[i].children[k]);
-    //         if (haveTheSameUsers) {
-    //           numOfSameUsers += 1;
-    //         }
-    //       }
-    //       if (numOfSameUsers === set.nodes[i].children.length) {
-    //         const addingTerm = ` ${set.nodes[j].titleTerm}`;
-    //         set.nodes[i].titleTerm += addingTerm;
-    //         set.nodes.splice(j, 1);
-    //         j -= 1;
-    //       }
-    //     }
-    //   }
-    // }
-
     // Computing user list
 
     for (let i = 0; i <= set.nodes.length; i += 1) {
@@ -292,53 +245,6 @@ class Graph extends Component {
         }
       }
     }
-
-    // Find all of users with only one term, then merge them
-
-    // console.log(userList.filter(x => x.count === 1));
-    // const userListWithCountEqualsOne = userList.filter(x => x.count === 1); // array
-    // console.log(set.nodes, userListWithCountEqualsOne);
-    // for (let i = 0; i < userListWithCountEqualsOne.length - 1; i += 1) {
-    //   let userListWithSameTerm = set.nodes.filter(
-    //     x => x.titleTerm === userListWithCountEqualsOne[i].term[0],
-    //   );
-    //   console.log(userListWithSameTerm);
-    //   let firstSameUser = userListWithSameTerm[0].children.find(
-    //     x => x === userListWithCountEqualsOne[0].id,
-    //   );
-    //   firstSameUser = 0;
-    //   console.log(userListWithSameTerm, firstSameUser);
-    //   userListWithCountEqualsOne.forEach((user) => {
-    //     let userToBeMerged = userListWithSameTerm[0].children.filter(x => x === user.id);
-    //     firstSameUser += userToBeMerged;
-    //     console.log(userToBeMerged, firstSameUser, set.nodes);
-    //   })
-    // }
-
-
-    // 2nd round merging nodes
-    // for (let i = 0; i < set.nodes.length - 1; i += 1) {
-    //   set.nodes.children = [...new Set(set.nodes.children)];
-    //   for (let j = i + 1; j < set.nodes.length; j += 1) {
-    //     let numOfSameUsers = 0;
-    //     // console.log(i, j);
-    //     for (let k = 0; k < set.nodes[i].children.length; k += 1) {
-    //       const haveTheSameUsers = set.nodes[j].children.includes(set.nodes[i].children[k]);
-    //       if (haveTheSameUsers) {
-    //         numOfSameUsers += 1;
-    //       }
-    //     }
-    //     // console.log(numOfSameUsers, set.nodes[i].titleTerm, set.nodes[j].titleTerm,
-    //     //   set.nodes[i].children.length, set.nodes[j].children.length);
-    //     if (numOfSameUsers >= set.nodes[j].children.length) {
-    //       // console.log('#ofuser == set.node[j].children.length');
-    //       // console.log(set.nodes[i].titleTerm, set.nodes[j].titleTerm);
-    //       set.nodes[i].children.push(set.nodes[j]);
-    //       set.nodes.splice(j, 1);
-    //       j -= 1;
-    //     }
-    //   }
-    // }
 
     // compute how many same users each term has
 
@@ -392,41 +298,6 @@ class Graph extends Component {
         }
       }
     }
-    // for (let i = 0; i < max - 1; i += 1) {
-    //   if (props[i][0] != null && !removeWords.includes(props[i][0])) {
-    //     for (let j = i + 1; j < max; j += 1) {
-    //       let count = 0;
-    //       if (props[j][0] != null && !removeWords.includes(props[j][0])) {
-    //         props[i][1].forEach((id1) => {
-    //           props[j][1].forEach((id2) => {
-    //             if (id1 != null && id2 != null) {
-    //               if (id1 === id2) {
-    //                 count += 1;
-    //               }
-    //             }
-    //           });
-    //         });
-    //       }
-    //       if (count !== 0) {
-    //         set.links.push({
-    //           source: props[i][0],
-    //           target: props[j][0],
-    //           tag: 0,
-    //           color: '#d9d9d9 ',
-    //           value: count,
-    //         });
-    //         initLinks.push({
-    //           source: props[i][0],
-    //           target: props[j][0],
-    //           tag: 0,
-    //           value: count,
-    //         });
-    //       }
-    //     }
-    //   }
-    // }
-
-    // console.log(set);
 
     const someData = [];
     let postCount;
@@ -474,6 +345,10 @@ class Graph extends Component {
       heatMapSvg.attr('transform', d3.event.transform);
     }
 
+    function wordTreeSvgZoomed() {
+      wordTreeSvg.attr('transform', d3.event.transform);
+    }
+
     svg = svg
       .call(d3.zoom().scaleExtent([1 / 2, 8]).on('zoom', zoomed))
       .append('g')
@@ -484,7 +359,7 @@ class Graph extends Component {
     const simulation = d3.forceSimulation()
       .force('link', d3.forceLink().id(d => d.titleTerm))
       .force('charge', d3.forceManyBody().strength(-300))
-      .force('center', d3.forceCenter(width / 2, height / 2));
+      .force('center', d3.forceCenter(width / 4, height / 2));
 
     let conutOfClickedNode = 0;
 
@@ -503,6 +378,10 @@ class Graph extends Component {
     let heatMapSvg = d3.select(this.myRef.current)
       .select('#timeLine')
       .call(d3.zoom().scaleExtent([1 / 2, 8]).on('zoom', heatMapZoomed));
+    let wordTreeSvg = d3.select(this.myRef.current)
+      .select('#wordTree')
+      .call(d3.zoom().scaleExtent([1 / 2, 8]).on('zoom', wordTreeSvgZoomed));
+
     update();
 
     function update() {
@@ -575,19 +454,12 @@ class Graph extends Component {
       const timeline = nodeEnter.selectAll('circle');
       // console.log(timeline);
 
-      timeline.data((d) => {
-        // console.log(d);
-        if (d.group === 1) {
-          return d.date;
-        }
-        return d;
-      })
+      timeline.data(d => (d.group === 1 ? d.date : d))
         .enter()
         .append('g')
         // .selectAll('line')
         .append('line')
         .attr('transform', (d) => {
-          // console.log(d);
           const erliestTime = new Date(d);
           const rotate = `rotate(${((erliestTime - startDate) / timePeriod) * 360})`;
           return rotate;
@@ -678,7 +550,7 @@ class Graph extends Component {
       // drawTimeLine();
       drawHeatMap();
       // drawSpiral();
-
+      // drawWordTree();
       function drawTable() {
         const table = leftSvg.append('foreignObject')
           .attr('width', '100%')
@@ -690,7 +562,8 @@ class Graph extends Component {
         th.append('td').attr('class', 'data name')
           .text('Title Term');
         th.append('td').attr('class', 'data name')
-          .text('# of User');
+          .attr('width', '30px')
+          .text('#User');
 
         // Create a table with rows and bind a data row to each table row
         const tr = table.selectAll('tr.data')
@@ -917,7 +790,7 @@ class Graph extends Component {
         // const spectrums = g.append('g');
         const spectrums = timeLineSvg.append('g');
         // spectrums.attr('transform', `translate(${width / 2 - 270}, -100) scale(1.2,1.2)`);
-        let domainName = [];
+        const domainName = [];
         set.nodes.forEach((term) => {
           domainName.push(term.titleTerm);
         });
@@ -1019,34 +892,231 @@ class Graph extends Component {
           postDate.forEach((ele) => {
             numOfPostAtDate[ele] = 0;
           });
-          obj.date.forEach((ele) => {
-            let postdate = new Date(ele);
-            postdate = new Date(postdate.toDateString());
-            numOfPostAtDate[postdate] += 1;
-          });
-          // console.log(numOfPostAtDate);
-          heatMapSvg.selectAll()
-            .data(obj.date)
-            .enter()
-            .append('rect')
-            .attr('x', (d) => {
-              const post_Date = new Date(d);
-              return heatMapX(new Date(post_Date.toDateString()));
-            })
-            .attr('y', d => heatMapY(obj.titleTerm))
-            .attr('width', heatMapX.bandwidth())
-            .attr('height', heatMapY.bandwidth())
-            .style('fill', (d) => {
-              let postdate = new Date(d);
+          if (obj.date) {
+            obj.date.forEach((ele) => {
+              let postdate = new Date(ele);
               postdate = new Date(postdate.toDateString());
-              const percentage = numOfPostAtDate[postdate] / 100;
-              return myColor(0.5 - (percentage / 2));
+              numOfPostAtDate[postdate] += 1;
             });
+            // console.log(numOfPostAtDate);
+            heatMapSvg.selectAll()
+              .data(obj.date)
+              .enter()
+              .append('rect')
+              .attr('x', (d) => {
+                const post_Date = new Date(d);
+                return heatMapX(new Date(post_Date.toDateString()));
+              })
+              .attr('y', d => heatMapY(obj.titleTerm))
+              .attr('width', heatMapX.bandwidth())
+              .attr('height', heatMapY.bandwidth())
+              .style('fill', (d) => {
+                let postdate = new Date(d);
+                postdate = new Date(postdate.toDateString());
+                const percentage = numOfPostAtDate[postdate] / 100;
+                return myColor(0.5 - (percentage / 2));
+              });
+          }
         });
         heatMapSvg.select('.axisY')
           .attr('font-size', '15px');
       }
 
+      // function drawWordTree() {
+      //   wordTreeSvg.selectAll('*').remove();
+      //   let treeData = {
+      //     name: 'Top Level',
+      //     children: [
+      //       {
+      //         name: 'Level 2: A',
+      //         children: [
+      //           { name: 'Son of A' },
+      //           { name: 'Daughter of A' },
+      //         ],
+      //       },
+      //       { name: 'Level 2: B' },
+      //     ],
+      //   };
+
+      //   // Set the dimensions and margins of the diagram
+      //   const margin = {
+      //     top: 20, right: 90, bottom: 30, left: 90,
+      //   };
+      //   const treeWidth = 960 - margin.left - margin.right;
+      //   const treeHeight = 500 - margin.top - margin.bottom;
+
+      //   // append the svg object to the body of the page
+      //   // appends a 'group' element to 'svg'
+      //   // moves the 'group' element to the top left margin
+      //   wordTreeSvg = wordTreeSvg.attr('fill', 'black')
+      //     .style('background', 'white')
+      //     .append('g')
+      //     .attr('transform', `translate(${margin.left}, ${margin.top})`);
+
+      //   let i = 0;
+      //   const duration = 750;
+
+      //   // declares a tree layout and assigns the size
+      //   const treemap = d3.tree().size([treeHeight, treeWidth]);
+
+      //   // Assigns parent, children, height, depth
+      //   const root = d3.hierarchy(treeData, d => d.children);
+      //   root.x0 = treeHeight / 2;
+      //   root.y0 = 0;
+
+      //   // Collapse after the second level
+      //   // root.children.forEach(collapse);
+
+      //   updateTree(root);
+
+      //   // Collapse the node and all it's children
+      //   // function collapse(d) {
+      //   //   if(d.children) {
+      //   //     d._children = d.children
+      //   //     d._children.forEach(collapse)
+      //   //     d.children = null
+      //   //   }
+      //   // }
+
+      //   function updateTree(source) {
+      //     // Assigns the x and y position for the nodes
+      //     treeData = treemap(root);
+
+      //     // Compute the new tree layout.
+      //     const treeNodes = treeData.descendants();
+      //     const treeLinks = treeData.descendants().slice(1);
+
+      //     // Normalize for fixed-depth.
+      //     treeNodes.forEach((d) => { d.y = d.depth * 180; });
+
+      //     // ****************** Nodes section ***************************
+
+      //     // Update the nodes...
+      //     const treeNode = wordTreeSvg.selectAll('g.node')
+      //       .data(treeNodes, (d) => {
+      //         i += 1;
+      //         if (d.id) {
+      //           return d.id;
+      //         }
+      //         d.id = i;
+      //         return d.id;
+      //       });
+
+      //     // Enter any new modes at the parent's previous position.
+      //     const treeNodeEnter = treeNode.enter().append('g')
+      //       .attr('class', 'node')
+      //       .attr('transform', d => `translate(${source.y0},${source.x0})`)
+      //       .on('click', click);
+
+      //     // Add Circle for the nodes
+      //     treeNodeEnter.append('circle')
+      //       .attr('class', 'node')
+      //       .attr('r', 1e-6)
+      //       .style('fill', d => (d.childrenHide ? 'lightsteelblue' : '#fff'));
+
+      //     // Add labels for the nodes
+      //     treeNodeEnter.append('text')
+      //       .attr('dy', '.35em')
+      //       .attr('x', d => (d.children || d.childrenHide ? -13 : 13))
+      //       .attr('text-anchor', d => (d.children || d.childrenHide ? 'end' : 'start'))
+      //       .text(d => d.data.name);
+
+      //     // UPDATE
+      //     const nodeUpdate = treeNodeEnter.merge(treeNode);
+
+      //     // Transition to the proper position for the node
+      //     nodeUpdate.transition()
+      //       .duration(duration)
+      //       .attr('transform', d => `translate(${d.y}, ${d.x})`);
+
+      //     // Update the node attributes and style
+      //     nodeUpdate.select('circle.node')
+      //       .attr('r', 10)
+      //       .style('fill', d => (d.childrenHide ? 'lightsteelblue' : '#fff'))
+      //       .attr('cursor', 'pointer')
+      //       .attr('fill', '#fff')
+      //       .attr('stroke', 'steelblue')
+      //       .attr('stroke-width', '3px');
+
+
+      //     // Remove any exiting nodes
+      //     const nodeExit = treeNode.exit().transition()
+      //       .duration(duration)
+      //       .attr('transform', d => `translate(${source.y}, ${source.x})`)
+      //       .remove();
+
+      //     // On exit reduce the node circles size to 0
+      //     nodeExit.select('circle')
+      //       .attr('r', 1e-6);
+
+      //     // On exit reduce the opacity of text labels
+      //     nodeExit.select('text')
+      //       .style('fill-opacity', 1e-6)
+      //       .attr('font', '12px sans-serif');
+
+      //     // ****************** links section ***************************
+
+      //     // Update the links...
+      //     const treeLink = wordTreeSvg.selectAll('path.link')
+      //       .data(treeLinks, d => d.id);
+
+      //     // Enter any new links at the parent's previous position.
+      //     const treeLinkEnter = treeLink.enter().insert('path', 'g')
+      //       .attr('class', 'link')
+      //       .attr('fill', 'none')
+      //       .attr('stroke', '#ccc')
+      //       .attr('stroke-width', '2px')
+      //       .attr('d', (d) => {
+      //         const o = { x: source.x0, y: source.y0 };
+      //         return diagonal(o, o);
+      //       });
+
+      //     // UPDATE
+      //     const linkUpdate = treeLinkEnter.merge(treeLink);
+
+      //     // Transition back to the parent element position
+      //     linkUpdate.transition()
+      //       .duration(duration)
+      //       .attr('d', d => diagonal(d, d.parent));
+
+      //     // Remove any exiting links
+      //     const linkExit = treeLink.exit().transition()
+      //       .duration(duration)
+      //       .attr('d', (d) => {
+      //         const o = { x: source.x, y: source.y };
+      //         return diagonal(o, o);
+      //       })
+      //       .remove();
+
+      //     // Store the old positions for transition.
+      //     treeNodes.forEach((d) => {
+      //       d.x0 = d.x;
+      //       d.y0 = d.y;
+      //     });
+
+      //     // Creates a curved (diagonal) path from parent to the child nodes
+      //     function diagonal(s, d) {
+      //       const path = `M ${s.y} ${s.x}
+      //               C ${(s.y + d.y) / 2} ${s.x},
+      //                 ${(s.y + d.y) / 2} ${d.x},
+      //                 ${d.y} ${d.x}`;
+
+      //       return path;
+      //     }
+
+      //     // Toggle children on click.
+      //     function click(d) {
+      //       if (d.children) {
+      //         d.childrenHide = d.children;
+      //         d.children = null;
+      //       } else {
+      //         d.children = d.childrenHide;
+      //         d.childrenHide = null;
+      //       }
+      //       updateTree(d);
+      //     }
+      //   }
+      // }
       function ticked() {
         link
           .attr('x1', d => d.source.x)
@@ -1324,17 +1394,46 @@ class Graph extends Component {
     }
   }
 
+  drawWordTree(d) {
+    const options = {
+      maxFontSize: 14,
+      wordtree: {
+        format: 'implicit',
+        word: 'cats',
+      },
+    };
+    console.log(this.props);
+    console.log(this);
+    console.log('google chart');
+    console.log('wordtree');
+    const style = {
+      width: '40%',
+      float: 'right',
+    };
+    return (
+      <div className="App" style={style}>
+        <Chart
+          // style={style}
+          chartType="WordTree"
+          width="100%"
+          height="700px"
+          data={d}
+          options={options}
+        />
+      </div>
+    );
+  }
+
   render() {
     // const myRef = 'titleUserView';
     const { id } = this.props;
-    const timelineStyle = {
-      overflow: 'scroll',
-    } 
     return (
       <div id={`#${id}`}>
         <div ref={this.myRef}>
-          <svg id="barChart" width="20%" height="700px" />
-          <svg id="graph" width="80%" height="700px" />
+          <svg id="barChart" width="15%" height="700px" />
+          <svg id="graph" width="45%" height="700px" />
+          {/* <svg id="wordTree" width="40%" height="700px" /> */}
+          {this.drawWordTree(this.props.word)}
           <div>
             <svg id="timeLine" width="100%" height="600px" />
           </div>

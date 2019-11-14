@@ -120,6 +120,7 @@ class Grid extends React.Component {
       visprops: {
         list: [],
         date: [{ $gte: '', $lt: '' }],
+        word: [['']],
       },
       postlistprops: {
         list: [
@@ -358,6 +359,7 @@ class Grid extends React.Component {
       visprops: {
         list: list[collection + 2][0],
         date: list[collection + 3],
+        word: list[collection + 4],
       },
       postlistprops: {
         list: list[collection],
@@ -547,7 +549,7 @@ class Grid extends React.Component {
               </div> */}
             {/* </div> */}
             <div className="graph">
-              <Graph visprops={visprops.list} date={visprops.date} />
+              <Graph visprops={visprops.list} date={visprops.date} word={visprops.word} />
             </div>
             {/* <div className="box userview" id="table">
               <div id="userdeg">

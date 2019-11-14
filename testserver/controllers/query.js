@@ -386,9 +386,10 @@ let callback = function callback(req, res) {
               // let postlist = datalist[0];
               let wordlist = datalist[1];
               let titleWordList = datalist[2];
+              let titleCuttedWords = datalist[3];
               
 
-              return { list: [res.result, wordlist, titleWordList, queryobj1.date], previous: [res.previous], next: [res.next] };
+              return { list: [res.result, wordlist, titleWordList, queryobj1.date,titleCuttedWords], previous: [res.previous], next: [res.next] };
             }),
           );
         } else if (!isEmpty(queryobj2)) {
