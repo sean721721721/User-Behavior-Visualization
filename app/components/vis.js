@@ -1,3 +1,4 @@
+/* eslint-disable no-console */
 /* eslint-disable linebreak-style */
 /* eslint-disable react/prop-types */
 /* eslint-disable no-unused-vars */
@@ -53,7 +54,6 @@ class Graph extends Component {
     const startDate = new Date(date.$gte);
     const endDate = new Date(date.$lt);
     const timePeriod = endDate - startDate;
-    // console.log(startDate, endDate);
     const props = JSON.parse(JSON.stringify(visprops)); // clone props;
     const set = { nodes: [], links: [] };
     let link;
@@ -64,271 +64,33 @@ class Graph extends Component {
     const propsUserList = [{ id: '', count: 0, term: [] }];
     const initLinks = [];
     const removeWords = ['新聞', '八卦', '幹嘛'];
+    const groupedWords = [];
+    const max = Math.min(props.length, SetNumOfNodes);
+    const someData = [];
+    const pi = Math.PI;
+    props.splice(SetNumOfNodes); // Splice props to match properly size
 
-    // Splice props to match properly size
-
-    props.splice(SetNumOfNodes);
-
-    // props combine any titleterms with the equal users
-
-    for (let i = 0; i < props.length - 1; i += 1) {
-      for (let j = i + 1; j < props.length; j += 1) {
-        let numOfSameUser = 0;
-        for (let k = 0; k < props[i][1].length; k += 1) {
-          const findTheSameUser = props[j][1].includes(props[i][1][k]);
-          if (findTheSameUser) {
-            numOfSameUser += 1;
-          }
-        }
-        if (numOfSameUser === props[i][1].length && numOfSameUser === props[j][1].length) {
-          // console.log(numOfSameUser, props[i][1], props[j][1]);
-          const addingTerm = ` ${props[j][0]}`;
-          props[i][0] += addingTerm;
-          props.splice(j, 1);
-          j -= 1;
-        }
-      }
-    }
-
-    for (let i = 0; i < removeWords.length; i += 1) {
-      const index = props.findIndex(x => x[0] === removeWords[i]);
-      if (index !== -1) {
-        props.splice(index, 1);
-      }
-    }
+    mergeTermNodes(); // props combine any titleterms with the equal users
+    removeTermNodesWithRemovedWords();
 
     for (let i = 0; i < props.length - 1; i += 1) {
       props[i][1] = [...new Set(props[i][1])];
       props[i][1].sort();
     }
-    // console.log(props.length);
 
-    // Computing props user list
-
-    for (let i = 0; i < props.length; i += 1) {
-      if (props[i][1]) {
-        props[i][1].forEach((userId) => {
-          const existedUser = propsUserList.find(x => x.id === userId);
-          if (existedUser) {
-            existedUser.term.push(props[i][0]);
-            existedUser.count += 1;
-          } else {
-            propsUserList.push({
-              id: userId,
-              numOfUsr: 1,
-              merge: 1,
-              count: 1,
-              term: [props[i][0]],
-            });
-          }
-        });
-      }
-    }
-
-    // console.log(propsUserList);
-
-    // props[i][1]=['id', 'id'] => props[i][1]=[{id:, count:, ... }]
-
-    for (let i = 0; i < props.length; i += 1) {
-      propsUserList.forEach((x) => {
-        const index = props[i][1].findIndex(user => user === x.id);
-        if (index !== -1) {
-          props[i][1].splice(index, 1);
-          props[i][1].push(x);
-        }
-      });
-    }
-    const copyprops = JSON.parse(JSON.stringify(props));
-    // console.log(copyprops);
-    // console.log(props);
-
-    // Combine all user with count == 1
-    const findIndex = (array, num) => array.findIndex(x => x.id === num);
-    for (let i = 0; i < props.length; i += 1) {
-      userList = props[i][1].filter(x => x.count === 1);
-      // console.log(userList);
-      let temp = '';
-      let size = 0;
-      for (let j = 1; j < userList.length; j += 1) {
-        temp += ` ${userList[j].id}`;
-        size += 1;
-        const deleteIndex = findIndex(props[i][1], userList[j].id);
-        // const deleteIndex = props[i][1].findIndex(x => x.id === userList[j].id);
-        props[i][1].splice(deleteIndex, 1);
-      }
-      if (userList.length > 0) {
-        userList[0].id += temp;
-        userList[0].numOfUsr += size;
-        userList[0].merge = 2;
-      }
-    }
-    const hasMergedId = [];
-    for (let i = 0; i < props.length; i += 1) { // which title
-      for (let j = 0; j < props[i][1].length - 1; j += 1) {
-        for (let k = j + 1; k < props[i][1].length; k += 1) {
-          let equal = 1;
-          // console.log(props[i][1][j].id, props[i][1][k].id);
-          if (props[i][1][j].count === props[i][1][k].count) {
-            if (props[i][1][j].term) {
-              for (let l = 0; l < props[i][1][j].term.length; l += 1) {
-                if (!props[i][1][k].term.includes(props[i][1][j].term[l])) {
-                  // console.log(`${props[i][1][j].id} is not equal to ${props[i][1][k].id}`);
-                  equal = 0;
-                  break;
-                }
-              }
-              if (equal === 1) {
-                if (!hasMergedId.includes(props[i][1][k].id)) {
-                  // console.log(`${props[i][1][j].id} is equal to ${props[i][1][k].id}`);
-                  props[i][1][j].id += props[i][1][k].id;
-                  hasMergedId.push(props[i][1][k].id);
-                  props[i][1][j].merge = 2;
-                  props[i][1][j].numOfUsr += 1;
-                }
-                props[i][1].splice(k, 1);
-                k -= 1;
-              }
-            }
-          }
-        }
-      }
-    }
-
-    // Nodes setting
-    for (let i = 0; i < Math.min(props.length, SetNumOfNodes); i += 1) {
-      if (props[i][0] != null) {
-        const existKey = set.nodes.find(ele => ele.titleTerm === props[i][0]);
-        if (existKey === undefined) {
-          if (!removeWords.includes(props[i][0])) {
-            set.nodes.push({
-              titleTerm: props[i][0],
-              children: props[i][1],
-              _children: [],
-              articleIndex: props[i][2],
-              date: props[i][3],
-              community: [['', 0]],
-              group: 1,
-              tag: 0,
-              connected: -1,
-              size: 5 + Math.log2(props[i][1].length),
-            });
-            props[i][1].forEach((titleTerm) => {
-              const existId = set.nodes.find(ele => ele.titleTerm === titleTerm);
-              if (existId === undefined) {
-                // if(id != null)
-                //   set.nodes.push({id: id, group: 2, tag: 0, size: 5});
-              }
-            });
-          }
-        }
-      }
-    }
+    computePropsUserList(); // Computing props user list
+    propsDataStructureBuild(); // props[i][1]=['id', 'id'] => props[i][1]=[{id:, count:, ... }]
+    mergeTermNodesWithUserCountEqualsOne(); // Combine all user with count == 1
+    setNodes(); // Nodes setting
 
     for (let i = 0; i < set.nodes.length - 1; i += 1) {
       set.nodes[i].children.sort();
     }
 
-    // Computing user list
-
-    for (let i = 0; i <= set.nodes.length; i += 1) {
-      if (set.nodes[i]) {
-        if (set.nodes[i].children) {
-          set.nodes[i].children.forEach((userId) => {
-            const existedUser = userList.find(x => x.id === userId);
-            if (existedUser) {
-              existedUser.term.push(set.nodes[i].titleTerm);
-              existedUser.count += 1;
-            } else {
-              userList.push({ id: userId, count: 1, term: [set.nodes[i].titleTerm] });
-            }
-          });
-        }
-      }
-    }
-
-    // compute how many same users each term has
-
-    for (let i = 0; i < set.nodes.length - 1; i += 1) {
-      for (let j = i + 1; j < set.nodes.length; j += 1) {
-        let numOfSameUsers = 0;
-        const largestNumOfSameUsers = 0;
-        // let term = '';
-        for (let k = 0; k < set.nodes[i].children.length; k += 1) {
-          const haveTheSameUsers = set.nodes[j].children.includes(set.nodes[i].children[k]);
-          if (haveTheSameUsers) {
-            numOfSameUsers += 1;
-          }
-        }
-        if (numOfSameUsers > set.nodes[i].community[0][1]) {
-          set.nodes[i].community[0][0] = set.nodes[j].titleTerm;
-          set.nodes[i].community[0][1] = numOfSameUsers;
-          // set.nodes.splice(j, 1);
-          // j -= 1;
-        } else if (numOfSameUsers === set.nodes[i].community[0][1]) {
-          set.nodes[i].community.push([set.nodes[j].titleTerm, numOfSameUsers]);
-        }
-      }
-    }
-
-    // title words links by articleIndex
-    const groupedWords = [];
-    const max = Math.min(props.length, SetNumOfNodes);
-    for (let i = 0; i < set.nodes.length - 1; i += 1) {
-      for (let j = 0; j < set.nodes.length; j += 1) {
-        let count = 0;
-        set.nodes[i].children.forEach((id1) => {
-          if (set.nodes[j].children.includes(id1)) {
-            count += 1;
-          }
-        });
-        if (count !== 0) {
-          set.links.push({
-            source: set.nodes[i].titleTerm,
-            target: set.nodes[j].titleTerm,
-            tag: 0,
-            color: '#d9d9d9 ',
-            value: count,
-          });
-          initLinks.push({
-            source: set.nodes[i].titleTerm,
-            target: set.nodes[j].titleTerm,
-            tag: 0,
-            value: count,
-          });
-        }
-      }
-    }
-
-    const someData = [];
-    let postCount;
-    for (let i = 0; i < 365; i += 1) {
-      const currentDate = new Date();
-      currentDate.setDate(currentDate.getDate() + i - 233);
-      someData.push({
-        date: currentDate,
-        value: 0,
-        group: currentDate.getMonth(),
-      });
-    }
-
-    if (props[0]) {
-      postCount = props[0][3].length;
-    }
-    // console.log(`posCount: ${postCount}`);
-    for (let i = 0; i < postCount; i += 1) {
-      someData.find((x) => {
-        const xMonth = x.date.getMonth();
-        const dataMonth = new Date(props[0][3][i]).getMonth();
-        const xDate = x.date.getDate();
-        const dataDate = new Date(props[0][3][i]).getDate();
-        return xMonth === dataMonth && xDate === dataDate;
-      }).value += 1;
-    }
-
-    // console.log(someData);
-
-
-    const pi = Math.PI;
+    computeNodesUserList(); // Computing user list
+    computeNumOfUsersHaveSameTerm(); // compute how many same users each term has
+    LinkTitleWordByArticleIndex(); // title words links by articleIndex
+    setSpiralDataStructure();
 
     const width = 900;
     const height = 900;
@@ -336,18 +98,6 @@ class Graph extends Component {
       .select('#graph');
 
     svg.selectAll('*').remove();
-
-    function zoomed() {
-      svg.attr('transform', d3.event.transform);
-    }
-
-    function heatMapZoomed() {
-      heatMapSvg.attr('transform', d3.event.transform);
-    }
-
-    function wordTreeSvgZoomed() {
-      wordTreeSvg.attr('transform', d3.event.transform);
-    }
 
     svg = svg
       .call(d3.zoom().scaleExtent([1 / 2, 8]).on('zoom', zoomed))
@@ -378,7 +128,7 @@ class Graph extends Component {
     let heatMapSvg = d3.select(this.myRef.current)
       .select('#timeLine')
       .call(d3.zoom().scaleExtent([1 / 2, 8]).on('zoom', heatMapZoomed));
-    let wordTreeSvg = d3.select(this.myRef.current)
+    const wordTreeSvg = d3.select(this.myRef.current)
       .select('#wordTree')
       .call(d3.zoom().scaleExtent([1 / 2, 8]).on('zoom', wordTreeSvgZoomed));
 
@@ -387,10 +137,8 @@ class Graph extends Component {
     function update() {
       console.log(set);
       ({ nodes, links } = set);
-      //  let g =svg.append('g')
-      //     .attr('class', 'everything')
       svg.selectAll('g').remove();
-      // const linkGroup = svg.append('g').append('line');
+
       link = svg.selectAll('line')
         .data(set.links);
 
@@ -474,62 +222,30 @@ class Graph extends Component {
       const circles = nodeEnter.append('circle')
         .attr('r', d => d.size)
         .attr('fill', (d) => {
-          if (d.group !== 2) {
-            return color(d.group);
-          }
-          if (d.merge > 1) {
-            return color(d.group);
-          }
+          if (d.group !== 2) return color(d.group);
+          if (d.merge > 1) return color(d.group);
           return 'url(#pic_user)';
         })
-        .style('fill-opacity', (d) => {
-          if (d.group !== 2) {
-            return d.connected === 0 ? 0.1 : 1;
-          }
-          return 1;
-        })
+        .style('fill-opacity', d => (d.group !== 2 && d.connected === 0 ? 0.1 : 1))
         .attr('stroke', (d) => {
           if (d.group !== 2) {
-            if (d.tag === 1) {
-              return 'red';
-            }
+            if (d.tag === 1) return 'red';
             return 'white';
           }
           return '#ff7f0e';
         })
         .attr('stroke-width', 0.9)
         .attr('stroke-opacity', 1);
-      // let zoom_handler = d3.zoom()
-      //       .on('zoom', zoom_actions);
-      // zoom_handler(svg);
+
       const lables = nodeEnter.append('text')
-        .text((d) => {
-          if (d.merge > 1) {
-            return d.numOfUsr;
-          }
-          return d.titleTerm;
-        })
+        .text(d => (d.merge > 1 ? d.numOfUsr : d.titleTerm))
         .attr('font-family', 'sans-serif')
         .attr('font-size', ' 10px')
         .attr('color', '#000')
-        .attr('visibility', (d) => {
-          if (d.group !== 2 || d.merge > 1) {
-            return 'visible';
-          }
-          return 'hidden';
-        })
-        .attr('x', (d) => {
-          if (d.merge > 1) {
-            return -3;
-          }
-          return -d.size;
-        })
-        .attr('y', (d) => {
-          if (d.merge > 1) {
-            return 3;
-          }
-          return d.size + 7;
-        });
+        .attr('visibility', d => (d.group !== 2 || d.merge > 1 ? 'visible' : 'hidden'))
+        .attr('x', d => (d.merge > 1 ? -3 : -d.size))
+        .attr('y', d => (d.merge > 1 ? 3 : d.size + 7));
+
       nodeEnter.append('title')
         .text(d => d.titleTerm);
       node = nodeEnter.merge(node);
@@ -551,6 +267,7 @@ class Graph extends Component {
       drawHeatMap();
       // drawSpiral();
       // drawWordTree();
+
       function drawTable() {
         const table = leftSvg.append('foreignObject')
           .attr('width', '100%')
@@ -571,15 +288,7 @@ class Graph extends Component {
           .enter()
           .append('tr')
           .attr('class', 'datarow')
-          .style('border', (d) => {
-            if (d.tag === 1) {
-              return '2px black solid';
-            }
-            // if (d.connected === 1) {
-            //   return '2px red solid';
-            // }
-            return 'none';
-          })
+          .style('border', d => (d.tag === 1 ? '2px black solid' : 'none'))
           .on('mouseover', mouseOver(0.2))
           .on('mouseout', mouseOut)
           .on('click', clicked);
@@ -594,12 +303,8 @@ class Graph extends Component {
 
         // Create the percent value column
         tr.append('td').attr('class', 'data value')
-          .text((d) => {
-            if (d.children === undefined) {
-              return 0;
-            }
-            return d.children.length;
-          });
+          .text(d => (d.children === undefined ? 0 : d.children.length));
+
         // Create a column at the beginning of the table for the chart
         const chart = tr.append('td').attr('class', 'chart')
           .attr('width', chartWidth)
@@ -622,14 +327,7 @@ class Graph extends Component {
           .style('background-color', 'steelblue')
           .transition()
           .duration(500)
-          .style('width', (d) => {
-            if (d.children !== undefined) {
-              if (d.children.length > 0) {
-                return x(d.children.length);
-              }
-            }
-            return '0%';
-          });
+          .style('width', d => (d.children !== undefined && d.children.length > 0 ? x(d.children.length) : '0%'));
       }
 
       function drawSpiral() {
@@ -812,7 +510,6 @@ class Graph extends Component {
             .attr('r', 2)
             .style('fill', colors[((i % 10) + 1)]);
         }
-        
 
         // Add the x Axis
         const axisX = spectrums;
@@ -900,14 +597,13 @@ class Graph extends Component {
             });
             // console.log(numOfPostAtDate);
             heatMapSvg.selectAll()
-              .data(obj.date)
-              .enter()
+              .data(obj.date).enter()
               .append('rect')
               .attr('x', (d) => {
                 const post_Date = new Date(d);
                 return heatMapX(new Date(post_Date.toDateString()));
               })
-              .attr('y', d => heatMapY(obj.titleTerm))
+              .attr('y', heatMapY(obj.titleTerm))
               .attr('width', heatMapX.bandwidth())
               .attr('height', heatMapY.bandwidth())
               .style('fill', (d) => {
@@ -1132,12 +828,8 @@ class Graph extends Component {
         if (d3.event.defaultPrevented) return; // dragged
         set.nodes.forEach((_node) => {
           if (isConnected(d, _node)) {
-            // console.log(d, _node);
-            if (_node.connected <= 0) {
-              _node.connected = 1;
-            } else {
-              _node.connected += 1;
-            }
+            if (_node.connected <= 0) _node.connected = 1;
+            else _node.connected += 1;
           } else if (_node.connected === -1) {
             _node.connected = 0;
           }
@@ -1221,25 +913,6 @@ class Graph extends Component {
               }
             }
           });
-          // set.links = removeDuplicates(set.links, 'source');
-          // console.log(set.links);
-          // let nodeToBeMerged = set.nodes.filter(_node => _node.parentNode === d.titleTerm);
-          // nodeToBeMerged = nodeToBeMerged.filter(_node => _node.count === 1);
-          // // set.nodes.find(_node => _node.titleTerm === nodeToBeMerged.titleTerm)
-          // console.log(nodeToBeMerged);
-          // for (let i = 1; i <= nodeToBeMerged.length - 1; i += 1) {
-          //   // set.nodes.find(_node => _node.titleTerm === nodeToBeMerged.titleTerm).titleTerm
-          //   const linkToBeMerged = set.links.filter(
-          //     _link => _link.source === nodeToBeMerged[0].titleTerm,
-          //   );
-          //   console.log(linkToBeMerged);
-          //   nodeToBeMerged[0].titleTerm += nodeToBeMerged[i].titleTerm;
-          //   linkToBeMerged[0].source += nodeToBeMerged[i].titleTerm;
-          //   // linkToBeMerged[1].source += nodeToBeMerged[i].titleTerm;
-          // }
-          // console.log(set);
-          // console.log(nodeToBeMerged);
-
 
           d.tag = 1;
           conutOfClickedNode += 1;
@@ -1247,12 +920,8 @@ class Graph extends Component {
           d3.select(this).select('circle').attr('stroke', 'white');
           node.data(set.nodes, (o) => {
             if (isConnected(d, o)) {
-              const index_0 = set.nodes.findIndex((_node) => {
-                if (_node === undefined) {
-                  return -1;
-                }
-                return _node.titleTerm === o.titleTerm;
-              });
+              const index_0 = set.nodes.findIndex(_node => (
+                _node === undefined ? -1 : _node.titleTerm === o.titleTerm));
               // console.log(id_1, index_1)
               set.nodes[index_0].connected -= 1;
               // console.log(set.nodes[index_0].connected);
@@ -1265,15 +934,10 @@ class Graph extends Component {
 
           d.children.forEach((id_1) => {
             if (id_1 != null) {
-              const index_1 = set.nodes.findIndex((_node) => {
-                console.log(_node, id_1);
-                if (_node === undefined) {
-                  return -1;
-                }
-                return _node.titleTerm === id_1.id;
-              });
-              // console.log(id_1, index_1)
-              // console.log(set.nodes, index_1);
+              const index_1 = set.nodes.findIndex(
+                _node => ((_node === undefined) ? -1 : _node.titleTerm === id_1.id),
+              );
+
               set.nodes[index_1].connected -= 1;
 
               set.nodes.forEach((_node) => {
@@ -1287,17 +951,11 @@ class Graph extends Component {
               for (let j = 0; j < length; j += 1) {
                 const pos = set.links.map(e => e.source.titleTerm).indexOf(id_1.id);
                 if (pos !== -1) {
-                  const index_2 = set.nodes.findIndex((_node) => {
-                    if (_node === undefined) {
-                      return -1;
-                    }
-                    return _node.titleTerm === id_1.id;
-                  });
-                  if (index_2 === -1) {
-                    set.links.splice(pos, 1);
-                  } else if (set.nodes[index_2] === undefined) {
-                    set.links.splice(pos, 1);
-                  }
+                  const index_2 = set.nodes.findIndex(
+                    _node => (_node === undefined ? -1 : _node.titleTerm === id_1.id),
+                  );
+                  if (index_2 === -1) set.links.splice(pos, 1);
+                  else if (set.nodes[index_2] === undefined) set.links.splice(pos, 1);
                 }
               }
             }
@@ -1307,12 +965,7 @@ class Graph extends Component {
           set.links = set.links.filter(() => true);
           conutOfClickedNode -= 1;
 
-          if (conutOfClickedNode === 0) {
-            set.nodes.forEach((_node) => {
-              _node.connected = -1;
-              // console.log(_node.connected);
-            });
-          }
+          if (conutOfClickedNode === 0) set.nodes.forEach((_node) => { _node.connected = -1; });
           // mouseOut();
           d.tag = 0;
         }
@@ -1321,17 +974,12 @@ class Graph extends Component {
       }
 
       function mouseOut() {
-        node.style('stroke-opacity', d => 1);
+        node.style('stroke-opacity', 1);
         node.style('fill-opacity', 1);
         node.selectAll('text').style('visibility', d => (d.group === 2 ? 'visible' : 'visible'));
-        node.selectAll('circle').style('fill', (d) => {
-          if (d.group === 2) {
-            return '#ff7f0e';
-          }
-          return '1f77b4';
-        });
+        node.selectAll('circle').style('fill', d => (d.group === 2 ? '#ff7f0e' : '1f77b4'));
         link.style('stroke-opacity', 1);
-        link.style('stroke', d => '#ddd');
+        link.style('stroke', '#ddd');
       }
     }
     // build a dictionary of nodes that are linked
@@ -1348,23 +996,7 @@ class Graph extends Component {
     // fade nodes on hover
     function mouseOver(opacity) {
       return (d) => {
-        // check all other nodes to see if they're connected
-        // to this one. if so, keep the opacity at 1, otherwise
-        // fade
-        // node.selectAll('circles').style('stroke-opacity', (o) => {
-        //   let thisOpacity = isConnected(d, o) ? 1 : opacity;
-        //   return thisOpacity;
-        // });
-        // node.style('fill-opacity', (o) => {
-        //   let thisOpacity = isConnected(d, o) ? 1 : opacity;
-        //   return thisOpacity;
-        // });
-        node.selectAll('text').style('visibility', (o) => {
-          if (isConnected(d, o) || o.tag !== 0) {
-            return 'visible';
-          }
-          return 'hidden';
-        });
+        node.selectAll('text').style('visibility', o => (isConnected(d, o) || o.tag !== 0 ? 'visible' : 'hidden'));
         // also style link accordingly
         link.style('stroke-opacity', o => (o.source === d || o.target === d ? 1 : opacity));
         link.style('stroke', o => (o.source === d || o.target === d ? '#2E2E2E' : '#ddd'));
@@ -1392,6 +1024,248 @@ class Graph extends Component {
       const lookup = new Set();
       return array.filter(obj => !lookup.has(obj[key]) && lookup.add(obj[key]));
     }
+
+    function mergeTermNodes() {
+      for (let i = 0; i < props.length - 1; i += 1) {
+        for (let j = i + 1; j < props.length; j += 1) {
+          let numOfSameUser = 0;
+          for (let k = 0; k < props[i][1].length; k += 1) {
+            const findTheSameUser = props[j][1].includes(props[i][1][k]);
+            numOfSameUser = (findTheSameUser) ? numOfSameUser + 1 : numOfSameUser;
+          }
+          if (numOfSameUser === props[i][1].length && numOfSameUser === props[j][1].length) {
+            // console.log(numOfSameUser, props[i][1], props[j][1]);
+            const addingTerm = ` ${props[j][0]}`;
+            props[i][0] += addingTerm;
+            props.splice(j, 1);
+            j -= 1;
+          }
+        }
+      }
+    }
+
+    function removeTermNodesWithRemovedWords() {
+      for (let i = 0; i < removeWords.length; i += 1) {
+        const index = props.findIndex(prop => prop[0] === removeWords[i]);
+        if (index !== -1) props.splice(index, 1);
+      }
+    }
+
+    function computePropsUserList() {
+      for (let i = 0; i < props.length; i += 1) {
+        if (props[i][1]) {
+          props[i][1].forEach((userId) => {
+            const existedUser = propsUserList.find(user => user.id === userId);
+            if (existedUser) {
+              existedUser.term.push(props[i][0]);
+              existedUser.count += 1;
+            } else {
+              propsUserList.push({
+                id: userId,
+                numOfUsr: 1,
+                merge: 1,
+                count: 1,
+                term: [props[i][0]],
+              });
+            }
+          });
+        }
+      }
+    }
+
+    function propsDataStructureBuild() {
+      for (let i = 0; i < props.length; i += 1) {
+        propsUserList.forEach((propsUser) => {
+          const index = props[i][1].findIndex(user => user === propsUser.id);
+          if (index !== -1) {
+            props[i][1].splice(index, 1);
+            props[i][1].push(propsUser);
+          }
+        });
+      }
+    }
+
+    function mergeTermNodesWithUserCountEqualsOne() {
+      const findIndex = (array, num) => array.findIndex(ele => ele.id === num);
+      for (let i = 0; i < props.length; i += 1) {
+        userList = props[i][1].filter(user => user.count === 1);
+        // console.log(userList);
+        let temp = '';
+        let size = 0;
+        for (let j = 1; j < userList.length; j += 1) {
+          temp += ` ${userList[j].id}`;
+          size += 1;
+          const deleteIndex = findIndex(props[i][1], userList[j].id);
+          props[i][1].splice(deleteIndex, 1);
+        }
+        if (userList.length > 0) {
+          userList[0].id += temp;
+          userList[0].numOfUsr += size;
+          userList[0].merge = 2;
+        }
+      }
+      const hasMergedId = [];
+      for (let i = 0; i < props.length; i += 1) { // which title
+        for (let j = 0; j < props[i][1].length - 1; j += 1) {
+          for (let k = j + 1; k < props[i][1].length; k += 1) {
+            let equal = 1;
+            // console.log(props[i][1][j].id, props[i][1][k].id);
+            if (props[i][1][j].count === props[i][1][k].count && props[i][1][j].term) {
+              for (let l = 0; l < props[i][1][j].term.length; l += 1) {
+                if (!props[i][1][k].term.includes(props[i][1][j].term[l])) {
+                  // console.log(`${props[i][1][j].id} is not equal to ${props[i][1][k].id}`);
+                  equal = 0;
+                  break;
+                }
+              }
+              if (equal === 1) {
+                if (!hasMergedId.includes(props[i][1][k].id)) {
+                  // console.log(`${props[i][1][j].id} is equal to ${props[i][1][k].id}`);
+                  props[i][1][j].id += props[i][1][k].id;
+                  hasMergedId.push(props[i][1][k].id);
+                  props[i][1][j].merge = 2;
+                  props[i][1][j].numOfUsr += 1;
+                }
+                props[i][1].splice(k, 1);
+                k -= 1;
+              }
+            }
+          }
+        }
+      }
+    }
+
+    function setNodes() {
+      for (let i = 0; i < Math.min(props.length, SetNumOfNodes); i += 1) {
+        if (props[i][0] != null) {
+          const existKey = set.nodes.find(ele => ele.titleTerm === props[i][0]);
+          if (existKey === undefined) {
+            if (!removeWords.includes(props[i][0])) {
+              set.nodes.push({
+                titleTerm: props[i][0],
+                children: props[i][1],
+                _children: [],
+                articleIndex: props[i][2],
+                date: props[i][3],
+                community: [['', 0]],
+                group: 1,
+                tag: 0,
+                connected: -1,
+                size: 5 + Math.log2(props[i][1].length),
+              });
+              props[i][1].forEach((titleTerm) => {
+                const existId = set.nodes.find(ele => ele.titleTerm === titleTerm);
+                if (existId === undefined) {
+                  // if(id != null)
+                  //   set.nodes.push({id: id, group: 2, tag: 0, size: 5});
+                }
+              });
+            }
+          }
+        }
+      }
+    }
+
+    function computeNodesUserList() {
+      for (let i = 0; i <= set.nodes.length; i += 1) {
+        if (set.nodes[i]) {
+          if (set.nodes[i].children) {
+            set.nodes[i].children.forEach((userId) => {
+              const existedUser = userList.find(x => x.id === userId);
+              if (existedUser) {
+                existedUser.term.push(set.nodes[i].titleTerm);
+                existedUser.count += 1;
+              } else {
+                userList.push({ id: userId, count: 1, term: [set.nodes[i].titleTerm] });
+              }
+            });
+          }
+        }
+      }
+    }
+
+    function computeNumOfUsersHaveSameTerm() {
+      for (let i = 0; i < set.nodes.length - 1; i += 1) {
+        for (let j = i + 1; j < set.nodes.length; j += 1) {
+          let numOfSameUsers = 0;
+          const largestNumOfSameUsers = 0;
+          // let term = '';
+          for (let k = 0; k < set.nodes[i].children.length; k += 1) {
+            const haveTheSameUsers = set.nodes[j].children.includes(set.nodes[i].children[k]);
+            if (haveTheSameUsers) numOfSameUsers += 1;
+          }
+          if (numOfSameUsers > set.nodes[i].community[0][1]) {
+            set.nodes[i].community[0][0] = set.nodes[j].titleTerm;
+            set.nodes[i].community[0][1] = numOfSameUsers;
+          } else if (numOfSameUsers === set.nodes[i].community[0][1]) {
+            set.nodes[i].community.push([set.nodes[j].titleTerm, numOfSameUsers]);
+          }
+        }
+      }
+    }
+
+    function LinkTitleWordByArticleIndex() {
+      for (let i = 0; i < set.nodes.length - 1; i += 1) {
+        for (let j = 0; j < set.nodes.length; j += 1) {
+          let count = 0;
+          set.nodes[i].children.forEach((id1) => {
+            if (set.nodes[j].children.includes(id1)) count += 1;
+          });
+          if (count !== 0) {
+            set.links.push({
+              source: set.nodes[i].titleTerm,
+              target: set.nodes[j].titleTerm,
+              tag: 0,
+              color: '#d9d9d9 ',
+              value: count,
+            });
+            initLinks.push({
+              source: set.nodes[i].titleTerm,
+              target: set.nodes[j].titleTerm,
+              tag: 0,
+              value: count,
+            });
+          }
+        }
+      }
+    }
+
+    function setSpiralDataStructure() {
+      let postCount;
+      for (let i = 0; i < 365; i += 1) {
+        const currentDate = new Date();
+        currentDate.setDate(currentDate.getDate() + i - 233);
+        someData.push({
+          date: currentDate,
+          value: 0,
+          group: currentDate.getMonth(),
+        });
+      }
+
+      if (props[0]) postCount = props[0][3].length;
+      // console.log(`posCount: ${postCount}`);
+      for (let i = 0; i < postCount; i += 1) {
+        someData.find((data) => {
+          const xMonth = data.date.getMonth();
+          const dataMonth = new Date(props[0][3][i]).getMonth();
+          const xDate = data.date.getDate();
+          const dataDate = new Date(props[0][3][i]).getDate();
+          return xMonth === dataMonth && xDate === dataDate;
+        }).value += 1;
+      }
+    }
+
+    function zoomed() {
+      svg.attr('transform', d3.event.transform);
+    }
+
+    function heatMapZoomed() {
+      heatMapSvg.attr('transform', d3.event.transform);
+    }
+
+    function wordTreeSvgZoomed() {
+      wordTreeSvg.attr('transform', d3.event.transform);
+    }
   }
 
   drawWordTree(d) {
@@ -1402,9 +1276,7 @@ class Graph extends Component {
         word: 'cats',
       },
     };
-    console.log(this.props);
     console.log(this);
-    console.log('google chart');
     console.log('wordtree');
     const style = {
       width: '40%',
@@ -1426,14 +1298,14 @@ class Graph extends Component {
 
   render() {
     // const myRef = 'titleUserView';
-    const { id } = this.props;
+    const { id, word } = this.props;
     return (
       <div id={`#${id}`}>
         <div ref={this.myRef}>
           <svg id="barChart" width="15%" height="700px" />
           <svg id="graph" width="45%" height="700px" />
           {/* <svg id="wordTree" width="40%" height="700px" /> */}
-          {this.drawWordTree(this.props.word)}
+          {this.drawWordTree(word)}
           <div>
             <svg id="timeLine" width="100%" height="600px" />
           </div>
