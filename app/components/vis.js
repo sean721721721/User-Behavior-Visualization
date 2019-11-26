@@ -14,6 +14,7 @@ import * as d3 from 'd3';
 // import { max } from 'moment';
 // import { Row, Form } from 'antd';
 import Chart from 'react-google-charts';
+import { string } from 'prop-types';
 
 const SetNumOfNodes = 100;
 class Graph extends Component {
@@ -48,9 +49,8 @@ class Graph extends Component {
     // props[i][0]== userID, props[i][1]== articleIndex, props[i][0]== articlePostTime;
     // console.log(this.props);
     const { visprops } = this.props;
-    const { date } = this.props;
-    const { word } = this.props;
-    // console.log(date);
+    const { date, word, post } = this.props;
+    // console.log(date, word, post);
     const startDate = new Date(date.$gte);
     const endDate = new Date(date.$lt);
     const timePeriod = endDate - startDate;
@@ -121,15 +121,14 @@ class Graph extends Component {
     const x = d3.scaleLinear()
       .domain([0, d3.max(set.nodes, d => d.children.length)])
       .range(['0%', '100%']);
-    const leftSvg = d3.select(this.myRef.current)
-      .select('#barChart');
-    const timeLineSvg = d3.select(this.myRef.current)
-      .select('#timeLine');
-    let heatMapSvg = d3.select(this.myRef.current)
-      .select('#timeLine')
+    const leftSvg = d3.select(this.myRef.current).select('#barChart');
+
+    const timeLineSvg = d3.select(this.myRef.current).select('#timeLine');
+
+    const heatMapSvg = d3.select(this.myRef.current).select('#timeLine')
       .call(d3.zoom().scaleExtent([1 / 2, 8]).on('zoom', heatMapZoomed));
-    const wordTreeSvg = d3.select(this.myRef.current)
-      .select('#wordTree')
+
+    const wordTreeSvg = d3.select(this.myRef.current).select('#wordTree')
       .call(d3.zoom().scaleExtent([1 / 2, 8]).on('zoom', wordTreeSvgZoomed));
 
     update();
@@ -219,26 +218,43 @@ class Graph extends Component {
         .style('stroke', 'green')
         .style('stroke-width', '1px');
 
+      const keyPlayerCircles = nodeEnter.selectAll('circle');
+
+      keyPlayerCircles.data(d => (d.group === 2 ? [d] : d))
+        .enter()
+        .append('g').append('circle')
+        .attr('r', d => d.size + Math.sqrt(d.postCount))
+        .attr('fill', 'red')
+        .style('fill-opacity', 0)
+        .attr('stroke', 'gray')
+        .attr('stroke-width', 2)
+        .attr('stroke-opacity', d => (d.postCount >= 10 ? 1 : 0));
+
       const circles = nodeEnter.append('circle')
         .attr('r', d => d.size)
         .attr('fill', (d) => {
-          if (d.group !== 2) return color(d.group);
-          if (d.merge > 1) return color(d.group);
-          return 'url(#pic_user)';
+          return color(d.group);
+          // if (d.group !== 2) return color(d.group);
+          // if (d.merge > 1) return color(d.group);
+          // return 'url(#pic_user)';
         })
         .style('fill-opacity', d => (d.group !== 2 && d.connected === 0 ? 0.1 : 1))
         .attr('stroke', (d) => {
           if (d.group !== 2) {
-            if (d.tag === 1) return 'red';
-            return 'white';
+            if (d.tag === 1) return 'red'; // d.group !== 2 && d.tag === 1
+            return 'white'; // d.group !== 2 && d.tag !== 1
           }
-          return '#ff7f0e';
+          return '#ff7f0e'; // d.group === 2
         })
         .attr('stroke-width', 0.9)
         .attr('stroke-opacity', 1);
 
       const lables = nodeEnter.append('text')
-        .text(d => (d.merge > 1 ? d.numOfUsr : d.titleTerm))
+        .text((d) => {
+          // if (d.merge > 1) return d.numOfUsr;
+          if (d.group === 2) return d.postCount;
+          return d.titleTerm;
+        })
         .attr('font-family', 'sans-serif')
         .attr('font-size', ' 10px')
         .attr('color', '#000')
@@ -542,6 +558,7 @@ class Graph extends Component {
         // console.log(postDate);
 
         // set the dimensions and margins of the graph
+        console.log(heatMapSvg);
         heatMapSvg.selectAll('*').remove();
         const margin = {
           top: 30, right: 30, bottom: 30, left: 30,
@@ -550,7 +567,7 @@ class Graph extends Component {
         const heatMapHeight = domainName.length * 30;
 
         // append the svg object to the body of the page
-        heatMapSvg = heatMapSvg.attr('height', heatMapHeight + margin.top + margin.bottom)
+        let heatMap = heatMapSvg.attr('height', heatMapHeight + margin.top + margin.bottom)
           // .attr('width', heatMapWidth + margin.left + margin.right + 200)
           .append('g')
           .attr('transform',
@@ -561,7 +578,7 @@ class Graph extends Component {
           .range([0, heatMapWidth])
           .domain(postDate)
           .padding(0.1);
-        heatMapSvg.append('g')
+        heatMap.append('g')
           // .attr('transform', `translate(0, ${heatMapHeight})`)
           .call(d3.drag()
             .on('start', dragstarted)
@@ -574,7 +591,7 @@ class Graph extends Component {
           .range([0, heatMapHeight])
           .domain(domainName)
           .padding(0.1);
-        heatMapSvg.append('g')
+        heatMap.append('g')
           .attr('class', 'axisY')
           .call(d3.axisLeft(heatMapY));
 
@@ -596,7 +613,7 @@ class Graph extends Component {
               numOfPostAtDate[postdate] += 1;
             });
             // console.log(numOfPostAtDate);
-            heatMapSvg.selectAll()
+            heatMap.selectAll()
               .data(obj.date).enter()
               .append('rect')
               .attr('x', (d) => {
@@ -614,8 +631,11 @@ class Graph extends Component {
               });
           }
         });
-        heatMapSvg.select('.axisY')
+
+        heatMap.select('.axisY')
           .attr('font-size', '15px');
+        heatMap.selectAll('.axisY .tick')
+          .on('click', clicked);
       }
 
       // function drawWordTree() {
@@ -826,6 +846,10 @@ class Graph extends Component {
       function clicked(d) {
         console.log('clicked');
         if (d3.event.defaultPrevented) return; // dragged
+        if (typeof d === 'string') {
+          d = set.nodes.find(ele => ele.titleTerm === d);
+        }
+        console.log(d);
         set.nodes.forEach((_node) => {
           if (isConnected(d, _node)) {
             if (_node.connected <= 0) _node.connected = 1;
@@ -852,12 +876,16 @@ class Graph extends Component {
                   y: d.y,
                   size: 5 + Math.log2(id_1.children.length),
                 });
+                let num = 0;
+                id_1.children.forEach((id) => {
+                  num = (d.children.includes(id)) ? num + 1 : num;
+                });
                 set.links.push({
                   source: id_1.titleTerm,
                   target: d,
                   color: '#ffbb78',
                   tag: 0,
-                  value: 10,
+                  value: num,
                 });
               }
             }
@@ -872,13 +900,16 @@ class Graph extends Component {
                   if (_node.children) {
                     _node.children.forEach((id_2) => {
                       if (id_1.id === id_2.id) {
-                        set.links.push({
-                          source: id_1.id,
-                          target: _node.titleTerm,
-                          tag: 1,
-                          color: '#ffbb78 ',
-                          value: 1000000,
-                        });
+                        // if (id_1.postCount > 1) {
+                          console.log(id_1.id);
+                          set.links.push({
+                            source: id_1.id,
+                            target: _node.titleTerm,
+                            tag: 1,
+                            color: '#ffbb78 ',
+                            value: 1000000,
+                          });
+                        // }
                       }
                     });
                   }
@@ -886,27 +917,32 @@ class Graph extends Component {
                 const existId = set.nodes.find(ele => ele.titleTerm === id_1.id);
                 if (existId === undefined) {
                   // const { count } = userList.find(user => user.id === id_1.id);
-                  set.nodes.push({
-                    titleTerm: id_1.id,
-                    parentNode: d.titleTerm,
-                    count: id_1.count,
-                    group: 2,
-                    tag: 1,
-                    connected: 1,
-                    merge: id_1.merge,
-                    numOfUsr: id_1.numOfUsr,
-                    x: d.x,
-                    y: d.y,
-                    size: 5 * id_1.merge,
-                  });
+                  // if (id_1.postCount > 1) {
+                    set.nodes.push({
+                      titleTerm: id_1.id,
+                      parentNode: d.titleTerm,
+                      count: id_1.count,
+                      group: 2,
+                      tag: 1,
+                      connected: 1,
+                      merge: id_1.merge,
+                      numOfUsr: id_1.numOfUsr,
+                      postCount: id_1.postCount,
+                      x: d.x,
+                      y: d.y,
+                      size: 5 * id_1.merge,
+                    });
+                  // }
                 }
-                set.links.push({
-                  source: id_1.id,
-                  target: d,
-                  color: '#ffbb78',
-                  tag: 1,
-                  value: 1000000,
-                });
+                // if (id_1.postCount > 1) {
+                  set.links.push({
+                    source: id_1.id,
+                    target: d,
+                    color: '#ffbb78',
+                    tag: 1,
+                    value: 1000000,
+                  });
+                // }
               } else {
                 const index = set.nodes.findIndex(_node => _node.titleTerm === id_1.id);
                 set.nodes[index].connected += 1;
@@ -996,7 +1032,7 @@ class Graph extends Component {
     // fade nodes on hover
     function mouseOver(opacity) {
       return (d) => {
-        node.selectAll('text').style('visibility', o => (isConnected(d, o) || o.tag !== 0 ? 'visible' : 'hidden'));
+        node.selectAll('text').style('visibility', 'visible');
         // also style link accordingly
         link.style('stroke-opacity', o => (o.source === d || o.target === d ? 1 : opacity));
         link.style('stroke', o => (o.source === d || o.target === d ? '#2E2E2E' : '#ddd'));
@@ -1060,11 +1096,15 @@ class Graph extends Component {
               existedUser.term.push(props[i][0]);
               existedUser.count += 1;
             } else {
+              const count = post.filter((article) => {
+                return article.author === userId;
+              }).length;
               propsUserList.push({
                 id: userId,
                 numOfUsr: 1,
                 merge: 1,
                 count: 1,
+                postCount: count,
                 term: [props[i][0]],
               });
             }
@@ -1182,6 +1222,7 @@ class Graph extends Component {
           }
         }
       }
+      console.log(userList);
     }
 
     function computeNumOfUsersHaveSameTerm() {
