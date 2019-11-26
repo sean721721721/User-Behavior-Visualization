@@ -125,8 +125,7 @@ class Graph extends Component {
 
     const timeLineSvg = d3.select(this.myRef.current).select('#timeLine');
 
-    const heatMapSvg = d3.select(this.myRef.current).select('#timeLine')
-      .call(d3.zoom().scaleExtent([1 / 2, 8]).on('zoom', heatMapZoomed));
+    let heatMapSvg = d3.select(this.myRef.current).select('#timeLine');
 
     const wordTreeSvg = d3.select(this.myRef.current).select('#wordTree')
       .call(d3.zoom().scaleExtent([1 / 2, 8]).on('zoom', wordTreeSvgZoomed));
@@ -160,7 +159,7 @@ class Graph extends Component {
         .attr('class', 'nodes')
         .style('z-index', 1)
         .on('click', clicked)
-        .on('mouseover', mouseOver(0.2))
+        .on('mouseover', mouseOver(0.1))
         .on('mouseout', mouseOut)
         .call(d3.drag()
           .on('start', dragstarted)
@@ -305,7 +304,7 @@ class Graph extends Component {
           .append('tr')
           .attr('class', 'datarow')
           .style('border', d => (d.tag === 1 ? '2px black solid' : 'none'))
-          .on('mouseover', mouseOver(0.2))
+          .on('mouseover', mouseOver(0.1))
           .on('mouseout', mouseOut)
           .on('click', clicked);
 
@@ -560,6 +559,9 @@ class Graph extends Component {
         // set the dimensions and margins of the graph
         console.log(heatMapSvg);
         heatMapSvg.selectAll('*').remove();
+        heatMapSvg = heatMapSvg
+          .call(d3.zoom().scaleExtent([1 / 2, 8]).on('zoom', heatMapZoomed))
+          .append('g');
         const margin = {
           top: 30, right: 30, bottom: 30, left: 30,
         };
@@ -567,7 +569,7 @@ class Graph extends Component {
         const heatMapHeight = domainName.length * 30;
 
         // append the svg object to the body of the page
-        let heatMap = heatMapSvg.attr('height', heatMapHeight + margin.top + margin.bottom)
+        const heatMap = heatMapSvg.attr('height', heatMapHeight + margin.top + margin.bottom)
           // .attr('width', heatMapWidth + margin.left + margin.right + 200)
           .append('g')
           .attr('transform',
@@ -1015,7 +1017,7 @@ class Graph extends Component {
         node.selectAll('text').style('visibility', d => (d.group === 2 ? 'visible' : 'visible'));
         node.selectAll('circle').style('fill', d => (d.group === 2 ? '#ff7f0e' : '1f77b4'));
         link.style('stroke-opacity', 1);
-        link.style('stroke', '#ddd');
+        // link.style('stroke', '#ddd');
       }
     }
     // build a dictionary of nodes that are linked
@@ -1035,7 +1037,7 @@ class Graph extends Component {
         node.selectAll('text').style('visibility', 'visible');
         // also style link accordingly
         link.style('stroke-opacity', o => (o.source === d || o.target === d ? 1 : opacity));
-        link.style('stroke', o => (o.source === d || o.target === d ? '#2E2E2E' : '#ddd'));
+        // link.style('stroke', o => (o.source === d || o.target === d ? '#2E2E2E' : '#ddd'));
       };
     }
 
@@ -1343,8 +1345,8 @@ class Graph extends Component {
     return (
       <div id={`#${id}`}>
         <div ref={this.myRef}>
-          <svg id="barChart" width="15%" height="700px" />
-          <svg id="graph" width="45%" height="700px" />
+          <svg id="barChart" width="0%" height="700px" />
+          <svg id="graph" width="60%" height="700px" />
           {/* <svg id="wordTree" width="40%" height="700px" /> */}
           {this.drawWordTree(word)}
           <div>
