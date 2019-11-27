@@ -49,6 +49,7 @@ class Graph extends Component {
     // props[i][0]== userID, props[i][1]== articleIndex, props[i][0]== articlePostTime;
     // console.log(this.props);
     const { visprops } = this.props;
+    // console.log(visprops);
     const { date, word, post } = this.props;
     // console.log(date, word, post);
     const startDate = new Date(date.$gte);
@@ -68,6 +69,7 @@ class Graph extends Component {
     const max = Math.min(props.length, SetNumOfNodes);
     const someData = [];
     const pi = Math.PI;
+    let keyPlayerThreshold = 0;
     props.splice(SetNumOfNodes); // Splice props to match properly size
 
     mergeTermNodes(); // props combine any titleterms with the equal users
@@ -557,7 +559,7 @@ class Graph extends Component {
         // console.log(postDate);
 
         // set the dimensions and margins of the graph
-        console.log(heatMapSvg);
+        // console.log(heatMapSvg);
         heatMapSvg.selectAll('*').remove();
         heatMapSvg = heatMapSvg
           .call(d3.zoom().scaleExtent([1 / 2, 8]).on('zoom', heatMapZoomed))
@@ -902,8 +904,8 @@ class Graph extends Component {
                   if (_node.children) {
                     _node.children.forEach((id_2) => {
                       if (id_1.id === id_2.id) {
-                        // if (id_1.postCount > 1) {
-                          console.log(id_1.id);
+                        if (id_1.postCount > keyPlayerThreshold) {
+                          // console.log(id_1.id);
                           set.links.push({
                             source: id_1.id,
                             target: _node.titleTerm,
@@ -911,7 +913,7 @@ class Graph extends Component {
                             color: '#ffbb78 ',
                             value: 1000000,
                           });
-                        // }
+                        }
                       }
                     });
                   }
@@ -919,7 +921,7 @@ class Graph extends Component {
                 const existId = set.nodes.find(ele => ele.titleTerm === id_1.id);
                 if (existId === undefined) {
                   // const { count } = userList.find(user => user.id === id_1.id);
-                  // if (id_1.postCount > 1) {
+                  if (id_1.postCount > keyPlayerThreshold) {
                     set.nodes.push({
                       titleTerm: id_1.id,
                       parentNode: d.titleTerm,
@@ -934,9 +936,9 @@ class Graph extends Component {
                       y: d.y,
                       size: 5 * id_1.merge,
                     });
-                  // }
+                  }
                 }
-                // if (id_1.postCount > 1) {
+                if (id_1.postCount > keyPlayerThreshold) {
                   set.links.push({
                     source: id_1.id,
                     target: d,
@@ -944,7 +946,7 @@ class Graph extends Component {
                     tag: 1,
                     value: 1000000,
                   });
-                // }
+                }
               } else {
                 const index = set.nodes.findIndex(_node => _node.titleTerm === id_1.id);
                 set.nodes[index].connected += 1;
@@ -1090,6 +1092,7 @@ class Graph extends Component {
     }
 
     function computePropsUserList() {
+      // console.log(props);
       for (let i = 0; i < props.length; i += 1) {
         if (props[i][1]) {
           props[i][1].forEach((userId) => {
@@ -1098,9 +1101,7 @@ class Graph extends Component {
               existedUser.term.push(props[i][0]);
               existedUser.count += 1;
             } else {
-              const count = post.filter((article) => {
-                return article.author === userId;
-              }).length;
+              const count = post.filter(article => article.author === userId).length;
               propsUserList.push({
                 id: userId,
                 numOfUsr: 1,
@@ -1108,11 +1109,23 @@ class Graph extends Component {
                 count: 1,
                 postCount: count,
                 term: [props[i][0]],
+                responder: [],
               });
             }
           });
         }
       }
+
+      post.forEach((article) => {
+        const index = propsUserList.find(user => user.id === article.author);
+        if (index) {
+          index.responder.push({
+            title: article.article_title,
+            message: article.messages,
+          });
+        }
+      });
+      // console.log(propsUserList);
     }
 
     function propsDataStructureBuild() {
@@ -1165,8 +1178,11 @@ class Graph extends Component {
                   // console.log(`${props[i][1][j].id} is equal to ${props[i][1][k].id}`);
                   props[i][1][j].id += props[i][1][k].id;
                   hasMergedId.push(props[i][1][k].id);
+                  props[i][1][j].responder = props[i][1][j].responder
+                    .concat(props[i][1][k].responder);
                   props[i][1][j].merge = 2;
                   props[i][1][j].numOfUsr += 1;
+                  // console.log(props[i][1][j].responder, props[i][1][k].responder);
                 }
                 props[i][1].splice(k, 1);
                 k -= 1;
@@ -1224,7 +1240,7 @@ class Graph extends Component {
           }
         }
       }
-      console.log(userList);
+      // console.log(userList);
     }
 
     function computeNumOfUsersHaveSameTerm() {
@@ -1319,8 +1335,8 @@ class Graph extends Component {
         word: 'cats',
       },
     };
-    console.log(this);
-    console.log('wordtree');
+    // console.log(this);
+    // console.log('wordtree');
     const style = {
       width: '40%',
       float: 'right',

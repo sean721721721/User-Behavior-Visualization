@@ -507,8 +507,8 @@ class Grid extends React.Component {
     } = this.state;
     const selectedOptions = this.selectedOptions();
     const filename = this.getFilename();
-    console.log(filename);
-    console.log(this.state);
+    // console.log(filename);
+    // console.log(this.state);
     return (
       <div className="grid">
         <Menu
