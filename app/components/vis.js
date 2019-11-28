@@ -935,6 +935,7 @@ class Graph extends Component {
                       x: d.x,
                       y: d.y,
                       size: 5 * id_1.merge,
+                      responder: id_1.responder,
                     });
                   }
                 }
@@ -972,35 +973,61 @@ class Graph extends Component {
           //   return 1;
           // });
 
-          d.children.forEach((id_1) => {
-            if (id_1 != null) {
-              const index_1 = set.nodes.findIndex(
-                _node => ((_node === undefined) ? -1 : _node.titleTerm === id_1.id),
-              );
+          if (d.group === 1) {
+            d.children.forEach((id_1) => {
+              if (id_1 != null) {
+                const index_1 = set.nodes.findIndex(
+                  _node => ((_node === undefined) ? -1 : _node.titleTerm === id_1.id),
+                );
 
-              set.nodes[index_1].connected -= 1;
+                set.nodes[index_1].connected -= 1;
 
-              set.nodes.forEach((_node) => {
-                if (_node.titleTerm === id_1.id && _node.connected <= 0) {
-                  delete set.nodes[set.nodes.indexOf(_node)];
-                  set.nodes = set.nodes.filter(() => true);
-                }
-              });
+                set.nodes.forEach((_node) => {
+                  if (_node.titleTerm === id_1.id && _node.connected <= 0) {
+                    delete set.nodes[set.nodes.indexOf(_node)];
+                    set.nodes = set.nodes.filter(() => true);
+                  }
+                });
 
-              const { length } = set.links;
-              for (let j = 0; j < length; j += 1) {
-                const pos = set.links.map(e => e.source.titleTerm).indexOf(id_1.id);
-                if (pos !== -1) {
-                  const index_2 = set.nodes.findIndex(
-                    _node => (_node === undefined ? -1 : _node.titleTerm === id_1.id),
-                  );
-                  if (index_2 === -1) set.links.splice(pos, 1);
-                  else if (set.nodes[index_2] === undefined) set.links.splice(pos, 1);
+                const { length } = set.links;
+                for (let j = 0; j < length; j += 1) {
+                  const pos = set.links.map(e => e.source.titleTerm).indexOf(id_1.id);
+                  if (pos !== -1) {
+                    const index_2 = set.nodes.findIndex(
+                      _node => (_node === undefined ? -1 : _node.titleTerm === id_1.id),
+                    );
+                    if (index_2 === -1) set.links.splice(pos, 1);
+                    else if (set.nodes[index_2] === undefined) set.links.splice(pos, 1);
+                  }
                 }
               }
-            }
-          });
-
+            });
+          } else {
+            d.responder.forEach((article) => {
+              set.nodes.push({
+                titleTerm: article.title,
+                parentNode: d.titleTerm,
+                count: article.message.length,
+                message_count: article.message_count,
+                group: 2,
+                tag: 1,
+                connected: 1,
+                // merge: id_1.merge,
+                // numOfUsr: id_1.numOfUsr,
+                // postCount: id_1.postCount,
+                x: d.x,
+                y: d.y,
+                size: 5,
+              });
+              set.links.push({
+                source: article.title,
+                target: d,
+                color: '#ffbb78',
+                tag: 1,
+                value: 1000000,
+              });
+            });
+          }
           set.nodes = set.nodes.filter(() => true);
           set.links = set.links.filter(() => true);
           conutOfClickedNode -= 1;
@@ -1122,6 +1149,7 @@ class Graph extends Component {
           index.responder.push({
             title: article.article_title,
             message: article.messages,
+            message_count: article.message_count,
           });
         }
       });
