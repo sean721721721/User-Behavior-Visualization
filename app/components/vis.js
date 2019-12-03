@@ -1,3 +1,4 @@
+/* eslint-disable no-underscore-dangle */
 /* eslint-disable no-console */
 /* eslint-disable linebreak-style */
 /* eslint-disable react/prop-types */
@@ -112,10 +113,14 @@ class Graph extends Component {
     LinkTitleWordByArticleIndex(); // title words links by articleIndex
     setSpiralDataStructure();
     buildGraph();
-    let termBetweenness = jsnx.betweennessCentrality(G);
-    console.log(termBetweenness);
-    let termEigenVector = jsnx.eigenvectorCentrality(G);
-    console.log(termEigenVector);
+    const termCentrality = {
+      Betweenness: jsnx.betweennessCentrality(G, { weight: true })._stringValues,
+      EigenVector: jsnx.eigenvectorCentrality(G)._stringValues,
+      Cluster: jsnx.clustering(G)._stringValues,
+    };
+
+    console.log(termCentrality);
+
     const width = 900;
     const height = 900;
     let svg = d3.select(this.myRef.current)
@@ -160,12 +165,29 @@ class Graph extends Component {
     update();
 
     function update() {
-      const betweennessArr = Object.values(termBetweenness._stringValues);
-      const eigenvectorArr = Object.values(termEigenVector._stringValues);
+      const termCentralityArr = {
+        betweennessArr: Object.values(termCentrality.Betweenness),
+        eigenvectorArr: Object.values(termCentrality.EigenVector),
+        clusterArr: Object.values(termCentrality.Cluster),
+      };
+
       const normalizeBetweenness = d3.scaleLinear()
-        .domain([Math.min(...betweennessArr), Math.max(...betweennessArr)]).range([0.2, 0.8]);
+        .domain([
+          Math.min(...termCentralityArr.betweennessArr),
+          Math.max(...termCentralityArr.betweennessArr),
+        ]).range([0.2, 0.8]);
+
       const normalizeEigenvactor = d3.scaleLinear()
-        .domain([Math.min(...eigenvectorArr), Math.max(...eigenvectorArr)]).range([5, 50]);
+        .domain([
+          Math.min(...termCentralityArr.eigenvectorArr),
+          Math.max(...termCentralityArr.eigenvectorArr),
+        ]).range([5, 50]);
+
+      const normalizeCluster = d3.scaleLinear()
+        .domain([
+          Math.min(...termCentralityArr.clusterArr),
+          Math.max(...termCentralityArr.clusterArr),
+        ]).range([0.2, 0.8]);
 
       console.log(set);
       ({ nodes, links } = set);
@@ -219,7 +241,7 @@ class Graph extends Component {
         .attr('id', d => d.titleTerm)
         .attr('d', (d) => {
           if (d.group === 1) {
-            const circle_radius = normalizeEigenvactor(termEigenVector._stringValues[d.titleTerm]);
+            const circle_radius = normalizeEigenvactor(termCentrality.EigenVector[d.titleTerm]);
             const erliestTime = new Date(d.date[0]);
             const latestTime = new Date(d.date[d.date.length - 1]);
             const arc = d3.arc()
@@ -250,13 +272,13 @@ class Graph extends Component {
         .attr('y1', function setY_2(d) {
           let term = d3.select(this.parentNode.parentNode);
           term = term.select('path').attr('id');
-          return -normalizeEigenvactor(termEigenVector._stringValues[term]);
+          return -normalizeEigenvactor(termCentrality.EigenVector[term]);
         })
         .attr('x2', 0)
         .attr('y2', function setY_2(d) {
           let term = d3.select(this.parentNode.parentNode);
           term = term.select('path').attr('id');
-          return (-normalizeEigenvactor(termEigenVector._stringValues[term]) - 5);
+          return (-normalizeEigenvactor(termCentrality.EigenVector[term]) - 5);
         })
         .style('stroke', 'green')
         .style('stroke-width', '1px');
@@ -278,10 +300,10 @@ class Graph extends Component {
         .attr('stroke-opacity', d => (d.postCount >= 5 ? 1 : 0));
 
       const circles = nodeEnter.append('circle')
-        .attr('r', d => (d.group === 1 ? normalizeEigenvactor(termEigenVector._stringValues[d.titleTerm]) : d.size))
+        .attr('r', d => (d.group === 1 ? normalizeEigenvactor(termCentrality.EigenVector[d.titleTerm]) : d.size))
         // .attr('r', d => d.size)
         .attr('fill', (d) => {
-          if (d.group === 1) return termColor(normalizeBetweenness(termBetweenness._stringValues[d.titleTerm]));
+          if (d.group === 1) return termColor(normalizeBetweenness(termCentrality.Betweenness[d.titleTerm]));
           return color(d.group);
           // if (d.group !== 2) return color(d.group);
           // if (d.merge > 1) return color(d.group);
@@ -1439,18 +1461,10 @@ class Graph extends Component {
 
     function buildGraph() {
       const node_data = set.nodes.map(d => d.titleTerm);
-      const edge_data = set.links.map(d => [d.source, d.target]);
+      const edge_data = set.links.map(d => [d.source, d.target, d.value]);
       G.addNodesFrom(node_data);
       G.addEdgesFrom(edge_data);
     }
-
-    // function computeTermNodeBetweenness() {
-    //   return jsnx.betweennessCentrality(G);
-    // }
-
-    // function computeTermNodeEigenvactor() {
-    //   return jsnx.betweennessCentrality(G);
-    // }
 
     function zoomed() {
       svg.attr('transform', d3.event.transform);
