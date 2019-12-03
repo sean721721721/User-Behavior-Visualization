@@ -15,6 +15,7 @@ import * as d3 from 'd3';
 // import { Row, Form } from 'antd';
 import Chart from 'react-google-charts';
 import { string } from 'prop-types';
+import * as jsnx from 'jsnetworkx';
 
 const SetNumOfNodes = 100;
 class Graph extends Component {
@@ -64,12 +65,29 @@ class Graph extends Component {
     let userList = [{ id: '', count: 0, term: [] }];
     const propsUserList = [{ id: '', count: 0, term: [] }];
     const initLinks = [];
-    const removeWords = ['新聞', '八卦', '幹嘛'];
+    const removeWords = ['新聞', '八卦', '幹嘛', '問卦'];
     const groupedWords = [];
     const max = Math.min(props.length, SetNumOfNodes);
     const someData = [];
     const pi = Math.PI;
+    const pie = d3.pie()
+      .value((d) => {
+        console.log(d);
+        return d.count;
+      })
+      .sort(null);
+    const pieColor = d3.schemeTableau10;
     let keyPlayerThreshold = 0;
+    let G = new jsnx.Graph();
+    const termColor = d3.interpolateBlues;
+    // G.addNodesFrom([1, 2, 3, 4, 5]);
+    // G.addEdgesFrom([[1, 2], [1, 3], [1, 5], [1, 4]]);
+    // console.log(G);
+    // let betweenness = jsnx.betweennessCentrality(G);
+    // let degree = jsnx.degree(G);
+    // // var eigenvector = jsnx.eigenvectorCentrality(G);
+    // console.log('betweenness:', betweenness);
+    // console.log(degree);
     props.splice(SetNumOfNodes); // Splice props to match properly size
 
     mergeTermNodes(); // props combine any titleterms with the equal users
@@ -93,7 +111,11 @@ class Graph extends Component {
     computeNumOfUsersHaveSameTerm(); // compute how many same users each term has
     LinkTitleWordByArticleIndex(); // title words links by articleIndex
     setSpiralDataStructure();
-
+    buildGraph();
+    let termBetweenness = jsnx.betweennessCentrality(G);
+    console.log(termBetweenness);
+    let termEigenVector = jsnx.eigenvectorCentrality(G);
+    console.log(termEigenVector);
     const width = 900;
     const height = 900;
     let svg = d3.select(this.myRef.current)
@@ -109,7 +131,10 @@ class Graph extends Component {
     const color = d3.scaleOrdinal(d3.schemeCategory10);
     color(1);
     const simulation = d3.forceSimulation()
-      .force('link', d3.forceLink().id(d => d.titleTerm))
+      .force('link', d3.forceLink().id((d) => {
+        // console.log(d);
+        return typeof d.id === 'number' ? d.id : d.titleTerm;
+      }))
       .force('charge', d3.forceManyBody().strength(-300))
       .force('center', d3.forceCenter(width / 4, height / 2));
 
@@ -135,6 +160,13 @@ class Graph extends Component {
     update();
 
     function update() {
+      const betweennessArr = Object.values(termBetweenness._stringValues);
+      const eigenvectorArr = Object.values(termEigenVector._stringValues);
+      const normalizeBetweenness = d3.scaleLinear()
+        .domain([Math.min(...betweennessArr), Math.max(...betweennessArr)]).range([0.2, 0.8]);
+      const normalizeEigenvactor = d3.scaleLinear()
+        .domain([Math.min(...eigenvectorArr), Math.max(...eigenvectorArr)]).range([5, 50]);
+
       console.log(set);
       ({ nodes, links } = set);
       svg.selectAll('g').remove();
@@ -184,13 +216,15 @@ class Graph extends Component {
         .attr('y', 0);
 
       nodeEnter.append('path')
+        .attr('id', d => d.titleTerm)
         .attr('d', (d) => {
           if (d.group === 1) {
+            const circle_radius = normalizeEigenvactor(termEigenVector._stringValues[d.titleTerm]);
             const erliestTime = new Date(d.date[0]);
             const latestTime = new Date(d.date[d.date.length - 1]);
             const arc = d3.arc()
-              .innerRadius(20)
-              .outerRadius(21)
+              .innerRadius(circle_radius + 2)
+              .outerRadius(circle_radius + 3)
               .startAngle(((erliestTime - startDate) / timePeriod) * 360 * (pi / 180))
               .endAngle(((latestTime - startDate) / timePeriod) * 360 * (pi / 180));
             return arc();
@@ -213,9 +247,17 @@ class Graph extends Component {
           return rotate;
         })
         .attr('x1', 0)
-        .attr('y1', -20)
+        .attr('y1', function setY_2(d) {
+          let term = d3.select(this.parentNode.parentNode);
+          term = term.select('path').attr('id');
+          return -normalizeEigenvactor(termEigenVector._stringValues[term]);
+        })
         .attr('x2', 0)
-        .attr('y2', -25)
+        .attr('y2', function setY_2(d) {
+          let term = d3.select(this.parentNode.parentNode);
+          term = term.select('path').attr('id');
+          return (-normalizeEigenvactor(termEigenVector._stringValues[term]) - 5);
+        })
         .style('stroke', 'green')
         .style('stroke-width', '1px');
 
@@ -224,16 +266,22 @@ class Graph extends Component {
       keyPlayerCircles.data(d => (d.group === 2 ? [d] : d))
         .enter()
         .append('g').append('circle')
-        .attr('r', d => d.size + Math.sqrt(d.postCount))
-        .attr('fill', 'red')
-        .style('fill-opacity', 0)
+        .attr('r', (d) => {
+          console.log(d);
+          console.log(Math.sqrt(d.postCount));
+          return d.size + Math.sqrt(d.postCount);
+        })
+        .attr('fill', 'white')
+        .style('fill-opacity', 1)
         .attr('stroke', 'gray')
         .attr('stroke-width', 2)
-        .attr('stroke-opacity', d => (d.postCount >= 10 ? 1 : 0));
+        .attr('stroke-opacity', d => (d.postCount >= 5 ? 1 : 0));
 
       const circles = nodeEnter.append('circle')
-        .attr('r', d => d.size)
+        .attr('r', d => (d.group === 1 ? normalizeEigenvactor(termEigenVector._stringValues[d.titleTerm]) : d.size))
+        // .attr('r', d => d.size)
         .attr('fill', (d) => {
+          if (d.group === 1) return termColor(normalizeBetweenness(termBetweenness._stringValues[d.titleTerm]));
           return color(d.group);
           // if (d.group !== 2) return color(d.group);
           // if (d.merge > 1) return color(d.group);
@@ -250,18 +298,58 @@ class Graph extends Component {
         .attr('stroke-width', 0.9)
         .attr('stroke-opacity', 1);
 
+
+      const pieGroup = nodeEnter.append('g');
+      const path = pieGroup.selectAll('path')
+        .data((d) => {
+          if (d.group === 3) {
+            // const totalMessageCount = d.data.reduce((pre, next) => pre.count + next.count);
+            console.log(d.message_count);
+            return pie(d.message_count);
+          }
+          return [];
+        });
+
+      path.enter().append('path')
+        .attr('fill', (d) => {
+          switch (d.data.type) {
+            case 'push':
+              return pieColor[4];
+            case 'boo':
+              return pieColor[2];
+            case 'neutral':
+              return pieColor[5];
+            default:
+              break;
+          }
+          return 'gray';
+        })
+        .attr('d', (d) => {
+          console.log(d);
+          const arc = d3.arc()
+            .innerRadius(0)
+            .outerRadius(5 + Math.sqrt(d.data.radius))
+            .startAngle(d.startAngle)
+            .endAngle(d.endAngle);
+          return arc();
+        })
+        .attr('stroke', 'white')
+        .attr('stroke-width', '0.2px');
+
+
       const lables = nodeEnter.append('text')
         .text((d) => {
           // if (d.merge > 1) return d.numOfUsr;
           if (d.group === 2) return d.postCount;
+          if (d.group === 3) return '';
           return d.titleTerm;
         })
         .attr('font-family', 'sans-serif')
         .attr('font-size', ' 10px')
         .attr('color', '#000')
-        .attr('visibility', d => (d.group !== 2 || d.merge > 1 ? 'visible' : 'hidden'))
-        .attr('x', d => (d.merge > 1 ? -3 : -d.size))
-        .attr('y', d => (d.merge > 1 ? 3 : d.size + 7));
+        // .attr('visibility', d => (d.group !== 2 || d.merge > 1 ? 'visible' : 'hidden'))
+        .attr('x', d => (d.group !== 1 ? -3 : -d.size))
+        .attr('y', d => (d.group !== 1 ? 3 : d.size + 7));
 
       nodeEnter.append('title')
         .text(d => d.titleTerm);
@@ -1003,29 +1091,30 @@ class Graph extends Component {
               }
             });
           } else {
+            let uniquePostID = 0;
             d.responder.forEach((article) => {
               set.nodes.push({
                 titleTerm: article.title,
                 parentNode: d.titleTerm,
                 count: article.message.length,
                 message_count: article.message_count,
-                group: 2,
+                group: 3,
                 tag: 1,
                 connected: 1,
-                // merge: id_1.merge,
-                // numOfUsr: id_1.numOfUsr,
-                // postCount: id_1.postCount,
                 x: d.x,
                 y: d.y,
-                size: 5,
+                size: 5 + Math.sqrt(article.message_count.all),
+                id: uniquePostID,
               });
               set.links.push({
-                source: article.title,
+                source: uniquePostID,
                 target: d,
                 color: '#ffbb78',
                 tag: 1,
-                value: 1000000,
+                value: 300,
               });
+              console.log(set.links);
+              uniquePostID += 1;
             });
           }
           set.nodes = set.nodes.filter(() => true);
@@ -1044,7 +1133,7 @@ class Graph extends Component {
         node.style('stroke-opacity', 1);
         node.style('fill-opacity', 1);
         node.selectAll('text').style('visibility', d => (d.group === 2 ? 'visible' : 'visible'));
-        node.selectAll('circle').style('fill', d => (d.group === 2 ? '#ff7f0e' : '1f77b4'));
+        // node.selectAll('circle').style('fill', d => (d.group === 2 ? '#ff7f0e' : '1f77b4'));
         link.style('stroke-opacity', 1);
         // link.style('stroke', '#ddd');
       }
@@ -1146,10 +1235,16 @@ class Graph extends Component {
       post.forEach((article) => {
         const index = propsUserList.find(user => user.id === article.author);
         if (index) {
+          const { push, boo, neutral } = article.message_count;
+          const totalMessageCount = push + boo + neutral;
           index.responder.push({
             title: article.article_title,
             message: article.messages,
-            message_count: article.message_count,
+            message_count: [
+              { type: 'push', count: article.message_count.push, radius: totalMessageCount },
+              { type: 'boo', count: article.message_count.boo, radius: totalMessageCount },
+              { type: 'neutral', count: article.message_count.neutral, radius: totalMessageCount },
+            ],
           });
         }
       });
@@ -1341,6 +1436,21 @@ class Graph extends Component {
         }).value += 1;
       }
     }
+
+    function buildGraph() {
+      const node_data = set.nodes.map(d => d.titleTerm);
+      const edge_data = set.links.map(d => [d.source, d.target]);
+      G.addNodesFrom(node_data);
+      G.addEdgesFrom(edge_data);
+    }
+
+    // function computeTermNodeBetweenness() {
+    //   return jsnx.betweennessCentrality(G);
+    // }
+
+    // function computeTermNodeEigenvactor() {
+    //   return jsnx.betweennessCentrality(G);
+    // }
 
     function zoomed() {
       svg.attr('transform', d3.event.transform);

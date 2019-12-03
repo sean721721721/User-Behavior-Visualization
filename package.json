@@ -12,6 +12,7 @@
     "express-session": "^1.16.2",
     "helmet": "^3.21.2",
     "jieba": "^1.0.0",
+    "jsnetworkx": "^0.3.4",
     "lodash": "^4.17.15",
     "mongoose": "^5.6.7",
     "nodejieba": "^2.3.1",
