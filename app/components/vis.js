@@ -1286,24 +1286,24 @@ class Graph extends Component {
     }
 
     function mergeTermNodesWithUserCountEqualsOne() {
-      const findIndex = (array, num) => array.findIndex(ele => ele.id === num);
-      for (let i = 0; i < props.length; i += 1) {
-        userList = props[i][1].filter(user => user.count === 1);
-        // console.log(userList);
-        let temp = '';
-        let size = 0;
-        for (let j = 1; j < userList.length; j += 1) {
-          temp += ` ${userList[j].id}`;
-          size += 1;
-          const deleteIndex = findIndex(props[i][1], userList[j].id);
-          props[i][1].splice(deleteIndex, 1);
-        }
-        if (userList.length > 0) {
-          userList[0].id += temp;
-          userList[0].numOfUsr += size;
-          userList[0].merge = 2;
-        }
-      }
+      // const findIndex = (array, num) => array.findIndex(ele => ele.id === num);
+      // for (let i = 0; i < props.length; i += 1) {
+      //   userList = props[i][1].filter(user => user.count === 1);
+      //   // console.log(userList);
+      //   let temp = '';
+      //   let size = 0;
+      //   for (let j = 1; j < userList.length; j += 1) {
+      //     temp += ` ${userList[j].id}`;
+      //     size += 1;
+      //     const deleteIndex = findIndex(props[i][1], userList[j].id);
+      //     props[i][1].splice(deleteIndex, 1);
+      //   }
+      //   if (userList.length > 0) {
+      //     userList[0].id += temp;
+      //     userList[0].numOfUsr += size;
+      //     userList[0].merge = 2;
+      //   }
+      // }
       const hasMergedId = [];
       for (let i = 0; i < props.length; i += 1) { // which title
         for (let j = 0; j < props[i][1].length - 1; j += 1) {
@@ -1320,13 +1320,15 @@ class Graph extends Component {
               }
               if (equal === 1) {
                 if (!hasMergedId.includes(props[i][1][k].id)) {
-                  // console.log(`${props[i][1][j].id} is equal to ${props[i][1][k].id}`);
+                  console.log(`${props[i][1][j].id} is equal to ${props[i][1][k].id}`);
                   props[i][1][j].id += props[i][1][k].id;
                   hasMergedId.push(props[i][1][k].id);
                   props[i][1][j].responder = props[i][1][j].responder
                     .concat(props[i][1][k].responder);
                   props[i][1][j].merge = 2;
                   props[i][1][j].numOfUsr += 1;
+                  console.log(props[i][1][j].postCount, props[i][1][k].postCount);
+                  props[i][1][j].postCount += props[i][1][k].postCount;
                   // console.log(props[i][1][j].responder, props[i][1][k].responder);
                 }
                 props[i][1].splice(k, 1);
@@ -1433,6 +1435,16 @@ class Graph extends Component {
         }
       }
     }
+
+    // function reduceLinksByThreshHold(threshold) {
+    //   for (let i = 0; i < set.links.length; i += 1) {
+    //     const source = set.links[i].source;
+    //     const target = set.links[i].target;
+    //     const links_Strength = set.links[i].value;
+    //     const source_Strength = set.nodes.find(node => node.titleTerm === source). 
+    //     if()
+    //   }
+    // }
 
     function setSpiralDataStructure() {
       let postCount;
