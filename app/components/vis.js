@@ -15,10 +15,12 @@ import * as d3 from 'd3';
 // import { max } from 'moment';
 // import { Row, Form } from 'antd';
 import Chart from 'react-google-charts';
+import netClustering from 'netclustering';
 import { string } from 'prop-types';
 import * as jsnx from 'jsnetworkx';
+import Louvain from './jLouvain';
 
-const SetNumOfNodes = 100;
+const SetNumOfNodes = 200;
 class Graph extends Component {
   constructor(props) {
     super(props);
@@ -63,7 +65,7 @@ class Graph extends Component {
     let node;
     let links;
     let nodes;
-    let userList = [{ id: '', count: 0, term: [] }];
+    const userList = [{ id: '', count: 0, term: [] }];
     const propsUserList = [{ id: '', count: 0, term: [] }];
     const initLinks = [];
     const removeWords = ['新聞', '八卦', '幹嘛', '問卦'];
@@ -71,6 +73,7 @@ class Graph extends Component {
     const max = Math.min(props.length, SetNumOfNodes);
     const someData = [];
     const pi = Math.PI;
+    const LinkThreshold = 0.05;
     const pie = d3.pie()
       .value((d) => {
         console.log(d);
@@ -78,8 +81,8 @@ class Graph extends Component {
       })
       .sort(null);
     const pieColor = d3.schemeTableau10;
-    let keyPlayerThreshold = 0;
-    let G = new jsnx.Graph();
+    const keyPlayerThreshold = 0;
+    const G = new jsnx.Graph();
     const termColor = d3.interpolateBlues;
     // G.addNodesFrom([1, 2, 3, 4, 5]);
     // G.addEdgesFrom([[1, 2], [1, 3], [1, 5], [1, 4]]);
@@ -111,8 +114,12 @@ class Graph extends Component {
     computeNodesUserList(); // Computing user list
     computeNumOfUsersHaveSameTerm(); // compute how many same users each term has
     LinkTitleWordByArticleIndex(); // title words links by articleIndex
+    reduceLinksByThreshHold(LinkThreshold);
     setSpiralDataStructure();
     buildGraph();
+
+    communityDetecting();
+
     const termCentrality = {
       Betweenness: jsnx.betweennessCentrality(G, { weight: true })._stringValues,
       EigenVector: jsnx.eigenvectorCentrality(G)._stringValues,
@@ -123,8 +130,7 @@ class Graph extends Component {
 
     const width = 900;
     const height = 900;
-    let svg = d3.select(this.myRef.current)
-      .select('#graph');
+    let svg = d3.select('#graph');
 
     svg.selectAll('*').remove();
 
@@ -133,13 +139,10 @@ class Graph extends Component {
       .append('g')
       .attr('transform', 'translate(40,0)');
 
-    const color = d3.scaleOrdinal(d3.schemeCategory10);
-    color(1);
+    const color = d3.schemeTableau10.concat(d3.schemeSet1);
+    console.log(color);
     const simulation = d3.forceSimulation()
-      .force('link', d3.forceLink().id((d) => {
-        // console.log(d);
-        return typeof d.id === 'number' ? d.id : d.titleTerm;
-      }))
+      .force('link', d3.forceLink().id(d => (typeof d.id === 'number' ? d.id : d.titleTerm)))
       .force('charge', d3.forceManyBody().strength(-300))
       .force('center', d3.forceCenter(width / 4, height / 2));
 
@@ -153,18 +156,50 @@ class Graph extends Component {
     const x = d3.scaleLinear()
       .domain([0, d3.max(set.nodes, d => d.children.length)])
       .range(['0%', '100%']);
-    const leftSvg = d3.select(this.myRef.current).select('#barChart');
+    const leftSvg = d3.select('#barChart');
 
-    const timeLineSvg = d3.select(this.myRef.current).select('#timeLine');
+    const timeLineSvg = d3.select('#timeLine');
 
-    let heatMapSvg = d3.select(this.myRef.current).select('#timeLine');
+    let heatMapSvg = d3.select('#timeLine');
 
-    const wordTreeSvg = d3.select(this.myRef.current).select('#wordTree')
+    const wordTreeSvg = d3.select('#wordTree')
       .call(d3.zoom().scaleExtent([1 / 2, 8]).on('zoom', wordTreeSvgZoomed));
+
+    // const buttonDiv = d3.select(this.myRef.current).select('#button');
+    const buttonDiv = d3.select('#button')
+      .attr('width', 'auto')
+      .style('background', 'white');
+    buttonDiv.selectAll('*').remove()
+      .append('form');
+    console.log(buttonDiv);
+    const betweennessButton = buttonDiv.append('label')
+      .text('betweenness')
+      .append('input')
+      .text('betweenness')
+      .attr('type', 'radio')
+      .attr('name', 'centrality')
+      .attr('value', 'betweenness')
+      .on('click', () => {
+        update();
+      });
+    const eigenvectorButton = buttonDiv.append('label')
+      .text('eigenvector')
+      .append('input')
+      .attr('type', 'radio')
+      .attr('name', 'centrality')
+      .attr('value', 'eigenvector')
+      .property('checked', true)
+      .on('click', () => {
+        console.log(this.value);
+        update(this.value);
+      });
+    d3.select('#betweenness').on('input', update());
 
     update();
 
     function update() {
+      const selectedCentrality = d3.select('input[name="centrality"]:checked').property('value');
+      console.log(selectedCentrality);
       const termCentralityArr = {
         betweennessArr: Object.values(termCentrality.Betweenness),
         eigenvectorArr: Object.values(termCentrality.EigenVector),
@@ -175,14 +210,13 @@ class Graph extends Component {
         .domain([
           Math.min(...termCentralityArr.betweennessArr),
           Math.max(...termCentralityArr.betweennessArr),
-        ]).range([0.2, 0.8]);
+        ]).range([5, 50]);
 
-      const normalizeEigenvactor = d3.scaleLinear()
+      const normalizeEigenvector = d3.scaleLinear()
         .domain([
           Math.min(...termCentralityArr.eigenvectorArr),
           Math.max(...termCentralityArr.eigenvectorArr),
         ]).range([5, 50]);
-
       const normalizeCluster = d3.scaleLinear()
         .domain([
           Math.min(...termCentralityArr.clusterArr),
@@ -203,7 +237,7 @@ class Graph extends Component {
         .attr('class', 'links')
         .style('z-index', -1)
         .attr('stroke', d => d.color)
-        .attr('stroke-width', 1);
+        .attr('stroke-width', d => (d.value < 100000 ? d.value : 1));
       link = linkEnter.merge(link);
       // svg.selectAll('g').remove();
       node = svg.selectAll('g')
@@ -241,7 +275,7 @@ class Graph extends Component {
         .attr('id', d => d.titleTerm)
         .attr('d', (d) => {
           if (d.group === 1) {
-            const circle_radius = normalizeEigenvactor(termCentrality.EigenVector[d.titleTerm]);
+            const circle_radius = centrality(selectedCentrality, termCentrality.EigenVector[d.titleTerm]);
             const erliestTime = new Date(d.date[0]);
             const latestTime = new Date(d.date[d.date.length - 1]);
             const arc = d3.arc()
@@ -272,13 +306,13 @@ class Graph extends Component {
         .attr('y1', function setY_2(d) {
           let term = d3.select(this.parentNode.parentNode);
           term = term.select('path').attr('id');
-          return -normalizeEigenvactor(termCentrality.EigenVector[term]);
+          return -centrality(selectedCentrality, { titleTerm: term });
         })
         .attr('x2', 0)
         .attr('y2', function setY_2(d) {
           let term = d3.select(this.parentNode.parentNode);
           term = term.select('path').attr('id');
-          return (-normalizeEigenvactor(termCentrality.EigenVector[term]) - 5);
+          return (-centrality(selectedCentrality, { titleTerm: term }) - 5);
         })
         .style('stroke', 'green')
         .style('stroke-width', '1px');
@@ -288,11 +322,7 @@ class Graph extends Component {
       keyPlayerCircles.data(d => (d.group === 2 ? [d] : d))
         .enter()
         .append('g').append('circle')
-        .attr('r', (d) => {
-          console.log(d);
-          console.log(Math.sqrt(d.postCount));
-          return d.size + Math.sqrt(d.postCount);
-        })
+        .attr('r', d => d.size + Math.sqrt(d.postCount))
         .attr('fill', 'white')
         .style('fill-opacity', 1)
         .attr('stroke', 'gray')
@@ -300,11 +330,17 @@ class Graph extends Component {
         .attr('stroke-opacity', d => (d.postCount >= 5 ? 1 : 0));
 
       const circles = nodeEnter.append('circle')
-        .attr('r', d => (d.group === 1 ? normalizeEigenvactor(termCentrality.EigenVector[d.titleTerm]) : d.size))
+        .attr('r', d => (d.group === 1 ? centrality(selectedCentrality, d) : d.size))
         // .attr('r', d => d.size)
         .attr('fill', (d) => {
-          if (d.group === 1) return termColor(normalizeBetweenness(termCentrality.Betweenness[d.titleTerm]));
-          return color(d.group);
+          // if (d.group === 1) {
+          //   return termColor(normalizeBetweenness(termCentrality.Betweenness[d.titleTerm]));
+          // }
+          const cluster = d.cluster % 19;
+          console.log(cluster);
+          console.log(color[cluster]);
+          const betweennessColor = d3.hsl(color[cluster]);
+          return betweennessColor;
           // if (d.group !== 2) return color(d.group);
           // if (d.merge > 1) return color(d.group);
           // return 'url(#pic_user)';
@@ -313,11 +349,14 @@ class Graph extends Component {
         .attr('stroke', (d) => {
           if (d.group !== 2) {
             if (d.tag === 1) return 'red'; // d.group !== 2 && d.tag === 1
-            return 'white'; // d.group !== 2 && d.tag !== 1
+            const cluster = d.cluster % 19;
+            let strokeColor = d3.color(color[cluster]);
+            strokeColor = strokeColor.darker();
+            return strokeColor; // d.group !== 2 && d.tag !== 1
           }
-          return '#ff7f0e'; // d.group === 2
+          return 'gray'; // d.group === 2
         })
-        .attr('stroke-width', 0.9)
+        .attr('stroke-width', 2)
         .attr('stroke-opacity', 1);
 
 
@@ -347,7 +386,7 @@ class Graph extends Component {
           return 'gray';
         })
         .attr('d', (d) => {
-          console.log(d);
+          // console.log(d);
           const arc = d3.arc()
             .innerRadius(0)
             .outerRadius(5 + Math.sqrt(d.data.radius))
@@ -366,12 +405,13 @@ class Graph extends Component {
           if (d.group === 3) return '';
           return d.titleTerm;
         })
-        .attr('font-family', 'sans-serif')
-        .attr('font-size', ' 10px')
+        .style('text-anchor', 'middle')
+        .attr('font-family', 'Microsoft JhengHei')
+        .attr('font-size', d => `${5 + centrality(selectedCentrality, d)}px`)
         .attr('color', '#000')
         // .attr('visibility', d => (d.group !== 2 || d.merge > 1 ? 'visible' : 'hidden'))
-        .attr('x', d => (d.group !== 1 ? -3 : -d.size))
-        .attr('y', d => (d.group !== 1 ? 3 : d.size + 7));
+        // .attr('x', d => (d.group !== 1 ? -3 : -d.size))
+        .attr('y', d => (d.group !== 1 ? 3 : centrality(selectedCentrality, d) * 2 + 5));
 
       nodeEnter.append('title')
         .text(d => d.titleTerm);
@@ -485,7 +525,7 @@ class Graph extends Component {
           .angle(theta)
           .radius(radius);
 
-        const path = svg.attr('transform', `translate(${width / 4},${height / 4})`)
+        const spiral_path = svg.attr('transform', `translate(${width / 4},${height / 4})`)
           .append('path')
           .datum(points)
           .attr('id', 'spiral')
@@ -493,7 +533,7 @@ class Graph extends Component {
           .style('fill', 'none')
           .style('stroke', 'steelblue');
 
-        const spiralLength = path.node().getTotalLength();
+        const spiralLength = spiral_path.node().getTotalLength();
         const N = 365;
         const barWidth = (spiralLength / N) - 1;
 
@@ -513,8 +553,8 @@ class Graph extends Component {
           .append('rect')
           .attr('x', (d, i) => {
             const linePer = timeScale(d.date);
-            const posOnLine = path.node().getPointAtLength(linePer);
-            const angleOnLine = path.node().getPointAtLength(linePer - barWidth);
+            const posOnLine = spiral_path.node().getPointAtLength(linePer);
+            const angleOnLine = spiral_path.node().getPointAtLength(linePer - barWidth);
 
             d.linePer = linePer; // % distance are on the spiral
             d.x = posOnLine.x; // x postion on the spiral
@@ -1133,7 +1173,7 @@ class Graph extends Component {
                 target: d,
                 color: '#ffbb78',
                 tag: 1,
-                value: 300,
+                value: 100000,
               });
               console.log(set.links);
               uniquePostID += 1;
@@ -1158,6 +1198,11 @@ class Graph extends Component {
         // node.selectAll('circle').style('fill', d => (d.group === 2 ? '#ff7f0e' : '1f77b4'));
         link.style('stroke-opacity', 1);
         // link.style('stroke', '#ddd');
+      }
+
+      function centrality(option, d) {
+        if (option === 'eigenvector') return normalizeEigenvector(termCentrality.EigenVector[d.titleTerm]);
+        return normalizeBetweenness(termCentrality.Betweenness[d.titleTerm]);
       }
     }
     // build a dictionary of nodes that are linked
@@ -1320,14 +1365,14 @@ class Graph extends Component {
               }
               if (equal === 1) {
                 if (!hasMergedId.includes(props[i][1][k].id)) {
-                  console.log(`${props[i][1][j].id} is equal to ${props[i][1][k].id}`);
+                  // console.log(`${props[i][1][j].id} is equal to ${props[i][1][k].id}`);
                   props[i][1][j].id += props[i][1][k].id;
                   hasMergedId.push(props[i][1][k].id);
                   props[i][1][j].responder = props[i][1][j].responder
                     .concat(props[i][1][k].responder);
                   props[i][1][j].merge = 2;
                   props[i][1][j].numOfUsr += 1;
-                  console.log(props[i][1][j].postCount, props[i][1][k].postCount);
+                  // console.log(props[i][1][j].postCount, props[i][1][k].postCount);
                   props[i][1][j].postCount += props[i][1][k].postCount;
                   // console.log(props[i][1][j].responder, props[i][1][k].responder);
                 }
@@ -1412,39 +1457,49 @@ class Graph extends Component {
 
     function LinkTitleWordByArticleIndex() {
       for (let i = 0; i < set.nodes.length - 1; i += 1) {
-        for (let j = 0; j < set.nodes.length; j += 1) {
+        for (let j = i + 1; j < set.nodes.length; j += 1) {
           let count = 0;
-          set.nodes[i].children.forEach((id1) => {
-            if (set.nodes[j].children.includes(id1)) count += 1;
-          });
-          if (count !== 0) {
-            set.links.push({
-              source: set.nodes[i].titleTerm,
-              target: set.nodes[j].titleTerm,
-              tag: 0,
-              color: '#d9d9d9 ',
-              value: count,
+          if (i !== j) {
+            set.nodes[i].children.forEach((id1) => {
+              if (set.nodes[j].children.includes(id1)) count += 1;
             });
-            initLinks.push({
-              source: set.nodes[i].titleTerm,
-              target: set.nodes[j].titleTerm,
-              tag: 0,
-              value: count,
-            });
+            if (count !== 0) {
+              set.links.push({
+                source: set.nodes[i].titleTerm,
+                target: set.nodes[j].titleTerm,
+                tag: 0,
+                color: '#d9d9d9 ',
+                value: count,
+              });
+              initLinks.push({
+                source: set.nodes[i].titleTerm,
+                target: set.nodes[j].titleTerm,
+                tag: 0,
+                value: count,
+              });
+            }
           }
         }
       }
     }
 
-    // function reduceLinksByThreshHold(threshold) {
-    //   for (let i = 0; i < set.links.length; i += 1) {
-    //     const source = set.links[i].source;
-    //     const target = set.links[i].target;
-    //     const links_Strength = set.links[i].value;
-    //     const source_Strength = set.nodes.find(node => node.titleTerm === source). 
-    //     if()
-    //   }
-    // }
+    function reduceLinksByThreshHold(threshold) {
+      for (let i = 0; i < set.links.length; i += 1) {
+        const { source, target } = set.links[i];
+        const links_Strength = set.links[i].value;
+        const source_Strength = set.nodes.find(_node => _node.titleTerm === source)
+          .articleIndex.length;
+        const target_Strength = set.nodes.find(_node => _node.titleTerm === target)
+          .articleIndex.length;
+        const link_threshold = (source_Strength + target_Strength) * threshold;
+        if ((links_Strength * 2) < link_threshold || links_Strength === 1) {
+          // console.log(link_threshold);
+          // console.log(source, target);
+          set.links.splice(i, 1);
+          i -= 1;
+        }
+      }
+    }
 
     function setSpiralDataStructure() {
       let postCount;
@@ -1476,6 +1531,30 @@ class Graph extends Component {
       const edge_data = set.links.map(d => [d.source, d.target, d.value]);
       G.addNodesFrom(node_data);
       G.addEdgesFrom(edge_data);
+    }
+
+    function communityDetecting() {
+      // const node_data = set.nodes.map(d => d.titleTerm);
+      // const edge_data = set.links.map(d => [d.source, d.target, d.value]);
+      // const node_data = ['id1', 'id2', 'id3', 'id4'];
+      // const edge_data = [
+      //   {source: 'id1', target: 'id2', weight: 10.0},
+      //   {source: 'id2', target: 'id3', weight: 20.0},
+      //   {source: 'id3', target: 'id1', weight: 30.0}
+      // ];
+      // const init_part = {id1: 0, id2: 0, id3: 1};
+      // const community = Louvain().nodes(node_data).edges(edge_data);
+      // const result = community();
+      const links = JSON.parse(JSON.stringify(set.links));
+      for (let i = 0; i < links.length; i += 1) {
+        // console.log(links[i]);
+        links[i].source = set.nodes.findIndex(ele => ele.titleTerm === set.links[i].source );
+        links[i].target = set.nodes.findIndex(ele => ele.titleTerm === set.links[i].target);
+      }
+      netClustering.cluster(set.nodes, links);
+      // console.log(set.nodes, links);
+      // console.log(community());
+      // console.log(result);
     }
 
     function zoomed() {
@@ -1524,6 +1603,7 @@ class Graph extends Component {
     const { id, word } = this.props;
     return (
       <div id={`#${id}`}>
+        <div id="button" />
         <div ref={this.myRef}>
           <svg id="barChart" width="0%" height="700px" />
           <svg id="graph" width="60%" height="700px" />
