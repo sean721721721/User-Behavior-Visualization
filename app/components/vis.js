@@ -168,7 +168,8 @@ class Graph extends Component {
     // const buttonDiv = d3.select(this.myRef.current).select('#button');
     const buttonDiv = d3.select('#button')
       .attr('width', 'auto')
-      .style('background', 'white');
+      .style('background', 'white')
+      .text('Centrality: ');
     buttonDiv.selectAll('*').remove()
       .append('form');
     console.log(buttonDiv);
@@ -330,15 +331,11 @@ class Graph extends Component {
         .attr('stroke-opacity', d => (d.postCount >= 5 ? 1 : 0));
 
       const circles = nodeEnter.append('circle')
+        .transition()
+        .duration(500)
         .attr('r', d => (d.group === 1 ? centrality(selectedCentrality, d) : d.size))
-        // .attr('r', d => d.size)
         .attr('fill', (d) => {
-          // if (d.group === 1) {
-          //   return termColor(normalizeBetweenness(termCentrality.Betweenness[d.titleTerm]));
-          // }
           const cluster = d.cluster % 19;
-          console.log(cluster);
-          console.log(color[cluster]);
           const betweennessColor = d3.hsl(color[cluster]);
           return betweennessColor;
           // if (d.group !== 2) return color(d.group);
@@ -358,7 +355,6 @@ class Graph extends Component {
         })
         .attr('stroke-width', 2)
         .attr('stroke-opacity', 1);
-
 
       const pieGroup = nodeEnter.append('g');
       const path = pieGroup.selectAll('path')
