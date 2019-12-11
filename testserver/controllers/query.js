@@ -388,7 +388,7 @@ let callback = function callback(req, res) {
               let titleWordList = datalist[2];
               let titleCuttedWords = datalist[3];
               
-
+              console.log('datalist.js Done!');
               return { list: [res.result, wordlist, titleWordList, queryobj1.date,titleCuttedWords], previous: [res.previous], next: [res.next] };
             }),
           );

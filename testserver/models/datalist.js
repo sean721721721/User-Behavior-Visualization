@@ -491,12 +491,17 @@ let bindpostlist = function bindpostlist(qobj1, qobj2, ptt) {
         termfreq.push(termfreqency(test[i]));
     }
     termfreq.push(test);
-
+    console.log('Cutting article word ...');
     let articleCuttedWord = [];
     for(let i = 0; i < titleWord.length; i += 1){
+        // console.log(i, titleWord[i]);
         articleCuttedWord.push([[]]);
-        for(let j = 0; j < titleWord[i].length; j += 1){
-            articleCuttedWord[i][0] += ` ${titleWord[i][j]}`;
+        articleCuttedWord[i][0] += ``;
+        if (titleWord[i]) {
+            for(let j = 0; j < titleWord[i].length; j += 1){
+                articleCuttedWord[i][0] += ` ${titleWord[i][j]}`;
+                // console.log(articleCuttedWord);
+            }
         }
     }
     
@@ -504,7 +509,7 @@ let bindpostlist = function bindpostlist(qobj1, qobj2, ptt) {
     /*for(i=0;i<titleTest.length;i++){ 
         titleCount.push(titleScore(titleTest[i], list[0][i].message_count));
     }*/
-
+    
     //title terms relationshipt between userID
     for(i=0;i<titleTest.length;i++){ 
         titleCount.push(titleUser(titleTest[i], list[i]));
@@ -518,7 +523,7 @@ let bindpostlist = function bindpostlist(qobj1, qobj2, ptt) {
 
 //userId's relationship with title word
 let titleUser = function titleUser(terms, posts){  
-
+    console.log('Computing titleUser ... ');
     let userlist = {};
     let i =0;
     let articleIndex = [];
@@ -556,7 +561,7 @@ let titleUser = function titleUser(terms, posts){
     for(let j=0;j<keysSorted.length;j++){
         sortedUserList.push([keysSorted[j], userlist[keysSorted[j]], articleIndex[keysSorted[j]], articlePostTime[keysSorted[j]]]);       
     }
-    
+    console.log('compute titleUser Done!');
     return sortedUserList;
 }
 
@@ -657,7 +662,7 @@ let termfreqency = function termfreqency(terms){
     sortable.sort(function(a,b){
         return b[1] - a[1];
     })
-    //console.log('termfreq: ',termfreq);
+    console.log('computingTermfreqency Done!');
     return sortable;
     
     //TF-IDF testing

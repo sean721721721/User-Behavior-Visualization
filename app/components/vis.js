@@ -199,9 +199,9 @@ class Graph extends Component {
     update();
 
     function update() {
-      console.log(initLinks);
+      // console.log(initLinks);
       const selectedCentrality = d3.select('input[name="centrality"]:checked').property('value');
-      console.log(selectedCentrality);
+      // console.log(selectedCentrality);
       const termCentralityArr = {
         betweennessArr: Object.values(termCentrality.Betweenness),
         eigenvectorArr: Object.values(termCentrality.EigenVector),
@@ -239,7 +239,7 @@ class Graph extends Component {
         .attr('class', 'links')
         .style('z-index', -1)
         .attr('stroke', d => d.color)
-        .attr('stroke-width', d => (d.value < 100000 ? d.value : 1));
+        .attr('stroke-width', d => (d.value < 100000 ? d.value : 3));
       link = linkEnter.merge(link);
       // svg.selectAll('g').remove();
       node = svg.selectAll('g')
@@ -1208,12 +1208,12 @@ class Graph extends Component {
     }
     // build a dictionary of nodes that are linked
     const linkedByIndex = {};
-    console.log(initLinks);
-    console.log(links);
+    // console.log(initLinks);
+    // console.log(links);
     initLinks.forEach((d) => {
       linkedByIndex[`${d.source.index},${d.target.index}`] = 1;
     });
-    console.log(linkedByIndex);
+    // console.log(linkedByIndex);
     // check the dictionary to see if nodes are linked
     function isConnected(a, b) {
       return linkedByIndex[`${a.index},${b.index}`] || linkedByIndex[`${b.index},${a.index}`] || a.index === b.index;
