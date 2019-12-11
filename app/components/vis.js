@@ -199,6 +199,7 @@ class Graph extends Component {
     update();
 
     function update() {
+      console.log(initLinks);
       const selectedCentrality = d3.select('input[name="centrality"]:checked').property('value');
       console.log(selectedCentrality);
       const termCentralityArr = {
@@ -249,6 +250,7 @@ class Graph extends Component {
         .append('g')
         .attr('class', 'nodes')
         .style('z-index', 1)
+        .attr('opacity', d => (d.group !== 2 && d.connected === 0 ? 0.2 : 1))
         .on('click', clicked)
         .on('mouseover', mouseOver(0.1))
         .on('mouseout', mouseOut)
@@ -335,14 +337,17 @@ class Graph extends Component {
         .duration(500)
         .attr('r', d => (d.group === 1 ? centrality(selectedCentrality, d) : d.size))
         .attr('fill', (d) => {
-          const cluster = d.cluster % 19;
-          const betweennessColor = d3.hsl(color[cluster]);
-          return betweennessColor;
+          if (d.group === 1) {
+            const cluster = d.cluster % 19;
+            const betweennessColor = d3.hsl(color[cluster]);
+            return betweennessColor;
+          }
+          return 'url(#pic_user)';
           // if (d.group !== 2) return color(d.group);
           // if (d.merge > 1) return color(d.group);
           // return 'url(#pic_user)';
         })
-        .style('fill-opacity', d => (d.group !== 2 && d.connected === 0 ? 0.1 : 1))
+        .style('fill-opacity', 1)
         .attr('stroke', (d) => {
           if (d.group !== 2) {
             if (d.tag === 1) return 'red'; // d.group !== 2 && d.tag === 1
@@ -353,7 +358,7 @@ class Graph extends Component {
           }
           return 'gray'; // d.group === 2
         })
-        .attr('stroke-width', 2)
+        .attr('stroke-width', d => (d.group === 1 ? 2 : 0.9))
         .attr('stroke-opacity', 1);
 
       const pieGroup = nodeEnter.append('g');
@@ -1203,10 +1208,12 @@ class Graph extends Component {
     }
     // build a dictionary of nodes that are linked
     const linkedByIndex = {};
-    links.forEach((d) => {
+    console.log(initLinks);
+    console.log(links);
+    initLinks.forEach((d) => {
       linkedByIndex[`${d.source.index},${d.target.index}`] = 1;
     });
-
+    console.log(linkedByIndex);
     // check the dictionary to see if nodes are linked
     function isConnected(a, b) {
       return linkedByIndex[`${a.index},${b.index}`] || linkedByIndex[`${b.index},${a.index}`] || a.index === b.index;
@@ -1452,6 +1459,7 @@ class Graph extends Component {
     }
 
     function LinkTitleWordByArticleIndex() {
+      let link_index = 0;
       for (let i = 0; i < set.nodes.length - 1; i += 1) {
         for (let j = i + 1; j < set.nodes.length; j += 1) {
           let count = 0;
@@ -1468,11 +1476,18 @@ class Graph extends Component {
                 value: count,
               });
               initLinks.push({
-                source: set.nodes[i].titleTerm,
-                target: set.nodes[j].titleTerm,
+                source: {
+                  titleTerm: set.nodes[i].titleTerm,
+                  index: i,
+                },
+                target: {
+                  titleTerm: set.nodes[j].titleTerm,
+                  index: j,
+                },
                 tag: 0,
                 value: count,
               });
+              link_index += 1;
             }
           }
         }
