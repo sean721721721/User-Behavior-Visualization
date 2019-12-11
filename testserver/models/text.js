@@ -55,10 +55,10 @@ if (os.platform() === "linux") {
     nodejieba.load({
         dict: nodejieba.DEFAULT_DICT,
         hmmDict: nodejieba.DEFAULT_HMM_DICT,
-        userDict: "C:/Users/admin/Desktop/VisProject/controllers/big_dict.utf8", //windows
+        userDict: "../big_dict.utf8", //windows
         //userDict: "/Users/guojiankai/Project/server/big_dict.utf8", //mac        
         idfDict: nodejieba.DEFAULT_IDF_DICT,
-        stopWordDict: "C:/Users/admin/Desktop/VisProject/controllers/stop_dict.utf8" //windows
+        stopWordDict: "../stop_dict.utf8" //windows
         //stopWordDict: "/Users/guojiankai/Project/server/stop_dict.utf8" //mac    
     });
 }
