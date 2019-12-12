@@ -441,6 +441,20 @@ let bindpostlist = function bindpostlist(qobj1, qobj2, ptt) {
         pagea.push(post);
     }
     list.push(pagea);
+    // let wordCount =0;
+    
+    // for (i = 0; i < list[0].length; i += 1){
+    //     if(list[0][i].content){
+    //         wordCount += list[0][i].content.length;
+    //         wordCount += list[0][i].article_title.length;
+    //     }
+    //     if(list[0][i].messages){
+    //         for (let j = 0; j < list[0][i].messages.length; j++) {
+    //             wordCount += list[0][i].messages[j].push_content.length;                
+    //         }
+    //     }
+    // }
+    // console.log(wordCount);
     pagea = jb.cut(pagea, function () {
         for(i=0;i<pagea.length;i++){
             test[0][i] = pagea[i].word; 

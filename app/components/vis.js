@@ -68,12 +68,12 @@ class Graph extends Component {
     const userList = [{ id: '', count: 0, term: [] }];
     const propsUserList = [{ id: '', count: 0, term: [] }];
     const initLinks = [];
-    const removeWords = ['新聞', '八卦', '幹嘛', '問卦'];
+    const removeWords = ['新聞', '八卦', '幹嘛', '問卦', '爆卦'];
     const groupedWords = [];
     const max = Math.min(props.length, SetNumOfNodes);
     const someData = [];
     const pi = Math.PI;
-    const LinkThreshold = 0.05;
+    const LinkThreshold = 0.1;
     const pie = d3.pie()
       .value((d) => {
         console.log(d);
