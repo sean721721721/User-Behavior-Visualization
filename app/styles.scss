@@ -51,7 +51,6 @@ ul,
 li,
 fieldset,
 form,
-label,
 legend,
 table,
 caption,
@@ -238,6 +237,11 @@ div.tab button.active {
 
 .tabcontent input {
     width: 130px;
+    height: 25px;
+}
+
+.tabcontent .date {
+    width: 200px;
 }
 
 /* Style the close button */
@@ -449,6 +453,10 @@ textarea {
   font-size: 15px;
   width: 100%;
   height: 100%;
+}
+
+label {
+    margin-right: 10px;
 }
 /*****************************************************/
 

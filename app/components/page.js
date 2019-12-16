@@ -1,6 +1,11 @@
 // @flow
 import React from 'react';
 import PropTypes from 'prop-types';
+import InputGroup from 'react-bootstrap/InputGroup';
+import FormControl from 'react-bootstrap/FormControl';
+import Button from 'react-bootstrap/Button';
+import { Row } from 'antd';
+// import './style/input.css';
 import DataList from './datalist';
 
 class Page extends React.Component {
@@ -24,6 +29,13 @@ class Page extends React.Component {
     this.props = '';
   };
   */
+  getCR = (e, str) => {
+    const { onSubmit } = this.props;
+    this.setState(() => ({
+      type: str,
+    }));
+    onSubmit(e);
+  };
 
   render() {
     const {
@@ -54,20 +66,21 @@ class Page extends React.Component {
     if (show) {
       return (
         <div id="Page1" className="tabcontent">
-          <span
+          {/* <span
             className="topright"
             role="button"
             tabIndex="0"
             onClick={onChange}
             onKeyDown={onChange}
           >
-            x
-          </span>
+              x
+          </span> */}
           <fieldset>
-            <legend>Query date1</legend>
+            {/* <legend>Query date1</legend> */}
             <label htmlFor="x">
-              pagename:
+                Board:
               <input
+                className="form-control"
                 name="pagename"
                 id="pagename1"
                 type="text"
@@ -78,8 +91,9 @@ class Page extends React.Component {
             </label>
             <DataList props={pagenamelist} />
             <label htmlFor="x">
-              since:
+                Time:
               <input
+                className="form-control date"
                 type="date"
                 name="since"
                 id="date1"
@@ -88,9 +102,10 @@ class Page extends React.Component {
                 onChange={handlePT}
               />
             </label>
+            <span>~ &nbsp; </span>
             <label htmlFor="x">
-              until:
               <input
+                className="form-control date"
                 type="date"
                 name="until"
                 id="date2"
@@ -100,8 +115,9 @@ class Page extends React.Component {
               />
             </label>
             <label htmlFor="x">
-              key word filter:
+                Title:
               <input
+                className="form-control"
                 type="keyword1"
                 name="wordfilter"
                 id="keyword1"
@@ -111,8 +127,9 @@ class Page extends React.Component {
               />
             </label>
             <label htmlFor="x">
-              author filter:
+                Author:
               <input
+                className="form-control"
                 type="authorid1"
                 name="authorfilter"
                 id="authorid1"
@@ -122,8 +139,9 @@ class Page extends React.Component {
               />
             </label>
             <label htmlFor="x">
-              userid filter:
+                UserID:
               <input
+                className="form-control"
                 type="userid1"
                 name="idfilter"
                 id="userid1"
@@ -133,8 +151,9 @@ class Page extends React.Component {
               />
             </label>
             <label htmlFor="x">
-              content word filter:
+                Content word:
               <input
+                className="form-control"
                 type="keyword3"
                 name="contentfilter"
                 id="keyword3"
@@ -144,6 +163,9 @@ class Page extends React.Component {
               />
             </label>
           </fieldset>
+          <Button name="submit" type="button" size="sm" onClick={e => this.getCR(e, 'All')}>
+                New Submit
+          </Button>
         </div>
       );
     }

@@ -1,21 +1,19 @@
 // @flow
 import React from 'react';
 import PropTypes from 'prop-types';
-import ParameterTab from './parameter';
+// import ParameterTab from './parameter';
 import Page from './page';
 import SubmitTab from './submit';
 import DownloadtTab from './download';
+// import 
 
 class Menu extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
       ...props.menuprops,
-      showParameter: true,
-      showPage1: false,
-      showPage2: false,
-      showSubmit: false,
-      showDownload: false,
+      showPage1: true,
+      // showSubmit: false,
     };
     this.openTab = this.openTab.bind(this);
     this.handleCloseTab = this.handleCloseTab.bind(this);
@@ -23,144 +21,119 @@ class Menu extends React.Component {
 
   openTab = (evt, tabName) => {
     switch (tabName) {
-      case 'Parameters':
-        this.setState(() => ({
-          showParameter: true,
-          showPage1: false,
-          showPage2: false,
-          showSubmit: false,
-          showDownload: false,
-        }));
-        break;
+      // case 'Parameters':
+      //   this.setState(() => ({
+      //     showPage1: false,
+      //     showSubmit: false,
+      //   }));
+      //   break;
       case 'Page1':
         this.setState(() => ({
-          showParameter: false,
           showPage1: true,
-          showPage2: false,
-          showSubmit: false,
-          showDownload: false,
+          // showSubmit: false,
         }));
         break;
-      case 'Page2':
-        this.setState(() => ({
-          showParameter: false,
-          showPage1: false,
-          showPage2: true,
-          showSubmit: false,
-          showDownload: false,
-        }));
-        break;
-      case 'Submit':
-        this.setState(() => ({
-          showParameter: false,
-          showPage1: false,
-          showPage2: false,
-          showSubmit: true,
-          showDownload: false,
-        }));
-        break;
-      case 'Download':
-        this.setState(() => ({
-          showParameter: false,
-          showPage1: false,
-          showPage2: false,
-          showSubmit: false,
-          showDownload: true,
-        }));
-        break;
+      // case 'Page2':
+      //   this.setState(() => ({
+      //     showPage1: false,
+      //     showSubmit: false,
+      //     showDownload: false,
+      //   }));
+      //   break;
+      // case 'Submit':
+      //   this.setState(() => ({
+      //     showPage1: false,
+      //     showSubmit: true,
+      //   }));
+      //   break;
+      // case 'Download':
+      //   this.setState(() => ({
+      //     showPage1: false,
+      //     showSubmit: false,
+      //   }));
+      //   break;
       default:
     }
   };
 
   handleCloseTab = () => {
     // e.preventDefault();
-    console.log('close');
+    // console.log('close');
     this.setState(() => ({
-      showParameter: false,
-      showPage1: false,
-      showPage2: false,
-      showSubmit: false,
-      showDownload: false,
+      showPage1: true,
+      // showSubmit: false,
     }));
     // this.parentElement.style.display = 'none';
   };
 
   render() {
     const {
-      showParameter,
       showPage1,
-      showPage2,
-      showSubmit,
+      // showSubmit,
       submitType,
-      showDownload,
+      // showDownload,
     } = this.state;
 
     const {
       onSubmit,
       menuprops: {
-        initParameter, initPage1, initPage2, initDownload,
+        initPage1,
       },
-      handlePT,
       handlePT1,
-      handlePT2,
-      handleDT,
-      selectedOptions,
     } = this.props;
 
     return (
       <div className="box menu">
         <div className="tab">
-          <button className="tablinks" type="button">
+          {/* <button className="tablinks" type="button">
             <a href="/">Reset</a>
-          </button>
-          <button className="tablinks" type="button" onClick={e => this.openTab(e, 'Parameters')}>
-            Parameters
-          </button>
-          <button className="tablinks" type="button" onClick={e => this.openTab(e, 'Page1')}>
+          </button> */}
+          {/* <button className="tablinks" type="button" onClick={e => this.openTab(e, 'Page1')}>
             Page1
-          </button>
-          <button className="tablinks" type="button" onClick={e => this.openTab(e, 'Page2')}>
+          </button> */}
+          {/* <button className="tablinks" type="button" onClick={e => this.openTab(e, 'Page2')}>
             Page2
-          </button>
-          <button className="tablinks" type="button" onClick={e => this.openTab(e, 'Submit')}>
+          </button> */}
+          {/* <button className="tablinks" type="button" onClick={e => this.openTab(e, 'Submit')}>
             Submit
-          </button>
-          <button className="tablinks" type="button" onClick={e => this.openTab(e, 'Download')}>
+          </button> */}
+          {/* <button className="tablinks" type="button" onClick={e => this.openTab(e, 'Download')}>
             Download
-          </button>
+          </button> */}
         </div>
-        <ParameterTab
+        {/* <ParameterTab
           show={showParameter}
           init={initParameter}
           onChange={this.handleCloseTab}
           handlePT={handlePT}
-        />
+        /> */}
         <Page
           show={showPage1}
           init={initPage1}
           onChange={this.handleCloseTab}
           handlePT={handlePT1}
+          onSubmit={onSubmit}
         />
-        <Page
+        {/* <Page
           show={showPage2}
           init={initPage2}
           onChange={this.handleCloseTab}
           handlePT={handlePT2}
-        />
-        <SubmitTab
+        /> */}
+        {/* <SubmitTab
           show={showSubmit}
           type={submitType}
           set={this.state}
           onChange={this.handleCloseTab}
           onSubmit={onSubmit}
-        />
-        <DownloadtTab
+        /> */}
+        {/* <DownloadtTab
           show={showDownload}
           config={initDownload}
           onChange={this.handleCloseTab}
           handleDT={handleDT}
           selectedOptions={selectedOptions}
-        />
+        /> */}
       </div>
     );
   }
@@ -216,10 +189,10 @@ Menu.propTypes = {
     }),
   }).isRequired,
   onSubmit: PropTypes.func.isRequired,
-  handlePT: PropTypes.func.isRequired,
+  // handlePT: PropTypes.func.isRequired,
   handlePT1: PropTypes.func.isRequired,
-  handlePT2: PropTypes.func.isRequired,
-  handleDT: PropTypes.func.isRequired,
+  // handlePT2: PropTypes.func.isRequired,
+  // handleDT: PropTypes.func.isRequired,
   selectedOptions: PropTypes.arrayOf(PropTypes.string).isRequired,
 };
 

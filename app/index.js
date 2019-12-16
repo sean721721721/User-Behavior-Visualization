@@ -5,6 +5,7 @@ import middleware from './middlewares/sagamiddleware';
 import rootSaga from './middlewares/sagaeffect';
 import Route from './components/route';
 import './styles.scss';
+import 'bootstrap/dist/css/bootstrap.min.css';
 
 // create the saga middleware
 const { sagaMiddleware } = middleware;

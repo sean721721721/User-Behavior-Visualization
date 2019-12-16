@@ -291,6 +291,7 @@ class Grid extends React.Component {
   }
 
   handleSubmit(e) {
+    console.log(e);
     e.preventDefault();
     this.setState(prevState => ({
       ...prevState, isLoading: true, responseError: false, errorType: '',
@@ -413,6 +414,7 @@ class Grid extends React.Component {
 
   // should change to <input>
   handleTab(e, tab) {
+    console.log(e, tab);
     const { target } = e;
     const { name, value } = target;
     console.log(tab, name, value);
