@@ -440,7 +440,9 @@ let bindpostlist = function bindpostlist(qobj1, qobj2, ptt) {
         let post = postobj(qobj1[i]);
         pagea.push(post);
     }
+    pagea = pagea.filter(post => post.message_count.all > 10);
     list.push(pagea);
+    console.log(444,list[0].length);
     // let wordCount =0;
     
     // for (i = 0; i < list[0].length; i += 1){

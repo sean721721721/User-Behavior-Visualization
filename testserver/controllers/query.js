@@ -6,7 +6,9 @@ let mongoose = require('mongoose');
 let dl = require('../models/datalist.js');
 let winston = require('winston');
 let db = require('../db');
-
+let ns= require('../models/nodeSet.js')
+// import bar from '../models/nodeSet.js'
+// console.log(ns.setNodes());
 // Use native promises
 mongoose.Promise = global.Promise;
 let options = {
@@ -387,9 +389,14 @@ let callback = function callback(req, res) {
               let wordlist = datalist[1];
               let titleWordList = datalist[2];
               let titleCuttedWords = datalist[3];
+              console.log('datalist.js done!');
               
-              console.log('datalist.js Done!');
-              return { list: [res.result, wordlist, titleWordList, queryobj1.date,titleCuttedWords], previous: [res.previous], next: [res.next] };
+
+
+              let set = ns.setNodes(titleWordList[0], queryobj1.date, titleCuttedWords, res.result);
+              console.log('setNodes is done!');
+              return { list: [queryobj1.date, set, titleCuttedWords], previous: [res.previous], next: [res.next] };
+              // return { list: [res.result, wordlist, titleWordList, queryobj1.date,titleCuttedWords, set], previous: [res.previous], next: [res.next] };
             }),
           );
         } else if (!isEmpty(queryobj2)) {

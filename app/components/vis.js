@@ -33,11 +33,6 @@ class Graph extends Component {
     console.log('vis_DidMount');
   }
 
-  // componentDidUpdate() {
-  //   this.drawwithlabels();
-  //   console.log('vis_DidUpdate');
-  // }
-
   shouldComponentUpdate(nextProps, nextState) {
     if (JSON.stringify(this.props) === JSON.stringify(nextProps)) {
       console.log('vis not update !');
@@ -51,16 +46,17 @@ class Graph extends Component {
 
   drawwithlabels() {
     // props[i][0]== userID, props[i][1]== articleIndex, props[i][0]== articlePostTime;
-    // console.log(this.props);
-    const { visprops } = this.props;
-    // console.log(visprops);
-    const { date, word, post } = this.props;
-    // console.log(date, word, post);
+    // const { visprops } = this.props;
+    // const { word, post } = this.props;
+    const { date } = this.props;
     const startDate = new Date(date.$gte);
     const endDate = new Date(date.$lt);
     const timePeriod = endDate - startDate;
-    const props = JSON.parse(JSON.stringify(visprops)); // clone props;
-    const set = { nodes: [], links: [] };
+    // const props = JSON.parse(JSON.stringify(visprops)); // clone props;
+    // const set = { nodes: [], links: [] };
+    const { set: propsSet } = this.props;
+    const set = JSON.parse(JSON.stringify(propsSet));
+    // console.log(set);
     let link;
     let node;
     let links;
@@ -70,7 +66,7 @@ class Graph extends Component {
     const initLinks = [];
     const removeWords = ['新聞', '八卦', '幹嘛', '問卦', '爆卦'];
     const groupedWords = [];
-    const max = Math.min(props.length, SetNumOfNodes);
+    // const max = Math.min(props.length, SetNumOfNodes);
     const someData = [];
     const pi = Math.PI;
     const LinkThreshold = 0.1;
@@ -84,6 +80,7 @@ class Graph extends Component {
     const keyPlayerThreshold = 0;
     const G = new jsnx.Graph();
     const termColor = d3.interpolateBlues;
+    let selectedCluster = -1;
     // G.addNodesFrom([1, 2, 3, 4, 5]);
     // G.addEdgesFrom([[1, 2], [1, 3], [1, 5], [1, 4]]);
     // console.log(G);
@@ -92,41 +89,42 @@ class Graph extends Component {
     // // var eigenvector = jsnx.eigenvectorCentrality(G);
     // console.log('betweenness:', betweenness);
     // console.log(degree);
-    props.splice(SetNumOfNodes); // Splice props to match properly size
+    // props.splice(SetNumOfNodes); // Splice props to match properly size
 
-    mergeTermNodes(); // props combine any titleterms with the equal users
-    removeTermNodesWithRemovedWords();
+    // mergeTermNodes(); // props combine any titleterms with the equal users
+    // removeTermNodesWithRemovedWords();
 
-    for (let i = 0; i < props.length - 1; i += 1) {
-      props[i][1] = [...new Set(props[i][1])];
-      props[i][1].sort();
-    }
+    // for (let i = 0; i < props.length - 1; i += 1) {
+    //   props[i][1] = [...new Set(props[i][1])];
+    //   props[i][1].sort();
+    // }
 
-    computePropsUserList(); // Computing props user list
-    propsDataStructureBuild(); // props[i][1]=['id', 'id'] => props[i][1]=[{id:, count:, ... }]
-    mergeTermNodesWithUserCountEqualsOne(); // Combine all user with count == 1
-    setNodes(); // Nodes setting
+    // computePropsUserList(); // Computing props user list
+    // propsDataStructureBuild(); // props[i][1]=['id', 'id'] => props[i][1]=[{id:, count:, ... }]
+    // mergeTermNodesWithUserCountEqualsOne(); // Combine all user with count == 1
+    // setNodes(); // Nodes setting
 
-    for (let i = 0; i < set.nodes.length - 1; i += 1) {
-      set.nodes[i].children.sort();
-    }
+    // for (let i = 0; i < set.nodes.length - 1; i += 1) {
+    //   set.nodes[i].children.sort();
+    // }
 
-    computeNodesUserList(); // Computing user list
-    computeNumOfUsersHaveSameTerm(); // compute how many same users each term has
-    LinkTitleWordByArticleIndex(); // title words links by articleIndex
-    reduceLinksByThreshHold(LinkThreshold);
-    setSpiralDataStructure();
+    // computeNodesUserList(); // Computing user list
+    // computeNumOfUsersHaveSameTerm(); // compute how many same users each term has
+    // LinkTitleWordByArticleIndex(); // title words links by articleIndex
+    // reduceLinksByThreshHold(LinkThreshold);
+    // setSpiralDataStructure();
     buildGraph();
 
     communityDetecting();
-
+    const term_community = getTermCommunity();
+    // console.log(term_community);
     const termCentrality = {
       Betweenness: jsnx.betweennessCentrality(G, { weight: true })._stringValues,
       EigenVector: jsnx.eigenvectorCentrality(G)._stringValues,
       Cluster: jsnx.clustering(G)._stringValues,
     };
 
-    console.log(termCentrality);
+    // console.log(termCentrality);
 
     const width = 900;
     const height = 900;
@@ -137,14 +135,15 @@ class Graph extends Component {
     svg = svg
       .call(d3.zoom().scaleExtent([1 / 2, 8]).on('zoom', zoomed))
       .append('g')
-      .attr('transform', 'translate(40,0)');
+      .attr('transform', 'translate(40,0)')
+      .attr('transform', 'scale(0.5,0.5)');
 
     const color = d3.schemeTableau10.concat(d3.schemeSet1);
-    console.log(color);
+    // console.log(color);
     const simulation = d3.forceSimulation()
       .force('link', d3.forceLink().id(d => (typeof d.id === 'number' ? d.id : d.titleTerm)))
       .force('charge', d3.forceManyBody().strength(-300))
-      .force('center', d3.forceCenter(width / 4, height / 2));
+      .force('center', d3.forceCenter(width / 2, height / 2));
 
     let conutOfClickedNode = 0;
 
@@ -158,7 +157,7 @@ class Graph extends Component {
       .range(['0%', '100%']);
     const leftSvg = d3.select('#barChart');
 
-    const timeLineSvg = d3.select('#timeLine');
+    // const timeLineSvg = d3.select('#timeLine');
 
     let heatMapSvg = d3.select('#timeLine');
 
@@ -172,7 +171,7 @@ class Graph extends Component {
       .text('Centrality: ');
     buttonDiv.selectAll('*').remove()
       .append('form');
-    console.log(buttonDiv);
+    // console.log(buttonDiv);
     const betweennessButton = buttonDiv.append('label')
       .text('betweenness')
       .append('input')
@@ -196,7 +195,7 @@ class Graph extends Component {
       });
     d3.select('#betweenness').on('input', update());
 
-    update();
+    // update();
 
     function update() {
       // console.log(initLinks);
@@ -250,7 +249,11 @@ class Graph extends Component {
         .append('g')
         .attr('class', 'nodes')
         .style('z-index', 1)
-        .attr('opacity', d => (d.group !== 2 && d.connected === 0 ? 0.2 : 1))
+        .attr('opacity', (d) => {
+          if (d.group !== 2 && d.connected === 0) return 0.2;
+          if (d.show === 0) return 0.2;
+          return 1;
+        })
         .on('click', clicked)
         .on('mouseover', mouseOver(0.1))
         .on('mouseout', mouseOut)
@@ -402,8 +405,8 @@ class Graph extends Component {
       const lables = nodeEnter.append('text')
         .text((d) => {
           // if (d.merge > 1) return d.numOfUsr;
-          if (d.group === 2) return d.postCount;
-          if (d.group === 3) return '';
+          // if (d.group === 2) return d.postCount;
+          if (d.group === 2) return '';
           return d.titleTerm;
         })
         .style('text-anchor', 'middle')
@@ -430,13 +433,13 @@ class Graph extends Component {
 
       leftSvg.selectAll('*').remove();
 
-      drawTable();
+      drawTable(term_community);
       // drawTimeLine();
       drawHeatMap();
-      // drawSpiral();
       // drawWordTree();
 
-      function drawTable() {
+      function drawTable(data) {
+
         const table = leftSvg.append('foreignObject')
           .attr('width', '100%')
           .attr('height', '100%')
@@ -445,37 +448,38 @@ class Graph extends Component {
         const th = table.append('tr');
 
         th.append('td').attr('class', 'data name')
-          .text('Title Term');
-        th.append('td').attr('class', 'data name')
-          .attr('width', '30px')
-          .text('#User');
+          .attr('width', '25%')
+          .text('Cluster');
+        // th.append('td').attr('class', 'data name')
+        //   .attr('width', '30px')
+        //   .text('Color');
 
         // Create a table with rows and bind a data row to each table row
         const tr = table.selectAll('tr.data')
-          .data(set.nodes)
+          .data(data)
           .enter()
           .append('tr')
           .attr('class', 'datarow')
           .style('border', d => (d.tag === 1 ? '2px black solid' : 'none'))
           .on('mouseover', mouseOver(0.1))
           .on('mouseout', mouseOut)
-          .on('click', clicked);
+          .on('click', clusterClicked);
 
         // Set the even columns
         d3.selectAll('.datarow').filter(':nth-child(even)')
           .style('background', 'whitesmoke');
 
         // Create the name column
-        tr.append('td').attr('class', 'data name')
-          .text(d => d.titleTerm);
+        // tr.append('td').attr('class', 'data name')
+        //   .text(d => d.cluster);
 
-        // Create the percent value column
-        tr.append('td').attr('class', 'data value')
-          .text(d => (d.children === undefined ? 0 : d.children.length));
+        // // Create the percent value column
+        // tr.append('td').attr('class', 'data value')
+        //   .text(d => (d.children === undefined ? 0 : d.children.length));
 
         // Create a column at the beginning of the table for the chart
         const chart = tr.append('td').attr('class', 'chart')
-          .attr('width', chartWidth)
+          .attr('width', '10px')
           .attr('padding-bottom', '2px')
           .attr('padding-top', '2px');
 
@@ -491,207 +495,16 @@ class Graph extends Component {
 
         // Creates the positive div bar
         tr.select('div.positive')
-          .style('width', '0%')
-          .style('background-color', 'steelblue')
-          .transition()
-          .duration(500)
-          .style('width', d => (d.children !== undefined && d.children.length > 0 ? x(d.children.length) : '0%'));
-      }
-
-      function drawSpiral() {
-        // Spiral Display
-
-        const start = 0;
-        const end = 2.25;
-        const numSpirals = 3;
-        const margin = {
-          top: 50, bottom: 50, left: 50, right: 50,
-        };
-
-        const theta = r => numSpirals * Math.PI * r;
-
-        // used to assign nodes color by group
-        // const color = d3.scaleOrdinal(d3.schemeCategory10);
-
-        const r = d3.min([500, 500]) / 2 - 40;
-
-        const radius = d3.scaleLinear()
-          .domain([start, end])
-          .range([40, r]);
-
-        const points = d3.range(start, end + 0.001, (end - start) / 1000);
-
-        const spiral = d3.radialLine()
-          .curve(d3.curveCardinal)
-          .angle(theta)
-          .radius(radius);
-
-        const spiral_path = svg.attr('transform', `translate(${width / 4},${height / 4})`)
-          .append('path')
-          .datum(points)
-          .attr('id', 'spiral')
-          .attr('d', spiral)
-          .style('fill', 'none')
-          .style('stroke', 'steelblue');
-
-        const spiralLength = spiral_path.node().getTotalLength();
-        const N = 365;
-        const barWidth = (spiralLength / N) - 1;
-
-
-        const timeScale = d3.scaleTime()
-          .domain(d3.extent(someData, d => d.date))
-          .range([0, spiralLength]);
-
-        // yScale for the bar height
-        const yScale = d3.scaleLinear()
-          .domain([0, d3.max(someData, d => d.value)])
-          .range([0, (r / numSpirals) - 30]);
-
-        svg.selectAll('rect')
-          .data(someData)
-          .enter()
-          .append('rect')
-          .attr('x', (d, i) => {
-            const linePer = timeScale(d.date);
-            const posOnLine = spiral_path.node().getPointAtLength(linePer);
-            const angleOnLine = spiral_path.node().getPointAtLength(linePer - barWidth);
-
-            d.linePer = linePer; // % distance are on the spiral
-            d.x = posOnLine.x; // x postion on the spiral
-            d.y = posOnLine.y; // y position on the spiral
-
-            // angle at the spiral position
-            d.a = (Math.atan2(angleOnLine.y, angleOnLine.x) * 180 / Math.PI) - 90;
-            return d.x;
-          })
-          .attr('y', d => d.y)
-          .attr('width', barWidth)
-          .attr('height', d => yScale(d.value))
-          .style('fill', d => color(d.group))
-          .style('stroke', 'none')
-          .attr('transform', d => `rotate(${d.a},${d.x},${d.y})`);
-
-        // add date labels
-        const tF = d3.timeFormat('%b %Y');
-        const firstInMonth = {};
-
-        svg.selectAll('text')
-          .data(someData)
-          .enter()
-          .append('text')
-          .attr('dy', 10)
-          .style('text-anchor', 'start')
-          .style('font', '10px arial')
-          .append('textPath')
-        // only add for the first of each month
-          .filter((d) => {
-            const sd = tF(d.date);
-            if (!firstInMonth[sd]) {
-              firstInMonth[sd] = 1;
-              return true;
-            }
-            return false;
-          })
-          .text(d => tF(d.date))
-          // place text along spiral
-          .attr('xlink:href', '#spiral')
-          .style('fill', 'grey')
-          .attr('startOffset', d => `${(d.linePer / spiralLength) * 100}%`);
-
-
-        const tooltip = d3.select('#chart')
-          .append('div')
-          .attr('class', 'tooltip');
-
-        tooltip.append('div')
-          .attr('class', 'date');
-        tooltip.append('div')
-          .attr('class', 'value');
-
-        svg.selectAll('rect')
-          .on('mouseover', (d) => {
-            tooltip.select('.date').html(`Date: <b>${d.date.toDateString()}</b>`);
-            tooltip.select('.value').html(`Value: <b>${Math.round(d.value * 100) / 100}<b>`);
-
-            d3.select(this)
-              .style('fill', '#FFFFFF')
-              .style('stroke', '#000000')
-              .style('stroke-width', '2px');
-
-            tooltip.style('display', 'block');
-            tooltip.style('opacity', 2);
-          })
-          .on('mousemove', (d) => {
-            tooltip.style('top', `${d3.event.layerY + 10}px`)
-              .style('left', `${d3.event.layerX - 25}px`);
-          })
-          .on('mouseout', (d) => {
-            d3.selectAll('rect')
-              .style('fill', color(d.group))
-              .style('stroke', 'none');
-
-            tooltip.style('display', 'none');
-            tooltip.style('opacity', 0);
+          .style('width', '17px')
+          .style('background-color', (d) => {
+            const cluster = d.cluster % 19;
+            const betweennessColor = d3.hsl(color[cluster]);
+            return betweennessColor;
           });
-      }
-
-      function drawTimeLine() {
-        // const { gatekeeperprops } = this.state;
-        // const { ptt, news } = gatekeeperprops;
-        // console.log(news, ptt);
-
-        const xScale = d3.scaleTime().domain([startDate, endDate]).range([0, 100]);
-        const colorScale = d3.scaleLinear().domain([0, 1]).range([0.0, 0.5]);
-        const timeLinecolor = d3.interpolateSinebow;
-
-        // function update() {
-        timeLineSvg.selectAll('*').remove();
-
-        const formatTime = d3.timeFormat('%B %d, %Y');
-        // const g = timeLineSvg.append('foreignObject')
-        //   .attr('width', '100%')
-        //   .attr('height', '100%')
-        //   .style('overflow-y', 'scroll');
-        // const spectrums = g.append('g');
-        const spectrums = timeLineSvg.append('g');
-        // spectrums.attr('transform', `translate(${width / 2 - 270}, -100) scale(1.2,1.2)`);
-        const domainName = [];
-        set.nodes.forEach((term) => {
-          domainName.push(term.titleTerm);
-        });
-
-        const term_y = d3.scalePoint().range([0, domainName.length * 10]);
-        term_y.domain(domainName);
-
-        const date_x = d3.scaleTime().range([0, 900]);
-        date_x.domain([startDate, endDate]);
-        const colors = d3.schemeTableau10;
-        console.log(colors);
-        for (let i = 0; i < domainName.length; i += 1) {
-          const postTime = spectrums.selectAll('line').data(set.nodes[i].date);
-          postTime.enter()
-            .append('circle')
-            .attr('transform', 'translate(110,20)')
-            .attr('cy', (i * 10) + 1)
-            .attr('cx', d => date_x(new Date(d)))
-            .attr('r', 2)
-            .style('fill', colors[((i % 10) + 1)]);
-        }
-
-        // Add the x Axis
-        const axisX = spectrums;
-        const axisY = spectrums;
-
-        axisY.append('g')
-          .attr('transform', 'translate(110,20)')
-          .call(d3.axisLeft(term_y).tickFormat(d => d));
-
-        axisX.append('g')
-          .attr('transform', 'translate(110,17)')
-          .call(d3.axisTop(date_x).tickFormat(d3.timeFormat('%m/%d')));
-
-        axisY.attr('color', 'black');
+        // .transition()
+        // .duration(500)
+        // .style('width', d => (d.children !== undefined && d.children.length > 0 ?
+        // x(d.children.length) : '0%'));
       }
 
       function drawHeatMap() {
@@ -792,6 +605,64 @@ class Graph extends Component {
         heatMap.selectAll('.axisY .tick')
           .on('click', clicked);
       }
+
+      // function drawTimeLine() {
+      //   // const { gatekeeperprops } = this.state;
+      //   // const { ptt, news } = gatekeeperprops;
+      //   // console.log(news, ptt);
+
+      //   const xScale = d3.scaleTime().domain([startDate, endDate]).range([0, 100]);
+      //   const colorScale = d3.scaleLinear().domain([0, 1]).range([0.0, 0.5]);
+      //   const timeLinecolor = d3.interpolateSinebow;
+
+      //   // function update() {
+      //   timeLineSvg.selectAll('*').remove();
+
+      //   const formatTime = d3.timeFormat('%B %d, %Y');
+      //   // const g = timeLineSvg.append('foreignObject')
+      //   //   .attr('width', '100%')
+      //   //   .attr('height', '100%')
+      //   //   .style('overflow-y', 'scroll');
+      //   // const spectrums = g.append('g');
+      //   const spectrums = timeLineSvg.append('g');
+      //   // spectrums.attr('transform', `translate(${width / 2 - 270}, -100) scale(1.2,1.2)`);
+      //   const domainName = [];
+      //   set.nodes.forEach((term) => {
+      //     domainName.push(term.titleTerm);
+      //   });
+
+      //   const term_y = d3.scalePoint().range([0, domainName.length * 10]);
+      //   term_y.domain(domainName);
+
+      //   const date_x = d3.scaleTime().range([0, 900]);
+      //   date_x.domain([startDate, endDate]);
+      //   const colors = d3.schemeTableau10;
+      //   console.log(colors);
+      //   for (let i = 0; i < domainName.length; i += 1) {
+      //     const postTime = spectrums.selectAll('line').data(set.nodes[i].date);
+      //     postTime.enter()
+      //       .append('circle')
+      //       .attr('transform', 'translate(110,20)')
+      //       .attr('cy', (i * 10) + 1)
+      //       .attr('cx', d => date_x(new Date(d)))
+      //       .attr('r', 2)
+      //       .style('fill', colors[((i % 10) + 1)]);
+      //   }
+
+      //   // Add the x Axis
+      //   const axisX = spectrums;
+      //   const axisY = spectrums;
+
+      //   axisY.append('g')
+      //     .attr('transform', 'translate(110,20)')
+      //     .call(d3.axisLeft(term_y).tickFormat(d => d));
+
+      //   axisX.append('g')
+      //     .attr('transform', 'translate(110,17)')
+      //     .call(d3.axisTop(date_x).tickFormat(d3.timeFormat('%m/%d')));
+
+      //   axisY.attr('color', 'black');
+      // }
 
       // function drawWordTree() {
       //   wordTreeSvg.selectAll('*').remove();
@@ -988,6 +859,7 @@ class Graph extends Component {
       //     }
       //   }
       // }
+
       function ticked() {
         link
           .attr('x1', d => d.source.x)
@@ -998,6 +870,22 @@ class Graph extends Component {
           .attr('transform', d => `translate( ${d.x}, ${d.y})`);
       }
 
+      function clusterClicked(d) {
+        console.log(`cluster: ${d.cluster} clicked!`);
+        if (selectedCluster === d.cluster) {
+          set.nodes.forEach((_node) => { _node.show = 1; });
+        } else {
+          set.nodes.forEach((_node) => {
+            if (_node.cluster === d.cluster) {
+              _node.show = 1;
+            } else {
+              _node.show = 0;
+            }
+          });
+        }
+        selectedCluster = d.cluster;
+        update();
+      }
       function clicked(d) {
         console.log('clicked');
         if (d3.event.defaultPrevented) return; // dragged
@@ -1246,296 +1134,297 @@ class Graph extends Component {
       d.fy = null;
     }
 
-    function removeDuplicates(array, key) {
-      const lookup = new Set();
-      return array.filter(obj => !lookup.has(obj[key]) && lookup.add(obj[key]));
-    }
+    // function removeDuplicates(array, key) {
+    //   const lookup = new Set();
+    //   return array.filter(obj => !lookup.has(obj[key]) && lookup.add(obj[key]));
+    // }
 
-    function mergeTermNodes() {
-      for (let i = 0; i < props.length - 1; i += 1) {
-        for (let j = i + 1; j < props.length; j += 1) {
-          let numOfSameUser = 0;
-          for (let k = 0; k < props[i][1].length; k += 1) {
-            const findTheSameUser = props[j][1].includes(props[i][1][k]);
-            numOfSameUser = (findTheSameUser) ? numOfSameUser + 1 : numOfSameUser;
-          }
-          if (numOfSameUser === props[i][1].length && numOfSameUser === props[j][1].length) {
-            // console.log(numOfSameUser, props[i][1], props[j][1]);
-            const addingTerm = ` ${props[j][0]}`;
-            props[i][0] += addingTerm;
-            props.splice(j, 1);
-            j -= 1;
-          }
-        }
-      }
-    }
+    // function mergeTermNodes() {
+    //   for (let i = 0; i < props.length - 1; i += 1) {
+    //     for (let j = i + 1; j < props.length; j += 1) {
+    //       let numOfSameUser = 0;
+    //       for (let k = 0; k < props[i][1].length; k += 1) {
+    //         const findTheSameUser = props[j][1].includes(props[i][1][k]);
+    //         numOfSameUser = (findTheSameUser) ? numOfSameUser + 1 : numOfSameUser;
+    //       }
+    //       if (numOfSameUser === props[i][1].length && numOfSameUser === props[j][1].length) {
+    //         // console.log(numOfSameUser, props[i][1], props[j][1]);
+    //         const addingTerm = ` ${props[j][0]}`;
+    //         props[i][0] += addingTerm;
+    //         props.splice(j, 1);
+    //         j -= 1;
+    //       }
+    //     }
+    //   }
+    // }
 
-    function removeTermNodesWithRemovedWords() {
-      for (let i = 0; i < removeWords.length; i += 1) {
-        const index = props.findIndex(prop => prop[0] === removeWords[i]);
-        if (index !== -1) props.splice(index, 1);
-      }
-    }
+    // function removeTermNodesWithRemovedWords() {
+    //   for (let i = 0; i < removeWords.length; i += 1) {
+    //     const index = props.findIndex(prop => prop[0] === removeWords[i]);
+    //     if (index !== -1) props.splice(index, 1);
+    //   }
+    // }
 
-    function computePropsUserList() {
-      // console.log(props);
-      for (let i = 0; i < props.length; i += 1) {
-        if (props[i][1]) {
-          props[i][1].forEach((userId) => {
-            const existedUser = propsUserList.find(user => user.id === userId);
-            if (existedUser) {
-              existedUser.term.push(props[i][0]);
-              existedUser.count += 1;
-            } else {
-              const count = post.filter(article => article.author === userId).length;
-              propsUserList.push({
-                id: userId,
-                numOfUsr: 1,
-                merge: 1,
-                count: 1,
-                postCount: count,
-                term: [props[i][0]],
-                responder: [],
-              });
-            }
-          });
-        }
-      }
+    // function computePropsUserList() {
+    //   // console.log(props);
+    //   for (let i = 0; i < props.length; i += 1) {
+    //     if (props[i][1]) {
+    //       props[i][1].forEach((userId) => {
+    //         const existedUser = propsUserList.find(user => user.id === userId);
+    //         if (existedUser) {
+    //           existedUser.term.push(props[i][0]);
+    //           existedUser.count += 1;
+    //         } else {
+    //           const count = post.filter(article => article.author === userId).length;
+    //           propsUserList.push({
+    //             id: userId,
+    //             numOfUsr: 1,
+    //             merge: 1,
+    //             count: 1,
+    //             postCount: count,
+    //             term: [props[i][0]],
+    //             responder: [],
+    //           });
+    //         }
+    //       });
+    //     }
+    //   }
 
-      post.forEach((article) => {
-        const index = propsUserList.find(user => user.id === article.author);
-        if (index) {
-          const { push, boo, neutral } = article.message_count;
-          const totalMessageCount = push + boo + neutral;
-          index.responder.push({
-            title: article.article_title,
-            message: article.messages,
-            message_count: [
-              { type: 'push', count: article.message_count.push, radius: totalMessageCount },
-              { type: 'boo', count: article.message_count.boo, radius: totalMessageCount },
-              { type: 'neutral', count: article.message_count.neutral, radius: totalMessageCount },
-            ],
-          });
-        }
-      });
-      // console.log(propsUserList);
-    }
+    //   post.forEach((article) => {
+    //     const index = propsUserList.find(user => user.id === article.author);
+    //     if (index) {
+    //       const { push, boo, neutral } = article.message_count;
+    //       const totalMessageCount = push + boo + neutral;
+    //       index.responder.push({
+    //         title: article.article_title,
+    //         message: article.messages,
+    //         message_count: [
+    //           { type: 'push', count: article.message_count.push, radius: totalMessageCount },
+    //           { type: 'boo', count: article.message_count.boo, radius: totalMessageCount },
+    //           { type: 'neutral', count: article.message_count.neutral, radius: totalMessageCount },
+    //         ],
+    //       });
+    //     }
+    //   });
+    //   // console.log(propsUserList);
+    // }
 
-    function propsDataStructureBuild() {
-      for (let i = 0; i < props.length; i += 1) {
-        propsUserList.forEach((propsUser) => {
-          const index = props[i][1].findIndex(user => user === propsUser.id);
-          if (index !== -1) {
-            props[i][1].splice(index, 1);
-            props[i][1].push(propsUser);
-          }
-        });
-      }
-    }
+    // function propsDataStructureBuild() {
+    //   for (let i = 0; i < props.length; i += 1) {
+    //     propsUserList.forEach((propsUser) => {
+    //       const index = props[i][1].findIndex(user => user === propsUser.id);
+    //       if (index !== -1) {
+    //         props[i][1].splice(index, 1);
+    //         props[i][1].push(propsUser);
+    //       }
+    //     });
+    //   }
+    // }
 
-    function mergeTermNodesWithUserCountEqualsOne() {
-      // const findIndex = (array, num) => array.findIndex(ele => ele.id === num);
-      // for (let i = 0; i < props.length; i += 1) {
-      //   userList = props[i][1].filter(user => user.count === 1);
-      //   // console.log(userList);
-      //   let temp = '';
-      //   let size = 0;
-      //   for (let j = 1; j < userList.length; j += 1) {
-      //     temp += ` ${userList[j].id}`;
-      //     size += 1;
-      //     const deleteIndex = findIndex(props[i][1], userList[j].id);
-      //     props[i][1].splice(deleteIndex, 1);
-      //   }
-      //   if (userList.length > 0) {
-      //     userList[0].id += temp;
-      //     userList[0].numOfUsr += size;
-      //     userList[0].merge = 2;
-      //   }
-      // }
-      const hasMergedId = [];
-      for (let i = 0; i < props.length; i += 1) { // which title
-        for (let j = 0; j < props[i][1].length - 1; j += 1) {
-          for (let k = j + 1; k < props[i][1].length; k += 1) {
-            let equal = 1;
-            // console.log(props[i][1][j].id, props[i][1][k].id);
-            if (props[i][1][j].count === props[i][1][k].count && props[i][1][j].term) {
-              for (let l = 0; l < props[i][1][j].term.length; l += 1) {
-                if (!props[i][1][k].term.includes(props[i][1][j].term[l])) {
-                  // console.log(`${props[i][1][j].id} is not equal to ${props[i][1][k].id}`);
-                  equal = 0;
-                  break;
-                }
-              }
-              if (equal === 1) {
-                if (!hasMergedId.includes(props[i][1][k].id)) {
-                  // console.log(`${props[i][1][j].id} is equal to ${props[i][1][k].id}`);
-                  props[i][1][j].id += props[i][1][k].id;
-                  hasMergedId.push(props[i][1][k].id);
-                  props[i][1][j].responder = props[i][1][j].responder
-                    .concat(props[i][1][k].responder);
-                  props[i][1][j].merge = 2;
-                  props[i][1][j].numOfUsr += 1;
-                  // console.log(props[i][1][j].postCount, props[i][1][k].postCount);
-                  props[i][1][j].postCount += props[i][1][k].postCount;
-                  // console.log(props[i][1][j].responder, props[i][1][k].responder);
-                }
-                props[i][1].splice(k, 1);
-                k -= 1;
-              }
-            }
-          }
-        }
-      }
-    }
+    // function mergeTermNodesWithUserCountEqualsOne() {
+    //   // const findIndex = (array, num) => array.findIndex(ele => ele.id === num);
+    //   // for (let i = 0; i < props.length; i += 1) {
+    //   //   userList = props[i][1].filter(user => user.count === 1);
+    //   //   // console.log(userList);
+    //   //   let temp = '';
+    //   //   let size = 0;
+    //   //   for (let j = 1; j < userList.length; j += 1) {
+    //   //     temp += ` ${userList[j].id}`;
+    //   //     size += 1;
+    //   //     const deleteIndex = findIndex(props[i][1], userList[j].id);
+    //   //     props[i][1].splice(deleteIndex, 1);
+    //   //   }
+    //   //   if (userList.length > 0) {
+    //   //     userList[0].id += temp;
+    //   //     userList[0].numOfUsr += size;
+    //   //     userList[0].merge = 2;
+    //   //   }
+    //   // }
+    //   const hasMergedId = [];
+    //   for (let i = 0; i < props.length; i += 1) { // which title
+    //     for (let j = 0; j < props[i][1].length - 1; j += 1) {
+    //       for (let k = j + 1; k < props[i][1].length; k += 1) {
+    //         let equal = 1;
+    //         // console.log(props[i][1][j].id, props[i][1][k].id);
+    //         if (props[i][1][j].count === props[i][1][k].count && props[i][1][j].term) {
+    //           for (let l = 0; l < props[i][1][j].term.length; l += 1) {
+    //             if (!props[i][1][k].term.includes(props[i][1][j].term[l])) {
+    //               // console.log(`${props[i][1][j].id} is not equal to ${props[i][1][k].id}`);
+    //               equal = 0;
+    //               break;
+    //             }
+    //           }
+    //           if (equal === 1) {
+    //             if (!hasMergedId.includes(props[i][1][k].id)) {
+    //               // console.log(`${props[i][1][j].id} is equal to ${props[i][1][k].id}`);
+    //               props[i][1][j].id += props[i][1][k].id;
+    //               hasMergedId.push(props[i][1][k].id);
+    //               props[i][1][j].responder = props[i][1][j].responder
+    //                 .concat(props[i][1][k].responder);
+    //               props[i][1][j].merge = 2;
+    //               props[i][1][j].numOfUsr += 1;
+    //               // console.log(props[i][1][j].postCount, props[i][1][k].postCount);
+    //               props[i][1][j].postCount += props[i][1][k].postCount;
+    //               // console.log(props[i][1][j].responder, props[i][1][k].responder);
+    //             }
+    //             props[i][1].splice(k, 1);
+    //             k -= 1;
+    //           }
+    //         }
+    //       }
+    //     }
+    //   }
+    // }
 
-    function setNodes() {
-      for (let i = 0; i < Math.min(props.length, SetNumOfNodes); i += 1) {
-        if (props[i][0] != null) {
-          const existKey = set.nodes.find(ele => ele.titleTerm === props[i][0]);
-          if (existKey === undefined) {
-            if (!removeWords.includes(props[i][0])) {
-              set.nodes.push({
-                titleTerm: props[i][0],
-                children: props[i][1],
-                _children: [],
-                articleIndex: props[i][2],
-                date: props[i][3],
-                community: [['', 0]],
-                group: 1,
-                tag: 0,
-                connected: -1,
-                size: 5 + Math.log2(props[i][1].length),
-              });
-              props[i][1].forEach((titleTerm) => {
-                const existId = set.nodes.find(ele => ele.titleTerm === titleTerm);
-                if (existId === undefined) {
-                  // if(id != null)
-                  //   set.nodes.push({id: id, group: 2, tag: 0, size: 5});
-                }
-              });
-            }
-          }
-        }
-      }
-    }
+    // function setNodes() {
+    //   for (let i = 0; i < Math.min(props.length, SetNumOfNodes); i += 1) {
+    //     if (props[i][0] != null) {
+    //       const existKey = set.nodes.find(ele => ele.titleTerm === props[i][0]);
+    //       if (existKey === undefined) {
+    //         if (!removeWords.includes(props[i][0])) {
+    //           set.nodes.push({
+    //             titleTerm: props[i][0],
+    //             children: props[i][1],
+    //             _children: [],
+    //             articleIndex: props[i][2],
+    //             date: props[i][3],
+    //             community: [['', 0]],
+    //             group: 1,
+    //             tag: 0,
+    //             show: 1,
+    //             connected: -1,
+    //             size: 5 + Math.log2(props[i][1].length),
+    //           });
+    //           props[i][1].forEach((titleTerm) => {
+    //             const existId = set.nodes.find(ele => ele.titleTerm === titleTerm);
+    //             if (existId === undefined) {
+    //               // if(id != null)
+    //               //   set.nodes.push({id: id, group: 2, tag: 0, size: 5});
+    //             }
+    //           });
+    //         }
+    //       }
+    //     }
+    //   }
+    // }
 
-    function computeNodesUserList() {
-      for (let i = 0; i <= set.nodes.length; i += 1) {
-        if (set.nodes[i]) {
-          if (set.nodes[i].children) {
-            set.nodes[i].children.forEach((userId) => {
-              const existedUser = userList.find(x => x.id === userId);
-              if (existedUser) {
-                existedUser.term.push(set.nodes[i].titleTerm);
-                existedUser.count += 1;
-              } else {
-                userList.push({ id: userId, count: 1, term: [set.nodes[i].titleTerm] });
-              }
-            });
-          }
-        }
-      }
-      // console.log(userList);
-    }
+    // function computeNodesUserList() {
+    //   for (let i = 0; i <= set.nodes.length; i += 1) {
+    //     if (set.nodes[i]) {
+    //       if (set.nodes[i].children) {
+    //         set.nodes[i].children.forEach((userId) => {
+    //           const existedUser = userList.find(x => x.id === userId);
+    //           if (existedUser) {
+    //             existedUser.term.push(set.nodes[i].titleTerm);
+    //             existedUser.count += 1;
+    //           } else {
+    //             userList.push({ id: userId, count: 1, term: [set.nodes[i].titleTerm] });
+    //           }
+    //         });
+    //       }
+    //     }
+    //   }
+    //   // console.log(userList);
+    // }
 
-    function computeNumOfUsersHaveSameTerm() {
-      for (let i = 0; i < set.nodes.length - 1; i += 1) {
-        for (let j = i + 1; j < set.nodes.length; j += 1) {
-          let numOfSameUsers = 0;
-          const largestNumOfSameUsers = 0;
-          // let term = '';
-          for (let k = 0; k < set.nodes[i].children.length; k += 1) {
-            const haveTheSameUsers = set.nodes[j].children.includes(set.nodes[i].children[k]);
-            if (haveTheSameUsers) numOfSameUsers += 1;
-          }
-          if (numOfSameUsers > set.nodes[i].community[0][1]) {
-            set.nodes[i].community[0][0] = set.nodes[j].titleTerm;
-            set.nodes[i].community[0][1] = numOfSameUsers;
-          } else if (numOfSameUsers === set.nodes[i].community[0][1]) {
-            set.nodes[i].community.push([set.nodes[j].titleTerm, numOfSameUsers]);
-          }
-        }
-      }
-    }
+    // function computeNumOfUsersHaveSameTerm() {
+    //   for (let i = 0; i < set.nodes.length - 1; i += 1) {
+    //     for (let j = i + 1; j < set.nodes.length; j += 1) {
+    //       let numOfSameUsers = 0;
+    //       const largestNumOfSameUsers = 0;
+    //       // let term = '';
+    //       for (let k = 0; k < set.nodes[i].children.length; k += 1) {
+    //         const haveTheSameUsers = set.nodes[j].children.includes(set.nodes[i].children[k]);
+    //         if (haveTheSameUsers) numOfSameUsers += 1;
+    //       }
+    //       if (numOfSameUsers > set.nodes[i].community[0][1]) {
+    //         set.nodes[i].community[0][0] = set.nodes[j].titleTerm;
+    //         set.nodes[i].community[0][1] = numOfSameUsers;
+    //       } else if (numOfSameUsers === set.nodes[i].community[0][1]) {
+    //         set.nodes[i].community.push([set.nodes[j].titleTerm, numOfSameUsers]);
+    //       }
+    //     }
+    //   }
+    // }
 
-    function LinkTitleWordByArticleIndex() {
-      let link_index = 0;
-      for (let i = 0; i < set.nodes.length - 1; i += 1) {
-        for (let j = i + 1; j < set.nodes.length; j += 1) {
-          let count = 0;
-          if (i !== j) {
-            set.nodes[i].children.forEach((id1) => {
-              if (set.nodes[j].children.includes(id1)) count += 1;
-            });
-            if (count !== 0) {
-              set.links.push({
-                source: set.nodes[i].titleTerm,
-                target: set.nodes[j].titleTerm,
-                tag: 0,
-                color: '#d9d9d9 ',
-                value: count,
-              });
-              initLinks.push({
-                source: {
-                  titleTerm: set.nodes[i].titleTerm,
-                  index: i,
-                },
-                target: {
-                  titleTerm: set.nodes[j].titleTerm,
-                  index: j,
-                },
-                tag: 0,
-                value: count,
-              });
-              link_index += 1;
-            }
-          }
-        }
-      }
-    }
+    // function LinkTitleWordByArticleIndex() {
+    //   let link_index = 0;
+    //   for (let i = 0; i < set.nodes.length - 1; i += 1) {
+    //     for (let j = i + 1; j < set.nodes.length; j += 1) {
+    //       let count = 0;
+    //       if (i !== j) {
+    //         set.nodes[i].children.forEach((id1) => {
+    //           if (set.nodes[j].children.includes(id1)) count += 1;
+    //         });
+    //         if (count !== 0) {
+    //           set.links.push({
+    //             source: set.nodes[i].titleTerm,
+    //             target: set.nodes[j].titleTerm,
+    //             tag: 0,
+    //             color: '#d9d9d9 ',
+    //             value: count,
+    //           });
+    //           initLinks.push({
+    //             source: {
+    //               titleTerm: set.nodes[i].titleTerm,
+    //               index: i,
+    //             },
+    //             target: {
+    //               titleTerm: set.nodes[j].titleTerm,
+    //               index: j,
+    //             },
+    //             tag: 0,
+    //             value: count,
+    //           });
+    //           link_index += 1;
+    //         }
+    //       }
+    //     }
+    //   }
+    // }
 
-    function reduceLinksByThreshHold(threshold) {
-      for (let i = 0; i < set.links.length; i += 1) {
-        const { source, target } = set.links[i];
-        const links_Strength = set.links[i].value;
-        const source_Strength = set.nodes.find(_node => _node.titleTerm === source)
-          .articleIndex.length;
-        const target_Strength = set.nodes.find(_node => _node.titleTerm === target)
-          .articleIndex.length;
-        const link_threshold = (source_Strength + target_Strength) * threshold;
-        if ((links_Strength * 2) < link_threshold || links_Strength === 1) {
-          // console.log(link_threshold);
-          // console.log(source, target);
-          set.links.splice(i, 1);
-          i -= 1;
-        }
-      }
-    }
+    // function reduceLinksByThreshHold(threshold) {
+    //   for (let i = 0; i < set.links.length; i += 1) {
+    //     const { source, target } = set.links[i];
+    //     const links_Strength = set.links[i].value;
+    //     const source_Strength = set.nodes.find(_node => _node.titleTerm === source)
+    //       .articleIndex.length;
+    //     const target_Strength = set.nodes.find(_node => _node.titleTerm === target)
+    //       .articleIndex.length;
+    //     const link_threshold = (source_Strength + target_Strength) * threshold;
+    //     if ((links_Strength * 2) < link_threshold || links_Strength === 1) {
+    //       // console.log(link_threshold);
+    //       // console.log(source, target);
+    //       set.links.splice(i, 1);
+    //       i -= 1;
+    //     }
+    //   }
+    // }
 
-    function setSpiralDataStructure() {
-      let postCount;
-      for (let i = 0; i < 365; i += 1) {
-        const currentDate = new Date();
-        currentDate.setDate(currentDate.getDate() + i - 233);
-        someData.push({
-          date: currentDate,
-          value: 0,
-          group: currentDate.getMonth(),
-        });
-      }
+    // function setSpiralDataStructure() {
+    //   let postCount;
+    //   for (let i = 0; i < 365; i += 1) {
+    //     const currentDate = new Date();
+    //     currentDate.setDate(currentDate.getDate() + i - 233);
+    //     someData.push({
+    //       date: currentDate,
+    //       value: 0,
+    //       group: currentDate.getMonth(),
+    //     });
+    //   }
 
-      if (props[0]) postCount = props[0][3].length;
-      // console.log(`posCount: ${postCount}`);
-      for (let i = 0; i < postCount; i += 1) {
-        someData.find((data) => {
-          const xMonth = data.date.getMonth();
-          const dataMonth = new Date(props[0][3][i]).getMonth();
-          const xDate = data.date.getDate();
-          const dataDate = new Date(props[0][3][i]).getDate();
-          return xMonth === dataMonth && xDate === dataDate;
-        }).value += 1;
-      }
-    }
+    //   if (props[0]) postCount = props[0][3].length;
+    //   // console.log(`posCount: ${postCount}`);
+    //   for (let i = 0; i < postCount; i += 1) {
+    //     someData.find((data) => {
+    //       const xMonth = data.date.getMonth();
+    //       const dataMonth = new Date(props[0][3][i]).getMonth();
+    //       const xDate = data.date.getDate();
+    //       const dataDate = new Date(props[0][3][i]).getDate();
+    //       return xMonth === dataMonth && xDate === dataDate;
+    //     }).value += 1;
+    //   }
+    // }
 
     function buildGraph() {
       const node_data = set.nodes.map(d => d.titleTerm);
@@ -1568,6 +1457,21 @@ class Graph extends Component {
       // console.log(result);
     }
 
+    function getTermCommunity() {
+      let communityArr = [];
+      set.nodes.forEach((d) => {
+        const index = communityArr.findIndex(a => a.cluster === d.cluster);
+        if (index !== -1) {
+          communityArr[index].id.push(d.titleTerm);
+        } else {
+          communityArr.push({ cluster: d.cluster, id: [d.titleTerm] });
+        }
+      });
+
+      communityArr = communityArr.sort((a, b) => (a.cluster > b.cluster ? 1 : -1));
+      return communityArr;
+    }
+
     function zoomed() {
       svg.attr('transform', d3.event.transform);
     }
@@ -1592,7 +1496,7 @@ class Graph extends Component {
     // console.log(this);
     // console.log('wordtree');
     const style = {
-      width: '40%',
+      width: '30%',
       float: 'right',
     };
     return (
@@ -1614,9 +1518,10 @@ class Graph extends Component {
     const { id, word } = this.props;
     return (
       <div id={`#${id}`}>
-        <div id="button" />
+        <div style={{ width: '10%', height: '10px', float: 'left' }} />
+        <div id="button" style={{ width: '100%', height: '20px', background: 'white' }} />
         <div ref={this.myRef}>
-          <svg id="barChart" width="0%" height="700px" />
+          <svg id="barChart" width="10%" height="700px" />
           <svg id="graph" width="60%" height="700px" />
           {/* <svg id="wordTree" width="40%" height="700px" /> */}
           {this.drawWordTree(word)}

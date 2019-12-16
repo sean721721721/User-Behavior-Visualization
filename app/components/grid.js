@@ -357,10 +357,11 @@ class Grid extends React.Component {
         list: list[collection + 1][0],
       },
       visprops: {
-        list: list[collection + 2][0],
-        date: list[collection + 3],
-        word: list[collection + 4],
-        post: list[collection],
+        // list: list[collection + 2][0],
+        date: list[collection],
+        word: list[collection + 2],
+        // post: list[collection],
+        set: list[collection + 1],
       },
       postlistprops: {
         list: list[collection],
@@ -507,7 +508,7 @@ class Grid extends React.Component {
     } = this.state;
     const selectedOptions = this.selectedOptions();
     const filename = this.getFilename();
-    // console.log(filename);
+    console.log(visprops);
     // console.log(this.state);
     return (
       <div className="grid">
@@ -550,7 +551,7 @@ class Grid extends React.Component {
               </div> */}
             {/* </div> */}
             <div className="graph">
-              <Graph visprops={visprops.list} date={visprops.date} word={visprops.word} post={visprops.post} />
+              <Graph visprops={visprops.list} date={visprops.date} word={visprops.word} post={visprops.post} set={visprops.set} />
             </div>
             {/* <div className="box userview" id="table">
               <div id="userdeg">

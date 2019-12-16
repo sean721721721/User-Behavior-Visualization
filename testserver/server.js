@@ -1,6 +1,7 @@
 const express = require('express');
 const helmet = require('helmet');
 const cors = require('cors');
+const compression = require('compression');
 // const webpack = require('webpack');
 // const webpackDevMiddleware = require('webpack-dev-middleware');
 
@@ -14,6 +15,15 @@ const config = require('./config')[app.settings.env];
 
 app.use(cors());
 app.use(helmet());
+function shouldCompress(req, res) {
+  if (req.headers['x-no-compression']) {
+    // don't compress responses with this request header
+    return false;
+  }
+  // fallback to standard filter function
+  return compression.filter(req, res);
+}
+app.use(compression({ filter: shouldCompress }));
 
 /*
 let options = {
