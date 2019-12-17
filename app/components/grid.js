@@ -371,7 +371,7 @@ class Grid extends React.Component {
       },
     }));
     console.log('change');
-    // this.setState(prevState => ({ ...prevState, isLoading: false }));
+    this.setState(prevState => ({ ...prevState, isLoading: false }));
   }
 
   previousPage(e) {
@@ -511,7 +511,7 @@ class Grid extends React.Component {
     const selectedOptions = this.selectedOptions();
     const filename = this.getFilename();
     console.log(visprops);
-    // console.log(this.state);
+    console.log(this.state);
     return (
       <div className="grid">
         <Menu
@@ -525,6 +525,7 @@ class Grid extends React.Component {
         />
         <Provider store={store}>
           <div className="grid1">
+            <Loading isLoading={isLoading} responseError={responseError} errorType={errorType} />
             {/* <div className="grid2"> */}
               {/* <div className="box gateKeeperview">
                 <GateKeeper gatekeeperprops={gatekeeperprops} />
