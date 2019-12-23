@@ -3,9 +3,9 @@ import React from 'react';
 import PropTypes from 'prop-types';
 // import ParameterTab from './parameter';
 import Page from './page';
-import SubmitTab from './submit';
-import DownloadtTab from './download';
-// import 
+// import SubmitTab from './submit';
+// import DownloadtTab from './download';
+// import
 
 class Menu extends React.Component {
   constructor(props) {
@@ -70,7 +70,7 @@ class Menu extends React.Component {
     const {
       showPage1,
       // showSubmit,
-      submitType,
+      // submitType,
       // showDownload,
     } = this.state;
 
@@ -193,7 +193,7 @@ Menu.propTypes = {
   handlePT1: PropTypes.func.isRequired,
   // handlePT2: PropTypes.func.isRequired,
   // handleDT: PropTypes.func.isRequired,
-  selectedOptions: PropTypes.arrayOf(PropTypes.string).isRequired,
+  // selectedOptions: PropTypes.arrayOf(PropTypes.string).isRequired,
 };
 
 export default Menu;

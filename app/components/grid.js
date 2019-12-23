@@ -527,10 +527,10 @@ class Grid extends React.Component {
           <div className="grid1">
             <Loading isLoading={isLoading} responseError={responseError} errorType={errorType} />
             {/* <div className="grid2"> */}
-              {/* <div className="box gateKeeperview">
+            {/* <div className="box gateKeeperview">
                 <GateKeeper gatekeeperprops={gatekeeperprops} />
               </div> */}
-              {/* <div className="box overview">
+            {/* <div className="box overview">
                 <div id="template" className="slider__list" />
                 <div id="over" />
                 <div id="select" />
@@ -539,14 +539,14 @@ class Grid extends React.Component {
                 <VisibleCardList />
                 <Footer />
               </div> */}
-              {/* <div className="box postview">
+            {/* <div className="box postview">
                 <div id="page" />
                 <AddCard />
               </div> */}
-              {/* <div className="box termview">
+            {/* <div className="box termview">
                 <Termlist termlistprops={termlistprops.list} />
               </div> */}
-              {/* <div className="box detailview">
+            {/* <div className="box detailview">
                 <div className="btn-postgroup" />
                 <div className="btn-usergroup" />
                 <Post postprops={postprops} />

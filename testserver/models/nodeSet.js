@@ -2,12 +2,14 @@
 /* eslint-env node */
 module.exports = {
   setNodes(list, date, word, post) {
+    console.log(list);
+    // console.log(post);
     const linkThreshold = 0.1;
     const SetNumOfNodes = 200;
     const visprops = list;
-    const startDate = new Date(date.$gte);
-    const endDate = new Date(date.$lt);
-    const timePeriod = endDate - startDate;
+    // const startDate = new Date(date.$gte);
+    // const endDate = new Date(date.$lt);
+    // const timePeriod = endDate - startDate;
     const props = JSON.parse(JSON.stringify(visprops)); // clone props;
     const set = { nodes: [], links: [] };
     const userList = [{ id: '', count: 0, term: [] }];
@@ -94,13 +96,14 @@ module.exports = {
           });
         }
       }
-  
+
       post.forEach((article) => {
         const index = propsUserList.find(user => user.id === article.author);
         if (index) {
           const { push, boo, neutral } = article.message_count;
           const totalMessageCount = push + boo + neutral;
           index.responder.push({
+            articleId: article.article_id,
             title: article.article_title,
             message: article.messages,
             message_count: [
@@ -166,12 +169,33 @@ module.exports = {
           const existKey = set.nodes.find(ele => ele.titleTerm === props[i][0]);
           if (existKey === undefined) {
             if (!removeWords.includes(props[i][0])) {
+              let messageCount = {
+                all: 0, boo: 0, neutral: 0, push: 0,
+              };
+              let articleId = [];
+              //   console.log(props[i][4]);
+              if (props[i][4].length > 1) {
+                articleId = props[i][4].map(e => e.articleId);
+                messageCount.all = props[i][4].reduce((sum, { messageCount: { all } }) => sum + all, 0);
+                messageCount.boo = props[i][4].reduce((sum, { messageCount: { boo } }) => sum + boo, 0);
+                messageCount.neutral = props[i][4].reduce((sum, { messageCount: { neutral } }) => sum + neutral, 0);
+                messageCount.push = props[i][4].reduce((sum, { messageCount: { push } }) => sum + push, 0);
+              } else {
+                articleId.push(props[i][4][0].articleId);
+                messageCount.all = props[i][4][0].messageCount.all;
+                messageCount.boo = props[i][4][0].messageCount.boo;
+                messageCount.neutral = props[i][4][0].messageCount.neutral;
+                messageCount.push = props[i][4][0].messageCount.push;
+              }
+              //   console.log(messageCount);
               set.nodes.push({
                 titleTerm: props[i][0],
                 children: props[i][1],
                 _children: [],
                 articleIndex: props[i][2],
+                articleId,
                 date: props[i][3],
+                messageCount,
                 community: [['', 0]],
                 group: 1,
                 tag: 0,
@@ -213,7 +237,7 @@ module.exports = {
       for (let i = 0; i < set.nodes.length - 1; i += 1) {
         for (let j = i + 1; j < set.nodes.length; j += 1) {
           let numOfSameUsers = 0;
-          const largestNumOfSameUsers = 0;
+          //   const largestNumOfSameUsers = 0;
           // let term = '';
           for (let k = 0; k < set.nodes[i].children.length; k += 1) {
             const haveTheSameUsers = set.nodes[j].children.includes(set.nodes[i].children[k]);
@@ -229,7 +253,7 @@ module.exports = {
       }
     }
     function LinkTitleWordByArticleIndex() {
-      let link_index = 0;
+    //   let linkIndex = 0;
       for (let i = 0; i < set.nodes.length - 1; i += 1) {
         for (let j = i + 1; j < set.nodes.length; j += 1) {
           let count = 0;
@@ -237,7 +261,29 @@ module.exports = {
             set.nodes[i].children.forEach((id1) => {
               if (set.nodes[j].children.includes(id1)) count += 1;
             });
-            if (count !== 0) {
+            // if (count !== 0) {
+            //   set.links.push({
+            //     source: set.nodes[i].titleTerm,
+            //     target: set.nodes[j].titleTerm,
+            //     tag: 0,
+            //     color: '#d9d9d9 ',
+            //     value: count,
+            //   });
+            //   initLinks.push({
+            //     source: {
+            //       titleTerm: set.nodes[i].titleTerm,
+            //       index: i,
+            //     },
+            //     target: {
+            //       titleTerm: set.nodes[j].titleTerm,
+            //       index: j,
+            //     },
+            //     tag: 0,
+            //     value: count,
+            //   });
+            // //   linkIndex += 1;
+            // }
+            for (let k = 0; k < count; k += 1) {
               set.links.push({
                 source: set.nodes[i].titleTerm,
                 target: set.nodes[j].titleTerm,
@@ -257,7 +303,6 @@ module.exports = {
                 tag: 0,
                 value: count,
               });
-              link_index += 1;
             }
           }
         }
@@ -266,13 +311,13 @@ module.exports = {
     function reduceLinksByThreshHold(threshold) {
       for (let i = 0; i < set.links.length; i += 1) {
         const { source, target } = set.links[i];
-        const links_Strength = set.links[i].value;
-        const source_Strength = set.nodes.find(_node => _node.titleTerm === source)
+        const linksStrength = set.links[i].value;
+        const sourceStrength = set.nodes.find(_node => _node.titleTerm === source)
           .articleIndex.length;
-        const target_Strength = set.nodes.find(_node => _node.titleTerm === target)
+        const targetStrength = set.nodes.find(_node => _node.titleTerm === target)
           .articleIndex.length;
-        const link_threshold = (source_Strength + target_Strength) * threshold;
-        if ((links_Strength * 2) < link_threshold || links_Strength === 1) {
+        const linkThre = (sourceStrength + targetStrength) * threshold;
+        if ((linksStrength * 2) < linkThre || linksStrength === 1) {
           // console.log(link_threshold);
           // console.log(source, target);
           set.links.splice(i, 1);

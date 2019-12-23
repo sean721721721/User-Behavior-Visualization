@@ -521,29 +521,33 @@ let bindpostlist = function bindpostlist(qobj1, qobj2, ptt) {
         }
     }
     
-    //title term score
-    /*for(i=0;i<titleTest.length;i++){ 
-        titleCount.push(titleScore(titleTest[i], list[0][i].message_count));
-    }*/
     
     //title terms relationshipt between userID
     for(i=0;i<titleTest.length;i++){ 
         titleCount.push(titleUser(titleTest[i], list[i]));
     }
 
+    //title term score
+    // for(i=0;i<titleTest.length;i++){ 
+    //     titleCount.push(titleScore(titleTest[i], list[0][i].message_count));
+    // }
+    // console.log(titleCount);
     console.log("postlen: " + (list[0].length + list[1].length));
     const diff = process.hrtime(time);
     console.log(`bindpostlist() Benchmark took ${diff[0] * NS_PER_SEC + diff[1]} nanoseconds`);
+    // console.log(list,termfreq,titleCount, articleCuttedWord);
     return [list,termfreq,titleCount, articleCuttedWord];
 }
 
 //userId's relationship with title word
 let titleUser = function titleUser(terms, posts){  
     console.log('Computing titleUser ... ');
+    // console.log(terms, posts);
     let userlist = {};
     let i =0;
     let articleIndex = [];
     let articlePostTime = [];
+    let messageCountOfEachArticle = [];
     terms.forEach(function (term){
         if(term != null){
             let flag = 0;
@@ -553,14 +557,23 @@ let titleUser = function titleUser(terms, posts){
                 }
                 if(flag == 0){
                     if(!userlist.hasOwnProperty(wordPair.word)){
+                        // console.log(wordPair.word, posts[i].article_title);
                         userlist[wordPair.word] = [posts[i].author];
                         articleIndex[wordPair.word] = [i];
                         articlePostTime[wordPair.word] = [posts[i].date];
+                        messageCountOfEachArticle[wordPair.word] = [{
+                            articleId: posts[i].article_id,
+                            messageCount: posts[i].message_count,
+                        }];
                     }
                     else{
                         userlist[wordPair.word].push(posts[i].author);
                         articleIndex[wordPair.word].push(i);
                         articlePostTime[wordPair.word].push(posts[i].date);
+                        messageCountOfEachArticle[wordPair.word].push({
+                            articleId: posts[i].article_id,
+                            messageCount: posts[i].message_count,
+                        });
                     }
                 }
                 flag = 0;
@@ -568,15 +581,17 @@ let titleUser = function titleUser(terms, posts){
         }
         i++;
     })
-
+    // console.log('userlist', userlist);
     let keysSorted = Object.keys(userlist).sort(function(a,b){
         return userlist[b].length - userlist[a].length;
     })
 
     let sortedUserList = [];
     for(let j=0;j<keysSorted.length;j++){
-        sortedUserList.push([keysSorted[j], userlist[keysSorted[j]], articleIndex[keysSorted[j]], articlePostTime[keysSorted[j]]]);       
+        sortedUserList.push([keysSorted[j], userlist[keysSorted[j]], articleIndex[keysSorted[j]],
+            articlePostTime[keysSorted[j]], messageCountOfEachArticle[keysSorted[j]]]);       
     }
+    // console.log('sortedUserList', sortedUserList);
     console.log('compute titleUser Done!');
     return sortedUserList;
 }
@@ -585,8 +600,9 @@ let titleUser = function titleUser(terms, posts){
 let titleScore = function titleScore(terms, message_count){
     let titleScore = {};
     let i =0;
-
+    console.log('computing titleScore...');
     terms.forEach(function (term){
+        console.log(term);
         if(term != null){
             let flag = 0;
             term.forEach(function(wordPair){

@@ -16,6 +16,7 @@ import * as d3 from 'd3';
 // import { Row, Form } from 'antd';
 import Chart from 'react-google-charts';
 import netClustering from 'netclustering';
+import sentiment from 'multilang-sentiment';
 import { string } from 'prop-types';
 import * as jsnx from 'jsnetworkx';
 import Louvain from './jLouvain';
@@ -45,6 +46,10 @@ class Graph extends Component {
   }
 
   drawwithlabels() {
+    // var sentiment = require('multilang-sentiment');
+    // var tokens = ['世界','就','是','一个','疯子','的','囚笼'];
+    const result = sentiment('Cats are totally amazing!');
+    console.log(result);
     // props[i][0]== userID, props[i][1]== articleIndex, props[i][0]== articlePostTime;
     // const { visprops } = this.props;
     // const { word, post } = this.props;
@@ -325,15 +330,15 @@ class Graph extends Component {
 
       const keyPlayerCircles = nodeEnter.selectAll('circle');
 
-      keyPlayerCircles.data(d => (d.group === 2 ? [d] : d))
-        .enter()
-        .append('g').append('circle')
-        .attr('r', d => d.size + Math.sqrt(d.postCount))
-        .attr('fill', 'white')
-        .style('fill-opacity', 1)
-        .attr('stroke', 'gray')
-        .attr('stroke-width', 2)
-        .attr('stroke-opacity', d => (d.postCount >= 5 ? 1 : 0));
+      // keyPlayerCircles.data(d => (d.group === 2 ? [d] : d))
+      //   .enter()
+      //   .append('g').append('circle')
+      //   .attr('r', d => d.size + Math.sqrt(d.postCount))
+      //   .attr('fill', 'white')
+      //   .style('fill-opacity', 1)
+      //   .attr('stroke', 'gray')
+      //   .attr('stroke-width', 2)
+      //   .attr('stroke-opacity', d => (d.postCount >= 5 ? 1 : 0));
 
       const circles = nodeEnter.append('circle')
         .transition()
@@ -344,6 +349,9 @@ class Graph extends Component {
             const cluster = d.cluster % 19;
             const betweennessColor = d3.hsl(color[cluster]);
             return betweennessColor;
+          }
+          if (d.group === 2) {
+            return 'green';
           }
           return 'url(#pic_user)';
           // if (d.group !== 2) return color(d.group);
@@ -961,6 +969,18 @@ class Graph extends Component {
                 if (existId === undefined) {
                   // const { count } = userList.find(user => user.id === id_1.id);
                   if (id_1.postCount > keyPlayerThreshold) {
+                    const articleReplyCount = id_1.responder.reduce((sum, next) => {
+                      // console.log(sum, next.message_count);
+                      // console.log(d.articleId, next.articleId);
+                      if (d.articleId.includes(next.articleId)) {
+                        const all = next.message_count.reduce((num, { count }) => num + count, 0);
+                        // console.log(all);
+                        return sum + all;
+                      }
+                      return sum + 0;
+                    }, 0);
+                    console.log(articleReplyCount);
+                    const size = (articleReplyCount / d.messageCount.all) * 50;
                     set.nodes.push({
                       titleTerm: id_1.id,
                       parentNode: d.titleTerm,
@@ -973,7 +993,7 @@ class Graph extends Component {
                       postCount: id_1.postCount,
                       x: d.x,
                       y: d.y,
-                      size: 5 * id_1.merge,
+                      size,
                       responder: id_1.responder,
                     });
                   }
