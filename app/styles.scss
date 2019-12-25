@@ -295,7 +295,7 @@ path:hover {
 
 .grid {
     margin: 0 0 0 0;
-    border: 2px solid #CCC;
+    // border: 2px solid #CCC;
     height: 95vh;
     display: grid;
     grid-gap: 1px;
@@ -317,7 +317,7 @@ path:hover {
 
 .grid1 {
     margin: 0 0 0 0;
-    border: 2px solid #CCC;
+    // border: 2px solid #CCC;
     display: grid;
     grid-gap: 1px;
     grid-row: grow2 / growend;
@@ -335,8 +335,8 @@ path:hover {
     display: grid;
     grid-gap: 1px;
     grid-column: col1 / col2;
-    grid-template-columns: [scol1] 0.333fr [scol2] 0.333fr [scol3] 0.333fr [scolend];
-    grid-template-rows: [srow1] minmax(auto, 50vh) [srow2] minmax(30vh, 40vh) [srowend];
+    // grid-template-columns: [scol1] 0.333fr [scol2] 0.333fr [scol3] 0.333fr [scolend];
+    // grid-template-rows: [srow1] minmax(auto, 50vh) [srow2] minmax(30vh, 40vh) [srowend];
 }
 
 .overview {
@@ -364,6 +364,35 @@ path:hover {
 .graph {
     grid-column: col1 / colend;
     grid-row:none;
+    display: grid;
+    grid-template-columns: [sscol1] 0.2fr [sscol2] 10px [sscol3] auto [sscol4] 10px [sscol5] 0.2fr [sscolend];
+    grid-template-rows: [ssrow1] 0.8fr [ssrow2] 10px [ssrow3] 0.2fr [ssrowend];
+}
+
+.barchart {
+    display: grid;
+    grid-column: sscol1 / sscol2;
+    grid-row: ssrow1 / ssrow2;
+}
+
+.network {
+    border: 2px solid gray;
+    display: grid;
+    grid-column: sscol3 / sscol4;
+    grid-row: ssrow1 / ssrow2;
+    // grid-template-rows: [nwrow1] 0.1fr [nwrow2] 0.9fr [nwrowend];
+}
+
+.wordTree {
+    display: grid;
+    grid-column: sscol5 / sscolend;
+    grid-row:ssrow1 / ssrow2;
+}
+
+.heatMap {
+    display: grid;
+    grid-column: sscol1 / sscolend;
+    grid-row:ssrow3 / ssrowend;
 }
 
 .detailview {

@@ -553,9 +553,9 @@ class Grid extends React.Component {
                 <div id="detail" />
               </div> */}
             {/* </div> */}
-            <div className="graph">
-              <Graph visprops={visprops.list} date={visprops.date} word={visprops.word} post={visprops.post} set={visprops.set} />
-            </div>
+            {/* <div className="graph"> */}
+            <Graph visprops={visprops.list} date={visprops.date} word={visprops.word} post={visprops.post} set={visprops.set} />
+            {/* </div> */}
             {/* <div className="box userview" id="table">
               <div id="userdeg">
                 <div id="olbutton" />

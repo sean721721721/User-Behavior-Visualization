@@ -1516,11 +1516,11 @@ class Graph extends Component {
     // console.log(this);
     // console.log('wordtree');
     const style = {
-      width: '30%',
-      float: 'right',
+      float: 'left',
+      border: '2px solid gray',
     };
     return (
-      <div className="App" style={style}>
+      <div className="wordTree" style={style}>
         <Chart
           // style={style}
           chartType="WordTree"
@@ -1537,18 +1537,33 @@ class Graph extends Component {
     // const myRef = 'titleUserView';
     const { id, word } = this.props;
     return (
-      <div id={`#${id}`}>
-        <div style={{ width: '10%', height: '10px', float: 'left' }} />
-        <div id="button" style={{ width: '100%', height: '20px', background: 'white' }} />
-        <div ref={this.myRef}>
-          <svg id="barChart" width="10%" height="700px" />
-          <svg id="graph" width="60%" height="700px" />
-          {/* <svg id="wordTree" width="40%" height="700px" /> */}
-          {this.drawWordTree(word)}
-          <div>
-            <svg id="timeLine" width="100%" height="600px" />
-          </div>
+      <div className="graph" ref={this.myRef}>
+        {/* <div style={{ width: '10%', height: '10px', float: 'left' }} /> */}
+        {/* <div id="button" style={{ width: '100%', height: '20px', background: 'white' }} /> */}
+        {/* <div ref={this.myRef}> */}
+        <div className="barchart">
+          <svg id="barChart" width="100%" height="100%" style={{ border: '2px solid gray' }} />
         </div>
+        <div className="network">
+          <div
+            className="centralityOption"
+            id="button"
+            style={{
+              width: '100%',
+              height: '25px',
+              padding: '0px 10px',
+              // background: 'white',
+              // border: '2px solid gray',
+              // borderBottom: 'none',
+            }}
+          />
+          <svg id="graph" width="100%" height="95%" style={{}} />
+        </div>
+        {this.drawWordTree(word)}
+        <div className="heatMap" style={{ border: '2px solid gray' }}>
+          <svg id="timeLine" width="100%" height="600px" />
+        </div>
+        {/* </div> */}
       </div>
     );
   }
