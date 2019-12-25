@@ -362,7 +362,8 @@ class Grid extends React.Component {
         date: list[collection],
         word: list[collection + 2],
         // post: list[collection],
-        set: list[collection + 1],
+        set: list[collection + 1][0],
+        initLinks: list[collection + 1][1],
       },
       postlistprops: {
         list: list[collection],
@@ -554,7 +555,7 @@ class Grid extends React.Component {
               </div> */}
             {/* </div> */}
             {/* <div className="graph"> */}
-            <Graph visprops={visprops.list} date={visprops.date} word={visprops.word} post={visprops.post} set={visprops.set} />
+            <Graph visprops={visprops.list} date={visprops.date} word={visprops.word} post={visprops.post} set={visprops.set} initLinks={visprops.initLinks} />
             {/* </div> */}
             {/* <div className="box userview" id="table">
               <div id="userdeg">

@@ -2,7 +2,7 @@
 /* eslint-env node */
 module.exports = {
   setNodes(list, date, word, post) {
-    console.log(list);
+    // console.log(list);
     // console.log(post);
     const linkThreshold = 0.1;
     const SetNumOfNodes = 200;
@@ -325,6 +325,6 @@ module.exports = {
         }
       }
     }
-    return set;
+    return [set, initLinks];
   },
 };

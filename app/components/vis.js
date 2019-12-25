@@ -48,11 +48,12 @@ class Graph extends Component {
   drawwithlabels() {
     // var sentiment = require('multilang-sentiment');
     // var tokens = ['世界','就','是','一个','疯子','的','囚笼'];
-    const result = sentiment('Cats are totally amazing!');
-    console.log(result);
+    // const result = sentiment('Cats are totally amazing!');
+    // console.log(result);
     // props[i][0]== userID, props[i][1]== articleIndex, props[i][0]== articlePostTime;
     // const { visprops } = this.props;
     // const { word, post } = this.props;
+    console.log(this.props);
     const { date } = this.props;
     const startDate = new Date(date.$gte);
     const endDate = new Date(date.$lt);
@@ -60,7 +61,7 @@ class Graph extends Component {
     // const props = JSON.parse(JSON.stringify(visprops)); // clone props;
     // const set = { nodes: [], links: [] };
     const { set: propsSet } = this.props;
-    const set = JSON.parse(JSON.stringify(propsSet));
+    let set = JSON.parse(JSON.stringify(propsSet));
     // console.log(set);
     let link;
     let node;
@@ -68,7 +69,9 @@ class Graph extends Component {
     let nodes;
     const userList = [{ id: '', count: 0, term: [] }];
     const propsUserList = [{ id: '', count: 0, term: [] }];
-    const initLinks = [];
+    const { initLinks } = this.props;
+    console.log(initLinks);
+    // const initLinks = [];
     const removeWords = ['新聞', '八卦', '幹嘛', '問卦', '爆卦'];
     const groupedWords = [];
     // const max = Math.min(props.length, SetNumOfNodes);
@@ -121,6 +124,7 @@ class Graph extends Component {
     buildGraph();
 
     communityDetecting();
+    const origSet = JSON.parse(JSON.stringify(set));
     const term_community = getTermCommunity();
     // console.log(term_community);
     const termCentrality = {
@@ -911,6 +915,19 @@ class Graph extends Component {
         });
 
         if (d.tag === 0) {
+          set.nodes.forEach((_node) => {
+            // console.log(isConnected(d, _node));
+            if (!isConnected(d, _node)) {
+              // console.log(_node.titleTerm);
+              set.links = set.links.filter(
+                _link => _link.source.titleTerm !== _node.titleTerm
+                  && _link.target.titleTerm !== _node.titleTerm,
+              );
+              // console.log(set.links);
+              delete set.nodes[set.nodes.indexOf(_node)];
+              set.nodes = set.nodes.filter(() => true);
+            }
+          });
           d3.select(this).select('circle').attr('stroke', 'red');
 
           d.children.forEach((id_1) => {
@@ -1017,50 +1034,54 @@ class Graph extends Component {
           d.tag = 1;
           conutOfClickedNode += 1;
         } else {
-          d3.select(this).select('circle').attr('stroke', 'white');
-          node.data(set.nodes, (o) => {
-            if (isConnected(d, o)) {
-              const index_0 = set.nodes.findIndex(_node => (
-                _node === undefined ? -1 : _node.titleTerm === o.titleTerm));
-              // console.log(id_1, index_1)
-              set.nodes[index_0].connected -= 1;
-              // console.log(set.nodes[index_0].connected);
-            }
-          });
+          set = JSON.parse(JSON.stringify(origSet));
+          // console.log(set);
+          // console.log(origSet);
+          // d3.select(this).select('circle').attr('stroke', 'white');
+          // node.data(set.nodes, (o) => {
+          //   if (isConnected(d, o)) {
+          //     const index_0 = set.nodes.findIndex(_node => (
+          //       _node === undefined ? -1 : _node.titleTerm === o.titleTerm));
+          //       console.log(o.titleTerm, index_0);
+          //     console.log(set.nodes[index_0]);
+          //     set.nodes[index_0].connected -= 1;
+          //     // console.log(set.nodes[index_0].connected);
+          //   }
+          // });
 
           // node.style('fill-opacity', function(o) {
           //   return 1;
           // });
 
           if (d.group === 1) {
-            d.children.forEach((id_1) => {
-              if (id_1 != null) {
-                const index_1 = set.nodes.findIndex(
-                  _node => ((_node === undefined) ? -1 : _node.titleTerm === id_1.id),
-                );
+            // d.children.forEach((id_1) => {
+            //   if (id_1 != null) {
+            //     const index_1 = set.nodes.findIndex(
+            //       _node => ((_node === undefined) ? -1 : _node.titleTerm === id_1.id),
+            //     );
 
-                set.nodes[index_1].connected -= 1;
+            //     set.nodes[index_1].connected -= 1;
 
-                set.nodes.forEach((_node) => {
-                  if (_node.titleTerm === id_1.id && _node.connected <= 0) {
-                    delete set.nodes[set.nodes.indexOf(_node)];
-                    set.nodes = set.nodes.filter(() => true);
-                  }
-                });
+            //     set.nodes.forEach((_node) => {
+            //       if (_node.titleTerm === id_1.id && _node.connected <= 0) {
+            //         delete set.nodes[set.nodes.indexOf(_node)];
+            //         set.nodes = set.nodes.filter(() => true);
+            //       }
+            //     });
 
-                const { length } = set.links;
-                for (let j = 0; j < length; j += 1) {
-                  const pos = set.links.map(e => e.source.titleTerm).indexOf(id_1.id);
-                  if (pos !== -1) {
-                    const index_2 = set.nodes.findIndex(
-                      _node => (_node === undefined ? -1 : _node.titleTerm === id_1.id),
-                    );
-                    if (index_2 === -1) set.links.splice(pos, 1);
-                    else if (set.nodes[index_2] === undefined) set.links.splice(pos, 1);
-                  }
-                }
-              }
-            });
+            //     const { length } = set.links;
+            //     for (let j = 0; j < length; j += 1) {
+            //       const pos = set.links.map(e => e.source.titleTerm).indexOf(id_1.id);
+            //       if (pos !== -1) {
+            //         const index_2 = set.nodes.findIndex(
+            //           _node => (_node === undefined ? -1 : _node.titleTerm === id_1.id),
+            //         );
+            //         if (index_2 === -1) set.links.splice(pos, 1);
+            //         else if (set.nodes[index_2] === undefined) set.links.splice(pos, 1);
+            //       }
+            //     }
+            //   }
+            // });
           } else {
             let uniquePostID = 0;
             d.responder.forEach((article) => {
