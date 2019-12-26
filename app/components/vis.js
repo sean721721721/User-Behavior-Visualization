@@ -89,6 +89,8 @@ class Graph extends Component {
     const G = new jsnx.Graph();
     const termColor = d3.interpolateBlues;
     let selectedCluster = -1;
+    let fontSizeThreshhold = 20;
+    let sliderHasBeenLoaded = 0;
     // G.addNodesFrom([1, 2, 3, 4, 5]);
     // G.addEdgesFrom([[1, 2], [1, 3], [1, 5], [1, 4]]);
     // console.log(G);
@@ -138,20 +140,22 @@ class Graph extends Component {
     const width = 900;
     const height = 900;
     let svg = d3.select('#graph');
-
+    const realWidth = svg.attr('width');
+    const realHeight = svg.attr('height');
     svg.selectAll('*').remove();
 
     svg = svg
       .call(d3.zoom().scaleExtent([1 / 2, 8]).on('zoom', zoomed))
-      .append('g')
-      .attr('transform', 'translate(40,0)')
-      .attr('transform', 'scale(0.5,0.5)');
+      .append('g');
+    // .attr('transform', 'translate(40,0)')
+    // .attr('transform', 'scale(0.5,0.5)');
 
     const color = d3.schemeTableau10.concat(d3.schemeSet1);
     // console.log(color);
     const simulation = d3.forceSimulation()
       .force('link', d3.forceLink().id(d => (typeof d.id === 'number' ? d.id : d.titleTerm)))
       .force('charge', d3.forceManyBody().strength(-300))
+      .force('charge', d3.forceManyBody().distanceMax(1000))
       .force('center', d3.forceCenter(width / 2, height / 2));
 
     let conutOfClickedNode = 0;
@@ -204,9 +208,50 @@ class Graph extends Component {
       });
     d3.select('#betweenness').on('input', update());
 
+    const nevigator = d3.select('#button');
+    nevigator.append('text')
+      .attr('text-anchor', 'middle')
+      .attr('font-size', '24px')
+      .attr('x', '50%')
+      .attr('y', '10%')
+      .text(`${'Centrality:'} ${'    '}`);
+    nevigator.append('span')
+      .attr('font-size', '24px')
+      .attr('margin', '5px')
+      .text('Low');
+
+    const slider = nevigator.append('input');
+    slider.datum({})
+      .attr('type', 'range')
+      .attr('class', 'custom-range')
+      .attr('id', 'customRange1')
+      .style('width', '150px')
+      .style('padding-top', '15px')
+      .attr('value', fontSizeThreshhold)
+      .attr('min', 0)
+      .attr('max', 100)
+      .attr('step', 1)
+      .on('input', () => {
+        sliderHasBeenLoaded = 1;
+        update();
+      });
+
+    nevigator.append('text')
+      .attr('id', 'sizeThreshold')
+      .attr('text-anchor', 'middle')
+      .attr('font-size', '24px')
+      .attr('x', '50%')
+      .attr('y', '10%')
+      .text('High');
     // update();
 
     function update() {
+      if (sliderHasBeenLoaded) {
+        fontSizeThreshhold = d3.select('#customRange1').property('value');
+        // nevigator.select('#sizeThreshold').text(fontSizeThreshhold);
+      }
+      console.log(fontSizeThreshhold);
+      // console.log('svgupdate');
       // console.log(initLinks);
       const selectedCentrality = d3.select('input[name="centrality"]:checked').property('value');
       // console.log(selectedCentrality);
@@ -246,11 +291,43 @@ class Graph extends Component {
         .append('line')
         .attr('class', 'links')
         .style('z-index', -1)
-        .attr('stroke', d => d.color)
+        .attr('visibility', 'hidden')
+        .attr('stroke', (d) => {
+          console.log(d);
+          return d.color;
+        })
         .attr('stroke-width', d => (d.value < 100000 ? d.value : 3));
       link = linkEnter.merge(link);
+      console.log(realWidth, realHeight);
+      const voronoi = d3.voronoi().extent([[-1000, -1000], [4000, 2000]]);
+
+      const polygons = svg.append('g')
+        .attr('class', 'polygons')
+        .selectAll('polygon')
+        .data(set.nodes)
+        .enter()
+        .append('polygon')
+        .style('fill', (d) => {
+          if (d.group === 1) {
+            const cluster = d.cluster % 19;
+            const betweennessColor = d3.hsl(color[cluster]);
+            return betweennessColor;
+          }
+          return 'green';
+        })
+        .style('fill-opacity', 0.2)
+        .style('stroke', 'white')
+        .style('stroke-width', '1')
+        .call(d3.drag()
+          .on('start', dragstarted)
+          .on('drag', dragged)
+          .on('end', dragended));
+
+
       // svg.selectAll('g').remove();
-      node = svg.selectAll('g')
+      node = svg.append('g')
+        .attr('class', 'nodes')
+        .selectAll('g')
         .data(set.nodes);
       // node.exit().remove();
       // let node = svg.selectAll('g').data(set.nodes)
@@ -290,7 +367,7 @@ class Graph extends Component {
         .attr('id', d => d.titleTerm)
         .attr('d', (d) => {
           if (d.group === 1) {
-            const circle_radius = centrality(selectedCentrality, termCentrality.EigenVector[d.titleTerm]);
+            const circle_radius = centrality(selectedCentrality, termCentrality.EigenVector[d.titleTerm]) / 2;
             const erliestTime = new Date(d.date[0]);
             const latestTime = new Date(d.date[d.date.length - 1]);
             const arc = d3.arc()
@@ -321,13 +398,13 @@ class Graph extends Component {
         .attr('y1', function setY_2(d) {
           let term = d3.select(this.parentNode.parentNode);
           term = term.select('path').attr('id');
-          return -centrality(selectedCentrality, { titleTerm: term });
+          return -centrality(selectedCentrality, { titleTerm: term }) / 2;
         })
         .attr('x2', 0)
         .attr('y2', function setY_2(d) {
           let term = d3.select(this.parentNode.parentNode);
           term = term.select('path').attr('id');
-          return (-centrality(selectedCentrality, { titleTerm: term }) - 5);
+          return (-centrality(selectedCentrality, { titleTerm: term }) / 2 - 5);
         })
         .style('stroke', 'green')
         .style('stroke-width', '1px');
@@ -347,7 +424,7 @@ class Graph extends Component {
       const circles = nodeEnter.append('circle')
         .transition()
         .duration(500)
-        .attr('r', d => (d.group === 1 ? centrality(selectedCentrality, d) : d.size))
+        .attr('r', d => (d.group === 1 ? centrality(selectedCentrality, d) / 2 : d.size / 2))
         .attr('fill', (d) => {
           if (d.group === 1) {
             const cluster = d.cluster % 19;
@@ -423,7 +500,12 @@ class Graph extends Component {
         })
         .style('text-anchor', 'middle')
         .attr('font-family', 'Microsoft JhengHei')
-        .attr('font-size', d => `${5 + centrality(selectedCentrality, d)}px`)
+        .attr('font-size', (d) => {
+          if (centrality(selectedCentrality, d) <= fontSizeThreshhold) {
+            return '0px';
+          }
+          return `${5 + centrality(selectedCentrality, d)}px`;
+        })
         .attr('color', '#000')
         // .attr('visibility', d => (d.group !== 2 || d.merge > 1 ? 'visible' : 'hidden'))
         // .attr('x', d => (d.group !== 1 ? -3 : -d.size))
@@ -433,6 +515,12 @@ class Graph extends Component {
         .text(d => d.titleTerm);
       node = nodeEnter.merge(node);
 
+      const strengthScale = d3.scaleLinear()
+        .domain([
+          Math.min(...set.links.map(l => l.value)),
+          Math.max(...set.links.map(l => l.value)),
+        ]).range([1, 100]);
+
       simulation
         .nodes(set.nodes)
         .on('tick', ticked);
@@ -440,7 +528,14 @@ class Graph extends Component {
       simulation.alphaDecay(0.005)
         .force('link')
         .links(set.links)
-        .distance(d => 300 / d.value);
+        .distance(d => 1000 / strengthScale(d.value));
+        // .strength((d) => {
+        //   console.log(strengthScale(d.value));
+        //   return strengthScale(d.value);
+        // });
+
+      simulation.force('collision', d3.forceCollide(d => (d.group === 1 ? centrality(selectedCentrality, d) / 2 + 2 : d.size / 2 + 2)));
+      // .distance(d => 300 / d.value);
       // .strength(1);
 
       leftSvg.selectAll('*').remove();
@@ -873,6 +968,11 @@ class Graph extends Component {
       // }
 
       function ticked() {
+        if (set.nodes[0].x) {
+          const polygonShapes = voronoi(set.nodes.map(d => [d.x, d.y])).polygons();
+          polygons.attr('points', (d, i) => polygonShapes[i]);
+        }
+
         link
           .attr('x1', d => d.source.x)
           .attr('y1', d => d.source.y)
@@ -1578,6 +1678,7 @@ class Graph extends Component {
               // borderBottom: 'none',
             }}
           />
+          <div id="slider"></div>
           <svg id="graph" width="100%" height="95%" style={{}} />
         </div>
         {this.drawWordTree(word)}

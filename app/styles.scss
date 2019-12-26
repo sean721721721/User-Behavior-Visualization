@@ -299,7 +299,7 @@ path:hover {
     height: 95vh;
     display: grid;
     grid-gap: 1px;
-    grid-template-rows: [grow1] auto [grow2] minmax(1px, 90vh) [growend];
+    grid-template-rows: [grow1] 100px [grow2] minmax(1px, 90vh) [growend];
 }
 
 .box {
@@ -312,7 +312,8 @@ path:hover {
 
 .menu {
     padding: 5px;
-    grid-row: grow1 / grow2;
+    width: 100%;
+    // grid-row: grow1 / grow2;
 }
 
 .grid1 {
@@ -363,10 +364,10 @@ path:hover {
 
 .graph {
     grid-column: col1 / colend;
-    grid-row:none;
+    grid-row: grow2 / growend;
     display: grid;
     grid-template-columns: [sscol1] 0.2fr [sscol2] 10px [sscol3] auto [sscol4] 10px [sscol5] 0.2fr [sscolend];
-    grid-template-rows: [ssrow1] 0.8fr [ssrow2] 10px [ssrow3] 0.2fr [ssrowend];
+    grid-template-rows: [ssrow1] auto [ssrow2] 10px [ssrow3] 0.2fr [ssrowend];
 }
 
 .barchart {

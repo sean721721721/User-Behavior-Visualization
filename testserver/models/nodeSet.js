@@ -31,7 +31,7 @@ module.exports = {
     // console.log('computePropsUserList done!');
     propsDataStructureBuild();
     // console.log('propsDataStructureBuild done!');
-    mergeTermNodesWithUserCountEqualsOne();
+    // mergeTermNodesWithUserCountEqualsOne();
     // console.log('mergeTermNodesWithUserCountEqualsOne done!');
     setNodes();
     // console.log('setNodes done!');

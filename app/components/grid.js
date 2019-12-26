@@ -514,65 +514,69 @@ class Grid extends React.Component {
     console.log(visprops);
     console.log(this.state);
     return (
-      <div className="grid">
-        <Menu
-          menuprops={menuprops}
-          onSubmit={this.handleSubmit}
-          handlePT={e => this.handleTab(e, 'initParameter')}
-          handlePT1={e => this.handleTab(e, 'initPage1')}
-          handlePT2={e => this.handleTab(e, 'initPage2')}
-          handleDT={this.handleDownloadTab}
-          selectedOptions={selectedOptions}
-        />
-        <Provider store={store}>
-          <div className="grid1">
-            <Loading isLoading={isLoading} responseError={responseError} errorType={errorType} />
-            {/* <div className="grid2"> */}
-            {/* <div className="box gateKeeperview">
-                <GateKeeper gatekeeperprops={gatekeeperprops} />
-              </div> */}
-            {/* <div className="box overview">
-                <div id="template" className="slider__list" />
-                <div id="over" />
-                <div id="select" />
-                <Loading isLoading={isLoading} responseError={responseError} errorType={errorType} />
-                <AsyncApp />
-                <VisibleCardList />
-                <Footer />
-              </div> */}
-            {/* <div className="box postview">
-                <div id="page" />
-                <AddCard />
-              </div> */}
-            {/* <div className="box termview">
-                <Termlist termlistprops={termlistprops.list} />
-              </div> */}
-            {/* <div className="box detailview">
-                <div className="btn-postgroup" />
-                <div className="btn-usergroup" />
-                <Post postprops={postprops} />
-                <div id="detail" />
-              </div> */}
-            {/* </div> */}
-            {/* <div className="graph"> */}
-            <Graph visprops={visprops.list} date={visprops.date} word={visprops.word} post={visprops.post} set={visprops.set} initLinks={visprops.initLinks} />
-            {/* </div> */}
-            {/* <div className="box userview" id="table">
-              <div id="userdeg">
-                <div id="olbutton" />
-              </div>
-              <PostPage
-                postlistprops={postlistprops}
-                downloadprops={menuprops.initDownload}
-                filename={filename}
-                onChange={this.changePost}
-                previousPage={this.previousPage}
-                nextPage={this.nextPage}
-                postCount={postlistprops.list.length}
-              />
-            </div> */}
+      <div className="container-fluid">
+        <div className="navbar fixed-top">
+            <Menu
+              menuprops={menuprops}
+              onSubmit={this.handleSubmit}
+              handlePT={e => this.handleTab(e, 'initParameter')}
+              handlePT1={e => this.handleTab(e, 'initPage1')}
+              handlePT2={e => this.handleTab(e, 'initPage2')}
+              handleDT={this.handleDownloadTab}
+              selectedOptions={selectedOptions}
+            />
           </div>
-        </Provider>
+        <div className="grid">
+          <Provider store={store}>
+            <div className="grid1">
+              <Loading isLoading={isLoading} responseError={responseError} errorType={errorType} />
+              {/* <div className="grid2"> */}
+              {/* <div className="box gateKeeperview">
+                  <GateKeeper gatekeeperprops={gatekeeperprops} />
+                </div> */}
+              {/* <div className="box overview">
+                  <div id="template" className="slider__list" />
+                  <div id="over" />
+                  <div id="select" />
+                  <Loading isLoading={isLoading} responseError={responseError} errorType={errorType} />
+                  <AsyncApp />
+                  <VisibleCardList />
+                  <Footer />
+                </div> */}
+              {/* <div className="box postview">
+                  <div id="page" />
+                  <AddCard />
+                </div> */}
+              {/* <div className="box termview">
+                  <Termlist termlistprops={termlistprops.list} />
+                </div> */}
+              {/* <div className="box detailview">
+                  <div className="btn-postgroup" />
+                  <div className="btn-usergroup" />
+                  <Post postprops={postprops} />
+                  <div id="detail" />
+                </div> */}
+              {/* </div> */}
+              {/* <div className="graph"> */}
+              <Graph visprops={visprops.list} date={visprops.date} word={visprops.word} post={visprops.post} set={visprops.set} initLinks={visprops.initLinks} />
+              {/* </div> */}
+              {/* <div className="box userview" id="table">
+                <div id="userdeg">
+                  <div id="olbutton" />
+                </div>
+                <PostPage
+                  postlistprops={postlistprops}
+                  downloadprops={menuprops.initDownload}
+                  filename={filename}
+                  onChange={this.changePost}
+                  previousPage={this.previousPage}
+                  nextPage={this.nextPage}
+                  postCount={postlistprops.list.length}
+                />
+              </div> */}
+            </div>
+          </Provider>
+        </div>
       </div>
     );
   }
