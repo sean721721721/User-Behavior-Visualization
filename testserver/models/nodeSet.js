@@ -187,11 +187,38 @@ module.exports = {
                 messageCount.neutral = props[i][4][0].messageCount.neutral;
                 messageCount.push = props[i][4][0].messageCount.push;
               }
+
+              let articles = [];
+              // console.log(props[0][1][0]);
               //   console.log(messageCount);
+              articleId.some((id) => {
+                const firstRes = props[i][1].some((author) => {
+                  const secondRes = author.responder.forEach((p) => {
+                    if (p.articleId === id) {
+                      const { message_count } = p;
+                      const all = message_count[0].radius;
+                      const size = (all / messageCount.all) * 50;
+                      // console.log(message_count, all, size);
+                      const temp = p;
+                      temp.author = author.id;
+                      temp.size = size;
+                      temp.group = 3;
+                      temp.message = p.message;
+                      articles.push(p);
+                      return true;
+                    }
+                  });
+                  if (secondRes) return true;
+                });
+                if (firstRes) return true;
+              });
+              // console.log(articles);
+
               set.nodes.push({
                 titleTerm: props[i][0],
                 children: props[i][1],
                 _children: [],
+                articles,
                 articleIndex: props[i][2],
                 articleId,
                 date: props[i][3],
@@ -215,6 +242,7 @@ module.exports = {
         }
       }
     }
+
     function computeNodesUserList() {
       for (let i = 0; i <= set.nodes.length; i += 1) {
         if (set.nodes[i]) {

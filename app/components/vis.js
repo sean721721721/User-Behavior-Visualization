@@ -79,10 +79,7 @@ class Graph extends Component {
     const pi = Math.PI;
     const LinkThreshold = 0.1;
     const pie = d3.pie()
-      .value((d) => {
-        console.log(d);
-        return d.count;
-      })
+      .value(d => d.count)
       .sort(null);
     const pieColor = d3.schemeTableau10;
     const keyPlayerThreshold = 0;
@@ -91,6 +88,8 @@ class Graph extends Component {
     let selectedCluster = -1;
     let fontSizeThreshhold = 20;
     let sliderHasBeenLoaded = 0;
+    const NodeHiding = 1;
+    let cellData = { nodes: [], links: [] };
     // G.addNodesFrom([1, 2, 3, 4, 5]);
     // G.addEdgesFrom([[1, 2], [1, 3], [1, 5], [1, 4]]);
     // console.log(G);
@@ -173,7 +172,7 @@ class Graph extends Component {
     // const timeLineSvg = d3.select('#timeLine');
 
     let heatMapSvg = d3.select('#timeLine');
-
+    let articleCellSvg = d3.select('#articleCell');
     const wordTreeSvg = d3.select('#wordTree')
       .call(d3.zoom().scaleExtent([1 / 2, 8]).on('zoom', wordTreeSvgZoomed));
 
@@ -292,10 +291,7 @@ class Graph extends Component {
         .attr('class', 'links')
         .style('z-index', -1)
         .attr('visibility', 'hidden')
-        .attr('stroke', (d) => {
-          console.log(d);
-          return d.color;
-        })
+        .attr('stroke', d => d.color)
         .attr('stroke-width', d => (d.value < 100000 ? d.value : 3));
       link = linkEnter.merge(link);
       console.log(realWidth, realHeight);
@@ -317,11 +313,11 @@ class Graph extends Component {
         })
         .style('fill-opacity', 0.2)
         .style('stroke', 'white')
-        .style('stroke-width', '1')
-        .call(d3.drag()
-          .on('start', dragstarted)
-          .on('drag', dragged)
-          .on('end', dragended));
+        .style('stroke-width', '0');
+        // .call(d3.drag()
+        //   .on('start', dragstarted)
+        //   .on('drag', dragged)
+        //   .on('end', dragended));
 
 
       // svg.selectAll('g').remove();
@@ -406,6 +402,7 @@ class Graph extends Component {
           term = term.select('path').attr('id');
           return (-centrality(selectedCentrality, { titleTerm: term }) / 2 - 5);
         })
+        .attr('opacity', () => (NodeHiding ? 0 : 1))
         .style('stroke', 'green')
         .style('stroke-width', '1px');
 
@@ -439,7 +436,7 @@ class Graph extends Component {
           // if (d.merge > 1) return color(d.group);
           // return 'url(#pic_user)';
         })
-        .style('fill-opacity', 1)
+        .style('fill-opacity', () => (NodeHiding ? 0 : 1))
         .attr('stroke', (d) => {
           if (d.group !== 2) {
             if (d.tag === 1) return 'red'; // d.group !== 2 && d.tag === 1
@@ -451,7 +448,7 @@ class Graph extends Component {
           return 'gray'; // d.group === 2
         })
         .attr('stroke-width', d => (d.group === 1 ? 2 : 0.9))
-        .attr('stroke-opacity', 1);
+        .attr('stroke-opacity', () => (NodeHiding ? 0 : 1));
 
       const pieGroup = nodeEnter.append('g');
       const path = pieGroup.selectAll('path')
@@ -509,7 +506,10 @@ class Graph extends Component {
         .attr('color', '#000')
         // .attr('visibility', d => (d.group !== 2 || d.merge > 1 ? 'visible' : 'hidden'))
         // .attr('x', d => (d.group !== 1 ? -3 : -d.size))
-        .attr('y', d => (d.group !== 1 ? 3 : centrality(selectedCentrality, d) * 2 + 5));
+        .attr('y', (d) => {
+          if (NodeHiding) return 0;
+          return d.group !== 1 ? 3 : centrality(selectedCentrality, d) * 2 + 5;
+        });
 
       nodeEnter.append('title')
         .text(d => d.titleTerm);
@@ -528,11 +528,11 @@ class Graph extends Component {
       simulation.alphaDecay(0.005)
         .force('link')
         .links(set.links)
-        .distance(d => 1000 / strengthScale(d.value));
-        // .strength((d) => {
-        //   console.log(strengthScale(d.value));
-        //   return strengthScale(d.value);
-        // });
+        .distance(d => 500 / strengthScale(d.value));
+      // .strength((d) => {
+      //   console.log(strengthScale(d.value));
+      //   return strengthScale(d.value);
+      // });
 
       simulation.force('collision', d3.forceCollide(d => (d.group === 1 ? centrality(selectedCentrality, d) / 2 + 2 : d.size / 2 + 2)));
       // .distance(d => 300 / d.value);
@@ -545,8 +545,233 @@ class Graph extends Component {
       drawHeatMap();
       // drawWordTree();
 
-      function drawTable(data) {
+      function articleCell(cellNodes, cellLinks, cellIndex) {
+        console.log(cellNodes);
+        console.log(cellLinks);
+        // ({ nodes, links } = data);
+        articleCellSvg.selectAll('g').remove();
+        articleCellSvg = articleCellSvg
+          .call(d3.zoom().scaleExtent([1 / 2, 8]).on('zoom', articleCellZoomed))
+          .append('g');
 
+        let cellLink = articleCellSvg.selectAll('line')
+          .data(cellLinks);
+
+        link.exit().remove();
+        const cellLinkEnter = cellLink.enter()
+          // .append('g')
+          .append('line')
+          .attr('class', 'links')
+          .style('z-index', -1)
+          .attr('visibility', 'hidden')
+          .attr('stroke', d => d.color)
+          .attr('stroke-width', d => (d.value < 100000 ? d.value : 3));
+        cellLink = cellLinkEnter.merge(link);
+        console.log(realWidth, realHeight);
+        const cellVoronoi = d3.voronoi().extent([[-1000, -1000], [4000, 2000]]);
+
+        const cellPolygons = articleCellSvg.append('g')
+          .attr('class', 'polygons')
+          .selectAll('polygon')
+          .data(cellNodes)
+          .enter()
+          .append('polygon')
+          .style('fill', (d) => {
+            if (d.group === 1 || d.group === 3) {
+              const cluster = d.cluster % 19;
+              const betweennessColor = d3.hsl(color[cluster]);
+              return betweennessColor;
+            }
+            return 'green';
+          })
+          .style('fill-opacity', 0.2)
+          .style('stroke', 'white')
+          .style('stroke-width', '0');
+
+        let cellNode = articleCellSvg.append('g')
+          .attr('class', 'nodes')
+          .selectAll('g')
+          .data(cellNodes);
+
+        const cellNodeEnter = cellNode.enter()
+          .append('g')
+          .attr('class', 'nodes')
+          .style('z-index', 1)
+          .attr('opacity', (d) => {
+            if (d.group !== 2 && d.connected === 0) return 0.2;
+            if (d.show === 0) return 0.2;
+            return 1;
+          })
+          .on('click', clicked)
+          .on('mouseover', mouseOver(0.1))
+          .on('mouseout', mouseOut)
+          .call(d3.drag()
+            .on('start', dragstarted)
+            .on('drag', dragged)
+            .on('end', dragended));
+
+        cellNodeEnter
+          .append('defs')
+          .append('pattern')
+          .attr('id', 'pic_user')
+          .attr('height', 60)
+          .attr('width', 60)
+          .attr('x', 0)
+          .attr('y', 0)
+          .append('image')
+          .attr('xlink:href', 'https://i.imgur.com/jTUiJ1l.png')
+          .attr('height', 10)
+          .attr('width', 10)
+          .attr('x', 0)
+          .attr('y', 0);
+
+        cellNodeEnter.append('path')
+          .attr('id', d => d.titleTerm)
+          .attr('d', (d) => {
+            if (d.group === 1) {
+              const circle_radius = centrality(selectedCentrality, termCentrality.EigenVector[d.titleTerm]) / 2;
+              const erliestTime = new Date(d.date[0]);
+              const latestTime = new Date(d.date[d.date.length - 1]);
+              const arc = d3.arc()
+                .innerRadius(circle_radius + 2)
+                .outerRadius(circle_radius + 3)
+                .startAngle(((erliestTime - startDate) / timePeriod) * 360 * (pi / 180))
+                .endAngle(((latestTime - startDate) / timePeriod) * 360 * (pi / 180));
+              return arc();
+            }
+            // return 'M0';
+          })
+          .attr('fill', 'darkgray');
+
+        const cellKeyPlayerCircles = cellNodeEnter.selectAll('circle');
+
+        const cellCircles = cellNodeEnter.append('circle')
+          .transition()
+          .duration(500)
+          .attr('r', d => (d.group === 1 ? centrality(selectedCentrality, d) / 2 : d.size / 2))
+          .attr('fill', (d) => {
+            if (d.group === 1) {
+              const cluster = d.cluster % 19;
+              const betweennessColor = d3.hsl(color[cluster]);
+              return betweennessColor;
+            }
+            if (d.group === 2) {
+              return 'green';
+            }
+            return 'url(#pic_user)';
+          })
+          .style('fill-opacity', () => (NodeHiding ? 0 : 1))
+          .attr('stroke', (d) => {
+            if (d.group === 3) {
+              return 'red';
+            }
+            if (d.group !== 2) {
+              if (d.tag === 1) return 'red'; // d.group !== 2 && d.tag === 1
+              const cluster = d.cluster % 19;
+              let strokeColor = d3.color(color[cluster]);
+              strokeColor = strokeColor.darker();
+              return strokeColor; // d.group !== 2 && d.tag !== 1
+            }
+            return 'gray'; // d.group === 2
+          })
+          .attr('stroke-width', d => (d.group === 1 ? 2 : 0.9))
+          .attr('stroke-opacity', () => (NodeHiding ? 0 : 1));
+
+        const cellPieGroup = cellNodeEnter.append('g');
+        const cellPath = cellPieGroup.selectAll('path')
+          .data((d) => {
+            if (d.group === 3) {
+              // const totalMessageCount = d.data.reduce((pre, next) => pre.count + next.count);
+              // console.log(d.message_count);
+              return pie(d.message_count);
+            }
+            return [];
+          });
+
+        cellPath.enter().append('path')
+          .attr('fill', (d) => {
+            switch (d.data.type) {
+              case 'push':
+                return pieColor[4];
+              case 'boo':
+                return pieColor[2];
+              case 'neutral':
+                return pieColor[5];
+              default:
+                break;
+            }
+            return 'gray';
+          })
+          .attr('d', (d) => {
+            // console.log(d);
+            const arc = d3.arc()
+              .innerRadius(0)
+              .outerRadius(5 + Math.sqrt(d.data.radius))
+              .startAngle(d.startAngle)
+              .endAngle(d.endAngle);
+            return arc();
+          })
+          .attr('stroke', 'white')
+          .attr('stroke-width', '0.2px');
+
+
+        const cellLables = cellNodeEnter.append('text')
+          .text(d => d.author)
+          .style('text-anchor', 'middle')
+          .attr('font-family', 'Microsoft JhengHei')
+          .attr('font-size', '10px')
+          .attr('color', '#000')
+          .attr('y', (d) => {
+            if (NodeHiding) return 0;
+            return d.group !== 1 ? 3 : centrality(selectedCentrality, d) * 2 + 5;
+          });
+
+        cellNodeEnter.append('title')
+          .text(d => d.titleTerm);
+        cellNode = cellNodeEnter.merge(node);
+
+        const cellStrengthScale = d3.scaleLinear()
+          .domain([
+            Math.min(...set.links.map(l => l.value)),
+            Math.max(...set.links.map(l => l.value)),
+          ]).range([1, 100]);
+
+        const cellForceSimulation = d3.forceSimulation()
+          .force('link', d3.forceLink().id(d => d.title))
+          .force('charge', d3.forceManyBody().strength(-300))
+          .force('charge', d3.forceManyBody().distanceMax(1000))
+          .force('center', d3.forceCenter((100 * cellIndex) / 2, 500 / 2));
+
+        cellForceSimulation
+          .nodes(cellNodes)
+          .on('tick', cellTicked);
+
+        cellForceSimulation.alphaDecay(0.005)
+          .force('link')
+          .links(cellLinks)
+          .distance(d => 100);
+
+        // cellForceSimulation.force('collision', d3.forceCollide(d => d.size));
+        // leftSvg.selectAll('*').remove();
+
+        function cellTicked() {
+          // console.log(data.nodes[0]);
+          if (data.nodes[0].x) {
+            const cellPolygonShapes = voronoi(data.nodes.map(d => [d.x, d.y])).polygons();
+            // console.log(cellPolygonShapes);
+            cellPolygons.attr('points', (d, i) => cellPolygonShapes[i]);
+          }
+          cellLink
+            .attr('x1', d => d.source.x)
+            .attr('y1', d => d.source.y)
+            .attr('x2', d => d.target.x)
+            .attr('y2', d => d.target.y);
+          cellNode
+            .attr('transform', d => `translate( ${d.x}, ${d.y})`);
+        }
+      }
+
+      function drawTable(data) {
         const table = leftSvg.append('foreignObject')
           .attr('width', '100%')
           .attr('height', '100%')
@@ -968,8 +1193,10 @@ class Graph extends Component {
       // }
 
       function ticked() {
+        // console.log(set.nodes[0]);
         if (set.nodes[0].x) {
           const polygonShapes = voronoi(set.nodes.map(d => [d.x, d.y])).polygons();
+          // console.log(polygonShapes);
           polygons.attr('points', (d, i) => polygonShapes[i]);
         }
 
@@ -1096,7 +1323,7 @@ class Graph extends Component {
                       }
                       return sum + 0;
                     }, 0);
-                    console.log(articleReplyCount);
+                    // console.log(articleReplyCount);
                     const size = (articleReplyCount / d.messageCount.all) * 50;
                     set.nodes.push({
                       titleTerm: id_1.id,
@@ -1133,6 +1360,42 @@ class Graph extends Component {
 
           d.tag = 1;
           conutOfClickedNode += 1;
+          const clickedNode = JSON.parse(JSON.stringify(d));
+          cellData = { nodes: [clickedNode], links: [] };
+          clickedNode.articles.forEach((article) => {
+            cellData.nodes.push(article);
+            cellData.links.push({
+              source: article,
+              target: clickedNode,
+              color: '#ffbb78',
+              tag: 1,
+              value: 1,
+            });
+          });
+
+          d.children.forEach((usr) => {
+            if (usr.responder.length > 1) {
+              for (let i = 0; i < usr.responder.length - 1; i += 1) {
+                const temp = cellData.nodes.filter(n => n.articleId === usr.responder[i].articleId);
+                for (let j = 1; j < usr.responder.length; j += 1) {
+                  const next = cellData.nodes.filter(n => n.articleId === usr.responder[j].articleId);
+                  cellData.links.push({
+                    source: temp[0],
+                    target: next[0],
+                    color: '#ffbb78',
+                    tag: 1,
+                    value: 1,
+                  });
+                }
+              }
+            }
+          });
+
+          cellDataCommunityDetection(clickedNode);
+          console.log(cellData);
+          for (let i = 1; i < cellData.nodes.length; i += 1) {
+            articleCell(cellData.nodes[i], cellData.links, i);
+          }
         } else {
           set = JSON.parse(JSON.stringify(origSet));
           // console.log(set);
@@ -1233,6 +1496,27 @@ class Graph extends Component {
       function centrality(option, d) {
         if (option === 'eigenvector') return normalizeEigenvector(termCentrality.EigenVector[d.titleTerm]);
         return normalizeBetweenness(termCentrality.Betweenness[d.titleTerm]);
+      }
+
+      function cellDataCommunityDetection(clickedNode) {
+        const filteredLinks = cellData.links.filter((l) => {
+          if (l.target !== undefined) {
+            // console.log(l.target);
+            return l.target.titleTerm !== clickedNode.titleTerm;
+          }
+          return true;
+        });
+        console.log(filteredLinks);
+        const cellLinks = JSON.parse(JSON.stringify(filteredLinks));
+        // const cellLinks = JSON.parse(JSON.stringify(cellData.links));
+        console.log(cellData);
+        for (let i = 0; i < cellLinks.length; i += 1) {
+          // console.log(links[i]);
+          cellLinks[i].source = cellData.nodes.findIndex(ele => ele === cellData.links[i].source);
+          cellLinks[i].target = cellData.nodes.findIndex(ele => ele === cellData.links[i].target);
+        }
+        console.log(cellLinks);
+        netClustering.cluster(cellData.nodes, cellLinks);
       }
     }
     // build a dictionary of nodes that are linked
@@ -1342,7 +1626,9 @@ class Graph extends Component {
     //         message_count: [
     //           { type: 'push', count: article.message_count.push, radius: totalMessageCount },
     //           { type: 'boo', count: article.message_count.boo, radius: totalMessageCount },
-    //           { type: 'neutral', count: article.message_count.neutral, radius: totalMessageCount },
+    //           {
+    //             type: 'neutral',
+    //             count: article.message_count.neutral, radius: totalMessageCount },
     //         ],
     //       });
     //     }
@@ -1587,11 +1873,13 @@ class Graph extends Component {
       // const community = Louvain().nodes(node_data).edges(edge_data);
       // const result = community();
       const links = JSON.parse(JSON.stringify(set.links));
+      // console.log(links);
       for (let i = 0; i < links.length; i += 1) {
         // console.log(links[i]);
-        links[i].source = set.nodes.findIndex(ele => ele.titleTerm === set.links[i].source );
+        links[i].source = set.nodes.findIndex(ele => ele.titleTerm === set.links[i].source);
         links[i].target = set.nodes.findIndex(ele => ele.titleTerm === set.links[i].target);
       }
+
       netClustering.cluster(set.nodes, links);
       // console.log(set.nodes, links);
       // console.log(community());
@@ -1619,6 +1907,10 @@ class Graph extends Component {
 
     function heatMapZoomed() {
       heatMapSvg.attr('transform', d3.event.transform);
+    }
+
+    function articleCellZoomed() {
+      articleCellSvg.attr('transform', d3.event.transform);
     }
 
     function wordTreeSvgZoomed() {
@@ -1678,8 +1970,11 @@ class Graph extends Component {
               // borderBottom: 'none',
             }}
           />
-          <div id="slider"></div>
+          <div id="slider" />
           <svg id="graph" width="100%" height="95%" style={{}} />
+        </div>
+        <div className="articleCell">
+          <svg id="articleCell" width="100%" height="100%" />
         </div>
         {this.drawWordTree(word)}
         <div className="heatMap" style={{ border: '2px solid gray' }}>

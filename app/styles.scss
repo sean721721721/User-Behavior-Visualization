@@ -366,7 +366,7 @@ path:hover {
     grid-column: col1 / colend;
     grid-row: grow2 / growend;
     display: grid;
-    grid-template-columns: [sscol1] 0.2fr [sscol2] 10px [sscol3] auto [sscol4] 10px [sscol5] 0.2fr [sscolend];
+    grid-template-columns: [sscol1] 0.2fr [sscol2] 10px [sscol3] auto [sscol4] 5px [sscol5] 0.4fr [sscol6] 10px [sscol7] 0.2fr [sscolend];
     grid-template-rows: [ssrow1] auto [ssrow2] 10px [ssrow3] 0.2fr [ssrowend];
 }
 
@@ -384,9 +384,16 @@ path:hover {
     // grid-template-rows: [nwrow1] 0.1fr [nwrow2] 0.9fr [nwrowend];
 }
 
+.articleCell {
+    border: 2px solid gray;
+    display: grid;
+    grid-column: sscol5 / sscol6;
+    grid-row: ssrow1 / ssrow2;
+}
+
 .wordTree {
     display: grid;
-    grid-column: sscol5 / sscolend;
+    grid-column: sscol7 / sscolend;
     grid-row:ssrow1 / ssrow2;
 }
 
