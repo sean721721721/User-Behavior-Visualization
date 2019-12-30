@@ -549,10 +549,10 @@ class Graph extends Component {
         console.log(cellNodes);
         console.log(cellLinks);
         // ({ nodes, links } = data);
-        articleCellSvg.selectAll('g').remove();
-        articleCellSvg = articleCellSvg
-          .call(d3.zoom().scaleExtent([1 / 2, 8]).on('zoom', articleCellZoomed))
-          .append('g');
+        // articleCellSvg.selectAll('g').remove();
+        // articleCellSvg = articleCellSvg
+        //   .call(d3.zoom().scaleExtent([1 / 2, 8]).on('zoom', articleCellZoomed))
+        //   .append('g');
 
         let cellLink = articleCellSvg.selectAll('line')
           .data(cellLinks);
@@ -625,57 +625,29 @@ class Graph extends Component {
           .attr('x', 0)
           .attr('y', 0);
 
-        cellNodeEnter.append('path')
-          .attr('id', d => d.titleTerm)
-          .attr('d', (d) => {
-            if (d.group === 1) {
-              const circle_radius = centrality(selectedCentrality, termCentrality.EigenVector[d.titleTerm]) / 2;
-              const erliestTime = new Date(d.date[0]);
-              const latestTime = new Date(d.date[d.date.length - 1]);
-              const arc = d3.arc()
-                .innerRadius(circle_radius + 2)
-                .outerRadius(circle_radius + 3)
-                .startAngle(((erliestTime - startDate) / timePeriod) * 360 * (pi / 180))
-                .endAngle(((latestTime - startDate) / timePeriod) * 360 * (pi / 180));
-              return arc();
-            }
-            // return 'M0';
-          })
-          .attr('fill', 'darkgray');
-
         const cellKeyPlayerCircles = cellNodeEnter.selectAll('circle');
 
         const cellCircles = cellNodeEnter.append('circle')
           .transition()
           .duration(500)
-          .attr('r', d => (d.group === 1 ? centrality(selectedCentrality, d) / 2 : d.size / 2))
-          .attr('fill', (d) => {
-            if (d.group === 1) {
-              const cluster = d.cluster % 19;
-              const betweennessColor = d3.hsl(color[cluster]);
-              return betweennessColor;
-            }
-            if (d.group === 2) {
-              return 'green';
-            }
-            return 'url(#pic_user)';
-          })
-          .style('fill-opacity', () => (NodeHiding ? 0 : 1))
+          .attr('r', d => (d.group !== 3 ? 5 : d.size / 2))
+          .attr('fill', 'gray')
+          .style('fill-opacity', 1)
           .attr('stroke', (d) => {
-            if (d.group === 3) {
-              return 'red';
-            }
-            if (d.group !== 2) {
-              if (d.tag === 1) return 'red'; // d.group !== 2 && d.tag === 1
-              const cluster = d.cluster % 19;
-              let strokeColor = d3.color(color[cluster]);
-              strokeColor = strokeColor.darker();
-              return strokeColor; // d.group !== 2 && d.tag !== 1
-            }
+            // if (d.group === 3) {
+            //   return 'red';
+            // }
+            // if (d.group !== 2) {
+            //   if (d.tag === 1) return 'red'; // d.group !== 2 && d.tag === 1
+            //   const cluster = d.cluster % 19;
+            //   let strokeColor = d3.color(color[cluster]);
+            //   strokeColor = strokeColor.darker();
+            //   return strokeColor; // d.group !== 2 && d.tag !== 1
+            // }
             return 'gray'; // d.group === 2
           })
           .attr('stroke-width', d => (d.group === 1 ? 2 : 0.9))
-          .attr('stroke-opacity', () => (NodeHiding ? 0 : 1));
+          .attr('stroke-opacity', 1);
 
         const cellPieGroup = cellNodeEnter.append('g');
         const cellPath = cellPieGroup.selectAll('path')
@@ -737,10 +709,10 @@ class Graph extends Component {
           ]).range([1, 100]);
 
         const cellForceSimulation = d3.forceSimulation()
-          .force('link', d3.forceLink().id(d => d.title))
-          .force('charge', d3.forceManyBody().strength(-300))
-          .force('charge', d3.forceManyBody().distanceMax(1000))
-          .force('center', d3.forceCenter((100 * cellIndex) / 2, 500 / 2));
+          .force('link', d3.forceLink().id(d => d.id))
+          // .force('charge', d3.forceManyBody().strength(-30))
+          // .force('charge', d3.forceManyBody().distanceMax(1000))
+          .force('center', d3.forceCenter(100 * cellIndex, 500 / 2));
 
         cellForceSimulation
           .nodes(cellNodes)
@@ -749,18 +721,17 @@ class Graph extends Component {
         cellForceSimulation.alphaDecay(0.005)
           .force('link')
           .links(cellLinks)
-          .distance(d => 100);
+          .distance(d => 10);
 
         // cellForceSimulation.force('collision', d3.forceCollide(d => d.size));
-        // leftSvg.selectAll('*').remove();
 
         function cellTicked() {
           // console.log(data.nodes[0]);
-          if (data.nodes[0].x) {
-            const cellPolygonShapes = voronoi(data.nodes.map(d => [d.x, d.y])).polygons();
-            // console.log(cellPolygonShapes);
-            cellPolygons.attr('points', (d, i) => cellPolygonShapes[i]);
-          }
+          // if (data.nodes[0].x) {
+          //   const cellPolygonShapes = voronoi(data.nodes.map(d => [d.x, d.y])).polygons();
+          //   // console.log(cellPolygonShapes);
+          //   cellPolygons.attr('points', (d, i) => cellPolygonShapes[i]);
+          // }
           cellLink
             .attr('x1', d => d.source.x)
             .attr('y1', d => d.source.y)
@@ -1361,41 +1332,78 @@ class Graph extends Component {
           d.tag = 1;
           conutOfClickedNode += 1;
           const clickedNode = JSON.parse(JSON.stringify(d));
-          cellData = { nodes: [clickedNode], links: [] };
+          cellData = [];
           clickedNode.articles.forEach((article) => {
-            cellData.nodes.push(article);
-            cellData.links.push({
-              source: article,
-              target: clickedNode,
-              color: '#ffbb78',
-              tag: 1,
-              value: 1,
-            });
+            cellData.push({ nodes: [article], links: [] });
+            // cellData.links.push({
+            //   source: article,
+            //   target: clickedNode,
+            //   color: '#ffbb78',
+            //   tag: 1,
+            //   value: 1,
+            // });
           });
-
-          d.children.forEach((usr) => {
-            if (usr.responder.length > 1) {
-              for (let i = 0; i < usr.responder.length - 1; i += 1) {
-                const temp = cellData.nodes.filter(n => n.articleId === usr.responder[i].articleId);
-                for (let j = 1; j < usr.responder.length; j += 1) {
-                  const next = cellData.nodes.filter(n => n.articleId === usr.responder[j].articleId);
-                  cellData.links.push({
-                    source: temp[0],
-                    target: next[0],
-                    color: '#ffbb78',
-                    tag: 1,
-                    value: 1,
-                  });
-                }
-              }
-            }
-          });
-
-          cellDataCommunityDetection(clickedNode);
           console.log(cellData);
-          for (let i = 1; i < cellData.nodes.length; i += 1) {
-            articleCell(cellData.nodes[i], cellData.links, i);
-          }
+          let cellIndex = 0;
+          articleCellSvg = articleCellSvg
+            .call(d3.zoom().scaleExtent([1 / 2, 8]).on('zoom', articleCellZoomed))
+            .append('g');
+          cellData.forEach((ele) => {
+            d.children.some((usr) => {
+              const found = usr.responder.some((post) => {
+                console.log(ele.nodes[0]);
+                console.log(post);
+                if (post.articleId === ele.nodes[0].articleId) {
+                  post.message.forEach((replyer) => {
+                    ele.nodes.push({
+                      id: replyer.push_userid,
+                      date: replyer.push_ipdatetime,
+                      content: replyer.push_content,
+                      tag: replyer.push_tag,
+                    });
+                    ele.links.push({
+                      source: replyer.push_userid,
+                      target: ele,
+                      color: '#ffbb78',
+                      tag: 1,
+                      value: 1,
+                    });
+                  });
+                  return true;
+                }
+                return false;
+              });
+              return found;
+            });
+            console.log(ele);
+            articleCell(ele.nodes, ele.links, cellIndex);
+            cellIndex += 1;
+          });
+          // d.children.forEach((usr) => {
+          //   if (usr.responder.length > 1) {
+          //     for (let i = 0; i < usr.responder.length - 1; i += 1) {
+          //       const temp = cellData.nodes.filter(n => n.articleId === usr.responder[i].articleId);
+          //       for (let j = 1; j < usr.responder.length; j += 1) {
+          //         const next = cellData.nodes
+          //           .filter(n => n.articleId === usr.responder[j].articleId);
+
+          //         cellData.links.push({
+          //           source: temp[0],
+          //           target: next[0],
+          //           color: '#ffbb78',
+          //           tag: 1,
+          //           value: 1,
+          //         });
+          //       }
+          //     }
+          //   }
+          // });
+
+          // cellDataCommunityDetection(clickedNode);
+          // console.log(cellData);
+          // for (let i = 1; i < cellData.nodes.length; i += 1) {
+          //   articleCell(cellData.nodes[i], cellData.links, i);
+          // }
         } else {
           set = JSON.parse(JSON.stringify(origSet));
           // console.log(set);
@@ -1559,300 +1567,6 @@ class Graph extends Component {
       d.fy = null;
     }
 
-    // function removeDuplicates(array, key) {
-    //   const lookup = new Set();
-    //   return array.filter(obj => !lookup.has(obj[key]) && lookup.add(obj[key]));
-    // }
-
-    // function mergeTermNodes() {
-    //   for (let i = 0; i < props.length - 1; i += 1) {
-    //     for (let j = i + 1; j < props.length; j += 1) {
-    //       let numOfSameUser = 0;
-    //       for (let k = 0; k < props[i][1].length; k += 1) {
-    //         const findTheSameUser = props[j][1].includes(props[i][1][k]);
-    //         numOfSameUser = (findTheSameUser) ? numOfSameUser + 1 : numOfSameUser;
-    //       }
-    //       if (numOfSameUser === props[i][1].length && numOfSameUser === props[j][1].length) {
-    //         // console.log(numOfSameUser, props[i][1], props[j][1]);
-    //         const addingTerm = ` ${props[j][0]}`;
-    //         props[i][0] += addingTerm;
-    //         props.splice(j, 1);
-    //         j -= 1;
-    //       }
-    //     }
-    //   }
-    // }
-
-    // function removeTermNodesWithRemovedWords() {
-    //   for (let i = 0; i < removeWords.length; i += 1) {
-    //     const index = props.findIndex(prop => prop[0] === removeWords[i]);
-    //     if (index !== -1) props.splice(index, 1);
-    //   }
-    // }
-
-    // function computePropsUserList() {
-    //   // console.log(props);
-    //   for (let i = 0; i < props.length; i += 1) {
-    //     if (props[i][1]) {
-    //       props[i][1].forEach((userId) => {
-    //         const existedUser = propsUserList.find(user => user.id === userId);
-    //         if (existedUser) {
-    //           existedUser.term.push(props[i][0]);
-    //           existedUser.count += 1;
-    //         } else {
-    //           const count = post.filter(article => article.author === userId).length;
-    //           propsUserList.push({
-    //             id: userId,
-    //             numOfUsr: 1,
-    //             merge: 1,
-    //             count: 1,
-    //             postCount: count,
-    //             term: [props[i][0]],
-    //             responder: [],
-    //           });
-    //         }
-    //       });
-    //     }
-    //   }
-
-    //   post.forEach((article) => {
-    //     const index = propsUserList.find(user => user.id === article.author);
-    //     if (index) {
-    //       const { push, boo, neutral } = article.message_count;
-    //       const totalMessageCount = push + boo + neutral;
-    //       index.responder.push({
-    //         title: article.article_title,
-    //         message: article.messages,
-    //         message_count: [
-    //           { type: 'push', count: article.message_count.push, radius: totalMessageCount },
-    //           { type: 'boo', count: article.message_count.boo, radius: totalMessageCount },
-    //           {
-    //             type: 'neutral',
-    //             count: article.message_count.neutral, radius: totalMessageCount },
-    //         ],
-    //       });
-    //     }
-    //   });
-    //   // console.log(propsUserList);
-    // }
-
-    // function propsDataStructureBuild() {
-    //   for (let i = 0; i < props.length; i += 1) {
-    //     propsUserList.forEach((propsUser) => {
-    //       const index = props[i][1].findIndex(user => user === propsUser.id);
-    //       if (index !== -1) {
-    //         props[i][1].splice(index, 1);
-    //         props[i][1].push(propsUser);
-    //       }
-    //     });
-    //   }
-    // }
-
-    // function mergeTermNodesWithUserCountEqualsOne() {
-    //   // const findIndex = (array, num) => array.findIndex(ele => ele.id === num);
-    //   // for (let i = 0; i < props.length; i += 1) {
-    //   //   userList = props[i][1].filter(user => user.count === 1);
-    //   //   // console.log(userList);
-    //   //   let temp = '';
-    //   //   let size = 0;
-    //   //   for (let j = 1; j < userList.length; j += 1) {
-    //   //     temp += ` ${userList[j].id}`;
-    //   //     size += 1;
-    //   //     const deleteIndex = findIndex(props[i][1], userList[j].id);
-    //   //     props[i][1].splice(deleteIndex, 1);
-    //   //   }
-    //   //   if (userList.length > 0) {
-    //   //     userList[0].id += temp;
-    //   //     userList[0].numOfUsr += size;
-    //   //     userList[0].merge = 2;
-    //   //   }
-    //   // }
-    //   const hasMergedId = [];
-    //   for (let i = 0; i < props.length; i += 1) { // which title
-    //     for (let j = 0; j < props[i][1].length - 1; j += 1) {
-    //       for (let k = j + 1; k < props[i][1].length; k += 1) {
-    //         let equal = 1;
-    //         // console.log(props[i][1][j].id, props[i][1][k].id);
-    //         if (props[i][1][j].count === props[i][1][k].count && props[i][1][j].term) {
-    //           for (let l = 0; l < props[i][1][j].term.length; l += 1) {
-    //             if (!props[i][1][k].term.includes(props[i][1][j].term[l])) {
-    //               // console.log(`${props[i][1][j].id} is not equal to ${props[i][1][k].id}`);
-    //               equal = 0;
-    //               break;
-    //             }
-    //           }
-    //           if (equal === 1) {
-    //             if (!hasMergedId.includes(props[i][1][k].id)) {
-    //               // console.log(`${props[i][1][j].id} is equal to ${props[i][1][k].id}`);
-    //               props[i][1][j].id += props[i][1][k].id;
-    //               hasMergedId.push(props[i][1][k].id);
-    //               props[i][1][j].responder = props[i][1][j].responder
-    //                 .concat(props[i][1][k].responder);
-    //               props[i][1][j].merge = 2;
-    //               props[i][1][j].numOfUsr += 1;
-    //               // console.log(props[i][1][j].postCount, props[i][1][k].postCount);
-    //               props[i][1][j].postCount += props[i][1][k].postCount;
-    //               // console.log(props[i][1][j].responder, props[i][1][k].responder);
-    //             }
-    //             props[i][1].splice(k, 1);
-    //             k -= 1;
-    //           }
-    //         }
-    //       }
-    //     }
-    //   }
-    // }
-
-    // function setNodes() {
-    //   for (let i = 0; i < Math.min(props.length, SetNumOfNodes); i += 1) {
-    //     if (props[i][0] != null) {
-    //       const existKey = set.nodes.find(ele => ele.titleTerm === props[i][0]);
-    //       if (existKey === undefined) {
-    //         if (!removeWords.includes(props[i][0])) {
-    //           set.nodes.push({
-    //             titleTerm: props[i][0],
-    //             children: props[i][1],
-    //             _children: [],
-    //             articleIndex: props[i][2],
-    //             date: props[i][3],
-    //             community: [['', 0]],
-    //             group: 1,
-    //             tag: 0,
-    //             show: 1,
-    //             connected: -1,
-    //             size: 5 + Math.log2(props[i][1].length),
-    //           });
-    //           props[i][1].forEach((titleTerm) => {
-    //             const existId = set.nodes.find(ele => ele.titleTerm === titleTerm);
-    //             if (existId === undefined) {
-    //               // if(id != null)
-    //               //   set.nodes.push({id: id, group: 2, tag: 0, size: 5});
-    //             }
-    //           });
-    //         }
-    //       }
-    //     }
-    //   }
-    // }
-
-    // function computeNodesUserList() {
-    //   for (let i = 0; i <= set.nodes.length; i += 1) {
-    //     if (set.nodes[i]) {
-    //       if (set.nodes[i].children) {
-    //         set.nodes[i].children.forEach((userId) => {
-    //           const existedUser = userList.find(x => x.id === userId);
-    //           if (existedUser) {
-    //             existedUser.term.push(set.nodes[i].titleTerm);
-    //             existedUser.count += 1;
-    //           } else {
-    //             userList.push({ id: userId, count: 1, term: [set.nodes[i].titleTerm] });
-    //           }
-    //         });
-    //       }
-    //     }
-    //   }
-    //   // console.log(userList);
-    // }
-
-    // function computeNumOfUsersHaveSameTerm() {
-    //   for (let i = 0; i < set.nodes.length - 1; i += 1) {
-    //     for (let j = i + 1; j < set.nodes.length; j += 1) {
-    //       let numOfSameUsers = 0;
-    //       const largestNumOfSameUsers = 0;
-    //       // let term = '';
-    //       for (let k = 0; k < set.nodes[i].children.length; k += 1) {
-    //         const haveTheSameUsers = set.nodes[j].children.includes(set.nodes[i].children[k]);
-    //         if (haveTheSameUsers) numOfSameUsers += 1;
-    //       }
-    //       if (numOfSameUsers > set.nodes[i].community[0][1]) {
-    //         set.nodes[i].community[0][0] = set.nodes[j].titleTerm;
-    //         set.nodes[i].community[0][1] = numOfSameUsers;
-    //       } else if (numOfSameUsers === set.nodes[i].community[0][1]) {
-    //         set.nodes[i].community.push([set.nodes[j].titleTerm, numOfSameUsers]);
-    //       }
-    //     }
-    //   }
-    // }
-
-    // function LinkTitleWordByArticleIndex() {
-    //   let link_index = 0;
-    //   for (let i = 0; i < set.nodes.length - 1; i += 1) {
-    //     for (let j = i + 1; j < set.nodes.length; j += 1) {
-    //       let count = 0;
-    //       if (i !== j) {
-    //         set.nodes[i].children.forEach((id1) => {
-    //           if (set.nodes[j].children.includes(id1)) count += 1;
-    //         });
-    //         if (count !== 0) {
-    //           set.links.push({
-    //             source: set.nodes[i].titleTerm,
-    //             target: set.nodes[j].titleTerm,
-    //             tag: 0,
-    //             color: '#d9d9d9 ',
-    //             value: count,
-    //           });
-    //           initLinks.push({
-    //             source: {
-    //               titleTerm: set.nodes[i].titleTerm,
-    //               index: i,
-    //             },
-    //             target: {
-    //               titleTerm: set.nodes[j].titleTerm,
-    //               index: j,
-    //             },
-    //             tag: 0,
-    //             value: count,
-    //           });
-    //           link_index += 1;
-    //         }
-    //       }
-    //     }
-    //   }
-    // }
-
-    // function reduceLinksByThreshHold(threshold) {
-    //   for (let i = 0; i < set.links.length; i += 1) {
-    //     const { source, target } = set.links[i];
-    //     const links_Strength = set.links[i].value;
-    //     const source_Strength = set.nodes.find(_node => _node.titleTerm === source)
-    //       .articleIndex.length;
-    //     const target_Strength = set.nodes.find(_node => _node.titleTerm === target)
-    //       .articleIndex.length;
-    //     const link_threshold = (source_Strength + target_Strength) * threshold;
-    //     if ((links_Strength * 2) < link_threshold || links_Strength === 1) {
-    //       // console.log(link_threshold);
-    //       // console.log(source, target);
-    //       set.links.splice(i, 1);
-    //       i -= 1;
-    //     }
-    //   }
-    // }
-
-    // function setSpiralDataStructure() {
-    //   let postCount;
-    //   for (let i = 0; i < 365; i += 1) {
-    //     const currentDate = new Date();
-    //     currentDate.setDate(currentDate.getDate() + i - 233);
-    //     someData.push({
-    //       date: currentDate,
-    //       value: 0,
-    //       group: currentDate.getMonth(),
-    //     });
-    //   }
-
-    //   if (props[0]) postCount = props[0][3].length;
-    //   // console.log(`posCount: ${postCount}`);
-    //   for (let i = 0; i < postCount; i += 1) {
-    //     someData.find((data) => {
-    //       const xMonth = data.date.getMonth();
-    //       const dataMonth = new Date(props[0][3][i]).getMonth();
-    //       const xDate = data.date.getDate();
-    //       const dataDate = new Date(props[0][3][i]).getDate();
-    //       return xMonth === dataMonth && xDate === dataDate;
-    //     }).value += 1;
-    //   }
-    // }
-
     function buildGraph() {
       const node_data = set.nodes.map(d => d.titleTerm);
       const edge_data = set.links.map(d => [d.source, d.target, d.value]);
@@ -1879,11 +1593,7 @@ class Graph extends Component {
         links[i].source = set.nodes.findIndex(ele => ele.titleTerm === set.links[i].source);
         links[i].target = set.nodes.findIndex(ele => ele.titleTerm === set.links[i].target);
       }
-
       netClustering.cluster(set.nodes, links);
-      // console.log(set.nodes, links);
-      // console.log(community());
-      // console.log(result);
     }
 
     function getTermCommunity() {
