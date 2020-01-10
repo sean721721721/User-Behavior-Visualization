@@ -592,6 +592,7 @@ let titleUser = function titleUser(terms, posts){
             articlePostTime[keysSorted[j]], messageCountOfEachArticle[keysSorted[j]]]);       
     }
     // console.log('sortedUserList', sortedUserList);
+    // console.log(sortedUserList);
     console.log('compute titleUser Done!');
     return sortedUserList;
 }

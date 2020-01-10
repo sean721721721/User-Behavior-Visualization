@@ -58,6 +58,8 @@ class Graph extends Component {
     const startDate = new Date(date.$gte);
     const endDate = new Date(date.$lt);
     const timePeriod = endDate - startDate;
+    let beforeThisDate = startDate;
+    const timeScale = d3.scaleTime().domain([startDate, endDate]).range([0, 100]);
     // const props = JSON.parse(JSON.stringify(visprops)); // clone props;
     // const set = { nodes: [], links: [] };
     const { set: propsSet } = this.props;
@@ -90,38 +92,8 @@ class Graph extends Component {
     let sliderHasBeenLoaded = 0;
     const NodeHiding = 1;
     let cellData = { nodes: [], links: [] };
-    // G.addNodesFrom([1, 2, 3, 4, 5]);
-    // G.addEdgesFrom([[1, 2], [1, 3], [1, 5], [1, 4]]);
-    // console.log(G);
-    // let betweenness = jsnx.betweennessCentrality(G);
-    // let degree = jsnx.degree(G);
-    // // var eigenvector = jsnx.eigenvectorCentrality(G);
-    // console.log('betweenness:', betweenness);
-    // console.log(degree);
-    // props.splice(SetNumOfNodes); // Splice props to match properly size
+    let totalAuthorInfluence = 0;
 
-    // mergeTermNodes(); // props combine any titleterms with the equal users
-    // removeTermNodesWithRemovedWords();
-
-    // for (let i = 0; i < props.length - 1; i += 1) {
-    //   props[i][1] = [...new Set(props[i][1])];
-    //   props[i][1].sort();
-    // }
-
-    // computePropsUserList(); // Computing props user list
-    // propsDataStructureBuild(); // props[i][1]=['id', 'id'] => props[i][1]=[{id:, count:, ... }]
-    // mergeTermNodesWithUserCountEqualsOne(); // Combine all user with count == 1
-    // setNodes(); // Nodes setting
-
-    // for (let i = 0; i < set.nodes.length - 1; i += 1) {
-    //   set.nodes[i].children.sort();
-    // }
-
-    // computeNodesUserList(); // Computing user list
-    // computeNumOfUsersHaveSameTerm(); // compute how many same users each term has
-    // LinkTitleWordByArticleIndex(); // title words links by articleIndex
-    // reduceLinksByThreshHold(LinkThreshold);
-    // setSpiralDataStructure();
     buildGraph();
 
     communityDetecting();
@@ -157,6 +129,15 @@ class Graph extends Component {
       .force('charge', d3.forceManyBody().distanceMax(1000))
       .force('center', d3.forceCenter(width / 2, height / 2));
 
+    const cellForceSimulation = d3.forceSimulation()
+      .force('link', d3.forceLink().id((d) => {
+        if (d.group === 1) return d.titleTerm;
+        return d.id;
+      }))
+      .force('charge', d3.forceManyBody().strength(-10))
+      // .force('charge', d3.forceManyBody().distanceMax(1000))
+      .force('center', d3.forceCenter(200, 500));
+
     let conutOfClickedNode = 0;
 
     // Table with inline Bar chart
@@ -173,6 +154,9 @@ class Graph extends Component {
 
     let heatMapSvg = d3.select('#timeLine');
     let articleCellSvg = d3.select('#articleCell');
+    articleCellSvg = articleCellSvg
+      .call(d3.zoom().scaleExtent([1 / 2, 8]).on('zoom', articleCellZoomed))
+      .append('g');
     const wordTreeSvg = d3.select('#wordTree')
       .call(d3.zoom().scaleExtent([1 / 2, 8]).on('zoom', wordTreeSvgZoomed));
 
@@ -207,19 +191,19 @@ class Graph extends Component {
       });
     d3.select('#betweenness').on('input', update());
 
-    const nevigator = d3.select('#button');
-    nevigator.append('text')
+    const navigator = d3.select('#button');
+    navigator.append('text')
       .attr('text-anchor', 'middle')
       .attr('font-size', '24px')
       .attr('x', '50%')
       .attr('y', '10%')
       .text(`${'Centrality:'} ${'    '}`);
-    nevigator.append('span')
+    navigator.append('span')
       .attr('font-size', '24px')
       .attr('margin', '5px')
       .text('Low');
 
-    const slider = nevigator.append('input');
+    const slider = navigator.append('input');
     slider.datum({})
       .attr('type', 'range')
       .attr('class', 'custom-range')
@@ -235,21 +219,59 @@ class Graph extends Component {
         update();
       });
 
-    nevigator.append('text')
+    navigator.append('text')
       .attr('id', 'sizeThreshold')
       .attr('text-anchor', 'middle')
       .attr('font-size', '24px')
       .attr('x', '50%')
       .attr('y', '10%')
       .text('High');
+
+    const cellNavigator = d3.select('#timeSlider');
+    cellNavigator.append('text')
+      .attr('text-anchor', 'middle')
+      .attr('font-size', '24px')
+      .attr('x', '50%')
+      .attr('y', '10%')
+      .text(`${'Date:'} ${'    '}`);
+    cellNavigator.append('span')
+      .attr('font-size', '24px')
+      .attr('margin', '5px')
+      .text('Earliest');
+
+    const timeSlider = cellNavigator.append('input');
+    timeSlider.datum({})
+      .attr('type', 'range')
+      .attr('class', 'custom-range')
+      .attr('id', 'customRange2')
+      .style('width', '150px')
+      .style('padding-top', '15px')
+      .attr('value', beforeThisDate)
+      .attr('min', startDate)
+      .attr('max', endDate)
+      .attr('step', 1)
+      .on('input', () => {
+        sliderHasBeenLoaded = 1;
+        flowerGlyph(cellData.nodes, cellData.links, totalAuthorInfluence);
+      });
+
+    cellNavigator.append('text')
+      .attr('id', 'sizeThreshold')
+      .attr('text-anchor', 'middle')
+      .attr('font-size', '24px')
+      .attr('x', '50%')
+      .attr('y', '10%')
+      .text('Latest');
     // update();
 
     function update() {
       if (sliderHasBeenLoaded) {
         fontSizeThreshhold = d3.select('#customRange1').property('value');
+        beforeThisDate = d3.select('#customRange2').property('value');
+        beforeThisDate = timeScale.invert(beforeThisDate);
         // nevigator.select('#sizeThreshold').text(fontSizeThreshhold);
       }
-      console.log(fontSizeThreshhold);
+      console.log(beforeThisDate);
       // console.log('svgupdate');
       // console.log(initLinks);
       const selectedCentrality = d3.select('input[name="centrality"]:checked').property('value');
@@ -294,7 +316,7 @@ class Graph extends Component {
         .attr('stroke', d => d.color)
         .attr('stroke-width', d => (d.value < 100000 ? d.value : 3));
       link = linkEnter.merge(link);
-      console.log(realWidth, realHeight);
+      // console.log(realWidth, realHeight);
       const voronoi = d3.voronoi().extent([[-1000, -1000], [4000, 2000]]);
 
       const polygons = svg.append('g')
@@ -314,11 +336,6 @@ class Graph extends Component {
         .style('fill-opacity', 0.2)
         .style('stroke', 'white')
         .style('stroke-width', '0');
-        // .call(d3.drag()
-        //   .on('start', dragstarted)
-        //   .on('drag', dragged)
-        //   .on('end', dragended));
-
 
       // svg.selectAll('g').remove();
       node = svg.append('g')
@@ -407,17 +424,6 @@ class Graph extends Component {
         .style('stroke-width', '1px');
 
       const keyPlayerCircles = nodeEnter.selectAll('circle');
-
-      // keyPlayerCircles.data(d => (d.group === 2 ? [d] : d))
-      //   .enter()
-      //   .append('g').append('circle')
-      //   .attr('r', d => d.size + Math.sqrt(d.postCount))
-      //   .attr('fill', 'white')
-      //   .style('fill-opacity', 1)
-      //   .attr('stroke', 'gray')
-      //   .attr('stroke-width', 2)
-      //   .attr('stroke-opacity', d => (d.postCount >= 5 ? 1 : 0));
-
       const circles = nodeEnter.append('circle')
         .transition()
         .duration(500)
@@ -432,11 +438,9 @@ class Graph extends Component {
             return 'green';
           }
           return 'url(#pic_user)';
-          // if (d.group !== 2) return color(d.group);
-          // if (d.merge > 1) return color(d.group);
-          // return 'url(#pic_user)';
         })
         .style('fill-opacity', () => (NodeHiding ? 0 : 1))
+        // .style('fill-opacity', 1)
         .attr('stroke', (d) => {
           if (d.group !== 2) {
             if (d.tag === 1) return 'red'; // d.group !== 2 && d.tag === 1
@@ -490,8 +494,6 @@ class Graph extends Component {
 
       const lables = nodeEnter.append('text')
         .text((d) => {
-          // if (d.merge > 1) return d.numOfUsr;
-          // if (d.group === 2) return d.postCount;
           if (d.group === 2) return '';
           return d.titleTerm;
         })
@@ -504,8 +506,6 @@ class Graph extends Component {
           return `${5 + centrality(selectedCentrality, d)}px`;
         })
         .attr('color', '#000')
-        // .attr('visibility', d => (d.group !== 2 || d.merge > 1 ? 'visible' : 'hidden'))
-        // .attr('x', d => (d.group !== 1 ? -3 : -d.size))
         .attr('y', (d) => {
           if (NodeHiding) return 0;
           return d.group !== 1 ? 3 : centrality(selectedCentrality, d) * 2 + 5;
@@ -534,7 +534,7 @@ class Graph extends Component {
       //   return strengthScale(d.value);
       // });
 
-      simulation.force('collision', d3.forceCollide(d => (d.group === 1 ? centrality(selectedCentrality, d) / 2 + 2 : d.size / 2 + 2)));
+      simulation.force('collision', d3.forceCollide(d => (d.group === 1 ? centrality(selectedCentrality, d) * 2 + 2 : d.size / 2 + 2)));
       // .distance(d => 300 / d.value);
       // .strength(1);
 
@@ -544,203 +544,6 @@ class Graph extends Component {
       // drawTimeLine();
       drawHeatMap();
       // drawWordTree();
-
-      function articleCell(cellNodes, cellLinks, cellIndex) {
-        console.log(cellNodes);
-        console.log(cellLinks);
-        // ({ nodes, links } = data);
-        // articleCellSvg.selectAll('g').remove();
-        // articleCellSvg = articleCellSvg
-        //   .call(d3.zoom().scaleExtent([1 / 2, 8]).on('zoom', articleCellZoomed))
-        //   .append('g');
-
-        let cellLink = articleCellSvg.selectAll('line')
-          .data(cellLinks);
-
-        link.exit().remove();
-        const cellLinkEnter = cellLink.enter()
-          // .append('g')
-          .append('line')
-          .attr('class', 'links')
-          .style('z-index', -1)
-          .attr('visibility', 'hidden')
-          .attr('stroke', d => d.color)
-          .attr('stroke-width', d => (d.value < 100000 ? d.value : 3));
-        cellLink = cellLinkEnter.merge(link);
-        console.log(realWidth, realHeight);
-        const cellVoronoi = d3.voronoi().extent([[-1000, -1000], [4000, 2000]]);
-
-        const cellPolygons = articleCellSvg.append('g')
-          .attr('class', 'polygons')
-          .selectAll('polygon')
-          .data(cellNodes)
-          .enter()
-          .append('polygon')
-          .style('fill', (d) => {
-            if (d.group === 1 || d.group === 3) {
-              const cluster = d.cluster % 19;
-              const betweennessColor = d3.hsl(color[cluster]);
-              return betweennessColor;
-            }
-            return 'green';
-          })
-          .style('fill-opacity', 0.2)
-          .style('stroke', 'white')
-          .style('stroke-width', '0');
-
-        let cellNode = articleCellSvg.append('g')
-          .attr('class', 'nodes')
-          .selectAll('g')
-          .data(cellNodes);
-
-        const cellNodeEnter = cellNode.enter()
-          .append('g')
-          .attr('class', 'nodes')
-          .style('z-index', 1)
-          .attr('opacity', (d) => {
-            if (d.group !== 2 && d.connected === 0) return 0.2;
-            if (d.show === 0) return 0.2;
-            return 1;
-          })
-          .on('click', clicked)
-          .on('mouseover', mouseOver(0.1))
-          .on('mouseout', mouseOut)
-          .call(d3.drag()
-            .on('start', dragstarted)
-            .on('drag', dragged)
-            .on('end', dragended));
-
-        cellNodeEnter
-          .append('defs')
-          .append('pattern')
-          .attr('id', 'pic_user')
-          .attr('height', 60)
-          .attr('width', 60)
-          .attr('x', 0)
-          .attr('y', 0)
-          .append('image')
-          .attr('xlink:href', 'https://i.imgur.com/jTUiJ1l.png')
-          .attr('height', 10)
-          .attr('width', 10)
-          .attr('x', 0)
-          .attr('y', 0);
-
-        const cellKeyPlayerCircles = cellNodeEnter.selectAll('circle');
-
-        const cellCircles = cellNodeEnter.append('circle')
-          .transition()
-          .duration(500)
-          .attr('r', d => (d.group !== 3 ? 5 : d.size / 2))
-          .attr('fill', 'gray')
-          .style('fill-opacity', 1)
-          .attr('stroke', (d) => {
-            // if (d.group === 3) {
-            //   return 'red';
-            // }
-            // if (d.group !== 2) {
-            //   if (d.tag === 1) return 'red'; // d.group !== 2 && d.tag === 1
-            //   const cluster = d.cluster % 19;
-            //   let strokeColor = d3.color(color[cluster]);
-            //   strokeColor = strokeColor.darker();
-            //   return strokeColor; // d.group !== 2 && d.tag !== 1
-            // }
-            return 'gray'; // d.group === 2
-          })
-          .attr('stroke-width', d => (d.group === 1 ? 2 : 0.9))
-          .attr('stroke-opacity', 1);
-
-        const cellPieGroup = cellNodeEnter.append('g');
-        const cellPath = cellPieGroup.selectAll('path')
-          .data((d) => {
-            if (d.group === 3) {
-              // const totalMessageCount = d.data.reduce((pre, next) => pre.count + next.count);
-              // console.log(d.message_count);
-              return pie(d.message_count);
-            }
-            return [];
-          });
-
-        cellPath.enter().append('path')
-          .attr('fill', (d) => {
-            switch (d.data.type) {
-              case 'push':
-                return pieColor[4];
-              case 'boo':
-                return pieColor[2];
-              case 'neutral':
-                return pieColor[5];
-              default:
-                break;
-            }
-            return 'gray';
-          })
-          .attr('d', (d) => {
-            // console.log(d);
-            const arc = d3.arc()
-              .innerRadius(0)
-              .outerRadius(5 + Math.sqrt(d.data.radius))
-              .startAngle(d.startAngle)
-              .endAngle(d.endAngle);
-            return arc();
-          })
-          .attr('stroke', 'white')
-          .attr('stroke-width', '0.2px');
-
-
-        const cellLables = cellNodeEnter.append('text')
-          .text(d => d.author)
-          .style('text-anchor', 'middle')
-          .attr('font-family', 'Microsoft JhengHei')
-          .attr('font-size', '10px')
-          .attr('color', '#000')
-          .attr('y', (d) => {
-            if (NodeHiding) return 0;
-            return d.group !== 1 ? 3 : centrality(selectedCentrality, d) * 2 + 5;
-          });
-
-        cellNodeEnter.append('title')
-          .text(d => d.titleTerm);
-        cellNode = cellNodeEnter.merge(node);
-
-        const cellStrengthScale = d3.scaleLinear()
-          .domain([
-            Math.min(...set.links.map(l => l.value)),
-            Math.max(...set.links.map(l => l.value)),
-          ]).range([1, 100]);
-
-        const cellForceSimulation = d3.forceSimulation()
-          .force('link', d3.forceLink().id(d => d.id))
-          // .force('charge', d3.forceManyBody().strength(-30))
-          // .force('charge', d3.forceManyBody().distanceMax(1000))
-          .force('center', d3.forceCenter(100 * cellIndex, 500 / 2));
-
-        cellForceSimulation
-          .nodes(cellNodes)
-          .on('tick', cellTicked);
-
-        cellForceSimulation.alphaDecay(0.005)
-          .force('link')
-          .links(cellLinks)
-          .distance(d => 10);
-
-        // cellForceSimulation.force('collision', d3.forceCollide(d => d.size));
-
-        function cellTicked() {
-          // console.log(data.nodes[0]);
-          // if (data.nodes[0].x) {
-          //   const cellPolygonShapes = voronoi(data.nodes.map(d => [d.x, d.y])).polygons();
-          //   // console.log(cellPolygonShapes);
-          //   cellPolygons.attr('points', (d, i) => cellPolygonShapes[i]);
-          // }
-          cellLink
-            .attr('x1', d => d.source.x)
-            .attr('y1', d => d.source.y)
-            .attr('x2', d => d.target.x)
-            .attr('y2', d => d.target.y);
-          cellNode
-            .attr('transform', d => `translate( ${d.x}, ${d.y})`);
-        }
-      }
 
       function drawTable(data) {
         const table = leftSvg.append('foreignObject')
@@ -753,9 +556,6 @@ class Graph extends Component {
         th.append('td').attr('class', 'data name')
           .attr('width', '25%')
           .text('Cluster');
-        // th.append('td').attr('class', 'data name')
-        //   .attr('width', '30px')
-        //   .text('Color');
 
         // Create a table with rows and bind a data row to each table row
         const tr = table.selectAll('tr.data')
@@ -771,14 +571,6 @@ class Graph extends Component {
         // Set the even columns
         d3.selectAll('.datarow').filter(':nth-child(even)')
           .style('background', 'whitesmoke');
-
-        // Create the name column
-        // tr.append('td').attr('class', 'data name')
-        //   .text(d => d.cluster);
-
-        // // Create the percent value column
-        // tr.append('td').attr('class', 'data value')
-        //   .text(d => (d.children === undefined ? 0 : d.children.length));
 
         // Create a column at the beginning of the table for the chart
         const chart = tr.append('td').attr('class', 'chart')
@@ -804,10 +596,6 @@ class Graph extends Component {
             const betweennessColor = d3.hsl(color[cluster]);
             return betweennessColor;
           });
-        // .transition()
-        // .duration(500)
-        // .style('width', d => (d.children !== undefined && d.children.length > 0 ?
-        // x(d.children.length) : '0%'));
       }
 
       function drawHeatMap() {
@@ -839,7 +627,6 @@ class Graph extends Component {
 
         // append the svg object to the body of the page
         const heatMap = heatMapSvg.attr('height', heatMapHeight + margin.top + margin.bottom)
-          // .attr('width', heatMapWidth + margin.left + margin.right + 200)
           .append('g')
           .attr('transform',
             `translate(${200}, ${margin.top})`);
@@ -850,7 +637,6 @@ class Graph extends Component {
           .domain(postDate)
           .padding(0.1);
         heatMap.append('g')
-          // .attr('transform', `translate(0, ${heatMapHeight})`)
           .call(d3.drag()
             .on('start', dragstarted)
             .on('drag', dragged)
@@ -866,10 +652,6 @@ class Graph extends Component {
           .attr('class', 'axisY')
           .call(d3.axisLeft(heatMapY));
 
-        // Build color scale
-        // const myColor = d3.scaleLinear()
-        //   .range(['white', '#69b3a2'])
-        //   .domain([1, 100]);
         const myColor = d3.interpolateRdYlGn;
 
         set.nodes.forEach((obj) => {
@@ -908,260 +690,6 @@ class Graph extends Component {
         heatMap.selectAll('.axisY .tick')
           .on('click', clicked);
       }
-
-      // function drawTimeLine() {
-      //   // const { gatekeeperprops } = this.state;
-      //   // const { ptt, news } = gatekeeperprops;
-      //   // console.log(news, ptt);
-
-      //   const xScale = d3.scaleTime().domain([startDate, endDate]).range([0, 100]);
-      //   const colorScale = d3.scaleLinear().domain([0, 1]).range([0.0, 0.5]);
-      //   const timeLinecolor = d3.interpolateSinebow;
-
-      //   // function update() {
-      //   timeLineSvg.selectAll('*').remove();
-
-      //   const formatTime = d3.timeFormat('%B %d, %Y');
-      //   // const g = timeLineSvg.append('foreignObject')
-      //   //   .attr('width', '100%')
-      //   //   .attr('height', '100%')
-      //   //   .style('overflow-y', 'scroll');
-      //   // const spectrums = g.append('g');
-      //   const spectrums = timeLineSvg.append('g');
-      //   // spectrums.attr('transform', `translate(${width / 2 - 270}, -100) scale(1.2,1.2)`);
-      //   const domainName = [];
-      //   set.nodes.forEach((term) => {
-      //     domainName.push(term.titleTerm);
-      //   });
-
-      //   const term_y = d3.scalePoint().range([0, domainName.length * 10]);
-      //   term_y.domain(domainName);
-
-      //   const date_x = d3.scaleTime().range([0, 900]);
-      //   date_x.domain([startDate, endDate]);
-      //   const colors = d3.schemeTableau10;
-      //   console.log(colors);
-      //   for (let i = 0; i < domainName.length; i += 1) {
-      //     const postTime = spectrums.selectAll('line').data(set.nodes[i].date);
-      //     postTime.enter()
-      //       .append('circle')
-      //       .attr('transform', 'translate(110,20)')
-      //       .attr('cy', (i * 10) + 1)
-      //       .attr('cx', d => date_x(new Date(d)))
-      //       .attr('r', 2)
-      //       .style('fill', colors[((i % 10) + 1)]);
-      //   }
-
-      //   // Add the x Axis
-      //   const axisX = spectrums;
-      //   const axisY = spectrums;
-
-      //   axisY.append('g')
-      //     .attr('transform', 'translate(110,20)')
-      //     .call(d3.axisLeft(term_y).tickFormat(d => d));
-
-      //   axisX.append('g')
-      //     .attr('transform', 'translate(110,17)')
-      //     .call(d3.axisTop(date_x).tickFormat(d3.timeFormat('%m/%d')));
-
-      //   axisY.attr('color', 'black');
-      // }
-
-      // function drawWordTree() {
-      //   wordTreeSvg.selectAll('*').remove();
-      //   let treeData = {
-      //     name: 'Top Level',
-      //     children: [
-      //       {
-      //         name: 'Level 2: A',
-      //         children: [
-      //           { name: 'Son of A' },
-      //           { name: 'Daughter of A' },
-      //         ],
-      //       },
-      //       { name: 'Level 2: B' },
-      //     ],
-      //   };
-
-      //   // Set the dimensions and margins of the diagram
-      //   const margin = {
-      //     top: 20, right: 90, bottom: 30, left: 90,
-      //   };
-      //   const treeWidth = 960 - margin.left - margin.right;
-      //   const treeHeight = 500 - margin.top - margin.bottom;
-
-      //   // append the svg object to the body of the page
-      //   // appends a 'group' element to 'svg'
-      //   // moves the 'group' element to the top left margin
-      //   wordTreeSvg = wordTreeSvg.attr('fill', 'black')
-      //     .style('background', 'white')
-      //     .append('g')
-      //     .attr('transform', `translate(${margin.left}, ${margin.top})`);
-
-      //   let i = 0;
-      //   const duration = 750;
-
-      //   // declares a tree layout and assigns the size
-      //   const treemap = d3.tree().size([treeHeight, treeWidth]);
-
-      //   // Assigns parent, children, height, depth
-      //   const root = d3.hierarchy(treeData, d => d.children);
-      //   root.x0 = treeHeight / 2;
-      //   root.y0 = 0;
-
-      //   // Collapse after the second level
-      //   // root.children.forEach(collapse);
-
-      //   updateTree(root);
-
-      //   // Collapse the node and all it's children
-      //   // function collapse(d) {
-      //   //   if(d.children) {
-      //   //     d._children = d.children
-      //   //     d._children.forEach(collapse)
-      //   //     d.children = null
-      //   //   }
-      //   // }
-
-      //   function updateTree(source) {
-      //     // Assigns the x and y position for the nodes
-      //     treeData = treemap(root);
-
-      //     // Compute the new tree layout.
-      //     const treeNodes = treeData.descendants();
-      //     const treeLinks = treeData.descendants().slice(1);
-
-      //     // Normalize for fixed-depth.
-      //     treeNodes.forEach((d) => { d.y = d.depth * 180; });
-
-      //     // ****************** Nodes section ***************************
-
-      //     // Update the nodes...
-      //     const treeNode = wordTreeSvg.selectAll('g.node')
-      //       .data(treeNodes, (d) => {
-      //         i += 1;
-      //         if (d.id) {
-      //           return d.id;
-      //         }
-      //         d.id = i;
-      //         return d.id;
-      //       });
-
-      //     // Enter any new modes at the parent's previous position.
-      //     const treeNodeEnter = treeNode.enter().append('g')
-      //       .attr('class', 'node')
-      //       .attr('transform', d => `translate(${source.y0},${source.x0})`)
-      //       .on('click', click);
-
-      //     // Add Circle for the nodes
-      //     treeNodeEnter.append('circle')
-      //       .attr('class', 'node')
-      //       .attr('r', 1e-6)
-      //       .style('fill', d => (d.childrenHide ? 'lightsteelblue' : '#fff'));
-
-      //     // Add labels for the nodes
-      //     treeNodeEnter.append('text')
-      //       .attr('dy', '.35em')
-      //       .attr('x', d => (d.children || d.childrenHide ? -13 : 13))
-      //       .attr('text-anchor', d => (d.children || d.childrenHide ? 'end' : 'start'))
-      //       .text(d => d.data.name);
-
-      //     // UPDATE
-      //     const nodeUpdate = treeNodeEnter.merge(treeNode);
-
-      //     // Transition to the proper position for the node
-      //     nodeUpdate.transition()
-      //       .duration(duration)
-      //       .attr('transform', d => `translate(${d.y}, ${d.x})`);
-
-      //     // Update the node attributes and style
-      //     nodeUpdate.select('circle.node')
-      //       .attr('r', 10)
-      //       .style('fill', d => (d.childrenHide ? 'lightsteelblue' : '#fff'))
-      //       .attr('cursor', 'pointer')
-      //       .attr('fill', '#fff')
-      //       .attr('stroke', 'steelblue')
-      //       .attr('stroke-width', '3px');
-
-
-      //     // Remove any exiting nodes
-      //     const nodeExit = treeNode.exit().transition()
-      //       .duration(duration)
-      //       .attr('transform', d => `translate(${source.y}, ${source.x})`)
-      //       .remove();
-
-      //     // On exit reduce the node circles size to 0
-      //     nodeExit.select('circle')
-      //       .attr('r', 1e-6);
-
-      //     // On exit reduce the opacity of text labels
-      //     nodeExit.select('text')
-      //       .style('fill-opacity', 1e-6)
-      //       .attr('font', '12px sans-serif');
-
-      //     // ****************** links section ***************************
-
-      //     // Update the links...
-      //     const treeLink = wordTreeSvg.selectAll('path.link')
-      //       .data(treeLinks, d => d.id);
-
-      //     // Enter any new links at the parent's previous position.
-      //     const treeLinkEnter = treeLink.enter().insert('path', 'g')
-      //       .attr('class', 'link')
-      //       .attr('fill', 'none')
-      //       .attr('stroke', '#ccc')
-      //       .attr('stroke-width', '2px')
-      //       .attr('d', (d) => {
-      //         const o = { x: source.x0, y: source.y0 };
-      //         return diagonal(o, o);
-      //       });
-
-      //     // UPDATE
-      //     const linkUpdate = treeLinkEnter.merge(treeLink);
-
-      //     // Transition back to the parent element position
-      //     linkUpdate.transition()
-      //       .duration(duration)
-      //       .attr('d', d => diagonal(d, d.parent));
-
-      //     // Remove any exiting links
-      //     const linkExit = treeLink.exit().transition()
-      //       .duration(duration)
-      //       .attr('d', (d) => {
-      //         const o = { x: source.x, y: source.y };
-      //         return diagonal(o, o);
-      //       })
-      //       .remove();
-
-      //     // Store the old positions for transition.
-      //     treeNodes.forEach((d) => {
-      //       d.x0 = d.x;
-      //       d.y0 = d.y;
-      //     });
-
-      //     // Creates a curved (diagonal) path from parent to the child nodes
-      //     function diagonal(s, d) {
-      //       const path = `M ${s.y} ${s.x}
-      //               C ${(s.y + d.y) / 2} ${s.x},
-      //                 ${(s.y + d.y) / 2} ${d.x},
-      //                 ${d.y} ${d.x}`;
-
-      //       return path;
-      //     }
-
-      //     // Toggle children on click.
-      //     function click(d) {
-      //       if (d.children) {
-      //         d.childrenHide = d.children;
-      //         d.children = null;
-      //       } else {
-      //         d.children = d.childrenHide;
-      //         d.childrenHide = null;
-      //       }
-      //       updateTree(d);
-      //     }
-      //   }
-      // }
 
       function ticked() {
         // console.log(set.nodes[0]);
@@ -1213,176 +741,198 @@ class Graph extends Component {
         });
 
         if (d.tag === 0) {
-          set.nodes.forEach((_node) => {
-            // console.log(isConnected(d, _node));
-            if (!isConnected(d, _node)) {
-              // console.log(_node.titleTerm);
-              set.links = set.links.filter(
-                _link => _link.source.titleTerm !== _node.titleTerm
-                  && _link.target.titleTerm !== _node.titleTerm,
-              );
-              // console.log(set.links);
-              delete set.nodes[set.nodes.indexOf(_node)];
-              set.nodes = set.nodes.filter(() => true);
-            }
-          });
-          d3.select(this).select('circle').attr('stroke', 'red');
+          // set.nodes.forEach((_node) => {
+          //   // console.log(isConnected(d, _node));
+          //   if (!isConnected(d, _node)) {
+          //     // console.log(_node.titleTerm);
+          //     set.links = set.links.filter(
+          //       _link => _link.source.titleTerm !== _node.titleTerm
+          //         && _link.target.titleTerm !== _node.titleTerm,
+          //     );
+          //     // console.log(set.links);
+          //     delete set.nodes[set.nodes.indexOf(_node)];
+          //     set.nodes = set.nodes.filter(() => true);
+          //   }
+          // });
+          // d3.select(this).select('circle').attr('stroke', 'red');
 
-          d.children.forEach((id_1) => {
-            if (id_1 != null) {
-              if (id_1.titleTerm !== undefined) {
-                // console.log(id_1.titleTerm);
-                set.nodes.push({
-                  titleTerm: id_1.titleTerm,
-                  group: 3,
-                  children: id_1.children,
-                  tag: 0,
-                  connected: -1,
-                  x: d.x,
-                  y: d.y,
-                  size: 5 + Math.log2(id_1.children.length),
-                });
-                let num = 0;
-                id_1.children.forEach((id) => {
-                  num = (d.children.includes(id)) ? num + 1 : num;
-                });
-                set.links.push({
-                  source: id_1.titleTerm,
-                  target: d,
-                  color: '#ffbb78',
-                  tag: 0,
-                  value: num,
-                });
-              }
-            }
-          });
+          // d.children.forEach((id_1) => {
+          //   if (id_1 != null) {
+          //     if (id_1.titleTerm !== undefined) {
+          //       // console.log(id_1.titleTerm);
+          //       set.nodes.push({
+          //         titleTerm: id_1.titleTerm,
+          //         group: 3,
+          //         children: id_1.children,
+          //         tag: 0,
+          //         connected: -1,
+          //         x: d.x,
+          //         y: d.y,
+          //         size: 5 + Math.log2(id_1.children.length),
+          //       });
+          //       let num = 0;
+          //       id_1.children.forEach((id) => {
+          //         num = (d.children.includes(id)) ? num + 1 : num;
+          //       });
+          //       set.links.push({
+          //         source: id_1.titleTerm,
+          //         target: d,
+          //         color: '#ffbb78',
+          //         tag: 0,
+          //         value: num,
+          //       });
+          //     }
+          //   }
+          // });
 
-          d.children.forEach((id_1) => {
-            if (id_1 != null && id_1.id !== undefined) {
-              // console.log(id_1.id);
-              const checkUserId = obj => obj.titleTerm === id_1.id;
-              if (!set.nodes.some(checkUserId)) {
-                set.nodes.forEach((_node) => {
-                  if (_node.children) {
-                    _node.children.forEach((id_2) => {
-                      if (id_1.id === id_2.id) {
-                        if (id_1.postCount > keyPlayerThreshold) {
-                          // console.log(id_1.id);
-                          set.links.push({
-                            source: id_1.id,
-                            target: _node.titleTerm,
-                            tag: 1,
-                            color: '#ffbb78 ',
-                            value: 1000000,
-                          });
-                        }
-                      }
-                    });
-                  }
-                });
-                const existId = set.nodes.find(ele => ele.titleTerm === id_1.id);
-                if (existId === undefined) {
-                  // const { count } = userList.find(user => user.id === id_1.id);
-                  if (id_1.postCount > keyPlayerThreshold) {
-                    const articleReplyCount = id_1.responder.reduce((sum, next) => {
-                      // console.log(sum, next.message_count);
-                      // console.log(d.articleId, next.articleId);
-                      if (d.articleId.includes(next.articleId)) {
-                        const all = next.message_count.reduce((num, { count }) => num + count, 0);
-                        // console.log(all);
-                        return sum + all;
-                      }
-                      return sum + 0;
-                    }, 0);
-                    // console.log(articleReplyCount);
-                    const size = (articleReplyCount / d.messageCount.all) * 50;
-                    set.nodes.push({
-                      titleTerm: id_1.id,
-                      parentNode: d.titleTerm,
-                      count: id_1.count,
-                      group: 2,
-                      tag: 1,
-                      connected: 1,
-                      merge: id_1.merge,
-                      numOfUsr: id_1.numOfUsr,
-                      postCount: id_1.postCount,
-                      x: d.x,
-                      y: d.y,
-                      size,
-                      responder: id_1.responder,
-                    });
-                  }
-                }
-                if (id_1.postCount > keyPlayerThreshold) {
-                  set.links.push({
-                    source: id_1.id,
-                    target: d,
-                    color: '#ffbb78',
-                    tag: 1,
-                    value: 1000000,
-                  });
-                }
-              } else {
-                const index = set.nodes.findIndex(_node => _node.titleTerm === id_1.id);
-                set.nodes[index].connected += 1;
-              }
-            }
-          });
+          // d.children.forEach((id_1) => {
+          //   if (id_1 != null && id_1.id !== undefined) {
+          //     // console.log(id_1.id);
+          //     const checkUserId = obj => obj.titleTerm === id_1.id;
+          //     if (!set.nodes.some(checkUserId)) {
+          //       set.nodes.forEach((_node) => {
+          //         if (_node.children) {
+          //           _node.children.forEach((id_2) => {
+          //             if (id_1.id === id_2.id) {
+          //               if (id_1.postCount > keyPlayerThreshold) {
+          //                 // console.log(id_1.id);
+          //                 set.links.push({
+          //                   source: id_1.id,
+          //                   target: _node.titleTerm,
+          //                   tag: 1,
+          //                   color: '#ffbb78 ',
+          //                   value: 1000000,
+          //                 });
+          //               }
+          //             }
+          //           });
+          //         }
+          //       });
+          //       const existId = set.nodes.find(ele => ele.titleTerm === id_1.id);
+          //       if (existId === undefined) {
+          //         // const { count } = userList.find(user => user.id === id_1.id);
+          //         if (id_1.postCount > keyPlayerThreshold) {
+          //           const articleReplyCount = id_1.responder.reduce((sum, next) => {
+          //             // console.log(sum, next.message_count);
+          //             // console.log(d.articleId, next.articleId);
+          //             if (d.articleId.includes(next.articleId)) {
+          //               const all = next.message_count.reduce((num, { count }) => num + count, 0);
+          //               // console.log(all);
+          //               return sum + all;
+          //             }
+          //             return sum + 0;
+          //           }, 0);
+          //           // console.log(articleReplyCount);
+          //           const size = (articleReplyCount / d.messageCount.all) * 50;
+          //           set.nodes.push({
+          //             titleTerm: id_1.id,
+          //             parentNode: d.titleTerm,
+          //             count: id_1.count,
+          //             group: 2,
+          //             tag: 1,
+          //             connected: 1,
+          //             merge: id_1.merge,
+          //             numOfUsr: id_1.numOfUsr,
+          //             postCount: id_1.postCount,
+          //             x: d.x,
+          //             y: d.y,
+          //             size,
+          //             responder: id_1.responder,
+          //           });
+          //         }
+          //       }
+          //       if (id_1.postCount > keyPlayerThreshold) {
+          //         set.links.push({
+          //           source: id_1.id,
+          //           target: d,
+          //           color: '#ffbb78',
+          //           tag: 1,
+          //           value: 1000000,
+          //         });
+          //       }
+          //     } else {
+          //       const index = set.nodes.findIndex(_node => _node.titleTerm === id_1.id);
+          //       set.nodes[index].connected += 1;
+          //     }
+          //   }
+          // });
 
           d.tag = 1;
           conutOfClickedNode += 1;
+
+
           const clickedNode = JSON.parse(JSON.stringify(d));
-          cellData = [];
-          clickedNode.articles.forEach((article) => {
-            cellData.push({ nodes: [article], links: [] });
-            // cellData.links.push({
-            //   source: article,
-            //   target: clickedNode,
-            //   color: '#ffbb78',
-            //   tag: 1,
-            //   value: 1,
-            // });
-          });
-          console.log(cellData);
-          let cellIndex = 0;
-          articleCellSvg = articleCellSvg
-            .call(d3.zoom().scaleExtent([1 / 2, 8]).on('zoom', articleCellZoomed))
-            .append('g');
-          cellData.forEach((ele) => {
-            d.children.some((usr) => {
-              const found = usr.responder.some((post) => {
-                console.log(ele.nodes[0]);
-                console.log(post);
-                if (post.articleId === ele.nodes[0].articleId) {
-                  post.message.forEach((replyer) => {
-                    ele.nodes.push({
-                      id: replyer.push_userid,
-                      date: replyer.push_ipdatetime,
-                      content: replyer.push_content,
-                      tag: replyer.push_tag,
-                    });
-                    ele.links.push({
-                      source: replyer.push_userid,
-                      target: ele,
-                      color: '#ffbb78',
-                      tag: 1,
-                      value: 1,
-                    });
-                  });
-                  return true;
-                }
-                return false;
-              });
-              return found;
+          // cellData = [];
+          cellData.nodes.push(clickedNode);
+          totalAuthorInfluence = 0;
+          clickedNode.children.forEach((author) => {
+            let size = 0;
+            author.responder.forEach((article) => {
+              size += article.message.length;
             });
-            console.log(ele);
-            articleCell(ele.nodes, ele.links, cellIndex);
-            cellIndex += 1;
+            author.size = size;
+            totalAuthorInfluence += size;
+            cellData.nodes.push(author);
+            cellData.links.push({
+              source: clickedNode.titleTerm,
+              target: author,
+              color: '#ffbb78',
+              tag: 1,
+              value: 50,
+            });
           });
+
+          cellData.nodes.sort((a, b) => ((a.size < b.size) ? 1 : -1));
+          console.log(cellData);
+          // articleCellSvg.selectAll('g').remove();
+          flowerGlyph(cellData.nodes, cellData.links, totalAuthorInfluence);
+
+          // clickedNode.articles.forEach((article) => {
+          //   cellData.push({ nodes: [article], links: [] });
+          // });
+          // console.log(cellData);
+          // let cellIndex = 0;
+          // articleCellSvg = articleCellSvg
+          //   .call(d3.zoom().scaleExtent([1 / 2, 8]).on('zoom', articleCellZoomed))
+          //   .append('g');
+          // cellData.forEach((ele) => {
+          //   d.children.some((usr) => {
+          //     const found = usr.responder.some((post) => {
+          //       if (post.articleId === ele.nodes[0].articleId) {
+          //         const everytwenty = 0;
+          //         post.message.forEach((replyer) => {
+          //           const distance = everytwenty / 20;
+          //           ele.nodes.push({
+          //             id: replyer.push_userid,
+          //             date: replyer.push_ipdatetime,
+          //             content: replyer.push_content,
+          //             tag: replyer.push_tag,
+          //           });
+          //           ele.links.push({
+          //             source: replyer.push_userid,
+          //             target: ele,
+          //             color: '#ffbb78',
+          //             tag: 1,
+          //             value: 1 * parseInt(distance, 10),
+          //           });
+          //         });
+          //         return true;
+          //       }
+          //       return false;
+          //     });
+          //     return found;
+          //   });
+          //   console.log(ele);
+          //   articleCell(ele.nodes, ele.links, cellIndex);
+          //   cellIndex += 1;
+          // });
+
+
           // d.children.forEach((usr) => {
           //   if (usr.responder.length > 1) {
           //     for (let i = 0; i < usr.responder.length - 1; i += 1) {
-          //       const temp = cellData.nodes.filter(n => n.articleId === usr.responder[i].articleId);
+          //       const temp = cellData.nodes.filter(
+          //         n => n.articleId === usr.responder[i].articleId);
           //       for (let j = 1; j < usr.responder.length; j += 1) {
           //         const next = cellData.nodes
           //           .filter(n => n.articleId === usr.responder[j].articleId);
@@ -1406,20 +956,6 @@ class Graph extends Component {
           // }
         } else {
           set = JSON.parse(JSON.stringify(origSet));
-          // console.log(set);
-          // console.log(origSet);
-          // d3.select(this).select('circle').attr('stroke', 'white');
-          // node.data(set.nodes, (o) => {
-          //   if (isConnected(d, o)) {
-          //     const index_0 = set.nodes.findIndex(_node => (
-          //       _node === undefined ? -1 : _node.titleTerm === o.titleTerm));
-          //       console.log(o.titleTerm, index_0);
-          //     console.log(set.nodes[index_0]);
-          //     set.nodes[index_0].connected -= 1;
-          //     // console.log(set.nodes[index_0].connected);
-          //   }
-          // });
-
           // node.style('fill-opacity', function(o) {
           //   return 1;
           // });
@@ -1527,6 +1063,211 @@ class Graph extends Component {
         netClustering.cluster(cellData.nodes, cellLinks);
       }
     }
+
+    function flowerGlyph(cellNodes, cellLinks, totalInfluence) {
+      if (sliderHasBeenLoaded) {
+        beforeThisDate = d3.select('#customRange2').property('value');
+        beforeThisDate = timeScale.invert(beforeThisDate);
+      }
+      console.log(beforeThisDate);
+      console.log(cellNodes);
+      console.log(cellLinks);
+      // ({ nodes, links } = data);
+      articleCellSvg.selectAll('*').remove();
+      // articleCellSvg = articleCellSvg
+      //   .call(d3.zoom().scaleExtent([1 / 2, 8]).on('zoom', articleCellZoomed))
+      //   .append('g');
+
+      let cellLink = articleCellSvg.selectAll('line')
+        .data(cellLinks);
+
+      link.exit().remove();
+      const cellLinkEnter = cellLink.enter()
+        // .append('g')
+        .append('line')
+        .attr('class', 'links')
+        .style('z-index', -1)
+        .attr('visibility', 'hidden')
+        .attr('stroke', d => d.color)
+        .attr('stroke-width', d => (d.value < 100000 ? d.value : 3));
+      cellLink = cellLinkEnter.merge(link);
+      console.log(realWidth, realHeight);
+      const cellVoronoi = d3.voronoi().extent([[-1000, -1000], [4000, 2000]]);
+
+      const cellPolygons = articleCellSvg.append('g')
+        .attr('class', 'polygons')
+        .selectAll('polygon')
+        .data(cellNodes)
+        .enter()
+        .append('polygon')
+        .style('fill', (d) => {
+          if (d.group === 1 || d.group === 3) {
+            const cluster = d.cluster % 19;
+            const betweennessColor = d3.hsl(color[cluster]);
+            return betweennessColor;
+          }
+          return 'green';
+        })
+        .style('fill-opacity', 0.2)
+        .style('stroke', 'white')
+        .style('stroke-width', '0');
+
+      let cellNode = articleCellSvg.append('g')
+        .attr('class', 'nodes')
+        .selectAll('g')
+        .data(cellNodes);
+
+      const cellNodeEnter = cellNode.enter()
+        .append('g')
+        .attr('class', 'nodes')
+        .style('z-index', 1)
+        .attr('opacity', (d) => {
+          if (d.group !== 2 && d.connected === 0) return 0.2;
+          if (d.show === 0) return 0.2;
+          return 1;
+        })
+        // .on('click', clicked)
+        // .on('mouseover', mouseOver(0.1))
+        // .on('mouseout', mouseOut)
+        // .call(d3.drag()
+        //   .on('start', dragstarted)
+        //   .on('drag', dragged)
+        //   .on('end', dragended));
+
+      cellNodeEnter
+        .append('defs')
+        .append('pattern')
+        .attr('id', 'pic_user')
+        .attr('height', 60)
+        .attr('width', 60)
+        .attr('x', 0)
+        .attr('y', 0)
+        .append('image')
+        .attr('xlink:href', 'https://i.imgur.com/jTUiJ1l.png')
+        .attr('height', 10)
+        .attr('width', 10)
+        .attr('x', 0)
+        .attr('y', 0);
+
+      const cellKeyPlayerCircles = cellNodeEnter.selectAll('circle');
+
+      const cellCircles = cellNodeEnter.append('circle')
+        .transition()
+        .duration(500)
+        .attr('r', d => (d.group === 1 ? 10 : 1))
+        .attr('fill', d => (d.group === 1 ? 'gray' : 'green'))
+        .style('fill-opacity', 1)
+        .attr('stroke', 'gray')
+        .attr('stroke-width', d => (d.group === 1 ? 2 : 0.9))
+        .attr('stroke-opacity', 0);
+      const cellInfluence = cellNodeEnter.append('circle')
+        .attr('r', (d) => {
+          let tempInfluence = 0;
+          // let temp;
+          console.log(d);
+          if (d.responder) {
+            tempInfluence = d.responder[0].message.filter((msg) => {
+              console.log(new Date(`2019 ${msg.push_ipdatetime}`), beforeThisDate);
+              return (new Date(`2019 ${msg.push_ipdatetime}`) < beforeThisDate);
+            }).length;
+            console.log(tempInfluence);
+            return 314 * (tempInfluence / totalInfluence);
+          }
+          return d.group === 1 ? 5 : 314 * (d.size / totalInfluence);
+        })
+        .attr('fill', 'gray')
+        .style('fill-opacity', 0)
+        .attr('stroke', 'gray')
+        .attr('stroke-width', 1)
+        .attr('stroke-opacity', 1);
+
+      const cellPieGroup = cellNodeEnter.append('g');
+      const cellPath = cellPieGroup.selectAll('path')
+        .data((d) => {
+          if (d.group === 3) {
+            // const totalMessageCount = d.data.reduce((pre, next) => pre.count + next.count);
+            // console.log(d.message_count);
+            return pie(d.message_count);
+          }
+          return [];
+        });
+
+      cellPath.enter().append('path')
+        .attr('fill', (d) => {
+          switch (d.data.type) {
+            case 'push':
+              return pieColor[4];
+            case 'boo':
+              return pieColor[2];
+            case 'neutral':
+              return pieColor[5];
+            default:
+              break;
+          }
+          return 'gray';
+        })
+        .attr('d', (d) => {
+          // console.log(d);
+          const arc = d3.arc()
+            .innerRadius(0)
+            .outerRadius(5 + Math.sqrt(d.data.radius))
+            .startAngle(d.startAngle)
+            .endAngle(d.endAngle);
+          return arc();
+        })
+        .attr('stroke', 'white')
+        .attr('stroke-width', '0.2px');
+
+
+      const cellLables = cellNodeEnter.append('text')
+        .text(d => d.author)
+        .style('text-anchor', 'middle')
+        .attr('font-family', 'Microsoft JhengHei')
+        .attr('font-size', '10px')
+        .attr('color', '#000')
+        .attr('y', (d) => {
+          if (NodeHiding) return 0;
+          return d.group !== 1 ? 3 : centrality(selectedCentrality, d) * 2 + 5;
+        });
+
+      cellNodeEnter.append('title')
+        .text(d => `Title: ${d.id}${'\n'}url: ${d.url}`);
+      cellNode = cellNodeEnter.merge(node);
+
+      const cellStrengthScale = d3.scaleLinear()
+        .domain([
+          Math.min(...set.links.map(l => l.value)),
+          Math.max(...set.links.map(l => l.value)),
+        ]).range([1, 100]);
+
+      cellForceSimulation
+        .nodes(cellNodes)
+        .on('tick', cellTicked);
+
+      cellForceSimulation.alphaDecay(0.005)
+        .force('link')
+        .links(cellLinks)
+        .distance(100)
+        .strength(1);
+
+      cellForceSimulation.force('collision', d3.forceCollide(d => (d.size ? 314 * (d.size / totalInfluence) : 5)));
+
+      function cellTicked() {
+        // console.log(data.nodes[0]);
+        // if (data.nodes[0].x) {
+        //   const cellPolygonShapes = voronoi(data.nodes.map(d => [d.x, d.y])).polygons();
+        //   // console.log(cellPolygonShapes);
+        //   cellPolygons.attr('points', (d, i) => cellPolygonShapes[i]);
+        // }
+        cellLink
+          .attr('x1', d => d.source.x)
+          .attr('y1', d => d.source.y)
+          .attr('x2', d => d.target.x)
+          .attr('y2', d => d.target.y);
+        cellNode
+          .attr('transform', d => `translate( ${d.x}, ${d.y})`);
+      }
+    }
     // build a dictionary of nodes that are linked
     const linkedByIndex = {};
     // console.log(initLinks);
@@ -1551,7 +1292,10 @@ class Graph extends Component {
     }
 
     function dragstarted(d) {
-      if (!d3.event.active) simulation.alphaTarget(0.3).restart();
+      if (!d3.event.active) {
+        simulation.alphaTarget(0.3).restart();
+        cellForceSimulation.alphaTarget(0.3).restart();
+      }
       d.fx = d.x;
       d.fy = d.y;
     }
@@ -1562,7 +1306,10 @@ class Graph extends Component {
     }
 
     function dragended(d) {
-      if (!d3.event.active) simulation.alphaTarget(0);
+      if (!d3.event.active) {
+        cellForceSimulation.alphaTarget(0.3).restart();
+        simulation.alphaTarget(0);
+      }
       d.fx = null;
       d.fy = null;
     }
@@ -1669,7 +1416,7 @@ class Graph extends Component {
         </div>
         <div className="network">
           <div
-            className="centralityOption"
+            className="filterBar"
             id="button"
             style={{
               width: '100%',
@@ -1680,11 +1427,19 @@ class Graph extends Component {
               // borderBottom: 'none',
             }}
           />
-          <div id="slider" />
           <svg id="graph" width="100%" height="95%" style={{}} />
         </div>
         <div className="articleCell">
-          <svg id="articleCell" width="100%" height="100%" />
+          <div
+            className="filterBar"
+            id="timeSlider"
+            style={{
+              width: '100%',
+              height: '25px',
+              padding: '0px 10px',
+            }}
+          />
+          <svg id="articleCell" width="100%" height="95%" />
         </div>
         {this.drawWordTree(word)}
         <div className="heatMap" style={{ border: '2px solid gray' }}>

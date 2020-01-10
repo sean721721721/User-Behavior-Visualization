@@ -51,6 +51,7 @@ module.exports = {
 
     function mergeTermNodes() {
       for (let i = 0; i < props.length - 1; i += 1) {
+        // console.log(props[i][0]);
         for (let j = i + 1; j < props.length; j += 1) {
           let numOfSameUser = 0;
           for (let k = 0; k < props[i][1].length; k += 1) {
@@ -106,6 +107,7 @@ module.exports = {
             articleId: article.article_id,
             title: article.article_title,
             message: article.messages,
+            url: article.url,
             message_count: [
               { type: 'push', count: article.message_count.push, radius: totalMessageCount },
               { type: 'boo', count: article.message_count.boo, radius: totalMessageCount },
@@ -165,7 +167,11 @@ module.exports = {
     }
     function setNodes() {
       for (let i = 0; i < Math.min(props.length, SetNumOfNodes); i += 1) {
+        // console.log(props[i][2]);
+        // console.log(props[i][1].length);
         if (props[i][0] != null) {
+          // console.log(props[i][4]);
+          // console.log(i);
           const existKey = set.nodes.find(ele => ele.titleTerm === props[i][0]);
           if (existKey === undefined) {
             if (!removeWords.includes(props[i][0])) {
@@ -173,7 +179,6 @@ module.exports = {
                 all: 0, boo: 0, neutral: 0, push: 0,
               };
               let articleId = [];
-              //   console.log(props[i][4]);
               if (props[i][4].length > 1) {
                 articleId = props[i][4].map(e => e.articleId);
                 messageCount.all = props[i][4].reduce((sum, { messageCount: { all } }) => sum + all, 0);
@@ -282,35 +287,67 @@ module.exports = {
     }
     function LinkTitleWordByArticleIndex() {
     //   let linkIndex = 0;
+      // for (let i = 0; i < set.nodes.length - 1; i += 1) {
+      //   for (let j = i + 1; j < set.nodes.length; j += 1) {
+      //     let count = 0;
+      //     if (i !== j) {
+      //       set.nodes[i].children.forEach((id1) => {
+      //         if (set.nodes[j].children.includes(id1)) count += 1;
+      //       });
+      //       // if (count !== 0) {
+      //       //   set.links.push({
+      //       //     source: set.nodes[i].titleTerm,
+      //       //     target: set.nodes[j].titleTerm,
+      //       //     tag: 0,
+      //       //     color: '#d9d9d9 ',
+      //       //     value: count,
+      //       //   });
+      //       //   initLinks.push({
+      //       //     source: {
+      //       //       titleTerm: set.nodes[i].titleTerm,
+      //       //       index: i,
+      //       //     },
+      //       //     target: {
+      //       //       titleTerm: set.nodes[j].titleTerm,
+      //       //       index: j,
+      //       //     },
+      //       //     tag: 0,
+      //       //     value: count,
+      //       //   });
+      //       // //   linkIndex += 1;
+      //       // }
+      //       for (let k = 0; k < count; k += 1) {
+      //         set.links.push({
+      //           source: set.nodes[i].titleTerm,
+      //           target: set.nodes[j].titleTerm,
+      //           tag: 0,
+      //           color: '#d9d9d9 ',
+      //           value: count,
+      //         });
+      //         initLinks.push({
+      //           source: {
+      //             titleTerm: set.nodes[i].titleTerm,
+      //             index: i,
+      //           },
+      //           target: {
+      //             titleTerm: set.nodes[j].titleTerm,
+      //             index: j,
+      //           },
+      //           tag: 0,
+      //           value: count,
+      //         });
+      //       }
+      //     }
+      //   }
+      // }
       for (let i = 0; i < set.nodes.length - 1; i += 1) {
         for (let j = i + 1; j < set.nodes.length; j += 1) {
           let count = 0;
           if (i !== j) {
-            set.nodes[i].children.forEach((id1) => {
-              if (set.nodes[j].children.includes(id1)) count += 1;
+            set.nodes[i].articleIndex.forEach((id1) => {
+              if (set.nodes[j].articleIndex.includes(id1)) count += 1;
             });
-            // if (count !== 0) {
-            //   set.links.push({
-            //     source: set.nodes[i].titleTerm,
-            //     target: set.nodes[j].titleTerm,
-            //     tag: 0,
-            //     color: '#d9d9d9 ',
-            //     value: count,
-            //   });
-            //   initLinks.push({
-            //     source: {
-            //       titleTerm: set.nodes[i].titleTerm,
-            //       index: i,
-            //     },
-            //     target: {
-            //       titleTerm: set.nodes[j].titleTerm,
-            //       index: j,
-            //     },
-            //     tag: 0,
-            //     value: count,
-            //   });
-            // //   linkIndex += 1;
-            // }
+
             for (let k = 0; k < count; k += 1) {
               set.links.push({
                 source: set.nodes[i].titleTerm,
@@ -335,6 +372,8 @@ module.exports = {
           }
         }
       }
+
+
     }
     function reduceLinksByThreshHold(threshold) {
       for (let i = 0; i < set.links.length; i += 1) {

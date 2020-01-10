@@ -392,7 +392,7 @@ let callback = function callback(req, res) {
               console.log('datalist.js done!');
               
 
-
+              // console.log(titleWordList[0]);
               let [set,initLinks] = ns.setNodes(titleWordList[0], queryobj1.date, titleCuttedWords, res.result);
               console.log('setNodes is done!');
               return { list: [queryobj1.date, [set, initLinks], titleCuttedWords], previous: [res.previous], next: [res.next] };
