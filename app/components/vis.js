@@ -1166,10 +1166,13 @@ class Graph extends Component {
           // let temp;
           console.log(d);
           if (d.responder) {
-            tempInfluence = d.responder[0].message.filter((msg) => {
-              console.log(new Date(`2019 ${msg.push_ipdatetime}`), beforeThisDate);
-              return (new Date(`2019 ${msg.push_ipdatetime}`) < beforeThisDate);
-            }).length;
+            d.responder.forEach((article) => {
+              tempInfluence += article.message.filter((msg) => {
+                const push_ipdatetime = msg.push_ipdatetime.split(' ');
+                const pushDateTime = (push_ipdatetime.length > 2) ? `${push_ipdatetime[1]} ${push_ipdatetime[2]}` : push_ipdatetime;
+                return (new Date(`2019 ${pushDateTime}`) < beforeThisDate);
+              }).length;
+            });
             console.log(tempInfluence);
             return 314 * (tempInfluence / totalInfluence);
           }
