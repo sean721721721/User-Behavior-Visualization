@@ -131,7 +131,7 @@ class Graph extends Component {
         if (d.group === 1) return d.titleTerm;
         return d.id;
       }))
-      .force('charge', d3.forceManyBody().strength(-10))
+      // .force('charge', d3.forceManyBody().strength(-10))
       // .force('charge', d3.forceManyBody().distanceMax(1000))
       .force('center', d3.forceCenter(articleCellSvgWidth / 2, articleCellSvgHeight / 2));
 
@@ -857,7 +857,6 @@ class Graph extends Component {
           d.tag = 1;
           conutOfClickedNode += 1;
 
-
           const clickedNode = JSON.parse(JSON.stringify(d));
           // cellData = [];
           cellData.nodes.push(clickedNode);
@@ -865,6 +864,22 @@ class Graph extends Component {
           clickedNode.children.forEach((author) => {
             let size = 0;
             author.responder.forEach((article) => {
+              article.message.forEach((mes) => {
+                // if (!cellData.nodes.some(data => data.id === mes.push_userid)) {
+                  cellData.nodes.push({
+                    push_content: mes.push_content,
+                    push_ipdatetime: mes.push_ipdatetime,
+                    id: mes.push_userid,
+                  });
+                // }
+                cellData.links.push({
+                  source: mes.push_userid,
+                  target: author,
+                  color: '#ffbb78',
+                  tag: 1,
+                  value: 50,
+                });
+              });
               size += article.message.length;
             });
             author.size = size;
@@ -1101,9 +1116,10 @@ class Graph extends Component {
         .append('line')
         .attr('class', 'links')
         .style('z-index', -1)
-        .attr('visibility', 'hidden')
+        // .attr('visibility', 'hidden')
         .attr('stroke', d => d.color)
-        .attr('stroke-width', d => (d.value < 100000 ? d.value : 3));
+        .attr('stroke-width', 1);
+        // .attr('stroke-width', d => (d.value < 100000 ? d.value : 3));
       cellLink = cellLinkEnter.merge(link);
 
       const cellPieGroup = articleCellSvg.append('g')
@@ -1235,10 +1251,10 @@ class Graph extends Component {
       cellForceSimulation.alphaDecay(0.005)
         .force('link')
         .links(cellLinks)
-        .distance(100)
+        .distance(10)
         .strength(1);
 
-      cellForceSimulation.force('collision', d3.forceCollide(d => (d.size ? 314 * (d.size / totalInfluence) : 5)));
+      // cellForceSimulation.force('collision', d3.forceCollide(d => (d.size ? 314 * (d.size / totalInfluence) : 5)));
 
       function cellTicked() {
         // console.log(data.nodes[0]);
