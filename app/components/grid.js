@@ -291,7 +291,7 @@ class Grid extends React.Component {
   }
 
   handleSubmit(e) {
-    console.log(e);
+    // console.log(e);
     e.preventDefault();
     this.setState(prevState => ({
       ...prevState, isLoading: true, responseError: false, errorType: '',
@@ -418,11 +418,11 @@ class Grid extends React.Component {
     console.log(e, tab);
     const { target } = e;
     const { name, value } = target;
-    console.log(tab, name, value);
+    // console.log(tab, name, value);
     this.setState((prevState) => {
       const state = Lodash.cloneDeep(prevState);
       state.menuprops[tab][name] = value;
-      console.log(state);
+      // console.log(state);
       return state;
     });
   }
@@ -511,8 +511,8 @@ class Grid extends React.Component {
     } = this.state;
     const selectedOptions = this.selectedOptions();
     const filename = this.getFilename();
-    console.log(visprops);
-    console.log(this.state);
+    // console.log(visprops);
+    // console.log(this.state);
     return (
       <div className="container-fluid">
         <div className="navbar fixed-top">

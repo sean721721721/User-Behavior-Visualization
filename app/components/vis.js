@@ -20,6 +20,7 @@ import sentiment from 'multilang-sentiment';
 import { string } from 'prop-types';
 import * as jsnx from 'jsnetworkx';
 import Louvain from './jLouvain';
+import { OpinionLeader } from './OpinionLeader';
 
 const SetNumOfNodes = 200;
 class Graph extends Component {
@@ -31,12 +32,12 @@ class Graph extends Component {
   }
 
   componentDidMount() {
-    console.log('vis_DidMount');
+    // console.log('vis_DidMount');
   }
 
   shouldComponentUpdate(nextProps, nextState) {
     if (JSON.stringify(this.props) === JSON.stringify(nextProps)) {
-      console.log('vis not update !');
+      // console.log('vis not update !');
       return false;
     }
     console.log('vis update !');
@@ -46,14 +47,7 @@ class Graph extends Component {
   }
 
   drawwithlabels() {
-    // var sentiment = require('multilang-sentiment');
-    // var tokens = ['世界','就','是','一个','疯子','的','囚笼'];
-    // const result = sentiment('Cats are totally amazing!');
-    // console.log(result);
-    // props[i][0]== userID, props[i][1]== articleIndex, props[i][0]== articlePostTime;
-    // const { visprops } = this.props;
-    // const { word, post } = this.props;
-    console.log(this.props);
+    // console.log(this.props);
     const { date } = this.props;
     const startDate = new Date(date.$gte);
     const endDate = new Date(date.$lt);
@@ -72,7 +66,7 @@ class Graph extends Component {
     const userList = [{ id: '', count: 0, term: [] }];
     const propsUserList = [{ id: '', count: 0, term: [] }];
     const { initLinks } = this.props;
-    console.log(initLinks);
+    // console.log(initLinks);
     // const initLinks = [];
     const removeWords = ['新聞', '八卦', '幹嘛', '問卦', '爆卦'];
     const groupedWords = [];
@@ -90,10 +84,13 @@ class Graph extends Component {
     let selectedCluster = -1;
     let fontSizeThreshhold = 20;
     let sliderHasBeenLoaded = 0;
-    const NodeHiding = 1;
+    const NodeHiding = 0;
     let cellData = { nodes: [], links: [] };
     let totalAuthorInfluence = 0;
+    const articleCellSvgWidth = parseFloat(d3.select('#articleCell').style('width'));
+    const articleCellSvgHeight = parseFloat(d3.select('#articleCell').style('height'));
 
+    
     buildGraph();
 
     communityDetecting();
@@ -136,7 +133,7 @@ class Graph extends Component {
       }))
       .force('charge', d3.forceManyBody().strength(-10))
       // .force('charge', d3.forceManyBody().distanceMax(1000))
-      .force('center', d3.forceCenter(200, 500));
+      .force('center', d3.forceCenter(articleCellSvgWidth / 2, articleCellSvgHeight / 2));
 
     let conutOfClickedNode = 0;
 
@@ -271,7 +268,7 @@ class Graph extends Component {
         beforeThisDate = timeScale.invert(beforeThisDate);
         // nevigator.select('#sizeThreshold').text(fontSizeThreshhold);
       }
-      console.log(beforeThisDate);
+      // console.log(beforeThisDate);
       // console.log('svgupdate');
       // console.log(initLinks);
       const selectedCentrality = d3.select('input[name="centrality"]:checked').property('value');
@@ -299,7 +296,7 @@ class Graph extends Component {
           Math.max(...termCentralityArr.clusterArr),
         ]).range([0.2, 0.8]);
 
-      console.log(set);
+      // console.log(set);
       ({ nodes, links } = set);
       svg.selectAll('g').remove();
 
@@ -730,7 +727,7 @@ class Graph extends Component {
         if (typeof d === 'string') {
           d = set.nodes.find(ele => ele.titleTerm === d);
         }
-        console.log(d);
+        // console.log(d);
         set.nodes.forEach((_node) => {
           if (isConnected(d, _node)) {
             if (_node.connected <= 0) _node.connected = 1;
@@ -883,7 +880,7 @@ class Graph extends Component {
           });
 
           cellData.nodes.sort((a, b) => ((a.size < b.size) ? 1 : -1));
-          console.log(cellData);
+          // console.log(cellData);
           // articleCellSvg.selectAll('g').remove();
           flowerGlyph(cellData.nodes, cellData.links, totalAuthorInfluence);
 
@@ -1072,12 +1069,29 @@ class Graph extends Component {
       console.log(beforeThisDate);
       console.log(cellNodes);
       console.log(cellLinks);
+
+      const opinoinLeaderPie = d3.pie()
+        .value((d) => {
+          const totalComments = d.responder.reduce((pre, nex) => ({
+            message: {
+              length: pre.message.length + nex.message.length,
+            },
+          }));
+          console.log(totalComments.message.length);
+          return totalComments.message.length;
+        })
+        .sort(null);
       // ({ nodes, links } = data);
       articleCellSvg.selectAll('*').remove();
       // articleCellSvg = articleCellSvg
       //   .call(d3.zoom().scaleExtent([1 / 2, 8]).on('zoom', articleCellZoomed))
       //   .append('g');
-
+      articleCellSvg = articleCellSvg.append('g')
+        .attr('transform', (d) => {
+          const w = parseFloat(d3.select('#articleCell').style('width'));
+          const h = parseFloat(d3.select('#articleCell').style('height'));
+          return `translate(${w / 2}, ${h / 2}) scale(4,4)`;
+        });
       let cellLink = articleCellSvg.selectAll('line')
         .data(cellLinks);
 
@@ -1091,26 +1105,61 @@ class Graph extends Component {
         .attr('stroke', d => d.color)
         .attr('stroke-width', d => (d.value < 100000 ? d.value : 3));
       cellLink = cellLinkEnter.merge(link);
-      console.log(realWidth, realHeight);
-      const cellVoronoi = d3.voronoi().extent([[-1000, -1000], [4000, 2000]]);
 
-      const cellPolygons = articleCellSvg.append('g')
-        .attr('class', 'polygons')
-        .selectAll('polygon')
-        .data(cellNodes)
-        .enter()
-        .append('polygon')
-        .style('fill', (d) => {
-          if (d.group === 1 || d.group === 3) {
-            const cluster = d.cluster % 19;
-            const betweennessColor = d3.hsl(color[cluster]);
-            return betweennessColor;
+      const cellPieGroup = articleCellSvg.append('g')
+        .attr('class', 'pieChart')
+        .selectAll('g')
+        .data([cellNodes])
+        .enter();
+      const cellPath = cellPieGroup.selectAll('path')
+        .data((d) => {
+          const res = d.filter(e => e.responder);
+          return opinoinLeaderPie(res);
+        });
+
+      const arc = d3.arc()
+        .innerRadius(45)
+        .outerRadius(50);
+
+      cellPath.enter().append('path')
+        .attr('fill', (d) => {
+          switch (d.data.type) {
+            case 'push':
+              return pieColor[4];
+            case 'boo':
+              return pieColor[2];
+            case 'neutral':
+              return pieColor[5];
+            default:
+              break;
           }
-          return 'green';
+          return 'gray';
         })
-        .style('fill-opacity', 0.2)
-        .style('stroke', 'white')
-        .style('stroke-width', '0');
+        .attr('d', arc)
+        .attr('stroke', 'white')
+        .attr('stroke-width', '0.2px');
+
+      cellPath.enter().append('text')
+        .text(d => d.data.id)
+        .attr('transform', (d) => {
+          console.log(d);
+          if (d.data.id) {
+            const author = cellNodes.find(e => e.id === d.data.id);
+            console.log(arc.centroid(d));
+            [author.fx, author.fy] = arc.centroid(d);
+          }
+          return `translate(${arc.centroid(d)})`;
+        })
+        .style('text-anchor', 'middle')
+        .attr('font-family', 'Microsoft JhengHei')
+        .attr('font-size', '10px')
+        .attr('color', '#000');
+
+      // const authorData = cellPath.data();
+      // console.log(cellPath.enter().datum());
+      // console.log(authorData);
+
+      console.log(cellNodes);
 
       let cellNode = articleCellSvg.append('g')
         .attr('class', 'nodes')
@@ -1125,7 +1174,7 @@ class Graph extends Component {
           if (d.group !== 2 && d.connected === 0) return 0.2;
           if (d.show === 0) return 0.2;
           return 1;
-        })
+        });
         // .on('click', clicked)
         // .on('mouseover', mouseOver(0.1))
         // .on('mouseout', mouseOut)
@@ -1160,67 +1209,6 @@ class Graph extends Component {
         .attr('stroke', 'gray')
         .attr('stroke-width', d => (d.group === 1 ? 2 : 0.9))
         .attr('stroke-opacity', 0);
-      const cellInfluence = cellNodeEnter.append('circle')
-        .attr('r', (d) => {
-          let tempInfluence = 0;
-          // let temp;
-          console.log(d);
-          if (d.responder) {
-            d.responder.forEach((article) => {
-              tempInfluence += article.message.filter((msg) => {
-                const push_ipdatetime = msg.push_ipdatetime.split(' ');
-                const pushDateTime = (push_ipdatetime.length > 2) ? `${push_ipdatetime[1]} ${push_ipdatetime[2]}` : push_ipdatetime;
-                return (new Date(`2019 ${pushDateTime}`) < beforeThisDate);
-              }).length;
-            });
-            console.log(tempInfluence);
-            return 314 * (tempInfluence / totalInfluence);
-          }
-          return d.group === 1 ? 5 : 314 * (d.size / totalInfluence);
-        })
-        .attr('fill', 'gray')
-        .style('fill-opacity', 0)
-        .attr('stroke', 'gray')
-        .attr('stroke-width', 1)
-        .attr('stroke-opacity', 1);
-
-      const cellPieGroup = cellNodeEnter.append('g');
-      const cellPath = cellPieGroup.selectAll('path')
-        .data((d) => {
-          if (d.group === 3) {
-            // const totalMessageCount = d.data.reduce((pre, next) => pre.count + next.count);
-            // console.log(d.message_count);
-            return pie(d.message_count);
-          }
-          return [];
-        });
-
-      cellPath.enter().append('path')
-        .attr('fill', (d) => {
-          switch (d.data.type) {
-            case 'push':
-              return pieColor[4];
-            case 'boo':
-              return pieColor[2];
-            case 'neutral':
-              return pieColor[5];
-            default:
-              break;
-          }
-          return 'gray';
-        })
-        .attr('d', (d) => {
-          // console.log(d);
-          const arc = d3.arc()
-            .innerRadius(0)
-            .outerRadius(5 + Math.sqrt(d.data.radius))
-            .startAngle(d.startAngle)
-            .endAngle(d.endAngle);
-          return arc();
-        })
-        .attr('stroke', 'white')
-        .attr('stroke-width', '0.2px');
-
 
       const cellLables = cellNodeEnter.append('text')
         .text(d => d.author)
@@ -1228,10 +1216,7 @@ class Graph extends Component {
         .attr('font-family', 'Microsoft JhengHei')
         .attr('font-size', '10px')
         .attr('color', '#000')
-        .attr('y', (d) => {
-          if (NodeHiding) return 0;
-          return d.group !== 1 ? 3 : centrality(selectedCentrality, d) * 2 + 5;
-        });
+        .attr('y', 0);
 
       cellNodeEnter.append('title')
         .text(d => `Title: ${d.id}${'\n'}url: ${d.url}`);
@@ -1325,17 +1310,6 @@ class Graph extends Component {
     }
 
     function communityDetecting() {
-      // const node_data = set.nodes.map(d => d.titleTerm);
-      // const edge_data = set.links.map(d => [d.source, d.target, d.value]);
-      // const node_data = ['id1', 'id2', 'id3', 'id4'];
-      // const edge_data = [
-      //   {source: 'id1', target: 'id2', weight: 10.0},
-      //   {source: 'id2', target: 'id3', weight: 20.0},
-      //   {source: 'id3', target: 'id1', weight: 30.0}
-      // ];
-      // const init_part = {id1: 0, id2: 0, id3: 1};
-      // const community = Louvain().nodes(node_data).edges(edge_data);
-      // const result = community();
       const links = JSON.parse(JSON.stringify(set.links));
       // console.log(links);
       for (let i = 0; i < links.length; i += 1) {
@@ -1442,6 +1416,7 @@ class Graph extends Component {
               padding: '0px 10px',
             }}
           />
+
           <svg id="articleCell" width="100%" height="95%" />
         </div>
         {this.drawWordTree(word)}

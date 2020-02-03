@@ -4,6 +4,7 @@ module.exports = {
   setNodes(list, date, word, post) {
     // console.log(list);
     // console.log(post);
+    const NS_PER_SEC = 1e6;
     const linkThreshold = 0.1;
     const SetNumOfNodes = 200;
     const visprops = list;
@@ -11,6 +12,25 @@ module.exports = {
     // const endDate = new Date(date.$lt);
     // const timePeriod = endDate - startDate;
     const props = JSON.parse(JSON.stringify(visprops)); // clone props;
+    // props = [
+    //   ['term',
+    //     ['authors','authors'],
+    //     ['articleIndex','articleIndex'],
+    //     [
+    //       {'article'},
+    //       {'article'},
+    //     ]
+    //   ],
+    //   ['term',
+    //     ['authors','authors'],
+    //     ['articleIndex','articleIndex'],
+    //     [
+    //       {'article'},
+    //       {'article'},
+    //     ]
+    //   ]
+    // ]
+    // console.log(props);
     const set = { nodes: [], links: [] };
     const userList = [{ id: '', count: 0, term: [] }];
     const propsUserList = [{ id: '', count: 0, term: [] }];
@@ -48,8 +68,8 @@ module.exports = {
     // console.log('LinkTitleWordByArticleIndex done!');
     reduceLinksByThreshHold(linkThreshold);
     // console.log('reduceLinksByThreshHold done!');
-
     function mergeTermNodes() {
+      const time = process.hrtime();
       for (let i = 0; i < props.length - 1; i += 1) {
         // console.log(props[i][0]);
         for (let j = i + 1; j < props.length; j += 1) {
@@ -66,23 +86,35 @@ module.exports = {
           }
         }
       }
+      const diff = process.hrtime(time);
+      console.log(`mergeTermNodes() Benchmark took ${(diff[0] + diff[1]) / NS_PER_SEC} ms`);
     }
     function removeTermNodesWithRemovedWords() {
+      const time = process.hrtime();
       for (let i = 0; i < removeWords.length; i += 1) {
         const index = props.findIndex(prop => prop[0] === removeWords[i]);
         if (index !== -1) props.splice(index, 1);
       }
+      const diff = process.hrtime(time);
+      console.log(`removeTermNodesWithRemovedWords() Benchmark took ${(diff[0] + diff[1]) / NS_PER_SEC} ms`);
     }
     function computePropsUserList() {
+      let time = process.hrtime();
       // console.log(props);
       for (let i = 0; i < props.length; i += 1) {
-        if (props[i][1]) {
+        if (props[i][1]) { // userId
+          // console.log(props[i][1]);
+          let index = 0;
           props[i][1].forEach((userId) => {
-            const existedUser = propsUserList.find(user => user.id === userId);
-            if (existedUser) {
-              existedUser.term.push(props[i][0]);
-              existedUser.count += 1;
-            } else {
+            for (index; index < propsUserList.length; index += 1) {
+              if (propsUserList[index].id === userId) {
+                propsUserList[index].term.push(props[i][0]); // props[i][0] = term;
+                propsUserList[index].count += 1;
+                break;
+              }
+            }
+            if (index === propsUserList.length) {
+              index = 0;
               const count = post.filter(article => article.author === userId).length;
               propsUserList.push({
                 id: userId,
@@ -97,7 +129,9 @@ module.exports = {
           });
         }
       }
-
+      let diff = process.hrtime(time);
+      console.log(`computePropsUserList() Benchmark took ${(diff[0] + diff[1]) / NS_PER_SEC} ms`);
+      time = process.hrtime();
       post.forEach((article) => {
         const index = propsUserList.find(user => user.id === article.author);
         if (index) {
@@ -117,8 +151,12 @@ module.exports = {
         }
       });
       // console.log(propsUserList);
+      diff = process.hrtime(time);
+      console.log(`computePropsUserList() Benchmark took ${(diff[0] + diff[1]) / NS_PER_SEC} ms`);
     }
+
     function propsDataStructureBuild() {
+      const time = process.hrtime();
       for (let i = 0; i < props.length; i += 1) {
         propsUserList.forEach((propsUser) => {
           const index = props[i][1].findIndex(user => user === propsUser.id);
@@ -128,8 +166,12 @@ module.exports = {
           }
         });
       }
+      const diff = process.hrtime(time);
+      console.log(`propsDataStructureBuild() Benchmark took ${(diff[0] + diff[1]) / NS_PER_SEC} ms`);
     }
+
     function mergeTermNodesWithUserCountEqualsOne() {
+      const time = process.hrtime();
       const hasMergedId = [];
       for (let i = 0; i < props.length; i += 1) { // which title
         for (let j = 0; j < props[i][1].length - 1; j += 1) {
@@ -164,8 +206,11 @@ module.exports = {
           }
         }
       }
+      const diff = process.hrtime(time);
+      console.log(`mergeTermNodesWithUserCountEqualsOne() Benchmark took ${(diff[0] + diff[1]) / NS_PER_SEC} ms`);
     }
     function setNodes() {
+      const time = process.hrtime();
       for (let i = 0; i < Math.min(props.length, SetNumOfNodes); i += 1) {
         // console.log(props[i][2]);
         // console.log(props[i][1].length);
@@ -175,7 +220,7 @@ module.exports = {
           const existKey = set.nodes.find(ele => ele.titleTerm === props[i][0]);
           if (existKey === undefined) {
             if (!removeWords.includes(props[i][0])) {
-              let messageCount = {
+              const messageCount = {
                 all: 0, boo: 0, neutral: 0, push: 0,
               };
               let articleId = [];
@@ -193,7 +238,7 @@ module.exports = {
                 messageCount.push = props[i][4][0].messageCount.push;
               }
 
-              let articles = [];
+              const articles = [];
               // console.log(props[0][1][0]);
               //   console.log(messageCount);
               articleId.some((id) => {
@@ -246,9 +291,12 @@ module.exports = {
           }
         }
       }
+      const diff = process.hrtime(time);
+      console.log(`setNodes() Benchmark took ${(diff[0] + diff[1]) / NS_PER_SEC} ms`);
     }
 
     function computeNodesUserList() {
+      const time = process.hrtime();
       for (let i = 0; i <= set.nodes.length; i += 1) {
         if (set.nodes[i]) {
           if (set.nodes[i].children) {
@@ -264,9 +312,12 @@ module.exports = {
           }
         }
       }
+      const diff = process.hrtime(time);
+      console.log(`computeNodesUserList() Benchmark took ${(diff[0] + diff[1]) / NS_PER_SEC} ms`);
       // console.log(userList);
     }
     function computeNumOfUsersHaveSameTerm() {
+      const time = process.hrtime();
       for (let i = 0; i < set.nodes.length - 1; i += 1) {
         for (let j = i + 1; j < set.nodes.length; j += 1) {
           let numOfSameUsers = 0;
@@ -284,9 +335,12 @@ module.exports = {
           }
         }
       }
+      const diff = process.hrtime(time);
+      console.log(`computeNumOfUsersHaveSameTerm() Benchmark took ${(diff[0] + diff[1]) / NS_PER_SEC} ms`);
     }
     function LinkTitleWordByArticleIndex() {
-    //   let linkIndex = 0;
+      const time = process.hrtime();
+      //   let linkIndex = 0;
       // for (let i = 0; i < set.nodes.length - 1; i += 1) {
       //   for (let j = i + 1; j < set.nodes.length; j += 1) {
       //     let count = 0;
@@ -372,10 +426,12 @@ module.exports = {
           }
         }
       }
-
-
+      const diff = process.hrtime(time);
+      console.log(`LinkTitleWordByArticleIndex() Benchmark took ${(diff[0] + diff[1]) / NS_PER_SEC} ms`);
     }
+
     function reduceLinksByThreshHold(threshold) {
+      const time = process.hrtime();
       for (let i = 0; i < set.links.length; i += 1) {
         const { source, target } = set.links[i];
         const linksStrength = set.links[i].value;
@@ -391,6 +447,8 @@ module.exports = {
           i -= 1;
         }
       }
+      const diff = process.hrtime(time);
+      console.log(`reduceLinksByThreshHold() Benchmark took ${(diff[0] + diff[1]) / NS_PER_SEC} ms`);
     }
     return [set, initLinks];
   },

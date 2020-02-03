@@ -504,7 +504,9 @@ let bindpostlist = function bindpostlist(qobj1, qobj2, ptt) {
     
     //termfrequency
     for(i=0;i<test.length;i++){
-        termfreq.push(termfreqency(test[i]));
+        if(test[i].length > 0){
+            termfreq.push(termfreqency(test[i]));
+        }
     }
     termfreq.push(test);
     console.log('Cutting article word ...');
@@ -523,8 +525,10 @@ let bindpostlist = function bindpostlist(qobj1, qobj2, ptt) {
     
     
     //title terms relationshipt between userID
-    for(i=0;i<titleTest.length;i++){ 
-        titleCount.push(titleUser(titleTest[i], list[i]));
+    for(i=0;i<titleTest.length;i++){
+        if(list[i].length > 0){
+            titleCount.push(titleUser(titleTest[i], list[i]));
+        }
     }
 
     //title term score
@@ -540,7 +544,7 @@ let bindpostlist = function bindpostlist(qobj1, qobj2, ptt) {
 }
 
 //userId's relationship with title word
-let titleUser = function titleUser(terms, posts){  
+let titleUser = function titleUser(terms, posts){
     console.log('Computing titleUser ... ');
     // console.log(terms, posts);
     let userlist = {};
@@ -593,7 +597,7 @@ let titleUser = function titleUser(terms, posts){
     }
     // console.log('sortedUserList', sortedUserList);
     // console.log(sortedUserList);
-    console.log('compute titleUser Done!');
+    // console.log('compute titleUser Done!');
     return sortedUserList;
 }
 
@@ -695,7 +699,7 @@ let termfreqency = function termfreqency(terms){
     sortable.sort(function(a,b){
         return b[1] - a[1];
     })
-    console.log('computingTermfreqency Done!');
+    // console.log('computingTermfreqency Done!');
     return sortable;
     
     //TF-IDF testing

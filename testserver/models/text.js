@@ -80,7 +80,7 @@ var cut = function cut(posts, callback) {
     //var test =[];
     var pattern = new RegExp("[`~!@#$^&*()=|{}':;',\\[\\].<>/?~！@#￥……&*（）&;|{}【】‘《》；：”“'。，、？ ↵「」]");
     var http = new RegExp(/http/);
-    console.log(pattern);
+    // console.log(pattern);
     var p = 0,
         time = posts.length;
     // var termTable = [];
