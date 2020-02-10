@@ -1,4 +1,11 @@
+/* eslint-disable no-underscore-dangle */
+/* eslint-disable no-console */
+/* eslint-disable linebreak-style */
+/* eslint-disable react/prop-types */
+/* eslint-disable no-unused-vars */
 /* eslint-disable no-use-before-define */
+/* eslint-disable camelcase */
+/* eslint-disable no-param-reassign */
 import React, { Component, PureComponent } from 'react';
 // import PropTypes from 'prop-types';
 // import { connect } from 'react-redux';
@@ -8,52 +15,110 @@ import * as d3 from 'd3';
 // import { max } from 'moment';
 // import { Row, Form } from 'antd';
 
-export default function OpinionLeader(cellNodes, cellLinks, totalInfluence,
-  sliderHasBeenLoaded, articleCellSvg) {
-  const cellForceSimulation = d3.forceSimulation()
-    .force('link', d3.forceLink().id((d) => {
-      if (d.group === 1) return d.titleTerm;
-      return d.id;
-    }))
-    .force('charge', d3.forceManyBody().strength(-10))
-    // .force('charge', d3.forceManyBody().distanceMax(1000))
-    .force('center', d3.forceCenter(200, 500));
-
-  const pie = d3.pie()
-    .value(d => d.count)
-    .sort(null);
-  const pieColor = d3.schemeTableau10;
-  //   const startDate = new Date(date.$gte);
-  //   const endDate = new Date(date.$lt);
-  //   const timeScale = d3.scaleTime().domain([startDate, endDate]).range([0, 100]);
-
-  //   if (sliderHasBeenLoaded) {
-  //     beforeThisDate = d3.select('#customRange2').property('value');
-  //     beforeThisDate = timeScale.invert(beforeThisDate);
-  //   }
-  //   console.log(beforeThisDate);
+export default function OpinionLeader(cellNodes, cellLinks, beforeThisDate,
+  svg, forceSimulation, totalInfluence) {
+  // if (sliderHasBeenLoaded) {
+  //   thisDate = d3.select('#customRange2').property('value');
+  //   thisDate = timeScale.invert(beforeThisDate);
+  // }
   console.log(cellNodes);
   console.log(cellLinks);
+
+  const opinoinLeaderPie = d3.pie()
+    .value((d) => {
+      const totalComments = d.responder.reduce((pre, nex) => ({
+        message: {
+          length: pre.message.length + nex.message.length,
+        },
+      }));
+      console.log(totalComments.message.length);
+      // return totalComments.message.length;
+      return 45;
+    })
+    .sort(null);
   // ({ nodes, links } = data);
-  articleCellSvg.selectAll('*').remove();
-  // articleCellSvg = articleCellSvg
+  svg.selectAll('*').remove();
+  // svg = svg
   //   .call(d3.zoom().scaleExtent([1 / 2, 8]).on('zoom', articleCellZoomed))
   //   .append('g');
-
-  const cellLink = articleCellSvg.selectAll('line')
+  svg = svg.append('g')
+    .attr('transform', (d) => {
+      const w = parseFloat(d3.select('#articleCell').style('width'));
+      const h = parseFloat(d3.select('#articleCell').style('height'));
+      return `translate(${w / 2}, ${h / 2}) scale(2,2)`;
+    });
+  let cellLink = svg.selectAll('line')
     .data(cellLinks);
 
   // link.exit().remove();
   const cellLinkEnter = cellLink.enter()
-    // .append('g')
+  // .append('g')
     .append('line')
     .attr('class', 'links')
     .style('z-index', -1)
-    .attr('visibility', 'hidden')
+  // .attr('visibility', 'hidden')
     .attr('stroke', d => d.color)
-    .attr('stroke-width', d => (d.value < 100000 ? d.value : 3));
+    .attr('stroke-width', 1);
+  // .attr('stroke-width', d => (d.value < 100000 ? d.value : 3));
+  // cellLink = cellLinkEnter.merge(link);
+  cellLink = cellLinkEnter;
 
-  const cellNode = articleCellSvg.append('g')
+  const cellPieGroup = svg.append('g')
+    .attr('class', 'pieChart')
+    .selectAll('g')
+    .data([cellNodes])
+    .enter();
+  const cellPath = cellPieGroup.selectAll('path')
+    .data((d) => {
+      const res = d.filter(e => e.responder);
+      return opinoinLeaderPie(res);
+    });
+
+  const arc = d3.arc()
+    .innerRadius(135)
+    .outerRadius(140);
+
+  cellPath.enter().append('path')
+    .attr('fill', (d) => {
+      switch (d.data.type) {
+        // case 'push':
+        //   return pieColor[4];
+        // case 'boo':
+        //   return pieColor[2];
+        // case 'neutral':
+        //   return pieColor[5];
+        default:
+          break;
+      }
+      return 'gray';
+    })
+    .attr('d', arc)
+    .attr('stroke', 'white')
+    .attr('stroke-width', '0.2px');
+
+  cellPath.enter().append('text')
+    .text(d => d.data.id)
+    .attr('transform', (d) => {
+      // console.log(d);
+      if (d.data.id) {
+        const author = cellNodes.find(e => e.id === d.data.id);
+        // console.log(arc.centroid(d));
+        [author.fx, author.fy] = arc.centroid(d);
+      }
+      return `translate(${arc.centroid(d)})`;
+    })
+    .style('text-anchor', 'middle')
+    .attr('font-family', 'Microsoft JhengHei')
+    .attr('font-size', '10px')
+    .attr('color', '#000');
+
+  // const authorData = cellPath.data();
+  // console.log(cellPath.enter().datum());
+  // console.log(authorData);
+
+  console.log(cellNodes);
+
+  let cellNode = svg.append('g')
     .attr('class', 'nodes')
     .selectAll('g')
     .data(cellNodes);
@@ -66,7 +131,14 @@ export default function OpinionLeader(cellNodes, cellLinks, totalInfluence,
       if (d.group !== 2 && d.connected === 0) return 0.2;
       if (d.show === 0) return 0.2;
       return 1;
-    });
+    })
+  // .on('click', clicked)
+  // .on('mouseover', mouseOver(0.1))
+  // .on('mouseout', mouseOut)
+    .call(d3.drag()
+      .on('start', dragstarted)
+      .on('drag', dragged)
+      .on('end', dragended));
 
   cellNodeEnter
     .append('defs')
@@ -88,121 +160,188 @@ export default function OpinionLeader(cellNodes, cellLinks, totalInfluence,
   const cellCircles = cellNodeEnter.append('circle')
     .transition()
     .duration(500)
-    .attr('r', d => (d.group === 1 ? 10 : 1))
+    .attr('r', d => (d.group === 1 ? 0 : 1))
     .attr('fill', d => (d.group === 1 ? 'gray' : 'green'))
     .style('fill-opacity', 1)
     .attr('stroke', 'gray')
     .attr('stroke-width', d => (d.group === 1 ? 2 : 0.9))
     .attr('stroke-opacity', 0);
-  //   const cellInfluence = cellNodeEnter.append('circle')
-  //     .attr('r', (d) => {
-  //       let tempInfluence = 0;
-  //       // let temp;
-  //       console.log(d);
-  //       if (d.responder) {
-  //         d.responder.forEach((article) => {
-  //           tempInfluence += article.message.filter((msg) => {
-  //             const push_ipdatetime = msg.push_ipdatetime.split(' ');
-  //             const pushDateTime = (push_ipdatetime.length > 2) ? `${push_ipdatetime[1]} ${push_ipdatetime[2]}` : push_ipdatetime;
-  //             return (new Date(`2019 ${pushDateTime}`) < beforeThisDate);
-  //           }).length;
-  //         });
-  //         console.log(tempInfluence);
-  //         return 314 * (tempInfluence / totalInfluence);
-  //       }
-  //       return d.group === 1 ? 5 : 314 * (d.size / totalInfluence);
-  //     })
-  //     .attr('fill', 'gray')
-  //     .style('fill-opacity', 0)
-  //     .attr('stroke', 'gray')
-  //     .attr('stroke-width', 1)
-  //     .attr('stroke-opacity', 1);
 
-  const cellPieGroup = cellNodeEnter.append('g');
-  const cellPath = cellPieGroup.selectAll('path')
-    .data((d) => {
-      if (d.group === 3) {
-        // const totalMessageCount = d.data.reduce((pre, next) => pre.count + next.count);
-        // console.log(d.message_count);
-        return pie(d.message_count);
-      }
-      return [];
-    });
+  cellNodeEnter.on('mouseover', (d) => { mouseevent(d, 'mouseover'); })
+    .on('mouseout', (d) => { mouseevent(d, 'mouseout'); });
 
-  cellPath.enter().append('path')
-    .attr('fill', (d) => {
-      switch (d.data.type) {
-        case 'push':
-          return pieColor[4];
-        case 'boo':
-          return pieColor[2];
-        case 'neutral':
-          return pieColor[5];
-        default:
-          break;
-      }
-      return 'gray';
-    })
-    .attr('d', (d) => {
-      // console.log(d);
-      const arc = d3.arc()
-        .innerRadius(0)
-        .outerRadius(5 + Math.sqrt(d.data.radius))
-        .startAngle(d.startAngle)
-        .endAngle(d.endAngle);
-      return arc();
-    })
-    .attr('stroke', 'white')
-    .attr('stroke-width', '0.2px');
+  // const labelBox = cellNodeEnter.append('rect')
+  //   .attr('x', 0)
+  //   .attr('y', 0)
+  //   .attr('width', 100)
+  //   .attr('height', 50)
+  //   .style('fill', '#80d6c7');
 
-
-  //   const cellLables = cellNodeEnter.append('text')
-  //     .text(d => d.author)
-  //     .style('text-anchor', 'middle')
-  //     .attr('font-family', 'Microsoft JhengHei')
-  //     .attr('font-size', '10px')
-  //     .attr('color', '#000')
-  //     .attr('y', d => (d.group !== 1 ? 3 : centrality(selectedCentrality, d) * 2 + 5));
+  const cellLables = cellNodeEnter.append('text')
+    .text(d => d.author)
+    .style('text-anchor', 'middle')
+    .attr('font-family', 'Microsoft JhengHei')
+    .attr('font-size', '10px')
+    .attr('color', '#000')
+    .attr('y', 0);
 
   cellNodeEnter.append('title')
     .text(d => `Title: ${d.id}${'\n'}url: ${d.url}`);
   // cellNode = cellNodeEnter.merge(node);
+  cellNode = cellNodeEnter;
 
-  //   const cellStrengthScale = d3.scaleLinear()
-  //     .domain([
-  //       Math.min(...set.links.map(l => l.value)),
-  //       Math.max(...set.links.map(l => l.value)),
-  //     ]).range([1, 100]);
+  // const cellStrengthScale = d3.scaleLinear()
+  //   .domain([
+  //     Math.min(...set.links.map(l => l.value)),
+  //     Math.max(...set.links.map(l => l.value)),
+  //   ]).range([1, 100]);
 
-  cellForceSimulation
+  forceSimulation
     .nodes(cellNodes)
-    .on('tick', cellTicked);
+  // .on('tick', cellTicked)
+    .on('tick', onSimulationTick);
 
-  cellForceSimulation.alphaDecay(0.005)
+  forceSimulation.alphaDecay(0.005)
     .force('link')
     .links(cellLinks)
-    .distance(100)
-    .strength(1);
+    .distance(d => 10)
+    .strength(d => d.value / 7);
 
-  cellForceSimulation.force('collision', d3.forceCollide(d => (d.size ? 314 * (d.size / totalInfluence) : 5)));
+  forceSimulation.force('collision', d3.forceCollide(1));
+
+  const simulationDurationInMs = 60000; // 20 seconds
+
+  const startTime = Date.now();
+  const endTime = startTime + simulationDurationInMs;
+
+  function onSimulationTick() {
+    if (Date.now() < endTime) {
+      cellTicked();
+    } else {
+      forceSimulation.stop();
+    }
+  }
 
   function cellTicked() {
-    // console.log(data.nodes[0]);
-    // if (data.nodes[0].x) {
-    //   const cellPolygonShapes = voronoi(data.nodes.map(d => [d.x, d.y])).polygons();
-    //   // console.log(cellPolygonShapes);
-    //   cellPolygons.attr('points', (d, i) => cellPolygonShapes[i]);
-    // }
     cellLink
       .attr('x1', d => d.source.x)
       .attr('y1', d => d.source.y)
       .attr('x2', d => d.target.x)
-      .attr('y2', d => d.target.y);
+      .attr('y2', d => d.target.y)
+      .attr('class', d => (`from${d.source.index} to${d.target.index}`));
+
     cellNode
       .attr('transform', d => `translate( ${d.x}, ${d.y})`);
   }
 
-  return <svg />;
+  function dragstarted(d) {
+    if (!d3.event.active) {
+      forceSimulation.alphaTarget(0.3).restart();
+    }
+    d.fx = d.x;
+    d.fy = d.y;
+  }
+
+  function dragged(d) {
+    d.fx = d3.event.x;
+    d.fy = d3.event.y;
+  }
+
+  function dragended(d) {
+    if (!d3.event.active) {
+      forceSimulation.alphaTarget(0.3).restart();
+    }
+    d.fx = null;
+    d.fy = null;
+  }
+
+  function mouseevent(d, event, mode) {
+    console.log('mouseevent');
+    const line_out_color = (event === 'mouseover') ? 'black' : 'rgb(208,211,212)';
+    const line_in_color = (event === 'mouseover') ? 'rgb(218, 41, 28)' : 'rgb(208,211,212)';
+    const line_opacity = (event === 'mouseover') ? 1 : 0.3;
+    const dot_self_color = (event === 'mouseover') ? 'rgb(218, 41, 28)' : '#fff';
+    const dot_other_color = (event === 'mouseover') ? 'black' : '#fff';
+    const dot_selected_opacity = 1;
+    const dot_other_opacity = (event === 'mouseover') ? 0.1 : 1;
+    const dot_self_stroke_width = (event === 'mouseover') ? 2 : 1;
+
+    // clear out
+    d3.selectAll('circle.nodes').attr('r', e => e.radius).style('stroke', '#fff').style('stroke-width', dot_self_stroke_width);
+    d3.selectAll('line').attr('marker-end', 'none').style('stroke', 'rgb(208,211,212)').style('stroke-opacity', 0.3);
+    d3.selectAll('text.background-text').style('fill', 'rgb(208,211,212)').style('stroke', 'rgb(208,211,212)');
+
+    // color lines
+    d3.selectAll(`line.to${d.index}`).each((e) => {
+      e.type = 'in';
+    })
+      .attr('marker-end', e => ((event === 'mouseover') ? `url(#${e.type})` : 'none'))
+      .style('stroke', line_in_color)
+      .transition()
+      .duration(500)
+      .style('stroke-opacity', line_opacity);
+
+    d3.selectAll(`line.from${d.index}`).each((e) => {
+      e.type = 'out';
+    })
+      .attr('marker-end', e => ((event === 'mouseover') ? `url(#${e.type})` : 'none'))
+      .style('stroke', line_out_color)
+      .transition()
+      .duration(500)
+      .style('stroke-opacity', line_opacity);
+
+    // highlight dots
+    d3.selectAll('circle.nodes').transition().style('opacity', dot_other_opacity);
+    // self
+    d3.selectAll(`circle#_${d.index}`)
+      .style('stroke', dot_self_color)
+      .transition()
+      .duration(800)
+    // .attr('r', e => ((event === 'mouseover') ? node_r(e.highlight_mode) : node_r(e.normal_mode)))
+      .style('opacity', dot_selected_opacity)
+      .style('stroke-width', dot_self_stroke_width);
+    // to dots
+    d3.selectAll(`line.from${d.index}`).filter(e => e.target.index !== e.source.index).each((e) => {
+      if (event === 'mouseover') {
+        d3.select(`circle#_${e.target.index}`)
+          .style('stroke', dot_other_color)
+        // .attr('r', e1 => ((event === 'mouseover') ? node_r(e.count) : e1.radius))
+          .each((e1) => {
+            e1.select_radius = d3.select(this).attr('r');
+          })
+          .transition()
+          .duration(300)
+          .style('opacity', dot_selected_opacity);
+      } else {
+        d3.select(`circle#_${e.target.index}`)
+          .attr('r', e1 => e1.radius)
+          .style('stroke', dot_other_color)
+          .style('opacity', dot_selected_opacity);
+      }
+    });
+    // from dots
+    d3.selectAll(`line.to${d.index}`).filter(e => e.target.index !== e.source.index).each((e) => {
+      d3.select(`circle#_${e.source.index}`)
+      // .attr('r', e1 => ((event === 'mouseover') ? node_r(e.count) : e1.radius))
+        .each((e1) => {
+          e1.select_radius = d3.select(this).attr('r');
+        })
+        .style('stroke', dot_other_color)
+        .transition()
+        .duration(300)
+        .style('opacity', dot_selected_opacity);
+    });
+  }
+
+  function responderCommunityDetecting(data) {
+    const links = JSON.parse(JSON.stringify(data.links));
+    for (let i = 0; i < links.length; i += 1) {
+      // console.log(links[i]);
+      links[i].source = data.nodes.findIndex(ele => ele.id === data.links[i].source);
+      links[i].target = data.nodes.findIndex(ele => ele.id === data.links[i].target);
+    }
+    // netClustering.cluster(data.nodes, links);
+  }
 }
 
 export { OpinionLeader };

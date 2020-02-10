@@ -46,6 +46,34 @@ class Graph extends Component {
     return true;
   }
 
+  drawWordTree = (d) => {
+    const options = {
+      maxFontSize: 14,
+      wordtree: {
+        format: 'implicit',
+        word: 'cats',
+      },
+    };
+    // console.log(this);
+    // console.log('wordtree');
+    const style = {
+      float: 'left',
+      border: '2px solid gray',
+    };
+    return (
+      <div className="wordTree" style={style}>
+        <Chart
+          // style={style}
+          chartType="WordTree"
+          width="100%"
+          height="700px"
+          data={d}
+          options={options}
+        />
+      </div>
+    );
+  }
+
   drawwithlabels() {
     // console.log(this.props);
     const { date } = this.props;
@@ -85,12 +113,14 @@ class Graph extends Component {
     let fontSizeThreshhold = 20;
     let sliderHasBeenLoaded = 0;
     const NodeHiding = 0;
-    let cellData = { nodes: [], links: [] };
+    const cellData = { nodes: [], links: [] };
     let totalAuthorInfluence = 0;
     const articleCellSvgWidth = parseFloat(d3.select('#articleCell').style('width'));
     const articleCellSvgHeight = parseFloat(d3.select('#articleCell').style('height'));
+    const authorInfluenceThreshold = 100;
+    const articleInfluenceThreshold = 100;
+    const topAuthorThreshold = 8;
 
-    
     buildGraph();
 
     communityDetecting();
@@ -131,9 +161,9 @@ class Graph extends Component {
         if (d.group === 1) return d.titleTerm;
         return d.id;
       }))
-      // .force('charge', d3.forceManyBody().strength(-10))
-      // .force('charge', d3.forceManyBody().distanceMax(1000))
-      .force('center', d3.forceCenter(articleCellSvgWidth / 2, articleCellSvgHeight / 2));
+      // .force('charge', d3.forceManyBody().strength(-1))
+      // .force('charge', d3.forceManyBody().distanceMax(10))
+      .force('center', d3.forceCenter(0, 0));
 
     let conutOfClickedNode = 0;
 
@@ -249,7 +279,12 @@ class Graph extends Component {
       .attr('step', 1)
       .on('input', () => {
         sliderHasBeenLoaded = 1;
-        flowerGlyph(cellData.nodes, cellData.links, totalAuthorInfluence);
+        if (sliderHasBeenLoaded) {
+          beforeThisDate = d3.select('#customRange2').property('value');
+          beforeThisDate = timeScale.invert(beforeThisDate);
+        }
+        OpinionLeader(cellData.nodes, cellData.links,
+          beforeThisDate, articleCellSvg, cellForceSimulation, totalAuthorInfluence);
       });
 
     cellNavigator.append('text')
@@ -625,8 +660,7 @@ class Graph extends Component {
         // append the svg object to the body of the page
         const heatMap = heatMapSvg.attr('height', heatMapHeight + margin.top + margin.bottom)
           .append('g')
-          .attr('transform',
-            `translate(${200}, ${margin.top})`);
+          .attr('transform', `translate(${200}, ${margin.top})`);
 
         // Build X scales and axis:
         const heatMapX = d3.scaleBand()
@@ -689,10 +723,8 @@ class Graph extends Component {
       }
 
       function ticked() {
-        // console.log(set.nodes[0]);
         if (set.nodes[0].x) {
           const polygonShapes = voronoi(set.nodes.map(d => [d.x, d.y])).polygons();
-          // console.log(polygonShapes);
           polygons.attr('points', (d, i) => polygonShapes[i]);
         }
 
@@ -711,11 +743,7 @@ class Graph extends Component {
           set.nodes.forEach((_node) => { _node.show = 1; });
         } else {
           set.nodes.forEach((_node) => {
-            if (_node.cluster === d.cluster) {
-              _node.show = 1;
-            } else {
-              _node.show = 0;
-            }
+            _node.show = _node.cluster === d.cluster ? 1 : 0;
           });
         }
         selectedCluster = d.cluster;
@@ -730,242 +758,148 @@ class Graph extends Component {
         // console.log(d);
         set.nodes.forEach((_node) => {
           if (isConnected(d, _node)) {
-            if (_node.connected <= 0) _node.connected = 1;
-            else _node.connected += 1;
+            _node.connected = _node.connected <= 0 ? 1 : _node.connected += 1;
           } else if (_node.connected === -1) {
             _node.connected = 0;
           }
         });
 
         if (d.tag === 0) {
-          // set.nodes.forEach((_node) => {
-          //   // console.log(isConnected(d, _node));
-          //   if (!isConnected(d, _node)) {
-          //     // console.log(_node.titleTerm);
-          //     set.links = set.links.filter(
-          //       _link => _link.source.titleTerm !== _node.titleTerm
-          //         && _link.target.titleTerm !== _node.titleTerm,
-          //     );
-          //     // console.log(set.links);
-          //     delete set.nodes[set.nodes.indexOf(_node)];
-          //     set.nodes = set.nodes.filter(() => true);
-          //   }
-          // });
-          // d3.select(this).select('circle').attr('stroke', 'red');
-
-          // d.children.forEach((id_1) => {
-          //   if (id_1 != null) {
-          //     if (id_1.titleTerm !== undefined) {
-          //       // console.log(id_1.titleTerm);
-          //       set.nodes.push({
-          //         titleTerm: id_1.titleTerm,
-          //         group: 3,
-          //         children: id_1.children,
-          //         tag: 0,
-          //         connected: -1,
-          //         x: d.x,
-          //         y: d.y,
-          //         size: 5 + Math.log2(id_1.children.length),
-          //       });
-          //       let num = 0;
-          //       id_1.children.forEach((id) => {
-          //         num = (d.children.includes(id)) ? num + 1 : num;
-          //       });
-          //       set.links.push({
-          //         source: id_1.titleTerm,
-          //         target: d,
-          //         color: '#ffbb78',
-          //         tag: 0,
-          //         value: num,
-          //       });
-          //     }
-          //   }
-          // });
-
-          // d.children.forEach((id_1) => {
-          //   if (id_1 != null && id_1.id !== undefined) {
-          //     // console.log(id_1.id);
-          //     const checkUserId = obj => obj.titleTerm === id_1.id;
-          //     if (!set.nodes.some(checkUserId)) {
-          //       set.nodes.forEach((_node) => {
-          //         if (_node.children) {
-          //           _node.children.forEach((id_2) => {
-          //             if (id_1.id === id_2.id) {
-          //               if (id_1.postCount > keyPlayerThreshold) {
-          //                 // console.log(id_1.id);
-          //                 set.links.push({
-          //                   source: id_1.id,
-          //                   target: _node.titleTerm,
-          //                   tag: 1,
-          //                   color: '#ffbb78 ',
-          //                   value: 1000000,
-          //                 });
-          //               }
-          //             }
-          //           });
-          //         }
-          //       });
-          //       const existId = set.nodes.find(ele => ele.titleTerm === id_1.id);
-          //       if (existId === undefined) {
-          //         // const { count } = userList.find(user => user.id === id_1.id);
-          //         if (id_1.postCount > keyPlayerThreshold) {
-          //           const articleReplyCount = id_1.responder.reduce((sum, next) => {
-          //             // console.log(sum, next.message_count);
-          //             // console.log(d.articleId, next.articleId);
-          //             if (d.articleId.includes(next.articleId)) {
-          //               const all = next.message_count.reduce((num, { count }) => num + count, 0);
-          //               // console.log(all);
-          //               return sum + all;
-          //             }
-          //             return sum + 0;
-          //           }, 0);
-          //           // console.log(articleReplyCount);
-          //           const size = (articleReplyCount / d.messageCount.all) * 50;
-          //           set.nodes.push({
-          //             titleTerm: id_1.id,
-          //             parentNode: d.titleTerm,
-          //             count: id_1.count,
-          //             group: 2,
-          //             tag: 1,
-          //             connected: 1,
-          //             merge: id_1.merge,
-          //             numOfUsr: id_1.numOfUsr,
-          //             postCount: id_1.postCount,
-          //             x: d.x,
-          //             y: d.y,
-          //             size,
-          //             responder: id_1.responder,
-          //           });
-          //         }
-          //       }
-          //       if (id_1.postCount > keyPlayerThreshold) {
-          //         set.links.push({
-          //           source: id_1.id,
-          //           target: d,
-          //           color: '#ffbb78',
-          //           tag: 1,
-          //           value: 1000000,
-          //         });
-          //       }
-          //     } else {
-          //       const index = set.nodes.findIndex(_node => _node.titleTerm === id_1.id);
-          //       set.nodes[index].connected += 1;
-          //     }
-          //   }
-          // });
-
           d.tag = 1;
           conutOfClickedNode += 1;
 
           const clickedNode = JSON.parse(JSON.stringify(d));
-          // cellData = [];
+          cellData.nodes = [];
+          cellData.links = [];
+          clickedNode.fx = 0;
+          clickedNode.fy = 0;
           cellData.nodes.push(clickedNode);
           totalAuthorInfluence = 0;
+
+          // compute author's influence
+          clickedNode.children.forEach((author) => {
+            let influence = 0;
+            author.responder.forEach((article) => {
+              if (article.message.length >= articleInfluenceThreshold) {
+                influence += article.message.length;
+              }
+            });
+            author.influence = influence;
+          });
+          clickedNode.children.sort((a, b) => ((a.influence < b.influence) ? 1 : -1));
+          console.log(clickedNode.children);
+          // compute cellnodes and celllinks
+          let topInfluenceAuthor = 1;
           clickedNode.children.forEach((author) => {
             let size = 0;
-            author.responder.forEach((article) => {
-              article.message.forEach((mes) => {
-                // if (!cellData.nodes.some(data => data.id === mes.push_userid)) {
-                  cellData.nodes.push({
-                    push_content: mes.push_content,
-                    push_ipdatetime: mes.push_ipdatetime,
-                    id: mes.push_userid,
+
+            if (topInfluenceAuthor <= topAuthorThreshold) {
+              author.responder.forEach((article) => {
+                if (article.message.length >= articleInfluenceThreshold) {
+                  article.message.forEach((mes) => {
+                    if (mes.push_tag === '推' || mes.push_tag === '噓') {
+                      if (cellData.nodes.some(data => data.id === mes.push_userid)) {
+                        // already has same replyer
+                        const replyer = cellData.nodes.find(data => data.id === mes.push_userid);
+                        if (cellData.links.some(e => e.target === author && e.source === mes.push_userid)) {
+                          // reply same author
+                          cellData.links.find(e => e.target === author && e.source === mes.push_userid).value += 1;
+                          const repliedAuthor = replyer.reply.find(e => e.author === author);
+                          const repliedArticle = repliedAuthor.article.find(e => e.title === article.title);
+                          if (repliedArticle) {
+                            // reply same article
+                            const type = (mes.push_tag === '推') ? 'push' : 'boo';
+                            repliedArticle.messageCount.type += 1;
+                          } else {
+                            // reply different article
+                            repliedAuthor.article.push({
+                              title: article,
+                              messageCount: {
+                                push: mes.push_tag === '推' ? 1 : 0,
+                                boo: mes.push_tag === '噓' ? 1 : 0,
+                              },
+                            });
+                          }
+                        } else {
+                          replyer.reply.push({
+                            author,
+                            article: [{
+                              title: article,
+                              messageCount: {
+                                push: mes.push_tag === '推' ? 1 : 0,
+                                boo: mes.push_tag === '噓' ? 1 : 0,
+                              },
+                            }],
+                          });
+
+                          cellData.links.push({
+                            source: mes.push_userid,
+                            target: author,
+                            color: '#ffbb78',
+                            tag: 1,
+                            value: 1,
+                          });
+                        }
+                        // cellData.links.push({
+                        //   source: mes.push_userid,
+                        //   target: author,
+                        //   color: '#ffbb78',
+                        //   tag: 1,
+                        //   value: 1,
+                        // });
+                      } else {
+                        cellData.nodes.push({
+                          push_content: mes.push_content,
+                          push_ipdatetime: mes.push_ipdatetime,
+                          id: mes.push_userid,
+                          reply: [{
+                            author,
+                            article: [{
+                              title: article,
+                              messageCount: {
+                                push: mes.push_tag === '推' ? 1 : 0,
+                                boo: mes.push_tag === '噓' ? 1 : 0,
+                              },
+                            }],
+                          }],
+                        });
+                        cellData.links.push({
+                          source: mes.push_userid,
+                          target: author,
+                          color: '#ffbb78',
+                          tag: 1,
+                          value: 1,
+                        });
+                        cellData.links.push({
+                          source: clickedNode.titleTerm,
+                          target: mes.push_userid,
+                          color: '#ffbb78',
+                          tag: 1,
+                          value: 1,
+                        });
+                      }
+                    }
                   });
-                // }
-                cellData.links.push({
-                  source: mes.push_userid,
-                  target: author,
-                  color: '#ffbb78',
-                  tag: 1,
-                  value: 50,
-                });
+                  size += article.message.length;
+                }
               });
-              size += article.message.length;
-            });
-            author.size = size;
-            totalAuthorInfluence += size;
-            cellData.nodes.push(author);
-            cellData.links.push({
-              source: clickedNode.titleTerm,
-              target: author,
-              color: '#ffbb78',
-              tag: 1,
-              value: 50,
-            });
+              author.size = size;
+              totalAuthorInfluence += size;
+              if (size >= authorInfluenceThreshold) {
+                cellData.nodes.push(author);
+              }
+            }
+            topInfluenceAuthor += 1;
           });
 
           cellData.nodes.sort((a, b) => ((a.size < b.size) ? 1 : -1));
           // console.log(cellData);
-          // articleCellSvg.selectAll('g').remove();
-          flowerGlyph(cellData.nodes, cellData.links, totalAuthorInfluence);
-
-          // clickedNode.articles.forEach((article) => {
-          //   cellData.push({ nodes: [article], links: [] });
-          // });
-          // console.log(cellData);
-          // let cellIndex = 0;
-          // articleCellSvg = articleCellSvg
-          //   .call(d3.zoom().scaleExtent([1 / 2, 8]).on('zoom', articleCellZoomed))
-          //   .append('g');
-          // cellData.forEach((ele) => {
-          //   d.children.some((usr) => {
-          //     const found = usr.responder.some((post) => {
-          //       if (post.articleId === ele.nodes[0].articleId) {
-          //         const everytwenty = 0;
-          //         post.message.forEach((replyer) => {
-          //           const distance = everytwenty / 20;
-          //           ele.nodes.push({
-          //             id: replyer.push_userid,
-          //             date: replyer.push_ipdatetime,
-          //             content: replyer.push_content,
-          //             tag: replyer.push_tag,
-          //           });
-          //           ele.links.push({
-          //             source: replyer.push_userid,
-          //             target: ele,
-          //             color: '#ffbb78',
-          //             tag: 1,
-          //             value: 1 * parseInt(distance, 10),
-          //           });
-          //         });
-          //         return true;
-          //       }
-          //       return false;
-          //     });
-          //     return found;
-          //   });
-          //   console.log(ele);
-          //   articleCell(ele.nodes, ele.links, cellIndex);
-          //   cellIndex += 1;
-          // });
-
-
-          // d.children.forEach((usr) => {
-          //   if (usr.responder.length > 1) {
-          //     for (let i = 0; i < usr.responder.length - 1; i += 1) {
-          //       const temp = cellData.nodes.filter(
-          //         n => n.articleId === usr.responder[i].articleId);
-          //       for (let j = 1; j < usr.responder.length; j += 1) {
-          //         const next = cellData.nodes
-          //           .filter(n => n.articleId === usr.responder[j].articleId);
-
-          //         cellData.links.push({
-          //           source: temp[0],
-          //           target: next[0],
-          //           color: '#ffbb78',
-          //           tag: 1,
-          //           value: 1,
-          //         });
-          //       }
-          //     }
-          //   }
-          // });
-
-          // cellDataCommunityDetection(clickedNode);
-          // console.log(cellData);
-          // for (let i = 1; i < cellData.nodes.length; i += 1) {
-          //   articleCell(cellData.nodes[i], cellData.links, i);
-          // }
+          // const del = d3.select('#articleCell');
+          // del.selectAll('*').remove();
+          console.log(articleCellSvg);
+          // responderCommunityDetecting();
+          OpinionLeader(cellData.nodes, cellData.links,
+            beforeThisDate, articleCellSvg, cellForceSimulation, totalAuthorInfluence);
         } else {
           set = JSON.parse(JSON.stringify(origSet));
           // node.style('fill-opacity', function(o) {
@@ -973,34 +907,7 @@ class Graph extends Component {
           // });
 
           if (d.group === 1) {
-            // d.children.forEach((id_1) => {
-            //   if (id_1 != null) {
-            //     const index_1 = set.nodes.findIndex(
-            //       _node => ((_node === undefined) ? -1 : _node.titleTerm === id_1.id),
-            //     );
-
-            //     set.nodes[index_1].connected -= 1;
-
-            //     set.nodes.forEach((_node) => {
-            //       if (_node.titleTerm === id_1.id && _node.connected <= 0) {
-            //         delete set.nodes[set.nodes.indexOf(_node)];
-            //         set.nodes = set.nodes.filter(() => true);
-            //       }
-            //     });
-
-            //     const { length } = set.links;
-            //     for (let j = 0; j < length; j += 1) {
-            //       const pos = set.links.map(e => e.source.titleTerm).indexOf(id_1.id);
-            //       if (pos !== -1) {
-            //         const index_2 = set.nodes.findIndex(
-            //           _node => (_node === undefined ? -1 : _node.titleTerm === id_1.id),
-            //         );
-            //         if (index_2 === -1) set.links.splice(pos, 1);
-            //         else if (set.nodes[index_2] === undefined) set.links.splice(pos, 1);
-            //       }
-            //     }
-            //   }
-            // });
+            //
           } else {
             let uniquePostID = 0;
             d.responder.forEach((article) => {
@@ -1076,202 +983,6 @@ class Graph extends Component {
       }
     }
 
-    function flowerGlyph(cellNodes, cellLinks, totalInfluence) {
-      if (sliderHasBeenLoaded) {
-        beforeThisDate = d3.select('#customRange2').property('value');
-        beforeThisDate = timeScale.invert(beforeThisDate);
-      }
-      console.log(beforeThisDate);
-      console.log(cellNodes);
-      console.log(cellLinks);
-
-      const opinoinLeaderPie = d3.pie()
-        .value((d) => {
-          const totalComments = d.responder.reduce((pre, nex) => ({
-            message: {
-              length: pre.message.length + nex.message.length,
-            },
-          }));
-          console.log(totalComments.message.length);
-          return totalComments.message.length;
-        })
-        .sort(null);
-      // ({ nodes, links } = data);
-      articleCellSvg.selectAll('*').remove();
-      // articleCellSvg = articleCellSvg
-      //   .call(d3.zoom().scaleExtent([1 / 2, 8]).on('zoom', articleCellZoomed))
-      //   .append('g');
-      articleCellSvg = articleCellSvg.append('g')
-        .attr('transform', (d) => {
-          const w = parseFloat(d3.select('#articleCell').style('width'));
-          const h = parseFloat(d3.select('#articleCell').style('height'));
-          return `translate(${w / 2}, ${h / 2}) scale(4,4)`;
-        });
-      let cellLink = articleCellSvg.selectAll('line')
-        .data(cellLinks);
-
-      link.exit().remove();
-      const cellLinkEnter = cellLink.enter()
-        // .append('g')
-        .append('line')
-        .attr('class', 'links')
-        .style('z-index', -1)
-        // .attr('visibility', 'hidden')
-        .attr('stroke', d => d.color)
-        .attr('stroke-width', 1);
-        // .attr('stroke-width', d => (d.value < 100000 ? d.value : 3));
-      cellLink = cellLinkEnter.merge(link);
-
-      const cellPieGroup = articleCellSvg.append('g')
-        .attr('class', 'pieChart')
-        .selectAll('g')
-        .data([cellNodes])
-        .enter();
-      const cellPath = cellPieGroup.selectAll('path')
-        .data((d) => {
-          const res = d.filter(e => e.responder);
-          return opinoinLeaderPie(res);
-        });
-
-      const arc = d3.arc()
-        .innerRadius(45)
-        .outerRadius(50);
-
-      cellPath.enter().append('path')
-        .attr('fill', (d) => {
-          switch (d.data.type) {
-            case 'push':
-              return pieColor[4];
-            case 'boo':
-              return pieColor[2];
-            case 'neutral':
-              return pieColor[5];
-            default:
-              break;
-          }
-          return 'gray';
-        })
-        .attr('d', arc)
-        .attr('stroke', 'white')
-        .attr('stroke-width', '0.2px');
-
-      cellPath.enter().append('text')
-        .text(d => d.data.id)
-        .attr('transform', (d) => {
-          console.log(d);
-          if (d.data.id) {
-            const author = cellNodes.find(e => e.id === d.data.id);
-            console.log(arc.centroid(d));
-            [author.fx, author.fy] = arc.centroid(d);
-          }
-          return `translate(${arc.centroid(d)})`;
-        })
-        .style('text-anchor', 'middle')
-        .attr('font-family', 'Microsoft JhengHei')
-        .attr('font-size', '10px')
-        .attr('color', '#000');
-
-      // const authorData = cellPath.data();
-      // console.log(cellPath.enter().datum());
-      // console.log(authorData);
-
-      console.log(cellNodes);
-
-      let cellNode = articleCellSvg.append('g')
-        .attr('class', 'nodes')
-        .selectAll('g')
-        .data(cellNodes);
-
-      const cellNodeEnter = cellNode.enter()
-        .append('g')
-        .attr('class', 'nodes')
-        .style('z-index', 1)
-        .attr('opacity', (d) => {
-          if (d.group !== 2 && d.connected === 0) return 0.2;
-          if (d.show === 0) return 0.2;
-          return 1;
-        });
-        // .on('click', clicked)
-        // .on('mouseover', mouseOver(0.1))
-        // .on('mouseout', mouseOut)
-        // .call(d3.drag()
-        //   .on('start', dragstarted)
-        //   .on('drag', dragged)
-        //   .on('end', dragended));
-
-      cellNodeEnter
-        .append('defs')
-        .append('pattern')
-        .attr('id', 'pic_user')
-        .attr('height', 60)
-        .attr('width', 60)
-        .attr('x', 0)
-        .attr('y', 0)
-        .append('image')
-        .attr('xlink:href', 'https://i.imgur.com/jTUiJ1l.png')
-        .attr('height', 10)
-        .attr('width', 10)
-        .attr('x', 0)
-        .attr('y', 0);
-
-      const cellKeyPlayerCircles = cellNodeEnter.selectAll('circle');
-
-      const cellCircles = cellNodeEnter.append('circle')
-        .transition()
-        .duration(500)
-        .attr('r', d => (d.group === 1 ? 10 : 1))
-        .attr('fill', d => (d.group === 1 ? 'gray' : 'green'))
-        .style('fill-opacity', 1)
-        .attr('stroke', 'gray')
-        .attr('stroke-width', d => (d.group === 1 ? 2 : 0.9))
-        .attr('stroke-opacity', 0);
-
-      const cellLables = cellNodeEnter.append('text')
-        .text(d => d.author)
-        .style('text-anchor', 'middle')
-        .attr('font-family', 'Microsoft JhengHei')
-        .attr('font-size', '10px')
-        .attr('color', '#000')
-        .attr('y', 0);
-
-      cellNodeEnter.append('title')
-        .text(d => `Title: ${d.id}${'\n'}url: ${d.url}`);
-      cellNode = cellNodeEnter.merge(node);
-
-      const cellStrengthScale = d3.scaleLinear()
-        .domain([
-          Math.min(...set.links.map(l => l.value)),
-          Math.max(...set.links.map(l => l.value)),
-        ]).range([1, 100]);
-
-      cellForceSimulation
-        .nodes(cellNodes)
-        .on('tick', cellTicked);
-
-      cellForceSimulation.alphaDecay(0.005)
-        .force('link')
-        .links(cellLinks)
-        .distance(10)
-        .strength(1);
-
-      // cellForceSimulation.force('collision', d3.forceCollide(d => (d.size ? 314 * (d.size / totalInfluence) : 5)));
-
-      function cellTicked() {
-        // console.log(data.nodes[0]);
-        // if (data.nodes[0].x) {
-        //   const cellPolygonShapes = voronoi(data.nodes.map(d => [d.x, d.y])).polygons();
-        //   // console.log(cellPolygonShapes);
-        //   cellPolygons.attr('points', (d, i) => cellPolygonShapes[i]);
-        // }
-        cellLink
-          .attr('x1', d => d.source.x)
-          .attr('y1', d => d.source.y)
-          .attr('x2', d => d.target.x)
-          .attr('y2', d => d.target.y);
-        cellNode
-          .attr('transform', d => `translate( ${d.x}, ${d.y})`);
-      }
-    }
     // build a dictionary of nodes that are linked
     const linkedByIndex = {};
     // console.log(initLinks);
@@ -1326,15 +1037,16 @@ class Graph extends Component {
     }
 
     function communityDetecting() {
-      const links = JSON.parse(JSON.stringify(set.links));
+      const l = JSON.parse(JSON.stringify(set.links));
       // console.log(links);
-      for (let i = 0; i < links.length; i += 1) {
+      for (let i = 0; i < l.length; i += 1) {
         // console.log(links[i]);
-        links[i].source = set.nodes.findIndex(ele => ele.titleTerm === set.links[i].source);
-        links[i].target = set.nodes.findIndex(ele => ele.titleTerm === set.links[i].target);
+        l[i].source = set.nodes.findIndex(ele => ele.titleTerm === set.links[i].source);
+        l[i].target = set.nodes.findIndex(ele => ele.titleTerm === set.links[i].target);
       }
-      netClustering.cluster(set.nodes, links);
+      netClustering.cluster(set.nodes, l);
     }
+
 
     function getTermCommunity() {
       let communityArr = [];
@@ -1368,33 +1080,6 @@ class Graph extends Component {
     }
   }
 
-  drawWordTree(d) {
-    const options = {
-      maxFontSize: 14,
-      wordtree: {
-        format: 'implicit',
-        word: 'cats',
-      },
-    };
-    // console.log(this);
-    // console.log('wordtree');
-    const style = {
-      float: 'left',
-      border: '2px solid gray',
-    };
-    return (
-      <div className="wordTree" style={style}>
-        <Chart
-          // style={style}
-          chartType="WordTree"
-          width="100%"
-          height="700px"
-          data={d}
-          options={options}
-        />
-      </div>
-    );
-  }
 
   render() {
     // const myRef = 'titleUserView';
