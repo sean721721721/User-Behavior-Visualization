@@ -112,7 +112,7 @@ class Graph extends Component {
     let selectedCluster = -1;
     let fontSizeThreshhold = 20;
     let sliderHasBeenLoaded = 0;
-    const NodeHiding = 0;
+    const NodeHiding = 1;
     const cellData = { nodes: [], links: [] };
     let totalAuthorInfluence = 0;
     const articleCellSvgWidth = parseFloat(d3.select('#articleCell').style('width'));
@@ -125,15 +125,30 @@ class Graph extends Component {
 
     communityDetecting();
     const origSet = JSON.parse(JSON.stringify(set));
-    const term_community = getTermCommunity();
+    // const term_community = getTermCommunity();
     // console.log(term_community);
+    console.log(G);
     const termCentrality = {
-      Betweenness: jsnx.betweennessCentrality(G, { weight: true })._stringValues,
-      EigenVector: jsnx.eigenvectorCentrality(G)._stringValues,
-      Cluster: jsnx.clustering(G)._stringValues,
+      Betweenness: {},
+      EigenVector: {},
+      Cluster: {},
     };
 
-    // console.log(termCentrality);
+    try {
+      termCentrality.Betweenness = jsnx.betweennessCentrality(G, { weight: true })._stringValues;
+      termCentrality.EigenVector = jsnx.eigenvectorCentrality(G)._stringValues;
+      termCentrality.Cluster = jsnx.clustering(G)._stringValues;
+    } catch (error) {
+      console.log(error);
+      Object.keys(G.node._stringValues).map((key, index) => {
+        termCentrality.Betweenness[key] = 1;
+        termCentrality.EigenVector[key] = 1;
+        termCentrality.Cluster[key] = 1;
+        return true;
+      });
+    }
+
+    console.log(termCentrality);
 
     const width = 900;
     const height = 900;
@@ -160,10 +175,10 @@ class Graph extends Component {
       .force('link', d3.forceLink().id((d) => {
         if (d.group === 1) return d.titleTerm;
         return d.id;
-      }))
+      }));
       // .force('charge', d3.forceManyBody().strength(-1))
       // .force('charge', d3.forceManyBody().distanceMax(10))
-      .force('center', d3.forceCenter(0, 0));
+      // .force('center', d3.forceCenter(-10, 0));
 
     let conutOfClickedNode = 0;
 
@@ -181,6 +196,7 @@ class Graph extends Component {
 
     let heatMapSvg = d3.select('#timeLine');
     let articleCellSvg = d3.select('#articleCell');
+    articleCellSvg.selectAll('*').remove();
     articleCellSvg = articleCellSvg
       .call(d3.zoom().scaleExtent([1 / 2, 8]).on('zoom', articleCellZoomed))
       .append('g');
@@ -553,9 +569,23 @@ class Graph extends Component {
           Math.max(...set.links.map(l => l.value)),
         ]).range([1, 100]);
 
+
+      const simulationDurationInMs = 5000; // 20 seconds
+
+      const startTime = Date.now();
+      const endTime = startTime + simulationDurationInMs;
+
+      function onSimulationTick() {
+        if (Date.now() < endTime) {
+          ticked();
+        } else {
+          simulation.stop();
+        }
+      }
+
       simulation
         .nodes(set.nodes)
-        .on('tick', ticked);
+        .on('tick', onSimulationTick);
 
       simulation.alphaDecay(0.005)
         .force('link')
@@ -572,7 +602,7 @@ class Graph extends Component {
 
       leftSvg.selectAll('*').remove();
 
-      drawTable(term_community);
+      // drawTable(term_community);
       // drawTimeLine();
       drawHeatMap();
       // drawWordTree();
@@ -787,51 +817,82 @@ class Graph extends Component {
             author.influence = influence;
           });
           clickedNode.children.sort((a, b) => ((a.influence < b.influence) ? 1 : -1));
-          console.log(clickedNode.children);
           // compute cellnodes and celllinks
           let topInfluenceAuthor = 1;
-          clickedNode.children.forEach((author) => {
+          const topNumOfPushes = 200;
+          clickedNode.children.every((author) => {
             let size = 0;
 
             if (topInfluenceAuthor <= topAuthorThreshold) {
               author.responder.forEach((article) => {
+                let replyCount = 0;
                 if (article.message.length >= articleInfluenceThreshold) {
-                  article.message.forEach((mes) => {
-                    if (mes.push_tag === '推' || mes.push_tag === '噓') {
-                      if (cellData.nodes.some(data => data.id === mes.push_userid)) {
-                        // already has same replyer
-                        const replyer = cellData.nodes.find(data => data.id === mes.push_userid);
-                        if (cellData.links.some(e => e.target === author && e.source === mes.push_userid)) {
-                          // reply same author
-                          cellData.links.find(e => e.target === author && e.source === mes.push_userid).value += 1;
-                          const repliedAuthor = replyer.reply.find(e => e.author === author);
-                          const repliedArticle = repliedAuthor.article.find(e => e.title === article.title);
-                          if (repliedArticle) {
-                            // reply same article
-                            const type = (mes.push_tag === '推') ? 'push' : 'boo';
-                            repliedArticle.messageCount.type += 1;
+                  cellData.nodes.push({
+                    id: article.articleId,
+                    author: author.id,
+                    type: 'article',
+                  });
+                  article.message.every((mes) => {
+                    if (replyCount < topNumOfPushes) {
+                      if (mes.push_tag === '推' || mes.push_tag === '噓') {
+                        if (cellData.nodes.some(data => data.id === mes.push_userid)) {
+                          // already has same replyer
+                          const replyer = cellData.nodes.find(data => data.id === mes.push_userid);
+                          if (cellData.links.some(e => e.target === author && e.source === mes.push_userid)) {
+                            // reply same author
+                            cellData.links.find(e => e.target === author && e.source === mes.push_userid).value += 1;
+                            const repliedAuthor = replyer.reply.find(e => e.author === author);
+                            const repliedArticle = repliedAuthor.article.find(e => e.title === article.title);
+                            if (repliedArticle) {
+                              // reply same article
+                              const type = (mes.push_tag === '推') ? 'push' : 'boo';
+                              repliedArticle.messageCount.type += 1;
+                            } else {
+                              // reply different article
+                              repliedAuthor.article.push({
+                                title: article,
+                                messageCount: {
+                                  push: mes.push_tag === '推' ? 1 : 0,
+                                  boo: mes.push_tag === '噓' ? 1 : 0,
+                                },
+                              });
+                            }
                           } else {
-                            // reply different article
-                            repliedAuthor.article.push({
-                              title: article,
-                              messageCount: {
-                                push: mes.push_tag === '推' ? 1 : 0,
-                                boo: mes.push_tag === '噓' ? 1 : 0,
-                              },
+                            replyer.reply.push({
+                              author,
+                              article: [{
+                                title: article,
+                                messageCount: {
+                                  push: mes.push_tag === '推' ? 1 : 0,
+                                  boo: mes.push_tag === '噓' ? 1 : 0,
+                                },
+                              }],
+                            });
+
+                            cellData.links.push({
+                              source: mes.push_userid,
+                              target: author,
+                              color: '#ffbb78',
+                              tag: 1,
+                              value: 1,
                             });
                           }
                         } else {
-                          replyer.reply.push({
-                            author,
-                            article: [{
-                              title: article,
-                              messageCount: {
-                                push: mes.push_tag === '推' ? 1 : 0,
-                                boo: mes.push_tag === '噓' ? 1 : 0,
-                              },
+                          cellData.nodes.push({
+                            push_content: mes.push_content,
+                            push_ipdatetime: mes.push_ipdatetime,
+                            id: mes.push_userid,
+                            reply: [{
+                              author,
+                              article: [{
+                                title: article,
+                                messageCount: {
+                                  push: mes.push_tag === '推' ? 1 : 0,
+                                  boo: mes.push_tag === '噓' ? 1 : 0,
+                                },
+                              }],
                             }],
                           });
-
                           cellData.links.push({
                             source: mes.push_userid,
                             target: author,
@@ -839,67 +900,43 @@ class Graph extends Component {
                             tag: 1,
                             value: 1,
                           });
+                          cellData.links.push({
+                            source: clickedNode.titleTerm,
+                            target: mes.push_userid,
+                            color: '#ffbb78',
+                            tag: 0,
+                            value: 1,
+                          });
                         }
-                        // cellData.links.push({
-                        //   source: mes.push_userid,
-                        //   target: author,
-                        //   color: '#ffbb78',
-                        //   tag: 1,
-                        //   value: 1,
-                        // });
-                      } else {
-                        cellData.nodes.push({
-                          push_content: mes.push_content,
-                          push_ipdatetime: mes.push_ipdatetime,
-                          id: mes.push_userid,
-                          reply: [{
-                            author,
-                            article: [{
-                              title: article,
-                              messageCount: {
-                                push: mes.push_tag === '推' ? 1 : 0,
-                                boo: mes.push_tag === '噓' ? 1 : 0,
-                              },
-                            }],
-                          }],
-                        });
-                        cellData.links.push({
-                          source: mes.push_userid,
-                          target: author,
-                          color: '#ffbb78',
-                          tag: 1,
-                          value: 1,
-                        });
-                        cellData.links.push({
-                          source: clickedNode.titleTerm,
-                          target: mes.push_userid,
-                          color: '#ffbb78',
-                          tag: 1,
-                          value: 1,
-                        });
+                        replyCount += 1;
                       }
+                      return true;
                     }
+                    return false;
                   });
                   size += article.message.length;
                 }
               });
               author.size = size;
               totalAuthorInfluence += size;
+              console.log(author);
               if (size >= authorInfluenceThreshold) {
                 cellData.nodes.push(author);
               }
+              topInfluenceAuthor += 1;
+              return true;
             }
-            topInfluenceAuthor += 1;
+            return false;
           });
 
           cellData.nodes.sort((a, b) => ((a.size < b.size) ? 1 : -1));
           // console.log(cellData);
           // const del = d3.select('#articleCell');
           // del.selectAll('*').remove();
-          console.log(articleCellSvg);
           // responderCommunityDetecting();
           OpinionLeader(cellData.nodes, cellData.links,
             beforeThisDate, articleCellSvg, cellForceSimulation, totalAuthorInfluence);
+          update();
         } else {
           set = JSON.parse(JSON.stringify(origSet));
           // node.style('fill-opacity', function(o) {
@@ -1044,6 +1081,7 @@ class Graph extends Component {
         l[i].source = set.nodes.findIndex(ele => ele.titleTerm === set.links[i].source);
         l[i].target = set.nodes.findIndex(ele => ele.titleTerm === set.links[i].target);
       }
+      console.log(set.nodes, set.links, l);
       netClustering.cluster(set.nodes, l);
     }
 
