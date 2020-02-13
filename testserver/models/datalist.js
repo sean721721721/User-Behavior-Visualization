@@ -1,7 +1,7 @@
 /* eslint-disable */
 let jb = require('./text.js');
 const NS_PER_SEC = 1e9;
-
+const queryArticleFilter = 50;
 //for dbquery
 let newualist = function newualist(files, ptt) {
     const time = process.hrtime();
@@ -440,7 +440,7 @@ let bindpostlist = function bindpostlist(qobj1, qobj2, ptt) {
         let post = postobj(qobj1[i]);
         pagea.push(post);
     }
-    pagea = pagea.filter(post => post.message_count.all > 10);
+    pagea = pagea.filter(post => post.message_count.all > queryArticleFilter);
     list.push(pagea);
     // console.log(444,list[0].length);
     // let wordCount =0;

@@ -22,8 +22,8 @@ export default function OpinionLeader(cellNodes, cellLinks, beforeThisDate,
   //   thisDate = d3.select('#customRange2').property('value');
   //   thisDate = timeScale.invert(beforeThisDate);
   // }
-  console.log(cellNodes);
-  console.log(cellLinks);
+  console.log('cellNodes: ', cellNodes);
+  console.log('cellLinks: ', cellLinks);
   const color = d3.schemeTableau10;
   const articleInfluenceThreshold = 100;
   const authorNodes = cellNodes.filter(node => node.influence);
@@ -35,8 +35,8 @@ export default function OpinionLeader(cellNodes, cellLinks, beforeThisDate,
   // });
   const articleNodes = cellNodes.filter(node => node.type === 'article');
 
-  console.log(articleNodes);
-  console.log(authorNodes);
+  console.log('articleNodes: ', articleNodes);
+  console.log('authorNodes: ', authorNodes);
 
   const authorArr = authorNodes.map(node => node.id);
 
@@ -55,13 +55,13 @@ export default function OpinionLeader(cellNodes, cellLinks, beforeThisDate,
   const articlePie = d3.pie()
     .value((d) => {
       const author = authorNodes.find(e => e.id === d.author);
-      console.log(author);
+      // console.log(author);
       const articleRatio = author.responder.filter(e => e.message.length >= articleInfluenceThreshold);
       return (360 / authorArr.length) / articleRatio.length;
     })
     .sort(null);
 
-  console.log(articlePie(articleNodes));
+  console.log('articlePie(articleNodes): ', articlePie(articleNodes));
 
   responderCommunityDetecting(cellNodes, cellLinks);
 
@@ -131,7 +131,7 @@ export default function OpinionLeader(cellNodes, cellLinks, beforeThisDate,
 
   articlePath.enter().append('path')
     .attr('fill', (d) => {
-      console.log(d);
+      // console.log(d);
       return 'white';
     })
     .attr('d', articleArc)
@@ -157,10 +157,10 @@ export default function OpinionLeader(cellNodes, cellLinks, beforeThisDate,
   articlePath.enter().append('text')
     // .text(d => d.data.articleId)
     .attr('transform', (d) => {
-      console.log(d);
+      // console.log(d);
       if (d.data.id) {
         const article = cellNodes.find(e => e.id === d.data.id);
-        console.log(article);
+        // console.log(article);
         [article.fx, article.fy] = articleArc.centroid(d);
       }
       return `translate(${arc.centroid(d)})`;
@@ -170,7 +170,7 @@ export default function OpinionLeader(cellNodes, cellLinks, beforeThisDate,
     .attr('font-size', '10px')
     .attr('color', '#000');
 
-  console.log(cellNodes);
+  console.log('cellNodes: ', cellNodes);
 
   let cellNode = svg.append('g')
     .attr('class', 'nodes')
@@ -219,6 +219,8 @@ export default function OpinionLeader(cellNodes, cellLinks, beforeThisDate,
       if (d.reply) {
         if (d.reply.length === 1) {
           const index = authorArr.findIndex(e => e === d.reply[0].author.id);
+          const author = authorNodes.find(e => e.id === d.reply[0].author.id);
+          if (author.countedArticle === d.reply[0].article.length) return 'red';
           // return color[index];
           return color[d.cluster];
         }
@@ -273,7 +275,7 @@ export default function OpinionLeader(cellNodes, cellLinks, beforeThisDate,
 
   forceSimulation.force('collision', d3.forceCollide(1));
 
-  const simulationDurationInMs = 3000; // 20 seconds
+  const simulationDurationInMs = 60000; // 20 seconds
 
   const startTime = Date.now();
   const endTime = startTime + simulationDurationInMs;
@@ -397,20 +399,22 @@ export default function OpinionLeader(cellNodes, cellLinks, beforeThisDate,
   }
 
   function responderCommunityDetecting(dataNodes, dataLinks) {
-    const filteredLinks = dataLinks.filter(l => l.tag === 1);
+    const filteredLinks = dataLinks.filter(l => l.tag === 1 || l.tag === 2);
     const links = JSON.parse(JSON.stringify(filteredLinks));
+    // console.log(filteredLinks);
+    // console.log(dataNodes);
     for (let i = 0; i < links.length; i += 1) {
       // console.log(links[i]);
-      links[i].source = dataNodes.findIndex(ele => ele.id === filteredLinks[i].source);
+      links[i].source = dataNodes.findIndex((ele) => {
+        // console.log(ele.id, filteredLinks[i].source, ele.id === filteredLinks[i].source.id);
+        return ele.id === filteredLinks[i].source.id || ele.id === filteredLinks[i].source;
+      });
       links[i].target = dataNodes.findIndex((ele) => {
-        // console.log(ele.id, dataLinks[i].target, ele.id === dataLinks[i].target.id);
-        return ele.id === filteredLinks[i].target.id;
+        return ele.id === filteredLinks[i].target;
       });
     }
-    const index = dataNodes.findIndex(ele => ele.id === 'sonofgod');
-    const testLinks = links.filter(l => l.source === 270);
     // console.log(index, testLinks);
-    // console.log(dataNodes, dataLinks, links);
+    console.log(links);
     netClustering.cluster(dataNodes, links);
   }
 

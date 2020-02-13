@@ -5,7 +5,7 @@ module.exports = {
     // console.log(list);
     // console.log(post);
     const NS_PER_SEC = 1e6;
-    const linkThreshold = 0.1;
+    const linkThreshold = 0.01;
     const SetNumOfNodes = 200;
     const visprops = list;
     // const startDate = new Date(date.$gte);

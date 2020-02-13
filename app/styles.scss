@@ -381,6 +381,29 @@ path:hover {
     display: grid;
     grid-column: sscol3 / sscol4;
     grid-row: ssrow1 / ssrow2;
+    grid-template-rows: [nwrow1] 30px [nwrow2] auto [nwrow3] 0.45fr [nwrowend];
+}  
+
+.filterBar {
+    // border: 2px solid gray;
+    // display: grid;
+    // grid-column: sscol3 / sscol4;
+    grid-row: nwrow1 / nwrow2;
+}
+
+.termMap {
+    // border: 2px solid gray;
+    display: grid;
+    // grid-column: sscol3 / sscol4;
+    grid-row: nwrow2 / nwrow3;
+    // grid-template-rows: [nwrow1] 0.1fr [nwrow2] 0.9fr [nwrowend];
+}
+
+.authorList {
+    border-top: 2px solid gray;
+    display: grid;
+    // grid-column: sscol3 / sscol4;
+    grid-row: nwrow3 / nwrowend;
     // grid-template-rows: [nwrow1] 0.1fr [nwrow2] 0.9fr [nwrowend];
 }
 
