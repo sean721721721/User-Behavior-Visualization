@@ -18,7 +18,21 @@ import * as d3 from 'd3';
 
 export default function AuthorTable(nodes, div, callback) {
   div.selectAll('*').remove();
-  console.log(nodes.children);
+  const authorList = JSON.parse(JSON.stringify(nodes));
+
+  // compute author's influence
+  authorList.children.forEach((author) => {
+    let influence = 0;
+    author.responder.forEach((article) => {
+      influence += article.message.length;
+    });
+    author.influence = influence;
+  });
+  authorList.children = authorList.children.filter(author => author.influence >= 100);
+  authorList.children.sort((a, b) => ((a.influence < b.influence) ? 1 : -1));
+  const topicWithSelectedAuthor = JSON.parse(JSON.stringify(authorList));
+  topicWithSelectedAuthor.children = [];
+  console.log(authorList.children);
   console.log(div);
   const authorTable = div.append('table');
   console.log(authorTable);
@@ -45,7 +59,7 @@ export default function AuthorTable(nodes, div, callback) {
 
   // Create a table with rows and bind a data row to each table row
   const tr = authorTable.selectAll('tr.data')
-    .data(nodes.children)
+    .data(authorList.children)
     .enter()
     .append('tr')
     .attr('class', 'datarow')
@@ -60,7 +74,6 @@ export default function AuthorTable(nodes, div, callback) {
   tr.append('td')
     .text((d) => {
       const totalComment = d.responder.reduce((total, n) => total + n.message.length, 0);
-      console.log(totalComment);
       return totalComment;
     });
   d3.selectAll('.datarow').filter(':nth-child(even)')
@@ -70,7 +83,8 @@ export default function AuthorTable(nodes, div, callback) {
   function clicked(d) {
     console.log('table clicked');
     console.log(d);
-    callback(d);
+    topicWithSelectedAuthor.children.push(d);
+    callback(topicWithSelectedAuthor);
   }
 }
 

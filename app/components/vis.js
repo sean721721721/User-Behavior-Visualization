@@ -808,15 +808,14 @@ class Graph extends Component {
           conutOfClickedNode += 1;
 
           AuthorTable(d, authorTable, (n) => {
-            console.log(n);
-            const clickedNode = JSON.parse(JSON.stringify(d));
+            const clickedNode = JSON.parse(JSON.stringify(n));
             cellData.nodes = [];
             cellData.links = [];
             clickedNode.fx = 0;
             clickedNode.fy = 0;
             cellData.nodes.push(clickedNode);
             totalAuthorInfluence = 0;
-  
+
             // compute author's influence
             clickedNode.children.forEach((author) => {
               let influence = 0;
@@ -982,178 +981,6 @@ class Graph extends Component {
             OpinionLeader(cellData.nodes, cellData.links,
               beforeThisDate, articleCellSvg, cellForceSimulation, totalAuthorInfluence);
           });
-          // const clickedNode = JSON.parse(JSON.stringify(d));
-          // cellData.nodes = [];
-          // cellData.links = [];
-          // clickedNode.fx = 0;
-          // clickedNode.fy = 0;
-          // cellData.nodes.push(clickedNode);
-          // totalAuthorInfluence = 0;
-
-          // // compute author's influence
-          // clickedNode.children.forEach((author) => {
-          //   let influence = 0;
-          //   author.responder.forEach((article) => {
-          //     if (article.message.length >= articleInfluenceThreshold) {
-          //       influence += article.message.length;
-          //     }
-          //   });
-          //   author.influence = influence;
-          // });
-          // clickedNode.children.sort((a, b) => ((a.influence < b.influence) ? 1 : -1));
-          // // compute cellnodes and celllinks
-          // let topInfluenceAuthor = 1;
-          // const topNumOfPushes = 200;
-          // clickedNode.children.every((author) => {
-          //   let size = 0;
-          //   let countedArticle = 0; 
-          //   if (topInfluenceAuthor <= topAuthorThreshold) {
-          //     author.responder.forEach((article) => {
-          //       let replyCount = 0;
-          //       if (article.message.length >= articleInfluenceThreshold) {
-          //         cellData.nodes.push({
-          //           id: article.articleId,
-          //           author: author.id,
-          //           type: 'article',
-          //         });
-          //         cellData.links.push({
-          //           source: author,
-          //           target: article.articleId,
-          //           color: '#ffbb78',
-          //           tag: 2,
-          //           value: 1,
-          //         });
-          //         article.message.every((mes) => {
-          //           if (replyCount < topNumOfPushes) {
-          //             // if (mes.push_tag === '推' || mes.push_tag === '噓') {
-          //             if (mes.push_tag === '推') {
-          //               if (cellData.nodes.some(data => data.id === mes.push_userid)) {
-          //                 // already has same replyer
-          //                 const replyer = cellData.nodes.find(data => data.id === mes.push_userid);
-          //                 // if (cellData.links.some(e => e.target === author && e.source === mes.push_userid)) {
-          //                 if (replyer.reply.some(e => e.author.id === author.id)) {
-          //                   // reply same author
-          //                   // const authorReplyed = replyer.reply.find(e => e.author.id === author.id);
-          //                   // cellData.links.find(e => e.target === author && e.source === mes.push_userid).value += 1;
-          //                   const repliedAuthor = replyer.reply.find(e => e.author === author);
-          //                   const repliedArticle = repliedAuthor.article.find(e => e.title === article);
-          //                   if (repliedArticle) {
-          //                     // reply same article
-          //                     cellData.links.find(e => e.target === article.articleId && e.source === mes.push_userid).value += 1;
-          //                     const type = (mes.push_tag === '推') ? 'push' : 'boo';
-          //                     repliedArticle.messageCount[type] += 1;
-          //                   } else {
-          //                     // reply different article
-          //                     repliedAuthor.article.push({
-          //                       title: article,
-          //                       messageCount: {
-          //                         push: mes.push_tag === '推' ? 1 : 0,
-          //                         boo: mes.push_tag === '噓' ? 1 : 0,
-          //                       },
-          //                     });
-          //                     cellData.links.push({
-          //                       source: mes.push_userid,
-          //                       target: article.articleId,
-          //                       color: '#ffbb78',
-          //                       tag: 1,
-          //                       value: 1,
-          //                     });
-          //                   }
-          //                 } else {
-          //                   replyer.reply.push({
-          //                     author,
-          //                     article: [{
-          //                       title: article,
-          //                       messageCount: {
-          //                         push: mes.push_tag === '推' ? 1 : 0,
-          //                         boo: mes.push_tag === '噓' ? 1 : 0,
-          //                       },
-          //                     }],
-          //                   });
-          //                   cellData.links.push({
-          //                     source: mes.push_userid,
-          //                     target: article.articleId,
-          //                     color: '#ffbb78',
-          //                     tag: 1,
-          //                     value: 1,
-          //                   });
-          //                   // cellData.links.push({
-          //                   //   source: mes.push_userid,
-          //                   //   target: author,
-          //                   //   color: '#ffbb78',
-          //                   //   tag: 1,
-          //                   //   value: 1,
-          //                   // });
-          //                 }
-          //               } else {
-          //                 cellData.nodes.push({
-          //                   push_content: mes.push_content,
-          //                   push_ipdatetime: mes.push_ipdatetime,
-          //                   id: mes.push_userid,
-          //                   reply: [{
-          //                     author,
-          //                     article: [{
-          //                       title: article,
-          //                       messageCount: {
-          //                         push: mes.push_tag === '推' ? 1 : 0,
-          //                         boo: mes.push_tag === '噓' ? 1 : 0,
-          //                       },
-          //                     }],
-          //                   }],
-          //                 });
-
-          //                 cellData.links.push({
-          //                   source: mes.push_userid,
-          //                   target: article.articleId,
-          //                   color: '#ffbb78',
-          //                   tag: 1,
-          //                   value: 1,
-          //                 });
-          //                 // cellData.links.push({
-          //                 //   source: mes.push_userid,
-          //                 //   target: author,
-          //                 //   color: '#ffbb78',
-          //                 //   tag: 1,
-          //                 //   value: 1,
-          //                 // });
-          //                 cellData.links.push({
-          //                   source: clickedNode.titleTerm,
-          //                   target: mes.push_userid,
-          //                   color: '#ffbb78',
-          //                   tag: 0,
-          //                   value: 1,
-          //                 });
-          //               }
-          //               replyCount += 1;
-          //             }
-          //             return true;
-          //           }
-          //           return false;
-          //         });
-          //         size += article.message.length;
-          //         countedArticle += 1;
-          //       }
-          //     });
-          //     author.size = size;
-          //     totalAuthorInfluence += size;
-          //     // console.log(author);
-          //     if (size >= authorInfluenceThreshold) {
-          //       author.countedArticle = countedArticle;
-          //       cellData.nodes.push(author);
-          //     }
-          //     topInfluenceAuthor += 1;
-          //     return true;
-          //   }
-          //   return false;
-          // });
-
-          // cellData.nodes.sort((a, b) => ((a.size < b.size) ? 1 : -1));
-          // // console.log(cellData);
-          // // const del = d3.select('#articleCell');
-          // // del.selectAll('*').remove();
-          // // responderCommunityDetecting();
-          // OpinionLeader(cellData.nodes, cellData.links,
-          //   beforeThisDate, articleCellSvg, cellForceSimulation, totalAuthorInfluence);
           update();
         } else {
           set = JSON.parse(JSON.stringify(origSet));

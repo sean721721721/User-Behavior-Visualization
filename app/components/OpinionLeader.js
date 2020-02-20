@@ -276,7 +276,7 @@ export default function OpinionLeader(cellNodes, cellLinks, beforeThisDate,
 
   forceSimulation.force('collision', d3.forceCollide(1));
 
-  const simulationDurationInMs = 1000; // 20 seconds
+  const simulationDurationInMs = 60000; // 20 seconds
 
   const startTime = Date.now();
   const endTime = startTime + simulationDurationInMs;
