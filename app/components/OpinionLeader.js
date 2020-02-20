@@ -22,8 +22,8 @@ export default function OpinionLeader(cellNodes, cellLinks, beforeThisDate,
   //   thisDate = d3.select('#customRange2').property('value');
   //   thisDate = timeScale.invert(beforeThisDate);
   // }
-  console.log('cellNodes: ', cellNodes);
-  console.log('cellLinks: ', cellLinks);
+  // console.log('cellNodes: ', cellNodes);
+  // console.log('cellLinks: ', cellLinks);
   const color = d3.schemeTableau10;
   const articleInfluenceThreshold = 100;
   const authorNodes = cellNodes.filter(node => node.influence);
@@ -35,8 +35,8 @@ export default function OpinionLeader(cellNodes, cellLinks, beforeThisDate,
   // });
   const articleNodes = cellNodes.filter(node => node.type === 'article');
 
-  console.log('articleNodes: ', articleNodes);
-  console.log('authorNodes: ', authorNodes);
+  // console.log('articleNodes: ', articleNodes);
+  // console.log('authorNodes: ', authorNodes);
 
   const authorArr = authorNodes.map(node => node.id);
 
@@ -170,7 +170,7 @@ export default function OpinionLeader(cellNodes, cellLinks, beforeThisDate,
     .attr('font-size', '10px')
     .attr('color', '#000');
 
-  console.log('cellNodes: ', cellNodes);
+  // console.log('cellNodes: ', cellNodes);
 
   let cellNode = svg.append('g')
     .attr('class', 'nodes')
@@ -222,7 +222,8 @@ export default function OpinionLeader(cellNodes, cellLinks, beforeThisDate,
           const author = authorNodes.find(e => e.id === d.reply[0].author.id);
           if (author.countedArticle === d.reply[0].article.length) return 'red';
           // return color[index];
-          return color[d.cluster];
+          return 'green';
+          // return color[d.cluster];
         }
         return 'green';
       }
@@ -275,7 +276,7 @@ export default function OpinionLeader(cellNodes, cellLinks, beforeThisDate,
 
   forceSimulation.force('collision', d3.forceCollide(1));
 
-  const simulationDurationInMs = 60000; // 20 seconds
+  const simulationDurationInMs = 1000; // 20 seconds
 
   const startTime = Date.now();
   const endTime = startTime + simulationDurationInMs;
@@ -414,7 +415,7 @@ export default function OpinionLeader(cellNodes, cellLinks, beforeThisDate,
       });
     }
     // console.log(index, testLinks);
-    console.log(links);
+    // console.log(links);
     netClustering.cluster(dataNodes, links);
   }
 
