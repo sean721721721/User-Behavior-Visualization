@@ -997,9 +997,9 @@ class Graph extends Component {
                             if (replyer.reply.some(e => e.author.id === author.id)) {
                               // reply same author
                               const repliedAuthor = replyer.reply.find(e => e.author === author);
-                              console.log(repliedAuthor);
+                              // console.log(repliedAuthor);
                               const repliedArticle = repliedAuthor.article.find(e => e.title === article);
-                              console.log(repliedArticle);
+                              // console.log(repliedArticle);
                               if (repliedArticle) {
                                 // reply same article
                                 // cellData.links.find(e => e.target === article.articleId && e.source === mes.push_userid).value += 1;
@@ -1038,14 +1038,15 @@ class Graph extends Component {
                               // });
                             }
                           } else {
-                            console.log(authorGroup);
                             cellData.nodes.push({
                               pushCount: 1,
                               push_content: mes.push_content,
                               push_ipdatetime: mes.push_ipdatetime,
                               id: mes.push_userid,
                               authorGroup: [author.id],
-                              adj: [mes.push_userid],
+                              adj: {
+                                [mes.push_userid]: 1,
+                              },
                               reply: [{
                                 author,
                                 article: [{
@@ -1080,7 +1081,8 @@ class Graph extends Component {
                 // console.log(author);
                 if (size >= authorInfluenceThreshold) {
                   author.countedArticle = countedArticle;
-                  author.adj = [author.id];
+                  author.adj = {};
+                  author.adj[author.id] = 1;
                   cellData.nodes.push(author);
                 }
                 topInfluenceAuthor += 1;
@@ -1151,7 +1153,9 @@ class Graph extends Component {
               }
               return false;
             });
+
             mergeCellDataNodes(cellData);
+
             cellData.nodes.sort((a, b) => ((a.size < b.size) ? 1 : -1));
             OpinionLeader(cellData.nodes, cellData.links,
               beforeThisDate, articleCellSvg, cellForceSimulation, totalAuthorInfluence);
@@ -1206,58 +1210,38 @@ class Graph extends Component {
 
       function mergeCellDataNodes(data) {
         for (let i = 0; i < data.links.length; i += 1) {
-          const t = data.links[i].target;
-          const s = data.links[i].source;
-          // console.log(t, s);
-          const temp = data.nodes.find(e => e.id === t);
-          const next = data.nodes.find(e => e.id === s);
-          // adjacency matrix
-          let existedAdjT = temp.adj.find(e => e === s);
-          let existedAdjS = next.adj.find(e => e === t);
-          if (existedAdjT) {
-            existedAdjT = existedAdjT.concat(' ', s);
-            temp.adj = temp.adj.filter(e => e !== s);
-            temp.adj.push(existedAdjT);
-            console.log('target: ', existedAdjT);
-          } else {
-            data.nodes.find(e => e.id === t).adj.push(s);
-          }
+          const t = data.links[i].target; // target id
+          const s = data.links[i].source; // source id
+          const temp = data.nodes.find(e => e.id === t); // find target node
+          const next = data.nodes.find(e => e.id === s); // find source node
 
-          if (existedAdjS) {
-            existedAdjS = existedAdjS.concat(' ', t);
-            next.adj = next.adj.filter(e => e !== t);
-            next.adj.push(existedAdjS);
-            console.log('source: ', existedAdjS);
-          } else {
-            data.nodes.find(e => e.id === s).adj.push(t);
+          // adjacency matrix
+          temp.adj[s] = temp.adj[s] ? temp.adj[s] + 1 : 1;
+          next.adj[t] = next.adj[t] ? next.adj[t] + 1 : 1;
+        }
+        for (let i = 0; i < data.nodes.length - 1; i += 1) {
+          for (let j = i + 1; j < data.nodes.length; j += 1) {
+            if (_.isEqual(data.nodes[i].adj, data.nodes[j].adj)) {
+              const temp_id = data.nodes[i].id;
+              const next_id = data.nodes[j].id;
+              data.nodes[i].id = data.nodes[i].id.concat(' ', data.nodes[j].id);
+              console.log(temp_id, next_id, data.nodes[i].id, data.nodes[j].id);
+              data.links.forEach((l) => {
+                if (l.source === temp_id) l.source = data.nodes[i].id;
+                if (l.source === next_id) l.source = data.nodes[i].id;
+                if (l.target === temp_id) l.target = data.nodes[i].id;
+                if (l.target === next_id) l.target = data.nodes[i].id;
+              });
+
+              data.nodes = data.nodes.filter(e => e.id !== data.nodes[j].id);
+              j -= 1;
+            } else {
+              console.log(data.nodes[i], data.nodes[j]);
+            }
           }
         }
+
         console.log(data);
-        // for (let i = 0; i < data.nodes.length - 1; i += 1) {
-        //   const temp = data.nodes[i];
-        //   if (temp.adj) {
-        //     for (let j = i + 1; j < data.nodes.length; j += 1) {
-        //       const next = data.nodes[j];
-        //       if (temp.adj.every(e => next.adj.includes(e))) {
-        //         console.log(temp.id, next.id);
-        //         // First, modify others adj matrix
-        //         for (let k = i + 1; j < next.adj.length; j += k) {
-        //           // The id of the node which will be modified
-        //           const id = next.adj[k];
-        //           // the node which will be modified
-        //           const modifyingNode = data.nodes.find(e => e.id === id);
-        //           modifyingNode.adj = modifyingNode.adj.filter(e => e !== id);
-        //           modifyingNode.adj.push(temp.id.concat(' ', next.id));
-        //         }
-  
-        //         // Second, merge nodes
-        //         temp.id = temp.id.concat(' ', next.id);
-        //         data.nodes = data.nodes.filter(e => e.id !== next.id);
-        //       }
-        //     }
-        //   }
-        //   console.log(data);
-        // }
       }
 
       function mouseOut() {

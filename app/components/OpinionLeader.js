@@ -260,8 +260,8 @@ export default function OpinionLeader(cellNodes, cellLinks, beforeThisDate,
       if (d.author) radius = 5; // article nodes
       else if (d.group === 1) radius = 0; // center point
       else if (d.influence) radius = 5; // author
-      // else radius = d.pushCount; // replyer
-      else radius = centrality(d);
+      else radius = d.pushCount; // replyer
+      // else radius = centrality(d);
       d.radius = radius;
       return radius;
     })
