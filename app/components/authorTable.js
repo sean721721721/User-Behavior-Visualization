@@ -19,7 +19,7 @@ import * as d3 from 'd3';
 export default function AuthorTable(nodes, div, callback) {
   div.selectAll('*').remove();
   const authorList = JSON.parse(JSON.stringify(nodes));
-
+  let authorIndex = 0;
   // compute author's influence
   authorList.children.forEach((author) => {
     let influence = 0;
@@ -32,10 +32,10 @@ export default function AuthorTable(nodes, div, callback) {
   authorList.children.sort((a, b) => ((a.influence < b.influence) ? 1 : -1));
   const topicWithSelectedAuthor = JSON.parse(JSON.stringify(authorList));
   topicWithSelectedAuthor.children = [];
-  console.log(authorList.children);
-  console.log(div);
+  // console.log(authorList.children);
+  // console.log(div);
   const authorTable = div.append('table');
-  console.log(authorTable);
+  // console.log(authorTable);
   const th = authorTable.append('tr');
   th.append('th').attr('class', 'tableHeader id')
     .attr('width', '25%')
@@ -82,9 +82,10 @@ export default function AuthorTable(nodes, div, callback) {
 
   function clicked(d) {
     console.log('table clicked');
-    console.log(d);
+    // console.log(d);
     topicWithSelectedAuthor.children.push(d);
-    callback(topicWithSelectedAuthor);
+    callback(topicWithSelectedAuthor, d.id);
+    authorIndex += 1;
   }
 }
 

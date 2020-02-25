@@ -15,17 +15,58 @@ import * as d3 from 'd3';
 // import { max } from 'moment';
 // import { Row, Form } from 'antd';
 import netClustering from 'netclustering';
+import * as jsnx from 'jsnetworkx';
 
 export default function OpinionLeader(cellNodes, cellLinks, beforeThisDate,
   svg, forceSimulation, totalInfluence) {
-  // if (sliderHasBeenLoaded) {
-  //   thisDate = d3.select('#customRange2').property('value');
-  //   thisDate = timeScale.invert(beforeThisDate);
-  // }
-  // console.log('cellNodes: ', cellNodes);
+  console.log('cellNodes: ', cellNodes);
   // console.log('cellLinks: ', cellLinks);
+  const G = new jsnx.Graph();
   const color = d3.schemeTableau10;
   const articleInfluenceThreshold = 100;
+  buildGraph();
+
+
+  const termCentrality = {
+    Betweenness: {},
+    EigenVector: {},
+  };
+
+  try {
+    termCentrality.Betweenness = jsnx.betweennessCentrality(G, { weight: true })._stringValues;
+    termCentrality.EigenVector = jsnx.eigenvectorCentrality(G)._stringValues;
+    // termCentrality.Cluster = jsnx.clustering(G)._stringValues;
+  } catch (error) {
+    console.log(error);
+    Object.keys(G.node._stringValues).map((key, index) => {
+      termCentrality.Betweenness[key] = 1;
+      termCentrality.EigenVector[key] = 1;
+      // termCentrality.Cluster[key] = 1;
+      return true;
+    });
+  }
+
+
+  const termCentralityArr = {
+    betweennessArr: Object.values(termCentrality.Betweenness),
+    eigenvectorArr: Object.values(termCentrality.EigenVector),
+    // clusterArr: Object.values(termCentrality.Cluster),
+  };
+
+  const normalizeBetweenness = d3.scaleLinear()
+    .domain([
+      Math.min(...termCentralityArr.betweennessArr),
+      Math.max(...termCentralityArr.betweennessArr),
+    ]).range([1, 5]);
+
+  const normalizeEigenvector = d3.scaleLinear()
+    .domain([
+      Math.min(...termCentralityArr.eigenvectorArr),
+      Math.max(...termCentralityArr.eigenvectorArr),
+    ]).range([1, 5]);
+
+  console.log(termCentrality);
+
   const authorNodes = cellNodes.filter(node => node.influence);
   // const articleNodes = [];
   // authorNodes.map(e => e.responder).forEach((e) => {
@@ -39,7 +80,7 @@ export default function OpinionLeader(cellNodes, cellLinks, beforeThisDate,
   // console.log('authorNodes: ', authorNodes);
 
   const authorArr = authorNodes.map(node => node.id);
-
+  console.log(authorArr);
   const opinoinLeaderPie = d3.pie()
     .value((d) => {
       const totalComments = d.responder.reduce((pre, nex) => ({
@@ -56,14 +97,16 @@ export default function OpinionLeader(cellNodes, cellLinks, beforeThisDate,
     .value((d) => {
       const author = authorNodes.find(e => e.id === d.author);
       // console.log(author);
-      const articleRatio = author.responder.filter(e => e.message.length >= articleInfluenceThreshold);
+      const articleRatio = author.responder.filter(
+        e => e.message.length >= articleInfluenceThreshold,
+      );
       return (360 / authorArr.length) / articleRatio.length;
     })
     .sort(null);
 
   console.log('articlePie(articleNodes): ', articlePie(articleNodes));
 
-  responderCommunityDetecting(cellNodes, cellLinks);
+  // responderCommunityDetecting(cellNodes, cellLinks);
 
   // ({ nodes, links } = data);
   svg.selectAll('*').remove();
@@ -110,8 +153,8 @@ export default function OpinionLeader(cellNodes, cellLinks, beforeThisDate,
   cellPath.enter().append('path')
     .attr('fill', (d) => {
       const index = authorArr.findIndex(e => e === d.data.id);
-      // return color[index];
-      return color[d.data.cluster];
+      return color[index];
+      // return color[d.data.cluster];
     })
     .attr('d', arc)
     .attr('stroke', 'white')
@@ -157,11 +200,9 @@ export default function OpinionLeader(cellNodes, cellLinks, beforeThisDate,
   articlePath.enter().append('text')
     // .text(d => d.data.articleId)
     .attr('transform', (d) => {
-      // console.log(d);
       if (d.data.id) {
         const article = cellNodes.find(e => e.id === d.data.id);
-        // console.log(article);
-        [article.fx, article.fy] = articleArc.centroid(d);
+        // [article.fx, article.fy] = articleArc.centroid(d);
       }
       return `translate(${arc.centroid(d)})`;
     })
@@ -214,8 +255,29 @@ export default function OpinionLeader(cellNodes, cellLinks, beforeThisDate,
   const cellCircles = cellNodeEnter.append('circle')
     .transition()
     .duration(500)
-    .attr('r', d => (d.group === 1 ? 0 : 1))
+    .attr('r', (d) => {
+      let radius = 0;
+      if (d.author) radius = 5; // article nodes
+      else if (d.group === 1) radius = 0; // center point
+      else if (d.influence) radius = 5; // author
+      // else radius = d.pushCount; // replyer
+      else radius = centrality(d);
+      d.radius = radius;
+      return radius;
+    })
     .attr('fill', (d) => {
+      // console.log(d);
+      if (d.influence) return color[authorArr.findIndex(e => e === d.id)]; // author
+      if (d.authorGroup && d.authorGroup.length === 1) { // replyer
+        const index = authorArr.findIndex(e => e === d.authorGroup[0]);
+        // return color[d.cluster];
+        return color[index];
+      }
+      if (d.author) { // article
+        const index = authorArr.findIndex(e => e === d.author);
+        // return color[d.cluster];
+        return color[index];
+      }
       if (d.reply) {
         if (d.reply.length === 1) {
           const index = authorArr.findIndex(e => e === d.reply[0].author.id);
@@ -227,12 +289,11 @@ export default function OpinionLeader(cellNodes, cellLinks, beforeThisDate,
         }
         return 'green';
       }
-      return 'green';
     })
     .style('fill-opacity', 1)
-    .attr('stroke', 'gray')
+    .attr('stroke', 'black')
     .attr('stroke-width', d => (d.group === 1 ? 2 : 0.9))
-    .attr('stroke-opacity', 0);
+    .attr('stroke-opacity', d => (d.influence ? 1 : 0));
 
   cellNodeEnter.on('mouseover', (d) => { mouseevent(d, 'mouseover'); })
     .on('mouseout', (d) => { mouseevent(d, 'mouseout'); });
@@ -272,11 +333,14 @@ export default function OpinionLeader(cellNodes, cellLinks, beforeThisDate,
     .force('link')
     .links(cellLinks)
     .distance(d => 10)
-    .strength(d => d.value / 7);
+    .strength((d) => {
+      return 1;
+    });
+  // .strength(d => d.value / 7);
 
-  forceSimulation.force('collision', d3.forceCollide(1));
+  forceSimulation.force('collision', d3.forceCollide(d => d.radius));
 
-  const simulationDurationInMs = 60000; // 20 seconds
+  const simulationDurationInMs = 120000; // 20 seconds
 
   const startTime = Date.now();
   const endTime = startTime + simulationDurationInMs;
@@ -401,7 +465,9 @@ export default function OpinionLeader(cellNodes, cellLinks, beforeThisDate,
 
   function responderCommunityDetecting(dataNodes, dataLinks) {
     const filteredLinks = dataLinks.filter(l => l.tag === 1 || l.tag === 2);
+    console.log(filteredLinks);
     const links = JSON.parse(JSON.stringify(filteredLinks));
+    // const links = filteredLinks;
     // console.log(filteredLinks);
     // console.log(dataNodes);
     for (let i = 0; i < links.length; i += 1) {
@@ -415,8 +481,23 @@ export default function OpinionLeader(cellNodes, cellLinks, beforeThisDate,
       });
     }
     // console.log(index, testLinks);
-    // console.log(links);
+    console.log(links);
+    console.log(filteredLinks);
     netClustering.cluster(dataNodes, links);
+    console.log('community detecting done');
+  }
+
+  function buildGraph() {
+    const node_data = cellNodes.map(d => d.id);
+    const edge_data = cellLinks.map(d => [d.source, d.target, d.value]);
+    G.addNodesFrom(node_data);
+    G.addEdgesFrom(edge_data);
+  }
+
+  function centrality(d) {
+    // if (option === 'eigenvector') 
+    return normalizeEigenvector(termCentrality.EigenVector[d.id]);
+    // return normalizeBetweenness(termCentrality.Betweenness[d.id]);
   }
 
   // function communityDetecting() {
