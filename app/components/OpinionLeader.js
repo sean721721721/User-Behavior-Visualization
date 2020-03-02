@@ -322,7 +322,16 @@ export default function OpinionLeader(cellNodes, cellLinks, beforeThisDate,
     .attr('y', 3);
 
   cellNodeEnter.append('title')
-    .text(d => `${d.id}${'\n'}content: ${d.url}`);
+    .text((d) => {
+      if (d.push_detail) {
+        let push_content = '';
+        d.push_detail.forEach((e) => {
+          push_content = push_content.concat('\n', e.article[0].messageContent);
+        });
+        return `${d.id}${'\n'}content: ${push_content}`;
+      }
+      return `${d.id}${'\n'}content: ${d.url}`;
+    });
   // cellNode = cellNodeEnter.merge(node);
   cellNode = cellNodeEnter;
 

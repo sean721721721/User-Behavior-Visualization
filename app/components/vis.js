@@ -847,6 +847,16 @@ class Graph extends Component {
                             // already has same replyer
                             const replyer = cellData.nodes.find(data => data.id === mes.push_userid);
                             replyer.adj[mes.push_userid] += 1;
+                            replyer.push_detail.push({
+                              author,
+                              article: [{
+                                title: article,
+                                messageCount: {
+                                  push: mes.push_tag === '推' ? 1 : 0, boo: mes.push_tag === '噓' ? 1 : 0,
+                                },
+                                messageContent: mes.push_content,
+                              }],
+                            });
                             if (!replyer.authorGroup.some(e => e === author.id)) replyer.authorGroup.push(author.id);
                             if (replyer.reply.some(e => e.author.id === author.id)) {
                               // reply same author
@@ -890,7 +900,6 @@ class Graph extends Component {
                                   messageCount: {
                                     push: mes.push_tag === '推' ? 1 : 0, boo: mes.push_tag === '噓' ? 1 : 0,
                                   },
-                                  messageContent: mes.push_content,
                                 }],
                               });
                               // cellData.links.push({
@@ -1117,42 +1126,11 @@ class Graph extends Component {
             ? source_node.adj[t] + data.links[i].value : data.links[i].value;
         }
 
-        // self adjacency * 2
-        // data.nodes.forEach((e) => {
-        //   console.log(e);
-        //   if (e.adj && e.adj[e.id] !== -1) e.adj[e.id] *= e.adj[e.id];
-        // });
-
-
-        // merge nodes
-        // for (let i = 0; i < data.nodes.length - 1; i += 1) {
-        //   for (let j = i + 1; j < data.nodes.length; j += 1) {
-        //     if (adjIsEquivalent(data.nodes[i], data.nodes[j])) {
-        //       const temp_id = data.nodes[i].id;
-        //       const next_id = data.nodes[j].id;
-        //       // data.nodes[i].id = data.nodes[i].id.concat(' ', data.nodes[j].id);
-        //       data.links.forEach((l) => {
-        //         if (l.source === temp_id) l.source = data.nodes[i].id;
-        //         if (l.source === next_id) l.source = data.nodes[i].id;
-        //         if (l.target === temp_id) l.target = data.nodes[i].id;
-        //         if (l.target === next_id) l.target = data.nodes[i].id;
-        //       });
-        //       data.links = data.links.filter(e => e.source !== e.target);
-        //       data.nodes = data.nodes.filter(e => e.id !== data.nodes[j].id);
-        //       j -= 1;
-        //     } else {
-        //       // console.log(data.nodes[i], data.nodes[j]);
-        //     }
-        //   }
-        // }
-
-
         // merge nodes by author & article
         for (let i = 0; i < data.nodes.length - 1; i += 1) {
           for (let j = i + 1; j < data.nodes.length; j += 1) {
-            if (data.nodes[i].adj && data.nodes[j].adj) {
+            if (!data.nodes[i].responder && data.nodes[i].adj) {
               if (_.isEqual(data.nodes[i].reply, data.nodes[j].reply)) {
-                // console.log(data.nodes[i], data.nodes[j]);
                 const temp_id = data.nodes[i].id;
                 const next_id = data.nodes[j].id;
                 data.nodes[i].id = data.nodes[i].id.concat(' ', data.nodes[j].id);
@@ -1178,7 +1156,7 @@ class Graph extends Component {
             const temp = data.links[j];
             if ((temp.source === l.source && temp.target === l.target)
             || (temp.source === l.target && temp.target === l.source)) {
-              l.value += data.links[j].value;
+              // l.value += data.links[j].value;
               data.links.splice(j, 1);
               j -= 1;
             }
