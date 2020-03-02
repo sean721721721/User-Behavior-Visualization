@@ -379,9 +379,9 @@ let callback = function callback(req, res) {
               // Remove article content
               res.result.forEach(function(result){
                 result.content = ' ';
-                result.messages.forEach(function(message){
-                message.push_content = '';
-                })
+                // result.messages.forEach(function(message){
+                // message.push_content = '';
+                // })
               })
 
               let datalist = dl.bindpostlist(res.result, ptt);

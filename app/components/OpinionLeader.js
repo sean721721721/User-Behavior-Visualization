@@ -24,6 +24,7 @@ export default function OpinionLeader(cellNodes, cellLinks, beforeThisDate,
   const G = new jsnx.Graph();
   const color = d3.schemeTableau10;
   const articleInfluenceThreshold = 100;
+  let node_r = d3.scaleLinear().range([3, 20]);
   buildGraph();
 
 
@@ -57,13 +58,13 @@ export default function OpinionLeader(cellNodes, cellLinks, beforeThisDate,
     .domain([
       Math.min(...termCentralityArr.betweennessArr),
       Math.max(...termCentralityArr.betweennessArr),
-    ]).range([1, 5]);
+    ]).range([1, 10]);
 
   const normalizeEigenvector = d3.scaleLinear()
     .domain([
       Math.min(...termCentralityArr.eigenvectorArr),
       Math.max(...termCentralityArr.eigenvectorArr),
-    ]).range([1, 5]);
+    ]).range([1, 10]);
 
   console.log(termCentrality);
 
@@ -106,7 +107,7 @@ export default function OpinionLeader(cellNodes, cellLinks, beforeThisDate,
 
   console.log('articlePie(articleNodes): ', articlePie(articleNodes));
 
-  // responderCommunityDetecting(cellNodes, cellLinks);
+  responderCommunityDetecting(cellNodes, cellLinks);
 
   // ({ nodes, links } = data);
   svg.selectAll('*').remove();
@@ -130,8 +131,8 @@ export default function OpinionLeader(cellNodes, cellLinks, beforeThisDate,
     .style('z-index', -1)
   // .attr('visibility', 'hidden')
     .attr('stroke', d => d.color)
-    .attr('stroke-width', 1);
-  // .attr('stroke-width', d => (d.value < 100000 ? d.value : 3));
+    .attr('stroke-width', 1)
+    // .attr('stroke-width', d => (d.value < 100000 ? d.value : 3));
   // cellLink = cellLinkEnter.merge(link);
   cellLink = cellLinkEnter;
 
@@ -255,18 +256,20 @@ export default function OpinionLeader(cellNodes, cellLinks, beforeThisDate,
   const cellCircles = cellNodeEnter.append('circle')
     .transition()
     .duration(500)
+    .attr('class', 'nodes')
     .attr('r', (d) => {
       let radius = 0;
       if (d.author) radius = 5; // article nodes
       else if (d.group === 1) radius = 0; // center point
       else if (d.influence) radius = 5; // author
-      else radius = d.pushCount; // replyer
-      // else radius = centrality(d);
+      // else radius = d.pushCount; // replyer
+      else radius = centrality(d);
       d.radius = radius;
       return radius;
     })
     .attr('fill', (d) => {
       // console.log(d);
+      return color[d.cluster];
       if (d.influence) return color[authorArr.findIndex(e => e === d.id)]; // author
       if (d.authorGroup && d.authorGroup.length === 1) { // replyer
         const index = authorArr.findIndex(e => e === d.authorGroup[0]);
@@ -306,15 +309,20 @@ export default function OpinionLeader(cellNodes, cellLinks, beforeThisDate,
   //   .style('fill', '#80d6c7');
 
   const cellLables = cellNodeEnter.append('text')
-    // .text(d => d.author)
+    .text((d) => {
+      if (d.reply) {
+        return d.reply[0].article.length;
+      }
+      return '';
+    })
     .style('text-anchor', 'middle')
     .attr('font-family', 'Microsoft JhengHei')
     .attr('font-size', '10px')
     .attr('color', '#000')
-    .attr('y', 0);
+    .attr('y', 3);
 
   cellNodeEnter.append('title')
-    .text(d => `Title: ${d.id}${'\n'}url: ${d.url}`);
+    .text(d => `${d.id}${'\n'}content: ${d.url}`);
   // cellNode = cellNodeEnter.merge(node);
   cellNode = cellNodeEnter;
 
@@ -332,9 +340,9 @@ export default function OpinionLeader(cellNodes, cellLinks, beforeThisDate,
   forceSimulation.alphaDecay(0.005)
     .force('link')
     .links(cellLinks)
-    .distance(d => 10)
+    .distance(d => 30)
     .strength((d) => {
-      return 1;
+      return Math.min(1, 0.1 * d.value);
     });
   // .strength(d => d.value / 7);
 
@@ -362,7 +370,8 @@ export default function OpinionLeader(cellNodes, cellLinks, beforeThisDate,
       .attr('class', d => (`from${d.source.index} to${d.target.index}`));
 
     cellNode
-      .attr('transform', d => `translate( ${d.x}, ${d.y})`);
+      .attr('transform', d => `translate( ${d.x}, ${d.y})`)
+      .attr('id', d => `_${d.index}`);
   }
 
   function dragstarted(d) {
@@ -421,7 +430,7 @@ export default function OpinionLeader(cellNodes, cellLinks, beforeThisDate,
       .style('stroke-opacity', line_opacity);
 
     // highlight dots
-    d3.selectAll('circle.nodes').transition().style('opacity', dot_other_opacity);
+    // d3.selectAll('circle.nodes').transition().style('opacity', dot_other_opacity);
     // self
     d3.selectAll(`circle#_${d.index}`)
       .style('stroke', dot_self_color)
@@ -433,9 +442,12 @@ export default function OpinionLeader(cellNodes, cellLinks, beforeThisDate,
     // to dots
     d3.selectAll(`line.from${d.index}`).filter(e => e.target.index !== e.source.index).each((e) => {
       if (event === 'mouseover') {
-        d3.select(`circle#_${e.target.index}`)
+        d3.select(`nodes#_${e.target.index}`)
           .style('stroke', dot_other_color)
-        // .attr('r', e1 => ((event === 'mouseover') ? node_r(e.count) : e1.radius))
+          .attr('r', (e1) => {
+            console.log(e1);
+            return (event === 'mouseover') ? node_r(10) : e1.radius;
+          })
           .each((e1) => {
             e1.select_radius = d3.select(this).attr('r');
           })
@@ -451,7 +463,7 @@ export default function OpinionLeader(cellNodes, cellLinks, beforeThisDate,
     });
     // from dots
     d3.selectAll(`line.to${d.index}`).filter(e => e.target.index !== e.source.index).each((e) => {
-      d3.select(`circle#_${e.source.index}`)
+      d3.select(`nodes#_${e.source.index}`)
       // .attr('r', e1 => ((event === 'mouseover') ? node_r(e.count) : e1.radius))
         .each((e1) => {
           e1.select_radius = d3.select(this).attr('r');
@@ -464,7 +476,7 @@ export default function OpinionLeader(cellNodes, cellLinks, beforeThisDate,
   }
 
   function responderCommunityDetecting(dataNodes, dataLinks) {
-    const filteredLinks = dataLinks.filter(l => l.tag === 1 || l.tag === 2);
+    const filteredLinks = dataLinks.filter(l => l.tag === 1 || l.tag === 0);
     console.log(filteredLinks);
     const links = JSON.parse(JSON.stringify(filteredLinks));
     // const links = filteredLinks;
@@ -488,16 +500,18 @@ export default function OpinionLeader(cellNodes, cellLinks, beforeThisDate,
   }
 
   function buildGraph() {
+    let newLinks = JSON.parse(JSON.stringify(cellLinks));
+    newLinks = newLinks.filter(l => l.tag !== 0);
     const node_data = cellNodes.map(d => d.id);
-    const edge_data = cellLinks.map(d => [d.source, d.target, d.value]);
+    const edge_data = newLinks.map(d => [d.source, d.target, d.value]);
     G.addNodesFrom(node_data);
     G.addEdgesFrom(edge_data);
   }
 
   function centrality(d) {
-    // if (option === 'eigenvector') 
-    return normalizeEigenvector(termCentrality.EigenVector[d.id]);
-    // return normalizeBetweenness(termCentrality.Betweenness[d.id]);
+    // if (option === 'eigenvector')
+    // return normalizeEigenvector(termCentrality.EigenVector[d.id]);
+    return normalizeBetweenness(termCentrality.Betweenness[d.id]);
   }
 
   // function communityDetecting() {
