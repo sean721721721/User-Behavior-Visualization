@@ -81,7 +81,7 @@ export default function OpinionLeader(cellNodes, cellLinks, beforeThisDate,
   // console.log('authorNodes: ', authorNodes);
 
   const authorArr = authorNodes.map(node => node.id);
-  console.log(authorArr);
+  // console.log(authorArr);
   const opinoinLeaderPie = d3.pie()
     .value((d) => {
       const totalComments = d.responder.reduce((pre, nex) => ({
@@ -132,7 +132,7 @@ export default function OpinionLeader(cellNodes, cellLinks, beforeThisDate,
   // .attr('visibility', 'hidden')
     .attr('stroke', d => d.color)
     .attr('stroke-width', 1)
-    // .attr('stroke-width', d => (d.value < 100000 ? d.value : 3));
+    .attr('stroke-width', d => Math.min(d.value, 10));
   // cellLink = cellLinkEnter.merge(link);
   cellLink = cellLinkEnter;
 
@@ -486,7 +486,7 @@ export default function OpinionLeader(cellNodes, cellLinks, beforeThisDate,
 
   function responderCommunityDetecting(dataNodes, dataLinks) {
     const filteredLinks = dataLinks.filter(l => l.tag === 1 || l.tag === 0);
-    console.log(filteredLinks);
+    // console.log(filteredLinks);
     const links = JSON.parse(JSON.stringify(filteredLinks));
     // const links = filteredLinks;
     // console.log(filteredLinks);
@@ -502,8 +502,8 @@ export default function OpinionLeader(cellNodes, cellLinks, beforeThisDate,
       });
     }
     // console.log(index, testLinks);
-    console.log(links);
-    console.log(filteredLinks);
+    // console.log(links);
+    // console.log(filteredLinks);
     netClustering.cluster(dataNodes, links);
     console.log('community detecting done');
   }
@@ -515,6 +515,8 @@ export default function OpinionLeader(cellNodes, cellLinks, beforeThisDate,
     const edge_data = newLinks.map(d => [d.source, d.target, d.value]);
     G.addNodesFrom(node_data);
     G.addEdgesFrom(edge_data);
+    // let length = jsnx.allPairsShortestPathLength(G);
+    // console.log(Object.values(length._stringValues));
   }
 
   function centrality(d) {

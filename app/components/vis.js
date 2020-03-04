@@ -22,6 +22,7 @@ import * as jsnx from 'jsnetworkx';
 import Louvain from './jLouvain';
 import { OpinionLeader } from './OpinionLeader';
 import { AuthorTable } from './authorTable';
+// import request from 'request';
 
 const SetNumOfNodes = 200;
 class Graph extends Component {
@@ -76,6 +77,11 @@ class Graph extends Component {
   }
 
   drawwithlabels() {
+    // request('http://www.google.com', function (error, response, body) {
+    //   console.error('error:', error); // Print the error if one occurred
+    //   console.log('statusCode:', response && response.statusCode); // Print the response status code if a response was received
+    //   console.log('body:', body); // Print the HTML for the Google homepage.
+    // });
     // console.log(this.props);
     const { date } = this.props;
     const startDate = new Date(date.$gte);
@@ -1024,7 +1030,7 @@ class Graph extends Component {
                   const maximumLength = Math.min(topNumOfPushes, filteredMessages.length);
                   if (article.message.length >= articleInfluenceThreshold) {
                     for (let i = 0; i < maximumLength; i += 1) {
-                      console.log(filteredMessages[i]);
+                      // console.log(filteredMessages[i]);
                       const existedLink = cellData.links.find((l) => {
                         const user_id = filteredMessages[i].push_userid;
                         const author_id = author.id;
@@ -1170,7 +1176,7 @@ class Graph extends Component {
         for (let i = 0; i < data.links.length - 1; i += 1) {
           if (data.links[i].source === data.links[i].target) console.log(data.links[i]);
         }
-        console.log(count);
+        // console.log(count);
         console.log(data);
       }
 

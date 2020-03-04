@@ -39,6 +39,7 @@
     "react-router-redux": "^4.0.8",
     "redux": "^4.0.4",
     "redux-saga": "^0.16.2",
+    "request": "^2.88.2",
     "sententree": "^1.0.0",
     "should": "^13.2.3",
     "uglifyjs-webpack-plugin": "^2.2.0"
