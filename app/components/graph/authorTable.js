@@ -212,7 +212,7 @@ export default function AuthorTable(nodes, div, callback) {
   }
 
   function financial(x) {
-    return Number.parseFloat(x).toFixed(1);
+    return Number.parseFloat(x).toFixed(4);
   }
 
   function mergeCellDataNodes(ns, ls) {

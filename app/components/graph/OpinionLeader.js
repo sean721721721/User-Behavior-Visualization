@@ -311,7 +311,7 @@ export default function OpinionLeader(cellNodes, cellLinks, beforeThisDate,
   const cellLables = cellNodeEnter.append('text')
     .text((d) => {
       if (d.reply) {
-        return d.reply[0].article.length;
+        // return d.reply[0].article.length;
       }
       return '';
     })

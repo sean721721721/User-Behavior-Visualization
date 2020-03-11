@@ -16,7 +16,7 @@ import AsyncApp from '../containers/AsyncApp';
 // import VisibleCardList from '../containers/VisibleCardList';
 import Loading from './loading';
 import './style/bbs.css';
-import Graph from './vis';
+import Graph from './graph';
 import GateKeeper from './GateKeeper';
 
 class Grid extends React.Component {

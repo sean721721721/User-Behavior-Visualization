@@ -34,6 +34,7 @@ class Graph extends Component {
   }
 
   componentDidMount() {
+    // console.log(this.props.name);
     // console.log('vis_DidMount');
   }
 
@@ -861,6 +862,7 @@ class Graph extends Component {
                                   push: mes.push_tag === '推' ? 1 : 0, boo: mes.push_tag === '噓' ? 1 : 0,
                                 },
                                 messageContent: mes.push_content,
+                                pushDate: mes.push_ipdatetime,
                               }],
                             });
                             if (!replyer.authorGroup.some(e => e === author.id)) replyer.authorGroup.push(author.id);
@@ -899,15 +901,17 @@ class Graph extends Component {
                                   push_content: mes.push_content,
                                 }],
                               });
-                              replyer.push_detail.push({
-                                author,
-                                article: [{
-                                  title: article,
-                                  messageCount: {
-                                    push: mes.push_tag === '推' ? 1 : 0, boo: mes.push_tag === '噓' ? 1 : 0,
-                                  },
-                                }],
-                              });
+                              // replyer.push_detail.push({
+                              //   author,
+                              //   article: [{
+                              //     title: article,
+                              //     messageCount: {
+                              //       push: mes.push_tag === '推' ? 1 : 0, boo: mes.push_tag === '噓' ? 1 : 0,
+                              //     },
+                              //     messageContent: mes.push_content,
+                              //     pushDate: mes.push_ipdatetime,
+                              //   }],
+                              // });
                               // cellData.links.push({
                               //   source: mes.push_userid,
                               //   target: article.articleId,
@@ -943,6 +947,7 @@ class Graph extends Component {
                                     push: mes.push_tag === '推' ? 1 : 0, boo: mes.push_tag === '噓' ? 1 : 0,
                                   },
                                   messageContent: mes.push_content,
+                                  pushDate: mes.push_ipdatetime,
                                 }],
                               }],
                             });
