@@ -858,7 +858,11 @@ class Graph extends Component {
                           if (cellData.nodes.some(data => data.id === mes.push_userid)) {
                             // already has same replyer
                             const replyer = cellData.nodes.find(data => data.id === mes.push_userid);
+                            console.log(replyer);
                             replyer.adj[mes.push_userid] += 1;
+                            if (!replyer.push_detail) {
+                              replyer.push_detail = [];
+                            }
                             replyer.push_detail.push({
                               author,
                               article: [{
@@ -870,7 +874,9 @@ class Graph extends Component {
                                 pushDate: mes.push_ipdatetime,
                               }],
                             });
+                            replyer.authorGroup = replyer.authorGroup ? replyer.authorGroup : [];
                             if (!replyer.authorGroup.some(e => e === author.id)) replyer.authorGroup.push(author.id);
+                            replyer.reply = replyer.reply ? replyer.reply : [];
                             if (replyer.reply.some(e => e.author.id === author.id)) {
                               // reply same author
                               const repliedAuthor = replyer.reply.find(e => e.author === author);
@@ -1079,6 +1085,9 @@ class Graph extends Component {
             //   beforeThisDate, articleCellSvg, cellForceSimulation, totalAuthorInfluence);
             console.log(d3.select('#articleCell'));
             console.log(articleCellSvg);
+            const titleTermArr = cellData.nodes.forEach((e) => {
+              if (e.id === index) return e.titleTermArr;
+            });
             $this.setState({
               word: cellData.nodes[0].titleTermArr,
               renderOpinionLeaderView: 0,
@@ -1087,7 +1096,7 @@ class Graph extends Component {
               articleCellSvg,
               cellForceSimulation,
               totalAuthorInfluence,
-              user: cellData.nodes[0].id,
+              user: index,
             });
             console.log($this.state);
           });
