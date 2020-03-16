@@ -23,7 +23,7 @@ import Louvain from './jLouvain';
 import { OpinionLeader } from './OpinionLeader';
 import { AuthorTable } from './authorTable';
 import WordTree from './wordTree';
-import { ArticleCell } from './articleCell';
+import ArticleCell from './articleCell';
 // import request from 'request';
 
 const SetNumOfNodes = 200;
@@ -39,6 +39,7 @@ class Graph extends Component {
       articleCellSvg: '',
       cellForceSimulation: '',
       totalAuthorInfluence: '',
+      user: '',
     };
     // cellData.nodes, cellData.links,beforeThisDate, articleCellSvg, cellForceSimulation, totalAuthorInfluence
     this.drawWordTree = this.drawWordTree.bind(this);
@@ -50,11 +51,11 @@ class Graph extends Component {
   }
 
   shouldComponentUpdate(nextProps, nextState) {
-    // if (JSON.stringify(this.props) === JSON.stringify(nextProps) && JSON.stringify(this.state) === JSON.stringify(nextState)) {
-    //   console.log('shouldUpdate? No!!');
-    //   return false;
-    // }
-    if (JSON.stringify(this.props) === JSON.stringify(nextProps)) return false;
+    if (JSON.stringify(this.props) === JSON.stringify(nextProps) && JSON.stringify(this.state) === JSON.stringify(nextState)) {
+      console.log('shouldUpdate? No!!');
+      return false;
+    }
+    // if (JSON.stringify(this.props) === JSON.stringify(nextProps)) return false;
     console.log('vis update !');
     this.props = nextProps;
     this.drawwithlabels();
@@ -1074,8 +1075,10 @@ class Graph extends Component {
             console.log(cellData);
             mergeCellDataNodes(cellData);
             cellData.nodes.sort((a, b) => ((a.size < b.size) ? 1 : -1));
-            OpinionLeader(cellData.nodes, cellData.links,
-              beforeThisDate, articleCellSvg, cellForceSimulation, totalAuthorInfluence);
+            // OpinionLeader(cellData.nodes, cellData.links,
+            //   beforeThisDate, articleCellSvg, cellForceSimulation, totalAuthorInfluence);
+            console.log(d3.select('#articleCell'));
+            console.log(articleCellSvg);
             $this.setState({
               word: cellData.nodes[0].titleTermArr,
               renderOpinionLeaderView: 0,
@@ -1084,6 +1087,7 @@ class Graph extends Component {
               articleCellSvg,
               cellForceSimulation,
               totalAuthorInfluence,
+              user: cellData.nodes[0].id,
             });
             console.log($this.state);
           });
@@ -1373,6 +1377,7 @@ class Graph extends Component {
     const { id, word } = this.props;
     const { cellData, beforeThisDate, articleCellSvg, cellForceSimulation, totalAuthorInfluence } = this.state;
     console.log(this.state);
+    console.log(d3.select('#articleCell'));
     return (
       <div className="graph" ref={this.myRef}>
         {/* <div style={{ width: '10%', height: '10px', float: 'left' }} /> */}
@@ -1394,18 +1399,18 @@ class Graph extends Component {
             {/* <svg id="userList" width="100%" height="100%" style={{}} /> */}
           </div>
         </div>
-        <div className="articleCell">
+        {/* <div className="articleCell">
           <div
             className="opinionLeaderfilterBar"
             id="timeSlider"
             style={{ width: '100%', height: '25px', padding: '0px 10px' }}
           />
           <svg id="articleCell" width="100%" height="95%" />
-        </div>
-        {/* <ArticleCell data={{
+        </div> */}
+        <ArticleCell data={{
           cellData, beforeThisDate, articleCellSvg, cellForceSimulation, totalAuthorInfluence,
         }}
-        /> */}
+        />
         <div id="googleChart" />
         <WordTree word={this.state.word} />
         <div className="heatMap" style={{ border: '2px solid gray' }}>
