@@ -375,7 +375,9 @@ let callback = function callback(req, res) {
           resolve(
             findquery(page1, queryobj1, ptt, limit, sort).then(res => {
               console.log('q1 lenght: ' + res.result.length);
+              const queryArticleFilter = 50;
               // console.log('res.result', res.result);
+              res.result = res.result.filter(post => post.message_count.all > queryArticleFilter);
               // Remove article content
               res.result.forEach(function(result){
                 result.content = ' ';
@@ -383,7 +385,7 @@ let callback = function callback(req, res) {
                 // message.push_content = '';
                 // })
               })
-
+              
               let datalist = dl.bindpostlist(res.result, ptt);
               // let postlist = datalist[0];
               let wordlist = datalist[1];
@@ -394,6 +396,10 @@ let callback = function callback(req, res) {
 
               // console.log(titleWordList[0]);
               let [set,initLinks] = ns.setNodes(titleWordList[0], queryobj1.date, titleCuttedWords, res.result);
+              res.result.forEach(a=>{
+                console.log(a.article_title);
+              })
+              console.log(titleCuttedWords.length, res.result.length);
               console.log('setNodes is done!');
               return { list: [queryobj1.date, [set, initLinks], titleCuttedWords], previous: [res.previous], next: [res.next] };
               // return { list: [res.result, wordlist, titleWordList, queryobj1.date,titleCuttedWords, set], previous: [res.previous], next: [res.next] };

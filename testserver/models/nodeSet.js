@@ -124,6 +124,7 @@ module.exports = {
                 postCount: count,
                 term: [props[i][0]],
                 responder: [],
+                titleTermArr: [],
               });
             }
           });
@@ -132,11 +133,13 @@ module.exports = {
       let diff = process.hrtime(time);
       console.log(`computePropsUserList() Benchmark took ${(diff[0] + diff[1]) / NS_PER_SEC} ms`);
       time = process.hrtime();
+      let articleMapToCuttedWordIndex = 0;
       post.forEach((article) => {
         const index = propsUserList.find(user => user.id === article.author);
         if (index) {
           const { push, boo, neutral } = article.message_count;
           const totalMessageCount = push + boo + neutral;
+          index.titleTermArr.push(word[articleMapToCuttedWordIndex]);
           index.responder.push({
             articleId: article.article_id,
             title: article.article_title,
@@ -149,6 +152,7 @@ module.exports = {
             ],
           });
         }
+        articleMapToCuttedWordIndex += 1;
       });
       // console.log(propsUserList);
       diff = process.hrtime(time);

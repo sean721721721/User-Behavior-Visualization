@@ -23,6 +23,7 @@ import Louvain from './jLouvain';
 import { OpinionLeader } from './OpinionLeader';
 import { AuthorTable } from './authorTable';
 import WordTree from './wordTree';
+import { ArticleCell } from './articleCell';
 // import request from 'request';
 
 const SetNumOfNodes = 200;
@@ -30,7 +31,16 @@ class Graph extends Component {
   constructor(props) {
     super(props);
     this.myRef = React.createRef();
-    this.state = { ...props };
+    this.state = {
+      ...props,
+      renderOpinionLeaderView: 1,
+      cellData: {},
+      beforeThisDate: '',
+      articleCellSvg: '',
+      cellForceSimulation: '',
+      totalAuthorInfluence: '',
+    };
+    // cellData.nodes, cellData.links,beforeThisDate, articleCellSvg, cellForceSimulation, totalAuthorInfluence
     this.drawWordTree = this.drawWordTree.bind(this);
   }
 
@@ -40,10 +50,16 @@ class Graph extends Component {
   }
 
   shouldComponentUpdate(nextProps, nextState) {
+    // if (JSON.stringify(this.props) === JSON.stringify(nextProps) && JSON.stringify(this.state) === JSON.stringify(nextState)) {
+    //   console.log('shouldUpdate? No!!');
+    //   return false;
+    // }
     if (JSON.stringify(this.props) === JSON.stringify(nextProps)) return false;
     console.log('vis update !');
     this.props = nextProps;
     this.drawwithlabels();
+    // this.createNewWordTree('op');
+    // console.log(this.createNewWordTree());
     return true;
   }
 
@@ -74,7 +90,11 @@ class Graph extends Component {
   }
 
   drawwithlabels() {
+    this.renderWordTree();
+    const $this = this;
     const { date } = this.props;
+    const { word: titleTermArr } = this.props;
+    console.log(titleTermArr);
     const startDate = new Date(date.$gte);
     const endDate = new Date(date.$lt);
     const timePeriod = endDate - startDate;
@@ -773,6 +793,10 @@ class Graph extends Component {
       }
       function clicked(d) {
         console.log('clicked');
+        $this.setState({
+          word: [['clicked']],
+          renderOpinionLeaderView: 0,
+        });
         if (d3.event.defaultPrevented) return; // dragged
         if (typeof d === 'string') {
           d = set.nodes.find(ele => ele.titleTerm === d);
@@ -1049,10 +1073,19 @@ class Graph extends Component {
             });
             console.log(cellData);
             mergeCellDataNodes(cellData);
-
             cellData.nodes.sort((a, b) => ((a.size < b.size) ? 1 : -1));
             OpinionLeader(cellData.nodes, cellData.links,
               beforeThisDate, articleCellSvg, cellForceSimulation, totalAuthorInfluence);
+            $this.setState({
+              word: cellData.nodes[0].titleTermArr,
+              renderOpinionLeaderView: 0,
+              cellData,
+              beforeThisDate,
+              articleCellSvg,
+              cellForceSimulation,
+              totalAuthorInfluence,
+            });
+            console.log($this.state);
           });
           update();
         } else {
@@ -1331,9 +1364,15 @@ class Graph extends Component {
     }
   }
 
+  renderWordTree() {
+    <WordTree word={[['a']]} />;
+  }
 
   render() {
+    console.log('render: ', this.state);
     const { id, word } = this.props;
+    const { cellData, beforeThisDate, articleCellSvg, cellForceSimulation, totalAuthorInfluence } = this.state;
+    console.log(this.state);
     return (
       <div className="graph" ref={this.myRef}>
         {/* <div style={{ width: '10%', height: '10px', float: 'left' }} /> */}
@@ -1361,10 +1400,14 @@ class Graph extends Component {
             id="timeSlider"
             style={{ width: '100%', height: '25px', padding: '0px 10px' }}
           />
-
           <svg id="articleCell" width="100%" height="95%" />
         </div>
-        <WordTree word={word} />
+        {/* <ArticleCell data={{
+          cellData, beforeThisDate, articleCellSvg, cellForceSimulation, totalAuthorInfluence,
+        }}
+        /> */}
+        <div id="googleChart" />
+        <WordTree word={this.state.word} />
         <div className="heatMap" style={{ border: '2px solid gray' }}>
           <svg id="timeLine" width="100%" height="600px" />
         </div>

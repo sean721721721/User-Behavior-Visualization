@@ -16,17 +16,18 @@ import * as d3 from 'd3';
 // import { Row, Form } from 'antd';
 import netClustering from 'netclustering';
 import * as jsnx from 'jsnetworkx';
+import Chart from 'react-google-charts';
+// import jieba from 'nodejieba';
 
 export default function OpinionLeader(cellNodes, cellLinks, beforeThisDate,
   svg, forceSimulation, totalInfluence) {
+  console.log(svg);
   console.log('cellNodes: ', cellNodes);
-  // console.log('cellLinks: ', cellLinks);
   const G = new jsnx.Graph();
   const color = d3.schemeTableau10;
   const articleInfluenceThreshold = 100;
-  let node_r = d3.scaleLinear().range([3, 20]);
+  const node_r = d3.scaleLinear().range([3, 20]);
   buildGraph();
-
 
   const termCentrality = {
     Betweenness: {},

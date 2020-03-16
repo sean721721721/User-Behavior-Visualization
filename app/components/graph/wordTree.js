@@ -1,5 +1,6 @@
 import React from 'react';
 import Chart from 'react-google-charts';
+import {GoogleCharts} from 'google-charts';
 
 const WordTree = (props) => {
   // console.log(this.props);

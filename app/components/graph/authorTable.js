@@ -353,6 +353,7 @@ export default function AuthorTable(nodes, div, callback) {
       }
     }
   }
+  // WordTree({ word: [['ag v'], ['ag c']] });
 }
 
 export { AuthorTable };
