@@ -51,19 +51,19 @@ export default function AuthorTable(nodes, div, callback) {
     .text('UserID');
   th.append('th').attr('class', 'tableHeader deltaLength')
     .attr('width', '25%')
-    .text('delta length');
+    .text('LPR');
   th.append('th').attr('class', 'tableHeader articleCount')
     .attr('width', '25%')
-    .text('ArticleCount');
+    .text('# Of Articles');
   th.append('th').attr('class', 'tableHeader messageCount')
     .attr('width', '25%')
     .text('Total Comments');
-  th.append('th').attr('class', 'tableHeader articles')
-    .attr('width', '25%')
-    .text('Articles');
-  th.append('th').attr('class', 'tableHeader comments')
-    .attr('width', '25%')
-    .text('comments');
+  // th.append('th').attr('class', 'tableHeader articles')
+  //   .attr('width', '25%')
+  //   .text('Articles');
+  // th.append('th').attr('class', 'tableHeader comments')
+  //   .attr('width', '25%')
+  //   .text('comments');
 
   authorTable.selectAll('.tableHeader')
     .style('background', d3.schemeTableau10[0])

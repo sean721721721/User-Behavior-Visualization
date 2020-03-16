@@ -22,6 +22,7 @@ import * as jsnx from 'jsnetworkx';
 import Louvain from './jLouvain';
 import { OpinionLeader } from './OpinionLeader';
 import { AuthorTable } from './authorTable';
+import WordTree from './wordTree';
 // import request from 'request';
 
 const SetNumOfNodes = 200;
@@ -39,10 +40,7 @@ class Graph extends Component {
   }
 
   shouldComponentUpdate(nextProps, nextState) {
-    if (JSON.stringify(this.props) === JSON.stringify(nextProps)) {
-      // console.log('vis not update !');
-      return false;
-    }
+    if (JSON.stringify(this.props) === JSON.stringify(nextProps)) return false;
     console.log('vis update !');
     this.props = nextProps;
     this.drawwithlabels();
@@ -57,8 +55,6 @@ class Graph extends Component {
         word: 'cats',
       },
     };
-    // console.log(this);
-    // console.log('wordtree');
     const style = {
       float: 'left',
       border: '2px solid gray',
@@ -78,20 +74,12 @@ class Graph extends Component {
   }
 
   drawwithlabels() {
-    // request('http://www.google.com', function (error, response, body) {
-    //   console.error('error:', error); // Print the error if one occurred
-    //   console.log('statusCode:', response && response.statusCode); // Print the response status code if a response was received
-    //   console.log('body:', body); // Print the HTML for the Google homepage.
-    // });
-    // console.log(this.props);
     const { date } = this.props;
     const startDate = new Date(date.$gte);
     const endDate = new Date(date.$lt);
     const timePeriod = endDate - startDate;
     let beforeThisDate = startDate;
     const timeScale = d3.scaleTime().domain([startDate, endDate]).range([0, 100]);
-    // const props = JSON.parse(JSON.stringify(visprops)); // clone props;
-    // const set = { nodes: [], links: [] };
     const { set: propsSet } = this.props;
     let set = JSON.parse(JSON.stringify(propsSet));
     // console.log(set);
@@ -102,11 +90,10 @@ class Graph extends Component {
     const userList = [{ id: '', count: 0, term: [] }];
     const propsUserList = [{ id: '', count: 0, term: [] }];
     const { initLinks } = this.props;
-    // console.log(initLinks);
-    // const initLinks = [];
+
     const removeWords = ['新聞', '八卦', '幹嘛', '問卦', '爆卦'];
     const groupedWords = [];
-    // const max = Math.min(props.length, SetNumOfNodes);
+
     const someData = [];
     const pi = Math.PI;
     const LinkThreshold = 0.1;
@@ -135,9 +122,7 @@ class Graph extends Component {
 
     communityDetecting();
     const origSet = JSON.parse(JSON.stringify(set));
-    // const term_community = getTermCommunity();
-    // console.log(term_community);
-    // console.log(G);
+
     const termCentrality = {
       Betweenness: {},
       EigenVector: {},
@@ -158,8 +143,6 @@ class Graph extends Component {
       });
     }
 
-    // console.log(termCentrality);
-
     const width = 900;
     const height = 900;
     let svg = d3.select('#graph');
@@ -174,11 +157,8 @@ class Graph extends Component {
     svg = svg
       .call(d3.zoom().scaleExtent([1 / 2, 8]).on('zoom', zoomed))
       .append('g');
-    // .attr('transform', 'translate(40,0)')
-    // .attr('transform', 'scale(0.5,0.5)');
 
     const color = d3.schemeTableau10.concat(d3.schemeSet1);
-    // console.log(color);
     const simulation = d3.forceSimulation()
       .force('link', d3.forceLink().id(d => (typeof d.id === 'number' ? d.id : d.titleTerm)))
       .force('charge', d3.forceManyBody().strength(-300))
@@ -1353,7 +1333,6 @@ class Graph extends Component {
 
 
   render() {
-    // const myRef = 'titleUserView';
     const { id, word } = this.props;
     return (
       <div className="graph" ref={this.myRef}>
@@ -1367,14 +1346,7 @@ class Graph extends Component {
           <div
             className="filterBar"
             id="button"
-            style={{
-              width: '100%',
-              height: '25px',
-              padding: '0px 10px',
-              // background: 'white',
-              // border: '2px solid gray',
-              // borderBottom: 'none',
-            }}
+            style={{ width: '100%', height: '25px', padding: '0px 10px' }}
           />
           <div className="termMap">
             <svg id="graph" width="100%" height="100%" style={{}} />
@@ -1387,16 +1359,12 @@ class Graph extends Component {
           <div
             className="opinionLeaderfilterBar"
             id="timeSlider"
-            style={{
-              width: '100%',
-              height: '25px',
-              padding: '0px 10px',
-            }}
+            style={{ width: '100%', height: '25px', padding: '0px 10px' }}
           />
 
           <svg id="articleCell" width="100%" height="95%" />
         </div>
-        {this.drawWordTree(word)}
+        <WordTree word={word} />
         <div className="heatMap" style={{ border: '2px solid gray' }}>
           <svg id="timeLine" width="100%" height="600px" />
         </div>
