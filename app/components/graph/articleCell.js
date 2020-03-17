@@ -1,3 +1,6 @@
+/* eslint-disable no-console */
+/* eslint-disable prefer-const */
+/* eslint-disable react/prop-types */
 import React, { PureComponent } from 'react';
 import * as d3 from 'd3';
 import netClustering from 'netclustering';
@@ -7,8 +10,8 @@ import { OpinionLeader } from './OpinionLeader';
 class ArticleCell extends React.Component {
   componentDidUpdate() {
     console.log(this.props);
-    if (this.props.data) {
-      const { data } = this.props;
+    const { data } = this.props;
+    if (data) {
       let {
         cellData,
         beforeThisDate,
@@ -16,12 +19,13 @@ class ArticleCell extends React.Component {
         cellForceSimulation,
         totalAuthorInfluence,
       } = data;
-      console.log(cellData);
       articleCellSvg = d3.select('#articleCell');
       if (cellData.nodes) {
-        console.log('do OPView rendering');
-        OpinionLeader(cellData.nodes, cellData.links,
-          beforeThisDate, articleCellSvg, cellForceSimulation, totalAuthorInfluence);
+        if (data.$this.state.hover !== 1) {
+          console.log('do OPView rendering');
+          OpinionLeader(cellData.nodes, cellData.links,
+            beforeThisDate, articleCellSvg, cellForceSimulation, totalAuthorInfluence, data.$this);
+        }
       }
     }
   }

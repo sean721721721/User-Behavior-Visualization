@@ -20,7 +20,7 @@ import Chart from 'react-google-charts';
 // import jieba from 'nodejieba';
 
 export default function OpinionLeader(cellNodes, cellLinks, beforeThisDate,
-  svg, forceSimulation, totalInfluence) {
+  svg, forceSimulation, totalInfluence, $this) {
   console.log(svg);
   console.log('cellNodes: ', cellNodes);
   const G = new jsnx.Graph();
@@ -406,6 +406,18 @@ export default function OpinionLeader(cellNodes, cellLinks, beforeThisDate,
   }
 
   function mouseevent(d, event, mode) {
+    console.log(d);
+    if (event === 'mouseover' && d.titleTermArr) {
+      const userState = $this.state.user;
+      if (!$this.state.user.includes(d.id)) {
+        userState.push(d.id);
+      }
+      $this.setState({
+        word: d.titleTermArr,
+        user: userState,
+        hover: 1,
+      });
+    }
     const line_out_color = (event === 'mouseover') ? 'black' : 'rgb(208,211,212)';
     const line_in_color = (event === 'mouseover') ? 'rgb(218, 41, 28)' : 'rgb(208,211,212)';
     const line_opacity = (event === 'mouseover') ? 1 : 0.3;

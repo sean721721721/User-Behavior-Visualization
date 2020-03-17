@@ -33,13 +33,14 @@ class Graph extends Component {
     this.myRef = React.createRef();
     this.state = {
       ...props,
-      renderOpinionLeaderView: 1,
+      draw: 1,
       cellData: {},
       beforeThisDate: '',
       articleCellSvg: '',
       cellForceSimulation: '',
       totalAuthorInfluence: '',
-      user: '',
+      user: [],
+      hover: 0,
     };
     // cellData.nodes, cellData.links,beforeThisDate, articleCellSvg, cellForceSimulation, totalAuthorInfluence
     this.drawWordTree = this.drawWordTree.bind(this);
@@ -51,16 +52,18 @@ class Graph extends Component {
   }
 
   shouldComponentUpdate(nextProps, nextState) {
-    if (JSON.stringify(this.props) === JSON.stringify(nextProps) && JSON.stringify(this.state) === JSON.stringify(nextState)) {
-      console.log('shouldUpdate? No!!');
-      return false;
+    if (!this.state.hover) {
+      if (JSON.stringify(this.props) === JSON.stringify(nextProps)
+      && JSON.stringify(this.state) === JSON.stringify(nextState)) {
+        console.log('shouldUpdate? No!!');
+        return false;
+      }
     }
-    // if (JSON.stringify(this.props) === JSON.stringify(nextProps)) return false;
     console.log('vis update !');
-    this.props = nextProps;
-    this.drawwithlabels();
-    // this.createNewWordTree('op');
-    // console.log(this.createNewWordTree());
+    if (JSON.stringify(this.props) !== JSON.stringify(nextProps) || nextState.draw === 1) {
+      this.props = nextProps;
+      this.drawwithlabels();
+    }
     return true;
   }
 
@@ -91,11 +94,11 @@ class Graph extends Component {
   }
 
   drawwithlabels() {
+    console.log('draw');
     this.renderWordTree();
     const $this = this;
     const { date } = this.props;
     const { word: titleTermArr } = this.props;
-    console.log(titleTermArr);
     const startDate = new Date(date.$gte);
     const endDate = new Date(date.$lt);
     const timePeriod = endDate - startDate;
@@ -796,7 +799,7 @@ class Graph extends Component {
         console.log('clicked');
         $this.setState({
           word: [['clicked']],
-          renderOpinionLeaderView: 0,
+          draw: 0,
         });
         if (d3.event.defaultPrevented) return; // dragged
         if (typeof d === 'string') {
@@ -858,7 +861,7 @@ class Graph extends Component {
                           if (cellData.nodes.some(data => data.id === mes.push_userid)) {
                             // already has same replyer
                             const replyer = cellData.nodes.find(data => data.id === mes.push_userid);
-                            console.log(replyer);
+                            // console.log(replyer);
                             replyer.adj[mes.push_userid] += 1;
                             if (!replyer.push_detail) {
                               replyer.push_detail = [];
@@ -1088,15 +1091,22 @@ class Graph extends Component {
             const titleTermArr = cellData.nodes.forEach((e) => {
               if (e.id === index) return e.titleTermArr;
             });
+            // console.log($this.state.user);
+            let userState = $this.state.user;
+            if (!$this.state.user.includes(index)) {
+              userState.push(index);
+            }
+            // console.log(userState);
             $this.setState({
               word: cellData.nodes[0].titleTermArr,
-              renderOpinionLeaderView: 0,
+              draw: 0,
               cellData,
               beforeThisDate,
               articleCellSvg,
               cellForceSimulation,
               totalAuthorInfluence,
-              user: index,
+              user: userState,
+              hover: 0,
             });
             console.log($this.state);
           });
@@ -1385,6 +1395,7 @@ class Graph extends Component {
     console.log('render: ', this.state);
     const { id, word } = this.props;
     const { cellData, beforeThisDate, articleCellSvg, cellForceSimulation, totalAuthorInfluence } = this.state;
+    const $this = this;
     console.log(this.state);
     console.log(d3.select('#articleCell'));
     return (
@@ -1417,7 +1428,7 @@ class Graph extends Component {
           <svg id="articleCell" width="100%" height="95%" />
         </div> */}
         <ArticleCell data={{
-          cellData, beforeThisDate, articleCellSvg, cellForceSimulation, totalAuthorInfluence,
+          cellData, beforeThisDate, articleCellSvg, cellForceSimulation, totalAuthorInfluence, $this,
         }}
         />
         <div id="googleChart" />
