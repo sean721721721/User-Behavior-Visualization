@@ -327,7 +327,8 @@ export default function AuthorTable(nodes, div, callback) {
     function pageRank(node_data, link_data, d) {
       const total_num = node_data.length;
       const link_num = link_data.length;
-      for (let k = 0; k < 10; k += 1) {
+      const tolerance = 1e-6;
+      for (let k = 0; k < 100; k += 1) {
         let newPageRank = [];
         for (let i = 0; i < total_num; i += 1) {
           let total_rightFormula = 0;
@@ -346,10 +347,17 @@ export default function AuthorTable(nodes, div, callback) {
           }
           newPageRank.push(((1 - d) / total_num) + (d * total_rightFormula));
         }
+        let err = 0;
+        for (let i = 0; i < total_num; i += 1) {
+          err += Math.abs(node_data[i].pageRank - newPageRank[i]);
+        }
+
         for (let m = 0; m < total_num; m += 1) {
           node_data[m].pageRank = newPageRank[m];
           // if (node_data[m].post && node_data[m].weight > 0) console.log(node_data[m], node_data[m].pageRank);
         }
+        console.log(err, total_num * tolerance);
+        if (err < total_num * tolerance) break;
       }
     }
   }
