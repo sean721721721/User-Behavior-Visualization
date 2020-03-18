@@ -74,6 +74,19 @@ function filter(pattern ,str){
     return word;
 }
 
+let simpleCut = function simpleCut(sentence) {
+    console.log(sentence);
+    var pattern = new RegExp("[`~!@#$^&*()=|{}':;',\\[\\].<>/?~！@#￥……&*（）&;|{}【】‘《》；：”“'。，、？ ↵「」]");
+    var http = new RegExp(/http/);
+    var wordStr = "";
+    for (var j = 0; j < sentence.length; j++) {
+        wordStr += sentence.substr(j, 1).replace(pattern, "");
+    }
+    wordStr = nodejieba.cut(wordStr);
+    console.log(wordStr);
+    return wordStr;
+}
+
 var cut = function cut(posts, callback) {
     var data = posts;
     var result = [];
@@ -100,7 +113,6 @@ var cut = function cut(posts, callback) {
     // }
 
     for (var i = 0; i < data.length; i++) {
-
         if (data[i].message) {
 
             var temp = data[i].message;
@@ -189,3 +201,4 @@ var cut = function cut(posts, callback) {
 
 var exports = module.exports = {};
 exports.cut = cut;
+exports.simpleCut = simpleCut;

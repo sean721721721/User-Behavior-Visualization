@@ -459,7 +459,7 @@ let bindpostlist = function bindpostlist(qobj1, qobj2, ptt) {
     // console.log(wordCount);
     pagea = jb.cut(pagea, function () {
         for(i=0;i<pagea.length;i++){
-            console.log(i, pagea[i].cuttedTitleWord);
+            // console.log(i, pagea[i].cuttedTitleWord);
             test[0][i] = pagea[i].word; 
             titleTest[0][i] = pagea[i].titleWord;
             titleWord.push(pagea[i].cuttedTitleWord);
@@ -513,7 +513,7 @@ let bindpostlist = function bindpostlist(qobj1, qobj2, ptt) {
     console.log('Cutting article word ...');
     let articleCuttedWord = [];
     for(let i = 0; i < titleWord.length; i += 1){
-        console.log(i, titleWord[i]);
+        // console.log(i, titleWord[i]);
         articleCuttedWord.push([[]]);
         articleCuttedWord[i][0] += ``;
         if (titleWord[i]) {

@@ -1,9 +1,20 @@
 /* eslint-disable no-use-before-define */
 /* eslint-env node */
+const nodejieba = require('nodejieba');
+let jb = require('./text.js');
+
 module.exports = {
   setNodes(list, date, word, post) {
     // console.log(list);
     // console.log(post);
+    const copyPost = JSON.parse(JSON.stringify(post));
+    for (let i = 0; i < copyPost.length; i += 1) {
+      for (let j = 0; j < copyPost[i].messages.length; j += 1) {
+        copyPost[i].messages[j].cutted_push_content = [];
+      }
+    }
+
+
     const NS_PER_SEC = 1e6;
     const linkThreshold = 0.01;
     const SetNumOfNodes = 200;
@@ -115,7 +126,7 @@ module.exports = {
             }
             if (index === propsUserList.length) {
               index = 0;
-              const count = post.filter(article => article.author === userId).length;
+              const count = copyPost.filter(article => article.author === userId).length;
               propsUserList.push({
                 id: userId,
                 numOfUsr: 1,
@@ -134,7 +145,18 @@ module.exports = {
       console.log(`computePropsUserList() Benchmark took ${(diff[0] + diff[1]) / NS_PER_SEC} ms`);
       time = process.hrtime();
       let articleMapToCuttedWordIndex = 0;
-      post.forEach((article) => {
+      for (let i = 0; i < copyPost.length; i += 1) {
+        for (let j = 0; j < copyPost[i].messages.length; j += 1) {
+          console.log(copyPost[i].messages[j].push_content);
+          const w = jb.simpleCut(copyPost[i].messages[j].push_content);
+          console.log('word: ', w);
+          copyPost[i].messages[j].cutted_push_content = w;
+          console.log(copyPost[i].messages[j].cutted_push_content);
+        }
+      }
+      // console.log(copyPost.messages[0].cutted_push_content);
+      copyPost.forEach((article) => {
+        console.log(article.messages[0]);
         const index = propsUserList.find(user => user.id === article.author);
         if (index) {
           const { push, boo, neutral } = article.message_count;
