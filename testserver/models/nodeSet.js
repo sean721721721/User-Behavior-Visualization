@@ -147,16 +147,16 @@ module.exports = {
       let articleMapToCuttedWordIndex = 0;
       for (let i = 0; i < copyPost.length; i += 1) {
         for (let j = 0; j < copyPost[i].messages.length; j += 1) {
-          console.log(copyPost[i].messages[j].push_content);
+          // console.log(copyPost[i].messages[j].push_content);
           const w = jb.simpleCut(copyPost[i].messages[j].push_content);
-          console.log('word: ', w);
+          // console.log('word: ', w);
           copyPost[i].messages[j].cutted_push_content = w;
-          console.log(copyPost[i].messages[j].cutted_push_content);
+          // console.log(copyPost[i].messages[j].cutted_push_content);
         }
       }
       // console.log(copyPost.messages[0].cutted_push_content);
       copyPost.forEach((article) => {
-        console.log(article.messages[0]);
+        // console.log(article.messages[0]);
         const index = propsUserList.find(user => user.id === article.author);
         if (index) {
           const { push, boo, neutral } = article.message_count;

@@ -2,6 +2,7 @@
 var fs = require('fs');
 var nodejieba = require("nodejieba");
 const os = require('os');
+const lineReader = require('line-reader');
 
 //test
 /*var path = "../data/saveposts_2014-03-01_2014-04-01_136845026417486_4-10-(17)-2017.json";
@@ -41,6 +42,34 @@ result = nodejieba.cut("男默女泪");
 result = nodejieba.cutSmall("南京市长江大桥", 3);
 //console.log(result);*/
 
+let stopWordDict = [];
+// fs.readFile('C:/Users/admin/Desktop/VisProject/controllers/stop_dict.utf8', 'utf8', function(err, contents) {
+//     console.log(contents);
+// });
+
+let file = fs.readFileSync('C:/Users/admin/Desktop/VisProject/controllers/stop_dict.utf8', 'utf8');
+// console.log(file[0]);
+var lines = file.split('\n');
+// console.log(lines);
+lines.forEach(function(line) {
+    line = line.replace('\r', '');
+    stopWordDict.push(line);
+});
+
+
+// console.log(stopWordDict);
+// fs.readFileSync('C:/Users/admin/Desktop/VisProject/controllers/stop_dict.utf8', 'utf8', function(err, data) {
+//     var lines = data.split('\n');
+//     lines.forEach(function(line) {
+//         stopWordDict.push(line);
+//     });
+// });
+
+// lineReader.eachLine('C:/Users/admin/Desktop/VisProject/controllers/stop_dict.utf8', function(line) {
+//     stopWordDict.push(line);
+//     console.log(line);
+// });
+
 if (os.platform() === "linux") {
     nodejieba.load({
         dict: nodejieba.DEFAULT_DICT,
@@ -75,15 +104,21 @@ function filter(pattern ,str){
 }
 
 let simpleCut = function simpleCut(sentence) {
-    console.log(sentence);
+    // console.log('stopword: ', stopWordDict[0]);
+    // console.log(sentence);
     var pattern = new RegExp("[`~!@#$^&*()=|{}':;',\\[\\].<>/?~！@#￥……&*（）&;|{}【】‘《》；：”“'。，、？ ↵「」]");
     var http = new RegExp(/http/);
     var wordStr = "";
+    let wordExtract = '';
     for (var j = 0; j < sentence.length; j++) {
         wordStr += sentence.substr(j, 1).replace(pattern, "");
     }
+    // wordExtract = nodejieba.extract(wordStr);
     wordStr = nodejieba.cut(wordStr);
-    console.log(wordStr);
+    wordStr = wordStr.filter(w => !stopWordDict.includes(w));
+    // console.log(`wordStr: ${wordStr} wordExtract: ${wordExtract}`);
+    // console.log(stopWordDict.includes('的'));
+    // console.log('wordStrt: ', wordStr);
     return wordStr;
 }
 

@@ -17,6 +17,7 @@
     "jieba": "^1.0.0",
     "jquery": "^3.4.1",
     "jsnetworkx": "^0.3.4",
+    "line-reader": "^0.4.0",
     "lodash": "^4.17.15",
     "mongoose": "^5.6.7",
     "multilang-sentiment": "^1.2.0",

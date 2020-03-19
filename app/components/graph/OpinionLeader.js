@@ -418,6 +418,19 @@ export default function OpinionLeader(cellNodes, cellLinks, beforeThisDate,
         hover: 1,
       });
     }
+
+    if (event === 'mouseover' && d.cutted_push_content) {
+      console.log(d.cutted_push_content);
+      const userState = $this.state.user;
+      if (!$this.state.user.includes(d.id)) {
+        userState.push(d.id);
+      }
+      $this.setState({
+        word: d.cutted_push_content,
+        user: userState,
+        hover: 1,
+      });
+    }
     const line_out_color = (event === 'mouseover') ? 'black' : 'rgb(208,211,212)';
     const line_in_color = (event === 'mouseover') ? 'rgb(218, 41, 28)' : 'rgb(208,211,212)';
     const line_opacity = (event === 'mouseover') ? 1 : 0.3;

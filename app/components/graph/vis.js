@@ -856,6 +856,10 @@ class Graph extends Component {
                   let replyCount = 0;
                   if (article.message.length >= articleInfluenceThreshold) {
                     article.message.every((mes) => {
+                      let cuttedPushContent = '';
+                      mes.cutted_push_content.forEach((w) => {
+                        cuttedPushContent = cuttedPushContent.concat(' ', w);
+                      });
                       if (replyCount < topNumOfPushes) {
                         if (mes.push_tag === '推') {
                           if (cellData.nodes.some(data => data.id === mes.push_userid)) {
@@ -877,6 +881,7 @@ class Graph extends Component {
                                 pushDate: mes.push_ipdatetime,
                               }],
                             });
+                            replyer.cutted_push_content.push([cuttedPushContent]);
                             replyer.authorGroup = replyer.authorGroup ? replyer.authorGroup : [];
                             if (!replyer.authorGroup.some(e => e === author.id)) replyer.authorGroup.push(author.id);
                             replyer.reply = replyer.reply ? replyer.reply : [];
@@ -964,6 +969,7 @@ class Graph extends Component {
                                   pushDate: mes.push_ipdatetime,
                                 }],
                               }],
+                              cutted_push_content: [[cuttedPushContent]],
                             });
 
                             // cellData.links.push({
