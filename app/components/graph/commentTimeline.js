@@ -38,7 +38,8 @@ export default function commentTimeline(nodes, svg, $this) {
       console.log(axis);
       const articleDate = new Date(d.date);
       const afterSixHours = new Date(d.date);
-      afterSixHours.setHours(articleDate.getDate() + timePeriod);
+      afterSixHours.setHours(articleDate.getHours() + timePeriod);
+      console.log(articleDate, afterSixHours);
       const commentTimeScale = d3.scaleTime().domain([articleDate, afterSixHours])
         .range([20, w - 20]);
       const xAxis = d3.axisBottom(commentTimeScale).ticks(6);
@@ -84,6 +85,9 @@ export default function commentTimeline(nodes, svg, $this) {
     .attr('width', 1)
     .attr('height', 10);
 
+  commentTime.append('title')
+    .text(d => d.push_ipdatetime);
+
   function dateFormat(mes) {
     let dat = '';
     const splitedDate = mes.push_ipdatetime.split(' ');
@@ -99,7 +103,7 @@ export default function commentTimeline(nodes, svg, $this) {
     node.responder.forEach((a) => {
       const begin = new Date(a.date);
       const afterThreeDays = new Date(a.date);
-      afterThreeDays.setHours(begin.getDate() + timePeriod);
+      afterThreeDays.setHours(begin.getHours() + timePeriod);
 
       const commentTimeScale = d3.scaleTime()
         .domain([begin, afterThreeDays])
