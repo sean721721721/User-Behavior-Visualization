@@ -4,7 +4,7 @@
 import React from 'react';
 import * as d3 from 'd3';
 import { OpinionLeader } from './OpinionLeader';
-import commentTimeline from './commentTimelineView';
+import { commentTimeline } from './commentTimeline';
 
 class OpinionLeaderView extends React.Component {
   componentDidUpdate() {
@@ -24,7 +24,7 @@ class OpinionLeaderView extends React.Component {
           console.log('do OPView rendering');
           OpinionLeader(cellData.nodes, cellData.links,
             beforeThisDate, articleCellSvg, cellForceSimulation, totalAuthorInfluence, data.$this);
-          commentTimeline(cellData.nodes);
+          commentTimeline(cellData.nodes, commentTimelineSvg, data.$this);
         }
       }
     }

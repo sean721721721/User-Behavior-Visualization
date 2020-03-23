@@ -381,7 +381,7 @@ path:hover {
     display: grid;
     grid-column: sscol3 / sscol4;
     grid-row: ssrow1 / ssrow2;
-    grid-template-rows: [nwrow1] 30px [nwrow2] auto [nwrow3] 0.45fr [nwrowend];
+    grid-template-rows: [nwrow1] 30px [nwrow2] 400px [nwrow3] 300px [nwrowend];
 }  
 
 .filterBar {

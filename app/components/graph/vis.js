@@ -1364,7 +1364,7 @@ class Graph extends Component {
           <div className="termMap">
             <svg id="graph" width="100%" height="100%" style={{}} />
           </div>
-          <div className="authorList" id="authorList" />
+          <div className="authorList" id="authorList" style={{ height: '100%', overflowY: 'auto' }} />
         </div>
         <OpinionLeaderView data={{
           cellData,

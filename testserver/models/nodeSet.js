@@ -172,6 +172,7 @@ module.exports = {
               { type: 'boo', count: article.message_count.boo, radius: totalMessageCount },
               { type: 'neutral', count: article.message_count.neutral, radius: totalMessageCount },
             ],
+            date: article.date,
           });
         }
         articleMapToCuttedWordIndex += 1;

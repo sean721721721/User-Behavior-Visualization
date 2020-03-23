@@ -21,8 +21,6 @@ import Chart from 'react-google-charts';
 
 export default function OpinionLeader(cellNodes, cellLinks, beforeThisDate,
   svg, forceSimulation, totalInfluence, $this) {
-  console.log(svg);
-  console.log('cellNodes: ', cellNodes);
   const G = new jsnx.Graph();
   const color = d3.schemeTableau10;
   const articleInfluenceThreshold = 100;
