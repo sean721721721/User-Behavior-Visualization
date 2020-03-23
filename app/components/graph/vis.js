@@ -1090,6 +1090,7 @@ class Graph extends Component {
               totalAuthorInfluence,
               user: userState,
               hover: 0,
+              mouseOverUser: index,
             });
             console.log($this.state);
           });
@@ -1348,8 +1349,6 @@ class Graph extends Component {
       word,
     } = this.state;
     const $this = this;
-    console.log(this.state);
-    console.log(d3.select('#articleCell'));
     return (
       <div className="graph" ref={this.myRef}>
         <div className="barchart">
@@ -1367,6 +1366,7 @@ class Graph extends Component {
           <div className="authorList" id="authorList" style={{ height: '100%', overflowY: 'auto' }} />
         </div>
         <OpinionLeaderView data={{
+          word,
           cellData,
           beforeThisDate,
           cellForceSimulation,
@@ -1375,7 +1375,7 @@ class Graph extends Component {
         }}
         />
         <div id="googleChart" />
-        <WordTree word={word} />
+        {/* <WordTree word={word} /> */}
         <div className="heatMap" style={{ border: '2px solid gray' }}>
           <svg id="timeLine" width="100%" height="600px" />
         </div>

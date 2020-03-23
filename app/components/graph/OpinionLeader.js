@@ -414,6 +414,7 @@ export default function OpinionLeader(cellNodes, cellLinks, beforeThisDate,
         word: d.titleTermArr,
         user: userState,
         hover: 1,
+        mouseOverUser: d.id,
       });
     }
 

@@ -410,27 +410,29 @@ path:hover {
 .opinionLeaderView {
     border: 2px solid gray;
     display: grid;
-    grid-column: sscol5 / sscol6;
+    grid-column: sscol5 / sscolend;
     grid-row: ssrow1 / ssrow2;
     grid-template-rows: [acrow1] 0.6fr [acrow2] 0.4fr [acrowend];
+    grid-template-columns: [accol1] 0.7fr [accol2] 0.3fr [accolend];
 }
 
 .articleCell {
-    border-bottom: 2px solid gray;
     display: grid;
-    // grid-column: sscol5 / sscol6;
+    grid-column: accol1 / accol2;
     grid-row: acrow1 / acrow2;
 }
 
 .commentTimeline {
     display: grid;
+    border-top: 2px solid gray;
+    grid-column: accol1 / accolend;
     grid-row: acrow2 / acrowend;
 }
 
 .wordTree {
     display: grid;
-    grid-column: sscol7 / sscolend;
-    grid-row:ssrow1 / ssrow2;
+    grid-column: accol2 / accolend;
+    grid-row: acrow1 / acrow2;
 }
 
 .heatMap {

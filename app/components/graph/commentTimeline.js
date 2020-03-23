@@ -11,10 +11,11 @@ import * as d3 from 'd3';
 export default function commentTimeline(nodes, svg, $this) {
   console.log(nodes);
   svg.selectAll('*').remove();
-  const h = parseFloat(d3.select('#articleCell').style('height'));
-  const w = parseFloat(d3.select('#articleCell').style('width'));
-
-  const opinionLeader = nodes.find(e => e.id === $this.state.user[0]);
+  const h = parseFloat(d3.select('.commentTimeline').style('height'));
+  const w = parseFloat(d3.select('.commentTimeline').style('width'));
+  console.log(w);
+  const timePeriod = 12;
+  const opinionLeader = nodes.find(e => e.id === $this.state.mouseOverUser);
   const timeScaleObjArr = [];
   timeScale(opinionLeader, timeScaleObjArr);
 
@@ -26,11 +27,26 @@ export default function commentTimeline(nodes, svg, $this) {
     .data(opinionLeader.responder)
     .enter()
     .append('g')
-    .attr('class', d => d.articleId)
+    .attr('id', (d, i) => `article_${i}`)
     .attr('transform', () => {
       articleIndex += 1;
-      return `translate(0,${articleIndex * 20})`;
+      return `translate(0,${articleIndex * 30})`;
+    })
+    .each((d, i) => {
+      console.log(d);
+      const axis = d3.select(`#article_${i}`);
+      console.log(axis);
+      const articleDate = new Date(d.date);
+      const afterSixHours = new Date(d.date);
+      afterSixHours.setHours(articleDate.getDate() + timePeriod);
+      const commentTimeScale = d3.scaleTime().domain([articleDate, afterSixHours])
+        .range([20, w - 20]);
+      const xAxis = d3.axisBottom(commentTimeScale).ticks(6);
+      axis.append('g')
+        .attr('transform', 'translate(0, 20)')
+        .call(xAxis);
     });
+
   const commentTime = articleTime.selectAll('circle')
     .data((d) => {
       d.message.forEach((m) => {
@@ -83,7 +99,7 @@ export default function commentTimeline(nodes, svg, $this) {
     node.responder.forEach((a) => {
       const begin = new Date(a.date);
       const afterThreeDays = new Date(a.date);
-      afterThreeDays.setDate(begin.getDate() + 1);
+      afterThreeDays.setHours(begin.getDate() + timePeriod);
 
       const commentTimeScale = d3.scaleTime()
         .domain([begin, afterThreeDays])

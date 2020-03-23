@@ -5,6 +5,7 @@ import React from 'react';
 import * as d3 from 'd3';
 import { OpinionLeader } from './OpinionLeader';
 import { commentTimeline } from './commentTimeline';
+import WordTree from './wordTree';
 
 class OpinionLeaderView extends React.Component {
   componentDidUpdate() {
@@ -24,13 +25,15 @@ class OpinionLeaderView extends React.Component {
           console.log('do OPView rendering');
           OpinionLeader(cellData.nodes, cellData.links,
             beforeThisDate, articleCellSvg, cellForceSimulation, totalAuthorInfluence, data.$this);
-          commentTimeline(cellData.nodes, commentTimelineSvg, data.$this);
         }
+        commentTimeline(cellData.nodes, commentTimelineSvg, data.$this);
       }
     }
   }
 
   render() {
+    const { data } = this.props;
+    const { word } = data;
     console.log(d3.select('#articleCell'));
     return (
       <div className="opinionLeaderView">
@@ -45,6 +48,7 @@ class OpinionLeaderView extends React.Component {
         <div className="commentTimeline">
           <svg id="commentTimeline" width="100%" height="100%" />
         </div>
+        <WordTree word={word} />
       </div>
     );
   }

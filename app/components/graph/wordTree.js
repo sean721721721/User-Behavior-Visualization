@@ -19,12 +19,12 @@ const WordTree = (props) => {
   const { word } = props;
   console.log(word);
   return (
-    <div className="wordTree" style={style}>
+    <div className="wordTree">
       <Chart
             // style={style}
         chartType="WordTree"
         width="100%"
-        height="700px"
+        height="100%"
         data={word}
         options={options}
       />
