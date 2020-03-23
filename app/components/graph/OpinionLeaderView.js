@@ -1,13 +1,12 @@
 /* eslint-disable no-console */
 /* eslint-disable prefer-const */
 /* eslint-disable react/prop-types */
-import React, { PureComponent } from 'react';
+import React from 'react';
 import * as d3 from 'd3';
-import netClustering from 'netclustering';
-import * as jsnx from 'jsnetworkx';
 import { OpinionLeader } from './OpinionLeader';
+import commentTimeline from './commentTimelineView';
 
-class ArticleCell extends React.Component {
+class OpinionLeaderView extends React.Component {
   componentDidUpdate() {
     console.log(this.props);
     const { data } = this.props;
@@ -15,16 +14,17 @@ class ArticleCell extends React.Component {
       let {
         cellData,
         beforeThisDate,
-        articleCellSvg,
         cellForceSimulation,
         totalAuthorInfluence,
       } = data;
-      articleCellSvg = d3.select('#articleCell');
+      let articleCellSvg = d3.select('#articleCell');
+      let commentTimelineSvg = d3.select('#commentTimeline');
       if (cellData.nodes) {
         if (data.$this.state.hover !== 1) {
           console.log('do OPView rendering');
           OpinionLeader(cellData.nodes, cellData.links,
             beforeThisDate, articleCellSvg, cellForceSimulation, totalAuthorInfluence, data.$this);
+          commentTimeline(cellData.nodes);
         }
       }
     }
@@ -33,17 +33,21 @@ class ArticleCell extends React.Component {
   render() {
     console.log(d3.select('#articleCell'));
     return (
-      <div className="articleCell">
-        <div
-          className="opinionLeaderfilterBar"
-          id="timeSlider"
-          style={{ width: '100%', height: '25px', padding: '0px 10px' }}
-        />
-        {/* {props.data.beforeThisDate} */}
-        <svg id="articleCell" width="100%" height="95%" />
+      <div className="opinionLeaderView">
+        <div className="articleCell">
+          <div
+            className="opinionLeaderfilterBar"
+            id="timeSlider"
+            style={{ width: '100%', height: '25px', padding: '0px 10px' }}
+          />
+          <svg id="articleCell" width="100%" height="94%" />
+        </div>
+        <div className="commentTimeline">
+          <svg id="commentTimeline" width="100%" height="100%" />
+        </div>
       </div>
     );
   }
 }
 
-export default ArticleCell;
+export default OpinionLeaderView;

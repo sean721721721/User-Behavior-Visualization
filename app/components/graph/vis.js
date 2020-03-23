@@ -23,7 +23,7 @@ import Louvain from './jLouvain';
 import { OpinionLeader } from './OpinionLeader';
 import { AuthorTable } from './authorTable';
 import WordTree from './wordTree';
-import ArticleCell from './articleCell';
+import OpinionLeaderView from './OpinionLeaderView';
 // import request from 'request';
 
 const SetNumOfNodes = 200;
@@ -36,13 +36,11 @@ class Graph extends Component {
       draw: 1,
       cellData: {},
       beforeThisDate: '',
-      articleCellSvg: '',
       cellForceSimulation: '',
       totalAuthorInfluence: '',
       user: [],
       hover: 0,
     };
-    // cellData.nodes, cellData.links,beforeThisDate, articleCellSvg, cellForceSimulation, totalAuthorInfluence
     this.drawWordTree = this.drawWordTree.bind(this);
   }
 
@@ -95,7 +93,6 @@ class Graph extends Component {
 
   drawwithlabels() {
     console.log('draw');
-    this.renderWordTree();
     const $this = this;
     const { date } = this.props;
     const { word: titleTermArr } = this.props;
@@ -134,8 +131,6 @@ class Graph extends Component {
     const NodeHiding = 1;
     const cellData = { nodes: [], links: [] };
     let totalAuthorInfluence = 0;
-    const articleCellSvgWidth = parseFloat(d3.select('#articleCell').style('width'));
-    const articleCellSvgHeight = parseFloat(d3.select('#articleCell').style('height'));
     const svgwidth = parseFloat(d3.select('#graph').style('width'));
     const svgHeight = parseFloat(d3.select('#graph').style('height'));
     const authorInfluenceThreshold = 100;
@@ -171,7 +166,6 @@ class Graph extends Component {
     const height = 900;
     let svg = d3.select('#graph');
     let heatMapSvg = d3.select('#timeLine');
-    let articleCellSvg = d3.select('#articleCell');
     const leftSvg = d3.select('#barChart');
     const authorTable = d3.select('#authorList');
     const realWidth = svg.attr('width');
@@ -209,15 +203,6 @@ class Graph extends Component {
     const x = d3.scaleLinear()
       .domain([0, d3.max(set.nodes, d => d.children.length)])
       .range(['0%', '100%']);
-
-    // const timeLineSvg = d3.select('#timeLine');
-
-    articleCellSvg.selectAll('*').remove();
-    articleCellSvg = articleCellSvg
-      .call(d3.zoom().scaleExtent([1 / 2, 8]).on('zoom', articleCellZoomed))
-      .append('g');
-    const wordTreeSvg = d3.select('#wordTree')
-      .call(d3.zoom().scaleExtent([1 / 2, 8]).on('zoom', wordTreeSvgZoomed));
 
     // const buttonDiv = d3.select(this.myRef.current).select('#button');
     const buttonDiv = d3.select('#button')
@@ -316,7 +301,7 @@ class Graph extends Component {
           beforeThisDate = timeScale.invert(beforeThisDate);
         }
         OpinionLeader(cellData.nodes, cellData.links,
-          beforeThisDate, articleCellSvg, cellForceSimulation, totalAuthorInfluence);
+          beforeThisDate, cellForceSimulation, totalAuthorInfluence);
       });
 
     cellNavigator.append('text')
@@ -925,7 +910,8 @@ class Graph extends Component {
                               //   article: [{
                               //     title: article,
                               //     messageCount: {
-                              //       push: mes.push_tag === '推' ? 1 : 0, boo: mes.push_tag === '噓' ? 1 : 0,
+                              //       push: mes.push_tag === '推' ? 1 : 0,
+                              //       boo: mes.push_tag === '噓' ? 1 : 0,
                               //     },
                               //     messageContent: mes.push_content,
                               //     pushDate: mes.push_ipdatetime,
@@ -1090,15 +1076,7 @@ class Graph extends Component {
             console.log(cellData);
             mergeCellDataNodes(cellData);
             cellData.nodes.sort((a, b) => ((a.size < b.size) ? 1 : -1));
-            // OpinionLeader(cellData.nodes, cellData.links,
-            //   beforeThisDate, articleCellSvg, cellForceSimulation, totalAuthorInfluence);
-            console.log(d3.select('#articleCell'));
-            console.log(articleCellSvg);
-            const titleTermArr = cellData.nodes.forEach((e) => {
-              if (e.id === index) return e.titleTermArr;
-            });
-            // console.log($this.state.user);
-            let userState = $this.state.user;
+            const userState = $this.state.user;
             if (!$this.state.user.includes(index)) {
               userState.push(index);
             }
@@ -1108,7 +1086,6 @@ class Graph extends Component {
               draw: 0,
               cellData,
               beforeThisDate,
-              articleCellSvg,
               cellForceSimulation,
               totalAuthorInfluence,
               user: userState,
@@ -1272,37 +1249,13 @@ class Graph extends Component {
         if (option === 'eigenvector') return normalizeEigenvector(termCentrality.EigenVector[d.titleTerm]);
         return normalizeBetweenness(termCentrality.Betweenness[d.titleTerm]);
       }
-
-      function cellDataCommunityDetection(clickedNode) {
-        const filteredLinks = cellData.links.filter((l) => {
-          if (l.target !== undefined) {
-            // console.log(l.target);
-            return l.target.titleTerm !== clickedNode.titleTerm;
-          }
-          return true;
-        });
-        console.log(filteredLinks);
-        const cellLinks = JSON.parse(JSON.stringify(filteredLinks));
-        // const cellLinks = JSON.parse(JSON.stringify(cellData.links));
-        console.log(cellData);
-        for (let i = 0; i < cellLinks.length; i += 1) {
-          // console.log(links[i]);
-          cellLinks[i].source = cellData.nodes.findIndex(ele => ele === cellData.links[i].source);
-          cellLinks[i].target = cellData.nodes.findIndex(ele => ele === cellData.links[i].target);
-        }
-        console.log(cellLinks);
-        netClustering.cluster(cellData.nodes, cellLinks);
-      }
     }
 
     // build a dictionary of nodes that are linked
     const linkedByIndex = {};
-    // console.log(initLinks);
-    // console.log(links);
     initLinks.forEach((d) => {
       linkedByIndex[`${d.source.index},${d.target.index}`] = 1;
     });
-    // console.log(linkedByIndex);
     // check the dictionary to see if nodes are linked
     function isConnected(a, b) {
       return linkedByIndex[`${a.index},${b.index}`] || linkedByIndex[`${b.index},${a.index}`] || a.index === b.index;
@@ -1383,32 +1336,22 @@ class Graph extends Component {
     function heatMapZoomed() {
       heatMapSvg.attr('transform', d3.event.transform);
     }
-
-    function articleCellZoomed() {
-      articleCellSvg.attr('transform', d3.event.transform);
-    }
-
-    function wordTreeSvgZoomed() {
-      wordTreeSvg.attr('transform', d3.event.transform);
-    }
-  }
-
-  renderWordTree() {
-    <WordTree word={[['a']]} />;
   }
 
   render() {
     console.log('render: ', this.state);
-    const { id, word } = this.props;
-    const { cellData, beforeThisDate, articleCellSvg, cellForceSimulation, totalAuthorInfluence } = this.state;
+    const {
+      cellData,
+      beforeThisDate,
+      cellForceSimulation,
+      totalAuthorInfluence,
+      word,
+    } = this.state;
     const $this = this;
     console.log(this.state);
     console.log(d3.select('#articleCell'));
     return (
       <div className="graph" ref={this.myRef}>
-        {/* <div style={{ width: '10%', height: '10px', float: 'left' }} /> */}
-        {/* <div id="button" style={{ width: '100%', height: '20px', background: 'white' }} /> */}
-        {/* <div ref={this.myRef}> */}
         <div className="barchart">
           <svg id="barChart" width="100%" height="100%" style={{ border: '2px solid gray' }} />
         </div>
@@ -1421,24 +1364,18 @@ class Graph extends Component {
           <div className="termMap">
             <svg id="graph" width="100%" height="100%" style={{}} />
           </div>
-          <div className="authorList" id="authorList">
-            {/* <svg id="userList" width="100%" height="100%" style={{}} /> */}
-          </div>
+          <div className="authorList" id="authorList" />
         </div>
-        {/* <div className="articleCell">
-          <div
-            className="opinionLeaderfilterBar"
-            id="timeSlider"
-            style={{ width: '100%', height: '25px', padding: '0px 10px' }}
-          />
-          <svg id="articleCell" width="100%" height="95%" />
-        </div> */}
-        <ArticleCell data={{
-          cellData, beforeThisDate, articleCellSvg, cellForceSimulation, totalAuthorInfluence, $this,
+        <OpinionLeaderView data={{
+          cellData,
+          beforeThisDate,
+          cellForceSimulation,
+          totalAuthorInfluence,
+          $this,
         }}
         />
         <div id="googleChart" />
-        <WordTree word={this.state.word} />
+        <WordTree word={word} />
         <div className="heatMap" style={{ border: '2px solid gray' }}>
           <svg id="timeLine" width="100%" height="600px" />
         </div>

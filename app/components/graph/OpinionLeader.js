@@ -119,7 +119,7 @@ export default function OpinionLeader(cellNodes, cellLinks, beforeThisDate,
     .attr('transform', (d) => {
       const w = parseFloat(d3.select('#articleCell').style('width'));
       const h = parseFloat(d3.select('#articleCell').style('height'));
-      return `translate(${w / 2}, ${h / 2}) scale(2,2)`;
+      return `translate(${w / 2}, ${h / 2}) scale(1.3,1.3)`;
     });
   let cellLink = svg.selectAll('line')
     .data(cellLinks);

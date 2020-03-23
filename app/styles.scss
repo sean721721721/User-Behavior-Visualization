@@ -407,11 +407,24 @@ path:hover {
     // grid-template-rows: [nwrow1] 0.1fr [nwrow2] 0.9fr [nwrowend];
 }
 
-.articleCell {
+.opinionLeaderView {
     border: 2px solid gray;
     display: grid;
     grid-column: sscol5 / sscol6;
     grid-row: ssrow1 / ssrow2;
+    grid-template-rows: [acrow1] 0.6fr [acrow2] 0.4fr [acrowend];
+}
+
+.articleCell {
+    border-bottom: 2px solid gray;
+    display: grid;
+    // grid-column: sscol5 / sscol6;
+    grid-row: acrow1 / acrow2;
+}
+
+.commentTimeline {
+    display: grid;
+    grid-row: acrow2 / acrowend;
 }
 
 .wordTree {
