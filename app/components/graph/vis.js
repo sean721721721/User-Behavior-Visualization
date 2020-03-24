@@ -852,6 +852,7 @@ class Graph extends Component {
                           if (cellData.nodes.some(data => data.id === mes.push_userid)) {
                             // already has same replyer
                             const replyer = cellData.nodes.find(data => data.id === mes.push_userid);
+                            replyer.push_content.push({ id: mes.push_userid, content: mes.push_content });
                             // console.log(replyer);
                             replyer.adj[mes.push_userid] += 1;
                             if (!replyer.push_detail) {
@@ -876,7 +877,7 @@ class Graph extends Component {
                             replyer.reply = replyer.reply ? replyer.reply : [];
                             if (replyer.reply.some(e => e.author.id === author.id)) {
                               // reply same author
-                              console.log(replyer, author);
+                              // console.log(replyer, author);
                               const repliedAuthor = replyer.reply.find(e => e.author === author);
                               const repliedArticle = repliedAuthor.article.find(e => e.title === article);
                               if (repliedArticle) {
@@ -935,7 +936,7 @@ class Graph extends Component {
                               id: mes.push_userid,
                               containUsers: [mes.push_userid],
                               pushCount: 1,
-                              push_content: mes.push_content,
+                              push_content: [{ id: mes.push_userid, content: mes.push_content }],
                               push_ipdatetime: mes.push_ipdatetime,
                               authorGroup: [author.id],
                               adj: {
@@ -1173,6 +1174,15 @@ class Graph extends Component {
                 const temp_id = data.nodes[i].id;
                 const next_id = data.nodes[j].id;
                 data.nodes[i].containUsers.push(data.nodes[j].id);
+                data.nodes[j].cutted_push_content.forEach((c) => {
+                  data.nodes[i].cutted_push_content.push(c);
+                });
+                data.nodes[j].push_detail.forEach((c) => {
+                  data.nodes[i].push_detail.push(c);
+                });
+                data.nodes[j].push_content.forEach((c) => {
+                  data.nodes[i].push_content.push(c);
+                });
                 data.nodes[i].id = data.nodes[i].id.concat(' ', data.nodes[j].id);
 
                 data.links.forEach((l) => {

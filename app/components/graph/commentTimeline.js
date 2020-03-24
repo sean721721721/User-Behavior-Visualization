@@ -72,6 +72,7 @@ export default function commentTimeline(nodes, svg, $this) {
     })
     .enter()
     .append('circle')
+    .attr('class', d => d.push_userid)
     .attr('fill', (d) => {
       let color = 'green';
       switch (d.push_tag) {
@@ -103,6 +104,43 @@ export default function commentTimeline(nodes, svg, $this) {
 
   commentTime.append('title')
     .text(d => d.push_ipdatetime);
+
+  const linkCoordinateWithSameUser = [];
+  d3.select('#commentTimeline')
+    .selectAll('circle')
+    .each((d, i, ns) => {
+      console.log(d3.select(ns[i]));
+      const x = d3.select(ns[i]).attr('cx');
+      const y = d3.select(ns[i]).attr('cy');
+      d3.selectAll(`.${d.push_userid}`).each((d2, j, _ns) => {
+        // console.log(d3.select(this).attr('cx'));
+        console.log(d3.select(_ns[j]));
+        linkCoordinateWithSameUser.push({
+          x1: x,
+          y1: y,
+          x2: d3.select(_ns[j]).attr('cx'),
+          y2: d3.select(_ns[j]).attr('cy'),
+        });
+      });
+    });
+  
+  console.log(linkCoordinateWithSameUser);
+
+  svg.append('g')
+    .attr('class', 'link')
+    .attr('transform', 'translate(0,100)')
+    .selectAll('line')
+    .data(linkCoordinateWithSameUser)
+    .enter()
+    .append('line')
+    .attr('x1', d => d.x1)
+    .attr('y1', d => d.y1)
+    .attr('x2', d => d.x2)
+    .attr('y2', d => d.y2)
+    .attr('stroke', 'blue')
+    .attr('stroke-width', 1);
+
+
 
   function dateFormat(mes) {
     let dat = '';
