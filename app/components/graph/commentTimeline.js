@@ -27,6 +27,7 @@ export default function commentTimeline(nodes, svg, $this) {
     .data(opinionLeader.responder)
     .enter()
     .append('g')
+    .attr('class', 'articles')
     .attr('id', (d, i) => `article_${i}`)
     .attr('transform', () => {
       articleIndex += 1;
@@ -62,14 +63,7 @@ export default function commentTimeline(nodes, svg, $this) {
     });
 
   const commentTime = articleTime.selectAll('circle')
-    .data((d) => {
-      return commentTimeData(d);
-      // d.message.forEach((m) => {
-      //   m.articleId = d.articleId;
-      //   m.articleDate = d.date;
-      // });
-      // return d.message;
-    })
+    .data(d => commentTimeData(d))
     .enter()
     .append('circle')
     .attr('class', d => d.push_userid)
@@ -106,29 +100,43 @@ export default function commentTimeline(nodes, svg, $this) {
     .text(d => d.push_ipdatetime);
 
   const linkCoordinateWithSameUser = [];
-  d3.select('#commentTimeline')
-    .selectAll('circle')
-    .each((d, i, ns) => {
-      console.log(d3.select(ns[i]));
-      const x = d3.select(ns[i]).attr('cx');
-      const y = d3.select(ns[i]).attr('cy');
-      d3.selectAll(`.${d.push_userid}`).each((d2, j, _ns) => {
-        // console.log(d3.select(this).attr('cx'));
-        console.log(d3.select(_ns[j]));
-        linkCoordinateWithSameUser.push({
-          x1: x,
-          y1: y,
-          x2: d3.select(_ns[j]).attr('cx'),
-          y2: d3.select(_ns[j]).attr('cy'),
+ 
+  svg.selectAll('.articles')
+    .each((d, i, n) => {
+      d3.select(n[i]).selectAll('circle')
+        .each((_d, _i, _n) => {
+          const x = parseFloat(d3.select(_n[_i]).attr('cx'));
+          const y = parseFloat(d3.select(_n[_i]).attr('cy'));
+          d3.selectAll('.articles').each((d2, i2, n2) => {
+            // console.log(d2);
+            d3.select(n2[i2]).selectAll(`.${_d.push_userid}`).each((_d2, _i2, _n2) => {
+              // console.log(d3.select(this).attr('cx'));
+              if (i < i2) {
+                console.log(_d.push_userid);
+                console.log(_d2.push_userid);
+                console.log(_d);
+                console.log(_d2);
+                console.log(i, i2);
+                console.log(x, y + (100 + (i * 130)));
+                // console.log(d3.select(_n2[_i2]).attr('cy'));
+                console.log(d3.select(_n2[_i2]).attr('cx'), parseFloat(d3.select(_n2[_i2]).attr('cy')) + (100 + i2 * 130));
+                linkCoordinateWithSameUser.push({
+                  x1: x,
+                  y1: y + (100 + (i * 130)),
+                  x2: parseFloat(d3.select(_n2[_i2]).attr('cx')),
+                  y2: parseFloat(d3.select(_n2[_i2]).attr('cy')) + (100 + (i2 * 130)),
+                });
+              }
+            });
+          });
         });
-      });
     });
   
   console.log(linkCoordinateWithSameUser);
 
   svg.append('g')
     .attr('class', 'link')
-    .attr('transform', 'translate(0,100)')
+    .attr('transform', 'translate(0,0)')
     .selectAll('line')
     .data(linkCoordinateWithSameUser)
     .enter()
@@ -221,6 +229,7 @@ export default function commentTimeline(nodes, svg, $this) {
   }
 
   function commentTimeData(data) {
+    console.log(data);
     const newData = JSON.parse(JSON.stringify(data));
     newData.message.forEach((mes) => {
       mes.articleId = data.articleId;
