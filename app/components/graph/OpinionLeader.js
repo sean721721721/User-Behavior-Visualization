@@ -430,6 +430,22 @@ export default function OpinionLeader(cellNodes, cellLinks, beforeThisDate,
         hover: 1,
       });
     }
+
+    d3.selectAll('circle')
+      .attr('r', (r) => {
+        if (!r || !d.containUsers) return 2;
+        if (d.containUsers.includes(r.push_userid)) {
+          console.log(r, d.containUsers);
+          return 5;
+        }
+        return 2;
+      })
+      .attr('stroke', 'black')
+      .attr('stroke-width', (r) => {
+        if (!r || !d.containUsers) return 0;
+        if (d.containUsers.includes(r.push_userid)) return 1;
+        return 0;
+      });
     const line_out_color = (event === 'mouseover') ? 'black' : 'rgb(208,211,212)';
     const line_in_color = (event === 'mouseover') ? 'rgb(218, 41, 28)' : 'rgb(208,211,212)';
     const line_opacity = (event === 'mouseover') ? 1 : 0.3;

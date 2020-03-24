@@ -45,8 +45,22 @@ class OpinionLeaderView extends React.Component {
           />
           <svg id="articleCell" width="100%" height="94%" />
         </div>
-        <div className="commentTimeline">
-          <svg id="commentTimeline" width="100%" height="100%" />
+        <div
+          className="commentTimeline"
+          style={{
+            // position: 'absolute',
+            // top: '15px',
+            // left: '15px',
+            overflowY: 'scroll',
+            // width: '280px',
+            // height: '400px',
+            // backgroundColor: '#e8e8e8',
+            // border: '1px solid #AAAAAA',
+            // borderRadius: '4px',
+            // boxShadow: 'inset 1px 1px 6px 2px rgba(0,0,0, .25)',
+          }}
+        >
+          <svg id="commentTimeline" width="100%" height="700px" />
         </div>
         <WordTree word={word} />
       </div>

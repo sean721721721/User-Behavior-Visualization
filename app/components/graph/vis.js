@@ -51,10 +51,11 @@ class Graph extends Component {
 
   shouldComponentUpdate(nextProps, nextState) {
     if (!this.state.hover) {
-      if (JSON.stringify(this.props) === JSON.stringify(nextProps)
-      && JSON.stringify(this.state) === JSON.stringify(nextState)) {
-        console.log('shouldUpdate? No!!');
-        return false;
+      if (JSON.stringify(this.props) === JSON.stringify(nextProps)) {
+        if (JSON.stringify(this.state.word) === JSON.stringify(nextState.word)) {
+          console.log('shouldUpdate? No!!');
+          return false;
+        }
       }
     }
     console.log('vis update !');
@@ -829,7 +830,7 @@ class Graph extends Component {
             clickedNode.children.sort((a, b) => ((a.influence < b.influence) ? 1 : -1));
             // compute cellnodes and celllinks
             let topInfluenceAuthor = 1;
-            const topNumOfPushes = 100;
+            const topNumOfPushes = 50;
 
             // testing data structure
             let authorGroup = index;
@@ -846,7 +847,8 @@ class Graph extends Component {
                         cuttedPushContent = cuttedPushContent.concat(' ', w);
                       });
                       if (replyCount < topNumOfPushes) {
-                        if (mes.push_tag === '推') {
+                        // if (mes.push_tag === '推') {
+                        if (mes.push_tag) {
                           if (cellData.nodes.some(data => data.id === mes.push_userid)) {
                             // already has same replyer
                             const replyer = cellData.nodes.find(data => data.id === mes.push_userid);
@@ -866,12 +868,15 @@ class Graph extends Component {
                                 pushDate: mes.push_ipdatetime,
                               }],
                             });
-                            replyer.cutted_push_content.push([cuttedPushContent]);
+                            // console.log(replyer);
+                            if (replyer.cutted_push_content) replyer.cutted_push_content.push([cuttedPushContent]);
+                            else replyer.cutted_push_content = [cuttedPushContent];
                             replyer.authorGroup = replyer.authorGroup ? replyer.authorGroup : [];
                             if (!replyer.authorGroup.some(e => e === author.id)) replyer.authorGroup.push(author.id);
                             replyer.reply = replyer.reply ? replyer.reply : [];
                             if (replyer.reply.some(e => e.author.id === author.id)) {
                               // reply same author
+                              console.log(replyer, author);
                               const repliedAuthor = replyer.reply.find(e => e.author === author);
                               const repliedArticle = repliedAuthor.article.find(e => e.title === article);
                               if (repliedArticle) {
@@ -928,6 +933,7 @@ class Graph extends Component {
                           } else {
                             cellData.nodes.push({
                               id: mes.push_userid,
+                              containUsers: [mes.push_userid],
                               pushCount: 1,
                               push_content: mes.push_content,
                               push_ipdatetime: mes.push_ipdatetime,
@@ -997,7 +1003,8 @@ class Graph extends Component {
               if (topInfluenceAuthor <= topAuthorThreshold) {
                 author.responder.forEach((article) => {
                   let replyCount = 0;
-                  const filteredMessages = article.message.filter(e => e.push_tag === '推');
+                  // const filteredMessages = article.message.filter(e => e.push_tag === '推');
+                  const filteredMessages = article.message.filter(e => e.push_tag);
                   // console.log(filteredMessages);
                   const maximumLength = Math.min(topNumOfPushes, filteredMessages.length);
                   if (article.message.length >= articleInfluenceThreshold) {
@@ -1036,7 +1043,8 @@ class Graph extends Component {
             clickedNode.children.every((author) => {
               if (topInfluenceAuthor <= topAuthorThreshold) {
                 author.responder.forEach((article) => {
-                  const filteredMessages = article.message.filter(e => e.push_tag === '推');
+                  // const filteredMessages = article.message.filter(e => e.push_tag === '推');
+                  const filteredMessages = article.message.filter(e => e.push_tag);
                   // console.log(filteredMessages);
                   const maximumLength = Math.min(topNumOfPushes, filteredMessages.length);
                   if (article.message.length >= articleInfluenceThreshold) {
@@ -1151,20 +1159,22 @@ class Graph extends Component {
           const source_node = data.nodes.find(e => e.id === s); // find source node
 
           // adjacency matrix
-          target_node.adj[s] = target_node.adj[s]
-            ? target_node.adj[s] + data.links[i].value : data.links[i].value;
-          source_node.adj[t] = source_node.adj[t]
-            ? source_node.adj[t] + data.links[i].value : data.links[i].value;
+          // target_node.adj[s] = target_node.adj[s]
+          //   ? target_node.adj[s] + data.links[i].value : data.links[i].value;
+          // source_node.adj[t] = source_node.adj[t]
+          //   ? source_node.adj[t] + data.links[i].value : data.links[i].value;
         }
 
         // merge nodes by author & article
         for (let i = 0; i < data.nodes.length - 1; i += 1) {
           for (let j = i + 1; j < data.nodes.length; j += 1) {
-            if (!data.nodes[i].responder && data.nodes[i].adj) {
+            if (!data.nodes[i].responder && data.nodes[i].id) {
               if (_.isEqual(data.nodes[i].reply, data.nodes[j].reply)) {
                 const temp_id = data.nodes[i].id;
                 const next_id = data.nodes[j].id;
+                data.nodes[i].containUsers.push(data.nodes[j].id);
                 data.nodes[i].id = data.nodes[i].id.concat(' ', data.nodes[j].id);
+
                 data.links.forEach((l) => {
                   if (l.source === temp_id) l.source = data.nodes[i].id;
                   if (l.source === next_id) l.source = data.nodes[i].id;
