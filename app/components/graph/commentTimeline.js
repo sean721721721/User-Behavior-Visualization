@@ -112,14 +112,12 @@ export default function commentTimeline(nodes, svg, $this) {
             d3.select(n2[i2]).selectAll(`.${_d.push_userid}`).each((_d2, _i2, _n2) => {
               // console.log(d3.select(this).attr('cx'));
               if (i < i2) {
-                console.log(_d.push_userid);
-                console.log(_d2.push_userid);
-                console.log(_d);
-                console.log(_d2);
-                console.log(i, i2);
-                console.log(x, y + (100 + (i * 130)));
-                // console.log(d3.select(_n2[_i2]).attr('cy'));
-                console.log(d3.select(_n2[_i2]).attr('cx'), parseFloat(d3.select(_n2[_i2]).attr('cy')) + (100 + i2 * 130));
+                // console.log(_d.push_userid);
+                // console.log(_d2.push_userid);
+                // console.log(_d);
+                // console.log(_d2);
+                // console.log(i, i2);
+                // console.log(x, y + (100 + (i * 130)));
                 linkCoordinateWithSameUser.push({
                   x1: x,
                   y1: y + (100 + (i * 130)),

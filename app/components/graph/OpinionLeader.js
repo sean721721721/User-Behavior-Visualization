@@ -20,7 +20,7 @@ import Chart from 'react-google-charts';
 // import jieba from 'nodejieba';
 
 export default function OpinionLeader(cellNodes, cellLinks, beforeThisDate,
-  svg, forceSimulation, totalInfluence, $this) {
+  svg, forceSimulation, totalInfluence, $this, optionsWord) {
   const G = new jsnx.Graph();
   const color = d3.schemeTableau10;
   const articleInfluenceThreshold = 100;
@@ -173,10 +173,10 @@ export default function OpinionLeader(cellNodes, cellLinks, beforeThisDate,
     .outerRadius(135);
 
   articlePath.enter().append('path')
-    .attr('fill', (d) => {
+    .attr('fill', (d) => 
       // console.log(d);
-      return 'white';
-    })
+       'white'
+    )
     .attr('d', articleArc)
     .attr('stroke', 'black')
     .attr('stroke-width', '0.2px');
@@ -349,9 +349,7 @@ export default function OpinionLeader(cellNodes, cellLinks, beforeThisDate,
     .force('link')
     .links(cellLinks)
     .distance(d => 30)
-    .strength((d) => {
-      return Math.min(1, 0.1 * d.value);
-    });
+    .strength((d) => Math.min(1, 0.1 * d.value));
   // .strength(d => d.value / 7);
 
   forceSimulation.force('collision', d3.forceCollide(d => d.radius));
@@ -411,6 +409,7 @@ export default function OpinionLeader(cellNodes, cellLinks, beforeThisDate,
         userState.push(d.id);
       }
       $this.setState({
+        optionsWord,
         word: d.titleTermArr,
         user: userState,
         hover: 1,
@@ -420,12 +419,14 @@ export default function OpinionLeader(cellNodes, cellLinks, beforeThisDate,
 
     if (event === 'mouseover' && d.cutted_push_content) {
       console.log(d.cutted_push_content);
+      const contentBeginWithSlash = cutted_push_contentAddSlash(d.cutted_push_content);
       const userState = $this.state.user;
       if (!$this.state.user.includes(d.id)) {
         userState.push(d.id);
       }
       $this.setState({
-        word: d.cutted_push_content,
+        optionsWord: '/',
+        word: contentBeginWithSlash,
         user: userState,
         hover: 1,
       });
@@ -525,6 +526,14 @@ export default function OpinionLeader(cellNodes, cellLinks, beforeThisDate,
     });
   }
 
+  function cutted_push_contentAddSlash(wordArr) {
+    const newWordArr = [];
+    wordArr.forEach((w) => {
+      newWordArr.push(['/ '.concat(w[0])]);
+    });
+    return newWordArr;
+  }
+
   function responderCommunityDetecting(dataNodes, dataLinks) {
     const filteredLinks = dataLinks.filter(l => l.tag === 1 || l.tag === 0);
     // console.log(filteredLinks);
@@ -534,13 +543,11 @@ export default function OpinionLeader(cellNodes, cellLinks, beforeThisDate,
     // console.log(dataNodes);
     for (let i = 0; i < links.length; i += 1) {
       // console.log(links[i]);
-      links[i].source = dataNodes.findIndex((ele) => {
+      links[i].source = dataNodes.findIndex((ele) => 
         // console.log(ele.id, filteredLinks[i].source, ele.id === filteredLinks[i].source.id);
-        return ele.id === filteredLinks[i].source.id || ele.id === filteredLinks[i].source;
-      });
-      links[i].target = dataNodes.findIndex((ele) => {
-        return ele.id === filteredLinks[i].target;
-      });
+         ele.id === filteredLinks[i].source.id || ele.id === filteredLinks[i].source
+      );
+      links[i].target = dataNodes.findIndex((ele) => ele.id === filteredLinks[i].target);
     }
     // console.log(index, testLinks);
     // console.log(links);

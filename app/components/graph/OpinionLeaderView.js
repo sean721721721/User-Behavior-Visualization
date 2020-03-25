@@ -17,6 +17,7 @@ class OpinionLeaderView extends React.Component {
         beforeThisDate,
         cellForceSimulation,
         totalAuthorInfluence,
+        optionsWord,
       } = data;
       let articleCellSvg = d3.select('#articleCell');
       let commentTimelineSvg = d3.select('#commentTimeline');
@@ -24,7 +25,7 @@ class OpinionLeaderView extends React.Component {
         if (data.$this.state.hover !== 1) {
           console.log('do OPView rendering');
           OpinionLeader(cellData.nodes, cellData.links,
-            beforeThisDate, articleCellSvg, cellForceSimulation, totalAuthorInfluence, data.$this);
+            beforeThisDate, articleCellSvg, cellForceSimulation, totalAuthorInfluence, data.$this, optionsWord);
         }
         commentTimeline(cellData.nodes, commentTimelineSvg, data.$this);
       }
@@ -33,7 +34,7 @@ class OpinionLeaderView extends React.Component {
 
   render() {
     const { data } = this.props;
-    const { word } = data;
+    const { word, optionsWord } = data;
     console.log(d3.select('#articleCell'));
     return (
       <div className="opinionLeaderView">
@@ -62,7 +63,7 @@ class OpinionLeaderView extends React.Component {
         >
           <svg id="commentTimeline" width="100%" height="700px" />
         </div>
-        <WordTree word={word} />
+        <WordTree word={word} optionsWord={optionsWord} />
       </div>
     );
   }

@@ -413,7 +413,7 @@ path:hover {
     grid-column: sscol5 / sscolend;
     grid-row: ssrow1 / ssrow2;
     grid-template-rows: [acrow1] 0.6fr [acrow2] 0.4fr [acrowend];
-    grid-template-columns: [accol1] 0.7fr [accol2] 0.3fr [accolend];
+    grid-template-columns: [accol1] 0.4fr [accol2] 0.6fr [accolend];
 }
 
 .articleCell {

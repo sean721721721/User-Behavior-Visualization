@@ -4,16 +4,19 @@ import {GoogleCharts} from 'google-charts';
 import sententree from 'sententree';
 
 const WordTree = (props) => {
-  // console.log(this.props);
+  const { optionsWord, word } = props;
+  const option = [['Phrases']];
+  const newWord = option.concat(word);
+
+
   const options = {
     maxFontSize: 14,
     wordtree: {
       format: 'implicit',
-      word: 'cats',
+      type: 'double',
+      word: optionsWord,
     },
   };
-
-  const { word } = props;
   //   const model = new SentenTreeBuilder()
   //     .buildModel(data);
 
@@ -23,7 +26,8 @@ const WordTree = (props) => {
   //     .on('nodeClick', (node) => {
   //       console.log('node', node);
   //     });
-  console.log(word);
+  console.log(newWord);
+  console.log(options);
   return (
     <div className="wordTree">
         <div id="vis"></div>
@@ -31,7 +35,7 @@ const WordTree = (props) => {
         chartType="WordTree"
         width="100%"
         height="100%"
-        data={word}
+        data={newWord}
         options={options}
       />
     </div>

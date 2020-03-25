@@ -783,7 +783,9 @@ class Graph extends Component {
       }
       function clicked(d) {
         console.log('clicked');
+        const opWord = d.titleTerm.split(' ')[0];
         $this.setState({
+          optionsWord: opWord,
           word: [['clicked']],
           draw: 0,
         });
@@ -1367,6 +1369,7 @@ class Graph extends Component {
       cellForceSimulation,
       totalAuthorInfluence,
       word,
+      optionsWord,
     } = this.state;
     const $this = this;
     return (
@@ -1392,6 +1395,7 @@ class Graph extends Component {
           cellForceSimulation,
           totalAuthorInfluence,
           $this,
+          optionsWord,
         }}
         />
         <div id="googleChart" />
