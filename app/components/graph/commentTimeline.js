@@ -206,8 +206,23 @@ export default function commentTimeline(nodes, svg, $this) {
     const afterSixHours = new Date(d.date);
     afterSixHours.setHours(articleDate.getHours() + timePeriod);
     const commentTimeScale = d3.scaleTime().domain([articleDate, afterSixHours])
-      .range([10, w - 100]);
-    return d3.axisBottom(commentTimeScale).ticks(12).tickFormat(d3.timeFormat('%H:%M'));
+      .range([10, w - 110]);
+    const afterArticlePostTimeFormat = (date) => {
+      // console.log(date);
+      console.log(new Date(date) - articleDate);
+      console.log(new Date(new Date(date) - articleDate));
+      // const dateMinusPostTime = new Date(new Date(date) - articleDate);
+      const dateMinusPostTime = d3.timeMinute.count(articleDate, new Date(date));
+      // console.log(dateMinusPostTime);
+      const customFormat = d3.format('');
+      // return customFormat(dateMinusPostTime);
+      return `${Math.floor(dateMinusPostTime / 60)}h${dateMinusPostTime % 60}m`;
+    }
+    return d3.axisBottom(commentTimeScale).ticks(3).tickFormat((date) => {
+      console.log(afterArticlePostTimeFormat(date));
+      // return `${afterArticlePostTimeFormat(date)} mins`;
+      return afterArticlePostTimeFormat(date);
+    });
   }
 
   function makeYAxis(direction) {
