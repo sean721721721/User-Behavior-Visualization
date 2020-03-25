@@ -84,23 +84,23 @@ class Menu extends React.Component {
 
     return (
       <div className="box menu">
-        <div className="tab">
-          {/* <button className="tablinks" type="button">
+        {/* <div className="tab"> */}
+        {/* <button className="tablinks" type="button">
             <a href="/">Reset</a>
           </button> */}
-          {/* <button className="tablinks" type="button" onClick={e => this.openTab(e, 'Page1')}>
+        {/* <button className="tablinks" type="button" onClick={e => this.openTab(e, 'Page1')}>
             Page1
           </button> */}
-          {/* <button className="tablinks" type="button" onClick={e => this.openTab(e, 'Page2')}>
+        {/* <button className="tablinks" type="button" onClick={e => this.openTab(e, 'Page2')}>
             Page2
           </button> */}
-          {/* <button className="tablinks" type="button" onClick={e => this.openTab(e, 'Submit')}>
+        {/* <button className="tablinks" type="button" onClick={e => this.openTab(e, 'Submit')}>
             Submit
           </button> */}
-          {/* <button className="tablinks" type="button" onClick={e => this.openTab(e, 'Download')}>
+        {/* <button className="tablinks" type="button" onClick={e => this.openTab(e, 'Download')}>
             Download
           </button> */}
-        </div>
+        {/* </div> */}
         {/* <ParameterTab
           show={showParameter}
           init={initParameter}
