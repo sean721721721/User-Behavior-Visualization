@@ -366,7 +366,7 @@ path:hover {
     grid-column: col1 / colend;
     grid-row: grow2 / growend;
     display: grid;
-    grid-template-columns: [sscol1] 0.0fr [sscol2] 0.005fr [sscol3] 0.5fr [sscol4] 0.005fr [sscol5] 0.485fr [sscol6] 0.005fr [sscol7] 0.2fr [sscolend];
+    grid-template-columns: [sscol1] 0.0fr [sscol2] 0.0fr [sscol3] 30fr [sscol4] 1fr [sscol5] 69fr [sscolend];
     grid-template-rows: [ssrow1] auto [ssrow2] 10px [ssrow3] 0.2fr [ssrowend];
 }
 
@@ -413,7 +413,7 @@ path:hover {
     grid-column: sscol5 / sscolend;
     grid-row: ssrow1 / ssrow2;
     grid-template-rows: [acrow1] 0.6fr [acrow2] 0.4fr [acrowend];
-    grid-template-columns: [accol1] 0.4fr [accol2] 0.6fr [accolend];
+    grid-template-columns: [accol1] 4fr [accol2] 6fr [accolend];
 }
 
 .articleCell {

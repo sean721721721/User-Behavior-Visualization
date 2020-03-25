@@ -1374,9 +1374,9 @@ class Graph extends Component {
     const $this = this;
     return (
       <div className="graph" ref={this.myRef}>
-        <div className="barchart">
+        {/* <div className="barchart">
           <svg id="barChart" width="100%" height="100%" style={{ border: '2px solid gray' }} />
-        </div>
+        </div> */}
         <div className="network">
           <div
             className="filterBar"
