@@ -50,6 +50,7 @@ class Graph extends Component {
   }
 
   shouldComponentUpdate(nextProps, nextState) {
+    // console.log(this.state, nextState);
     if (!this.state.hover) {
       if (JSON.stringify(this.props) === JSON.stringify(nextProps)) {
         if (JSON.stringify(this.state.word) === JSON.stringify(nextState.word)) {
@@ -127,7 +128,7 @@ class Graph extends Component {
     const G = new jsnx.Graph();
     const termColor = d3.interpolateBlues;
     let selectedCluster = -1;
-    let fontSizeThreshhold = 20;
+    let fontSizeThreshhold = 0;
     let sliderHasBeenLoaded = 0;
     const NodeHiding = 1;
     const cellData = { nodes: [], links: [] };
@@ -237,16 +238,16 @@ class Graph extends Component {
     d3.select('#betweenness').on('input', update());
 
     const navigator = d3.select('#button');
-    navigator.append('text')
-      .attr('text-anchor', 'middle')
-      .attr('font-size', '24px')
-      .attr('x', '50%')
-      .attr('y', '10%')
-      .text(`${'Centrality:'} ${'    '}`);
-    navigator.append('span')
-      .attr('font-size', '24px')
-      .attr('margin', '5px')
-      .text('Low');
+    // navigator.append('text')
+    //   .attr('text-anchor', 'middle')
+    //   .attr('font-size', '24px')
+    //   .attr('x', '50%')
+    //   .attr('y', '10%')
+    //   .text(`${'Centrality:'} ${'    '}`);
+    // navigator.append('span')
+    //   .attr('font-size', '24px')
+    //   .attr('margin', '5px')
+    //   .text('Low');
 
     const slider = navigator.append('input');
     slider.datum({})
@@ -264,13 +265,13 @@ class Graph extends Component {
         update();
       });
 
-    navigator.append('text')
-      .attr('id', 'sizeThreshold')
-      .attr('text-anchor', 'middle')
-      .attr('font-size', '24px')
-      .attr('x', '50%')
-      .attr('y', '10%')
-      .text('High');
+    // navigator.append('text')
+    //   .attr('id', 'sizeThreshold')
+    //   .attr('text-anchor', 'middle')
+    //   .attr('font-size', '24px')
+    //   .attr('x', '50%')
+    //   .attr('y', '10%')
+    //   .text('High');
 
     const cellNavigator = d3.select('#timeSlider');
     cellNavigator.append('text')
@@ -469,7 +470,8 @@ class Graph extends Component {
           term = term.select('path').attr('id');
           return (-centrality(selectedCentrality, { titleTerm: term }) / 2 - 5);
         })
-        .attr('opacity', () => (NodeHiding ? 0 : 1))
+        // .attr('opacity', () => (NodeHiding ? 0 : 1))
+        .attr('opacity', 0)
         .style('stroke', 'green')
         .style('stroke-width', '1px');
 
@@ -572,7 +574,7 @@ class Graph extends Component {
         ]).range([1, 100]);
 
 
-      const simulationDurationInMs = 5000; // 20 seconds
+      const simulationDurationInMs = 20000; // 20 seconds
 
       const startTime = Date.now();
       const endTime = startTime + simulationDurationInMs;
@@ -793,7 +795,6 @@ class Graph extends Component {
         if (typeof d === 'string') {
           d = set.nodes.find(ele => ele.titleTerm === d);
         }
-        console.log(authorTable);
         // AuthorTable(d, authorTable, (n) => {
         //   console.log(n);
         // });
@@ -832,7 +833,7 @@ class Graph extends Component {
             clickedNode.children.sort((a, b) => ((a.influence < b.influence) ? 1 : -1));
             // compute cellnodes and celllinks
             let topInfluenceAuthor = 1;
-            const topNumOfPushes = 50;
+            const topNumOfPushes = 100;
 
             // testing data structure
             let authorGroup = index;
@@ -854,6 +855,7 @@ class Graph extends Component {
                           if (cellData.nodes.some(data => data.id === mes.push_userid)) {
                             // already has same replyer
                             const replyer = cellData.nodes.find(data => data.id === mes.push_userid);
+                            // console.log(mes.push_userid, replyer);
                             replyer.push_content.push({ id: mes.push_userid, content: mes.push_content });
                             // console.log(replyer);
                             replyer.adj[mes.push_userid] += 1;
@@ -1084,16 +1086,17 @@ class Graph extends Component {
               }
               return false;
             });
-            console.log(cellData);
+            // console.log(cellData);
             mergeCellDataNodes(cellData);
             cellData.nodes.sort((a, b) => ((a.size < b.size) ? 1 : -1));
             const userState = $this.state.user;
             if (!$this.state.user.includes(index)) {
               userState.push(index);
             }
+            const setStateWord = cellData.nodes.find(e => e.id === index).titleTermArr;
             // console.log(userState);
             $this.setState({
-              word: cellData.nodes[0].titleTermArr,
+              word: setStateWord,
               draw: 0,
               cellData,
               beforeThisDate,

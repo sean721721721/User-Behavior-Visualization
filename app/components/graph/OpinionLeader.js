@@ -21,12 +21,14 @@ import Chart from 'react-google-charts';
 
 export default function OpinionLeader(cellNodes, cellLinks, beforeThisDate,
   svg, forceSimulation, totalInfluence, $this, optionsWord) {
+  const w = parseFloat(d3.select('#articleCell').style('width'));
+  const h = parseFloat(d3.select('#articleCell').style('height'));
   const G = new jsnx.Graph();
   const color = d3.schemeTableau10;
   const articleInfluenceThreshold = 100;
   const node_r = d3.scaleLinear().range([3, 20]);
   buildGraph();
-
+  const selectedArticles = [];
   const termCentrality = {
     Betweenness: {},
     EigenVector: {},
@@ -56,7 +58,7 @@ export default function OpinionLeader(cellNodes, cellLinks, beforeThisDate,
     .domain([
       Math.min(...termCentralityArr.betweennessArr),
       Math.max(...termCentralityArr.betweennessArr),
-    ]).range([1, 10]);
+    ]).range([5, 15]);
 
   const normalizeEigenvector = d3.scaleLinear()
     .domain([
@@ -67,36 +69,40 @@ export default function OpinionLeader(cellNodes, cellLinks, beforeThisDate,
   console.log(termCentrality);
 
   const authorNodes = cellNodes.filter(node => node.influence);
-  const articleNodes = cellNodes.filter(node => node.type === 'article');
+  const articleNodes = [];
+  cellNodes.forEach((node) => {
+    if (node.responder) {
+      node.responder.forEach((a) => {
+        articleNodes.push(a);
+      });
+    }
+  });
   console.log(articleNodes);
-
   const authorArr = authorNodes.map(node => node.id);
+  const selectedAuthorTotalComments = computedNumOfAllArticleComments(authorNodes);
   const opinoinLeaderPie = d3.pie()
     .value((d) => {
-      const totalComments = d.responder.reduce((pre, nex) => ({
-        message: {
-          length: pre.message.length + nex.message.length,
-        },
-      }));
-      return 360 / authorArr.length;
+      const totalComments = computedNumOfAllArticleComments([d]);
+      // return 360 / authorArr.length;
+      d.influenceRatio = totalComments / selectedAuthorTotalComments;
+      return 360 * (totalComments / selectedAuthorTotalComments);
     })
     .sort(null);
 
   const articlePie = d3.pie()
     .value((d) => {
+      console.log(d);
       const author = authorNodes.find(e => e.id === d.author);
       console.log(author);
       const articleRatio = author.responder.filter(
         e => e.message.length >= articleInfluenceThreshold,
       );
-      return (360 / authorArr.length) / articleRatio.length;
+      console.log(articleRatio);
+      return (360 * author.influenceRatio) * (d.message.length / author.influence);
     })
     .sort(null);
 
-  console.log('articlePie(articleNodes): ', articlePie(articleNodes));
-
   responderCommunityDetecting(cellNodes, cellLinks);
-
   // ({ nodes, links } = data);
   svg.selectAll('*').remove();
   // svg = svg
@@ -104,8 +110,6 @@ export default function OpinionLeader(cellNodes, cellLinks, beforeThisDate,
   //   .append('g');
   svg = svg.append('g')
     .attr('transform', (d) => {
-      const w = parseFloat(d3.select('#articleCell').style('width'));
-      const h = parseFloat(d3.select('#articleCell').style('height'));
       return `translate(${w / 2}, ${h / 2}) scale(1.3,1.3)`;
     });
   let cellLink = svg.selectAll('line')
@@ -118,7 +122,8 @@ export default function OpinionLeader(cellNodes, cellLinks, beforeThisDate,
     .attr('class', 'links')
     .style('z-index', -1)
   // .attr('visibility', 'hidden')
-    .attr('stroke', d => d.color)
+    .attr('stroke', 'gray')
+    .attr('stroke-opacity', 0.1)
     .attr('stroke-width', 1)
     .attr('stroke-width', d => Math.min(d.value, 10));
   // cellLink = cellLinkEnter.merge(link);
@@ -145,7 +150,9 @@ export default function OpinionLeader(cellNodes, cellLinks, beforeThisDate,
 
   cellPath.enter().append('path')
     .attr('fill', (d) => {
+      // const index = authorArr.findIndex(e => e === d.data.id);
       const index = authorArr.findIndex(e => e === d.data.id);
+      console.log();
       return color[index];
       // return color[d.data.cluster];
     })
@@ -154,31 +161,28 @@ export default function OpinionLeader(cellNodes, cellLinks, beforeThisDate,
     .attr('stroke-width', '0.2px');
 
 
-  cellPath
-    .data((d) => {
-      const res = d.filter(e => e.responder);
-      return opinoinLeaderPie(res);
-    })
-    .enter().append('path')
-    .attr('fill', (d) => {
-      const index = authorArr.findIndex(e => e === d.data.id);
-      return color[index];
-      // return color[d.data.cluster];
-    })
-    .attr('d', arc2)
-    .attr('stroke', 'white')
-    .attr('stroke-width', '0.2px');
-  // const authorData = cellPath.data();
-  // console.log(cellPath.enter().datum());
-  // console.log(authorData);
+  // cellPath
+  //   .data((d) => {
+  //     const res = d.filter(e => e.responder);
+  //     return opinoinLeaderPie(res);
+  //   })
+  //   .enter().append('path')
+  //   .attr('fill', (d) => {
+  //     const index = authorArr.findIndex(e => e === d.data.id);
+  //     return color[index];
+  //     // return color[d.data.cluster];
+  //   })
+  //   .attr('d', arc2)
+  //   .attr('stroke', 'white')
+  //   .attr('stroke-width', '0.2px');
 
   const articlePathGroup = cellPieGroup.append('g');
   const articlePath = articlePathGroup.selectAll('path')
     .data(articlePie(articleNodes));
 
   const articleArc = d3.arc()
-    .innerRadius(130)
-    .outerRadius(135);
+    .innerRadius(140)
+    .outerRadius(145);
 
   articlePath.enter().append('path')
     .attr('fill', (d) => {
@@ -205,18 +209,21 @@ export default function OpinionLeader(cellNodes, cellLinks, beforeThisDate,
     .attr('color', '#000');
 
   articlePath.enter().append('text')
-    // .text(d => d.data.articleId)
+    .text(d => d.data.title)
     .attr('transform', (d) => {
       if (d.data.id) {
         const article = cellNodes.find(e => e.id === d.data.id);
         // [article.fx, article.fy] = articleArc.centroid(d);
       }
-      return `translate(${arc.centroid(d)})`;
+      const position = arc.centroid(d);
+      position[1] += 20;
+      return `translate(${position})`;
     })
     .style('text-anchor', 'middle')
     .attr('font-family', 'Microsoft JhengHei')
     .attr('font-size', '10px')
-    .attr('color', '#000');
+    .attr('color', '#000')
+    .on('click', clicked);
 
   // console.log('cellNodes: ', cellNodes);
 
@@ -275,7 +282,9 @@ export default function OpinionLeader(cellNodes, cellLinks, beforeThisDate,
     })
     .attr('fill', (d) => {
       // console.log(d);
-      return color[d.cluster];
+      if (d.cluster) return color[d.cluster];
+      const index = authorArr.findIndex(e => e === d.id);
+      return color[index];
       // if (d.influence) return color[authorArr.findIndex(e => e === d.id)]; // author
       // if (d.authorGroup && d.authorGroup.length === 1) { // replyer
       //   const index = authorArr.findIndex(e => e === d.authorGroup[0]);
@@ -366,6 +375,61 @@ export default function OpinionLeader(cellNodes, cellLinks, beforeThisDate,
   const startTime = Date.now();
   const endTime = startTime + simulationDurationInMs;
 
+  function clicked(d) {
+    console.log(d);
+    if (d.data.title) {
+      if (!selectedArticles.includes(d.data.title)) {
+        selectedArticles.push(d.data.title);
+        let remainUsers = [];
+        remainUsers = findUsersCommentAllSelectedArticles(selectedArticles);
+        console.log(remainUsers);
+        // textArea.selectAll('text').remove();
+        svg.select('.textArea').remove();
+        const textArea = svg.append('g')
+          .attr('class', 'textArea')
+          .attr('transform', `translate(${w / 3.5},${-h / 3})`);
+        textArea.selectAll('text')
+          .data(remainUsers)
+          .enter()
+          .append('g')
+          .attr('transform', (e, i) => `translate(0, ${i * 12})`)
+          .append('text')
+          .text(e => e.id)
+          .attr('font-size', '10px')
+          .on('click', userTextClicked);
+      }
+    }
+  }
+  function userTextClicked(d) {
+    console.log(d);
+    d3.selectAll('svg#commentTimeline').selectAll(`line.${d.id}`).style('stroke', 'red');
+    
+  }
+  function findUsersCommentAllSelectedArticles(articleArr) {
+    let users = [];
+    const nodes = [];
+    articleArr.forEach((id) => {
+      nodes.push(articleNodes.find(a => a.title === id));
+    });
+    const articleCount = nodes.length;
+    nodes.forEach((a) => {
+      const userInOneArticle = [];
+      a.message.forEach((m) => {
+        if (!userInOneArticle.includes(m.push_userid)) {
+          userInOneArticle.push(m.push_userid);
+          const existedUser = users.find(e => e.id === m.push_userid);
+          if (existedUser) existedUser.count += 1;
+          else {
+            users.push({ id: m.push_userid, count: 1 });
+          }
+        }
+      });
+    });
+
+    users = users.filter(e => e.count >= articleCount);
+    return users;
+  }
+
   function onSimulationTick() {
     if (Date.now() < endTime) {
       cellTicked();
@@ -455,17 +519,17 @@ export default function OpinionLeader(cellNodes, cellLinks, beforeThisDate,
         return 0;
       });
     const line_out_color = (event === 'mouseover') ? 'black' : 'rgb(208,211,212)';
-    const line_in_color = (event === 'mouseover') ? 'rgb(218, 41, 28)' : 'rgb(208,211,212)';
+    const line_in_color = (event === 'mouseover') ? 'black' : 'rgb(208,211,212)';
     const line_opacity = (event === 'mouseover') ? 1 : 0.3;
     const dot_self_color = (event === 'mouseover') ? 'rgb(218, 41, 28)' : '#fff';
     const dot_other_color = (event === 'mouseover') ? 'black' : '#fff';
     const dot_selected_opacity = 1;
-    const dot_other_opacity = (event === 'mouseover') ? 0.1 : 1;
-    const dot_self_stroke_width = (event === 'mouseover') ? 2 : 1;
-    const dot_self_storke_opacity = (event === 'mouseover') ? 1 : 0;
+    const dot_other_opacity = (event === 'mouseover') ? 0.7 : 1;
+    const dot_self_stroke_width = (event === 'mouseover') ? 1 : 0.3;
+    const dot_self_storke_opacity = (event === 'mouseover') ? 1 : 1;
 
     // clear out
-    d3.selectAll('circle.nodes').attr('r', e => e.radius).style('stroke-opacity', dot_self_storke_opacity).style('stroke', '#fff')
+    d3.selectAll('circle.nodes').attr('r', e => e.radius).style('stroke-opacity', dot_self_storke_opacity).style('stroke', '#000')
       .style('stroke-width', dot_self_stroke_width);
     d3.selectAll('line').attr('marker-end', 'none').style('stroke', 'rgb(208,211,212)').style('stroke-opacity', 0.3);
     d3.selectAll('text.background-text').style('fill', 'rgb(208,211,212)').style('stroke', 'rgb(208,211,212)');
@@ -490,7 +554,6 @@ export default function OpinionLeader(cellNodes, cellLinks, beforeThisDate,
       .style('stroke-opacity', line_opacity);
 
     // highlight commentTimeline link
-    console.log(d3.selectAll('svg#commentTimeline'));
     d.containUsers.forEach((id) => {
       d3.selectAll('svg#commentTimeline').selectAll(`line.${id}`).style('stroke', 'red');
     });
@@ -550,7 +613,10 @@ export default function OpinionLeader(cellNodes, cellLinks, beforeThisDate,
   }
 
   function responderCommunityDetecting(dataNodes, dataLinks) {
-    const filteredLinks = dataLinks.filter(l => l.tag === 1 || l.tag === 0);
+    // const filteredLinks = dataLinks.filter(l => l.tag === 1 || l.tag === 0);
+    const authorCluster = dataNodes.filter(e => e.influence);
+    dataNodes = dataNodes.filter(e => !e.influence);
+    const filteredLinks = dataLinks.filter(l => l.tag === 1);
     const links = JSON.parse(JSON.stringify(filteredLinks));
     for (let i = 0; i < links.length; i += 1) {
       // console.log(links[i]);
@@ -584,6 +650,15 @@ export default function OpinionLeader(cellNodes, cellLinks, beforeThisDate,
     return normalizeBetweenness(termCentrality.Betweenness[d.id]);
   }
 
+  function computedNumOfAllArticleComments(arr) {
+    let count = 0;
+    arr.forEach((author) => {
+      author.responder.forEach((article) => {
+        count += article.message.length;
+      });
+    });
+    return count;
+  }
   // function communityDetecting() {
   //   const l = JSON.parse(JSON.stringify(set.links));
   //   // console.log(links);

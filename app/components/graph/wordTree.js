@@ -7,8 +7,6 @@ const WordTree = (props) => {
   const { optionsWord, word } = props;
   const option = [['Phrases']];
   const newWord = option.concat(word);
-
-
   const options = {
     maxFontSize: 14,
     wordtree: {
@@ -17,17 +15,6 @@ const WordTree = (props) => {
       word: optionsWord,
     },
   };
-  //   const model = new SentenTreeBuilder()
-  //     .buildModel(data);
-
-  //   new SentenTreeVis('#vis')
-  //   // change the number to limit number of output
-  //     .data(model.getRenderedGraphs(3))
-  //     .on('nodeClick', (node) => {
-  //       console.log('node', node);
-  //     });
-  console.log(newWord);
-  console.log(options);
   return (
     <div className="wordTree">
         <div id="vis"></div>

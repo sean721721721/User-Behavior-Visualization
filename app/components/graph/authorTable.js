@@ -23,6 +23,7 @@ export default function AuthorTable(nodes, div, callback) {
   const deltaLengthList = [];
   const threshold = 100;
   // computeDeltaLength(authorList, deltaLengthList);
+  const noCuttedAuthorIdList = JSON.parse(JSON.stringify(nodes));
   authorIdPreprocessing(authorList.children);
   leaderPageRank(authorList);
   // computeSentimentMatrix(authorList);
@@ -39,7 +40,7 @@ export default function AuthorTable(nodes, div, callback) {
   });
   authorList.children = authorList.children.filter(author => author.influence >= 100);
   authorList.children.sort((a, b) => d3.descending(a.pageRank, b.pageRank));
-  const topicWithSelectedAuthor = JSON.parse(JSON.stringify(authorList));
+  const topicWithSelectedAuthor = JSON.parse(JSON.stringify(noCuttedAuthorIdList));
   topicWithSelectedAuthor.children = [];
   // console.log(authorList.children);
   // console.log(div);
@@ -102,8 +103,10 @@ export default function AuthorTable(nodes, div, callback) {
   function clicked(d) {
     console.log('table clicked');
     // console.log(d);
-    topicWithSelectedAuthor.children.push(d);
-    callback(topicWithSelectedAuthor, d.id);
+    const pushAuthor = JSON.parse(JSON.stringify(d));
+    pushAuthor.id = pushAuthor.oldId;
+    topicWithSelectedAuthor.children.push(pushAuthor);
+    callback(topicWithSelectedAuthor, pushAuthor.id);
     authorIndex += 1;
   }
 
@@ -237,6 +240,7 @@ export default function AuthorTable(nodes, div, callback) {
   function authorIdPreprocessing(node_data) {
     node_data.forEach((n) => {
       const new_id = n.id.split(' ');
+      n.oldId = n.id;
       [n.id] = new_id;
     });
   }
@@ -249,7 +253,7 @@ export default function AuthorTable(nodes, div, callback) {
     computeSentimentMatrix(selectedNode, node, link);
     computeTotalWeightOfEachNode(node, link);
     pageRank(node, link, alpha);
-    console.log(node, link);
+    // console.log(node, link);
     selectedNode.children.forEach((e) => {
       const authorNode = node.find(e1 => e1.id === e.id);
       e.pageRank = authorNode ? authorNode.pageRank : 0;
@@ -357,7 +361,7 @@ export default function AuthorTable(nodes, div, callback) {
           node_data[m].pageRank = newPageRank[m];
           // if (node_data[m].post && node_data[m].weight > 0) console.log(node_data[m], node_data[m].pageRank);
         }
-        console.log(err, total_num * tolerance);
+        console.log(`leaderPageRank: ${err}, total_num * tolerance: ${total_num * tolerance}`);
         if (err < total_num * tolerance) break;
       }
     }

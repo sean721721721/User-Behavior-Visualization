@@ -9,7 +9,6 @@
 import * as d3 from 'd3';
 
 export default function commentTimeline(nodes, svg, $this) {
-  console.log(nodes);
   svg.selectAll('*').remove();
   // svg.attr('viewBox', '0 0 960 500');
   const h = parseFloat(d3.select('.commentTimeline').style('height'));
@@ -165,7 +164,7 @@ export default function commentTimeline(nodes, svg, $this) {
     .attr('x2', d => d.x2)
     .attr('y2', d => d.y2)
     .attr('stroke', 'gray')
-    .attr('stroke-opacity', 0.3)
+    .attr('stroke-opacity', 0.1)
     .attr('stroke-width', 1);
 
   function dateFormat(mes) {
@@ -208,21 +207,11 @@ export default function commentTimeline(nodes, svg, $this) {
     const commentTimeScale = d3.scaleTime().domain([articleDate, afterSixHours])
       .range([10, w - 110]);
     const afterArticlePostTimeFormat = (date) => {
-      // console.log(date);
-      console.log(new Date(date) - articleDate);
-      console.log(new Date(new Date(date) - articleDate));
-      // const dateMinusPostTime = new Date(new Date(date) - articleDate);
       const dateMinusPostTime = d3.timeMinute.count(articleDate, new Date(date));
-      // console.log(dateMinusPostTime);
-      const customFormat = d3.format('');
-      // return customFormat(dateMinusPostTime);
       return `${Math.floor(dateMinusPostTime / 60)}h${dateMinusPostTime % 60}m`;
     }
-    return d3.axisBottom(commentTimeScale).ticks(3).tickFormat((date) => {
-      console.log(afterArticlePostTimeFormat(date));
-      // return `${afterArticlePostTimeFormat(date)} mins`;
-      return afterArticlePostTimeFormat(date);
-    });
+    return d3.axisBottom(commentTimeScale)
+      .ticks(3).tickFormat(date => afterArticlePostTimeFormat(date));
   }
 
   function makeYAxis(direction) {
@@ -269,7 +258,6 @@ export default function commentTimeline(nodes, svg, $this) {
   }
 
   function commentTimeData(data) {
-    console.log(data);
     const newData = JSON.parse(JSON.stringify(data));
     newData.message.forEach((mes) => {
       mes.articleId = data.articleId;

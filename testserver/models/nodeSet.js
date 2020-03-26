@@ -167,6 +167,7 @@ module.exports = {
             title: article.article_title,
             message: article.messages,
             url: article.url,
+            author: index.id,
             message_count: [
               { type: 'push', count: article.message_count.push, radius: totalMessageCount },
               { type: 'boo', count: article.message_count.boo, radius: totalMessageCount },

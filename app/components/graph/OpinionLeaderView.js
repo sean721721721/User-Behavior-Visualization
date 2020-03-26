@@ -9,7 +9,6 @@ import WordTree from './wordTree';
 
 class OpinionLeaderView extends React.Component {
   componentDidUpdate() {
-    console.log(this.props);
     const { data } = this.props;
     if (data) {
       let {
@@ -35,7 +34,6 @@ class OpinionLeaderView extends React.Component {
   render() {
     const { data } = this.props;
     const { word, optionsWord } = data;
-    console.log(d3.select('#articleCell'));
     return (
       <div className="opinionLeaderView">
         <div className="articleCell">
