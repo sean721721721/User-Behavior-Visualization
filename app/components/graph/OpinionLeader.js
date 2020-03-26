@@ -402,8 +402,21 @@ export default function OpinionLeader(cellNodes, cellLinks, beforeThisDate,
   }
   function userTextClicked(d) {
     console.log(d);
-    d3.selectAll('svg#commentTimeline').selectAll(`line.${d.id}`).style('stroke', 'red');
-    
+    d3.selectAll('svg#commentTimeline').selectAll(`line`).style('stroke', 'gray')
+      .style('stroke-width', 0.3)
+      .style('stroke-opacity', 0.3);
+    d3.selectAll('svg#commentTimeline').selectAll(`line.${d.id}`).style('stroke', 'red')
+      .style('stroke-width', 1)
+      .style('stroke-opacity', 1);
+    d3.selectAll('circle')
+      .attr('r', (r) => {
+        return r.push_userid === d.id ? 5 : 2;
+      })
+      .attr('stroke', 'black')
+      .attr('stroke-width', (r) => {
+        return r.push_userid === d.id ? 1 : 0;
+      });
+
   }
   function findUsersCommentAllSelectedArticles(articleArr) {
     let users = [];
