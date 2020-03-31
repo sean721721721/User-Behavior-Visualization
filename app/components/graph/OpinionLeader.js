@@ -17,10 +17,11 @@ import * as d3 from 'd3';
 import netClustering from 'netclustering';
 import * as jsnx from 'jsnetworkx';
 import Chart from 'react-google-charts';
+import fetch from '../../reducers/fetch';
 // import jieba from 'nodejieba';
 
 export default function OpinionLeader(cellNodes, cellLinks, beforeThisDate,
-  svg, forceSimulation, totalInfluence, $this, optionsWord) {
+  svg, forceSimulation, totalInfluence, $this, optionsWord, submit) {
   const w = parseFloat(d3.select('#articleCell').style('width'));
   const h = parseFloat(d3.select('#articleCell').style('height'));
   const G = new jsnx.Graph();
@@ -356,9 +357,11 @@ export default function OpinionLeader(cellNodes, cellLinks, beforeThisDate,
 
   function articleNodeClicked(d) {
     // console.log(d);
+    submit(d);
     const adj = cellLinks.filter(e => e.target.index === d.index);
     adj.forEach((n) => {
-      d3.selectAll(`circle.nodes.circle_${n.source.index}`).style('stroke', 'red');
+      console.log(d3.selectAll(`.circle.nodes.circle_${n.source.index}`));
+      d3.selectAll(`.circle.nodes.circle_${n.source.index}`).style('stroke', 'red');
     });
   }
 
@@ -496,12 +499,11 @@ export default function OpinionLeader(cellNodes, cellLinks, beforeThisDate,
         hover: 1,
       });
     }
-
-    d3.selectAll('circle')
+    // console.log(d3.selectAll('.articles'));
+    d3.selectAll('.articles').selectAll('circle')
       .attr('r', (r) => {
         if (!r || !d.containUsers) return 2;
         if (d.containUsers.includes(r.push_userid)) {
-          console.log(r, d.containUsers);
           return 5;
         }
         return 2;
@@ -548,10 +550,12 @@ export default function OpinionLeader(cellNodes, cellLinks, beforeThisDate,
       .style('stroke-opacity', line_opacity);
 
     // highlight commentTimeline link
-    d.containUsers.forEach((id) => {
-      d3.selectAll('svg#commentTimeline').selectAll(`line.${id}`).style('stroke', 'red');
-    });
-    
+    if (d.containUsers) {
+      d.containUsers.forEach((id) => {
+        d3.selectAll('svg#commentTimeline').selectAll(`line.${id}`).style('stroke', 'red');
+      });
+    }
+
     // highlight dots
     // d3.selectAll('circle.nodes').transition().style('opacity', dot_other_opacity);
     // // self

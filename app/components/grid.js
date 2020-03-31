@@ -291,7 +291,7 @@ class Grid extends React.Component {
   }
 
   handleSubmit(e) {
-    // console.log(e);
+    console.log(e);
     e.preventDefault();
     this.setState(prevState => ({
       ...prevState, isLoading: true, responseError: false, errorType: '',
@@ -300,6 +300,9 @@ class Grid extends React.Component {
     const myRequest = new Request(url, {
       method: 'get',
     });
+    console.log(e);
+    console.log(url);
+    console.log(myRequest);
       // fetch(myRequest)
       //   .then(res => res.json())
       //   .then((res) => {
@@ -516,16 +519,16 @@ class Grid extends React.Component {
     return (
       <div className="container-fluid">
         <div className="navbar fixed-top">
-            <Menu
-              menuprops={menuprops}
-              onSubmit={this.handleSubmit}
-              handlePT={e => this.handleTab(e, 'initParameter')}
-              handlePT1={e => this.handleTab(e, 'initPage1')}
-              handlePT2={e => this.handleTab(e, 'initPage2')}
-              handleDT={this.handleDownloadTab}
-              selectedOptions={selectedOptions}
-            />
-          </div>
+          <Menu
+            menuprops={menuprops}
+            onSubmit={this.handleSubmit}
+            handlePT={e => this.handleTab(e, 'initParameter')}
+            handlePT1={e => this.handleTab(e, 'initPage1')}
+            handlePT2={e => this.handleTab(e, 'initPage2')}
+            handleDT={this.handleDownloadTab}
+            selectedOptions={selectedOptions}
+          />
+        </div>
         <div className="grid">
           <Provider store={store}>
             <div className="grid1">
@@ -558,7 +561,15 @@ class Grid extends React.Component {
                 </div> */}
               {/* </div> */}
               {/* <div className="graph"> */}
-              <Graph visprops={visprops.list} date={visprops.date} word={visprops.word} post={visprops.post} set={visprops.set} initLinks={visprops.initLinks} />
+              <Graph
+                visprops={visprops.list}
+                date={visprops.date}
+                word={visprops.word}
+                post={visprops.post}
+                set={visprops.set}
+                initLinks={visprops.initLinks}
+                opState={this.state}
+              />
               {/* </div> */}
               {/* <div className="box userview" id="table">
                 <div id="userdeg">

@@ -51,8 +51,12 @@ class Graph extends Component {
 
   shouldComponentUpdate(nextProps, nextState) {
     // console.log(this.state, nextState);
+    const { opState: thisOpState, ...thisWithoutOpState } = this.props;
+    const { opState: nextOpstate, ...nextWithoutOpState } = nextProps;
+    console.log(this.props, nextProps);
+    console.log(thisWithoutOpState, nextWithoutOpState);
     if (!this.state.hover) {
-      if (JSON.stringify(this.props) === JSON.stringify(nextProps)) {
+      if (JSON.stringify(thisWithoutOpState) === JSON.stringify(nextWithoutOpState)) {
         if (JSON.stringify(this.state.word) === JSON.stringify(nextState.word)) {
           console.log('shouldUpdate? No!!');
           return false;
@@ -60,7 +64,7 @@ class Graph extends Component {
       }
     }
     console.log('vis update !');
-    if (JSON.stringify(this.props) !== JSON.stringify(nextProps) || nextState.draw === 1) {
+    if (JSON.stringify(thisWithoutOpState) !== JSON.stringify(nextWithoutOpState) || nextState.draw === 1) {
       this.props = nextProps;
       this.drawwithlabels();
     }
@@ -95,6 +99,7 @@ class Graph extends Component {
 
   drawwithlabels() {
     console.log('draw');
+    console.log(this.props);
     const $this = this;
     const { date } = this.props;
     const { word: titleTermArr } = this.props;
@@ -1428,6 +1433,7 @@ class Graph extends Component {
       totalAuthorInfluence,
       word,
       optionsWord,
+      opState,
     } = this.state;
     const $this = this;
     return (
@@ -1454,6 +1460,7 @@ class Graph extends Component {
           totalAuthorInfluence,
           $this,
           optionsWord,
+          opState,
         }}
         />
         <div id="googleChart" />
