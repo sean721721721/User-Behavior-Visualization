@@ -844,6 +844,14 @@ class Graph extends Component {
                 author.responder.forEach((article) => {
                   let replyCount = 0;
                   if (article.message.length >= articleInfluenceThreshold) {
+                    cellData.nodes.push(article);
+                    cellData.links.push({
+                      source: article.articleId,
+                      target: author.id,
+                      tag: 0,
+                      value: 1,
+                    });
+                    console.log(cellData);
                     article.message.every((mes) => {
                       let cuttedPushContent = '';
                       mes.cutted_push_content.forEach((w) => {
@@ -1004,90 +1012,13 @@ class Graph extends Component {
             });
 
             // node links other nodes which comments the same article
-            clickedNode.children.every((author) => {
-              if (topInfluenceAuthor <= topAuthorThreshold) {
-                author.responder.forEach((article) => {
-                  let replyCount = 0;
-                  // const filteredMessages = article.message.filter(e => e.push_tag === '推');
-                  const filteredMessages = article.message.filter(e => e.push_tag);
-                  // console.log(filteredMessages);
-                  const maximumLength = Math.min(topNumOfPushes, filteredMessages.length);
-                  if (article.message.length >= articleInfluenceThreshold) {
-                    for (let i = 0; i < maximumLength - 1; i += 1) {
-                      for (let j = i + 1; j < maximumLength; j += 1) {
-                        const existedLink = cellData.links.find((l) => {
-                          const temp_id = filteredMessages[i].push_userid;
-                          const next_id = filteredMessages[j].push_userid;
-
-                          return (l.source === temp_id && l.target === next_id)
-                                  || (l.source === next_id && l.target === temp_id);
-                        });
-
-                        if (existedLink) existedLink.value += 1;
-                        else {
-                          cellData.links.push({
-                            source: filteredMessages[i].push_userid,
-                            target: filteredMessages[j].push_userid,
-                            color: '#ffbb78',
-                            tag: 1,
-                            value: 1,
-                          });
-                        }
-                        replyCount += 1;
-                      }
-                    }
-                  }
-                });
-                topInfluenceAuthor += 1;
-                return true;
-              }
-              return false;
-            });
+            // nodeLinksOtherNodesWithSameArticle(clickedNode, topInfluenceAuthor, topNumOfPushes);
 
             // node links the author
-            clickedNode.children.every((author) => {
-              if (topInfluenceAuthor <= topAuthorThreshold) {
-                author.responder.forEach((article) => {
-                  // const filteredMessages = article.message.filter(e => e.push_tag === '推');
-                  const filteredMessages = article.message.filter(e => e.push_tag);
-                  // console.log(filteredMessages);
-                  const maximumLength = Math.min(topNumOfPushes, filteredMessages.length);
-                  if (article.message.length >= articleInfluenceThreshold) {
-                    for (let i = 0; i < maximumLength; i += 1) {
-                      // console.log(filteredMessages[i]);
-                      const existedLink = cellData.links.find((l) => {
-                        const user_id = filteredMessages[i].push_userid;
-                        const author_id = author.id;
-                        return l.source === user_id && l.target === author.id;
-                      });
-                      if (existedLink) {
-                        existedLink.value += 1;
-                      } else {
-                        cellData.links.push({
-                          source: filteredMessages[i].push_userid,
-                          target: author.id,
-                          color: '#ffbb78',
-                          tag: 0,
-                          value: 1,
-                        });
-                      }
-                      // cellData.links.push({
-                      //   source: filteredMessages[i].push_userid,
-                      //   target: article.articleId,
-                      //   color: '#ffbb78',
-                      //   tag: 1,
-                      //   value: 1,
-                      // });
-                    }
-                  }
-                });
-                topInfluenceAuthor += 1;
-                return true;
-              }
-              return false;
-            });
-            // console.log(cellData);
+            // nodeLinksToAuthor(clickedNode, topInfluenceAuthor, topNumOfPushes);
+            nodeLinksToArticle(clickedNode, topInfluenceAuthor, topNumOfPushes);
             mergeCellDataNodes(cellData);
+
             cellData.nodes.sort((a, b) => ((a.size < b.size) ? 1 : -1));
             const userState = $this.state.user;
             if (!$this.state.user.includes(index)) {
@@ -1228,6 +1159,130 @@ class Graph extends Component {
         }
         // console.log(count);
         console.log(data);
+      }
+
+      function nodeLinksOtherNodesWithSameArticle(termNode,
+        thresholdOfInfluence, topNumOfComments) {
+        termNode.children.every((author) => {
+          if (thresholdOfInfluence <= topAuthorThreshold) {
+            author.responder.forEach((article) => {
+              let replyCount = 0;
+              // const filteredMessages = article.message.filter(e => e.push_tag === '推');
+              const filteredMessages = article.message.filter(e => e.push_tag);
+              // console.log(filteredMessages);
+              const maximumLength = Math.min(topNumOfComments, filteredMessages.length);
+              if (article.message.length >= articleInfluenceThreshold) {
+                for (let i = 0; i < maximumLength - 1; i += 1) {
+                  for (let j = i + 1; j < maximumLength; j += 1) {
+                    const existedLink = cellData.links.find((l) => {
+                      const temp_id = filteredMessages[i].push_userid;
+                      const next_id = filteredMessages[j].push_userid;
+
+                      return (l.source === temp_id && l.target === next_id)
+                              || (l.source === next_id && l.target === temp_id);
+                    });
+
+                    if (existedLink) existedLink.value += 1;
+                    else {
+                      cellData.links.push({
+                        source: filteredMessages[i].push_userid,
+                        target: filteredMessages[j].push_userid,
+                        color: '#ffbb78',
+                        tag: 1,
+                        value: 1,
+                      });
+                    }
+                    replyCount += 1;
+                  }
+                }
+              }
+            });
+            thresholdOfInfluence += 1;
+            return true;
+          }
+          return false;
+        });
+      }
+
+      function nodeLinksToAuthor(termNode, thresholdOfInfluence, topNumOfComments) {
+        termNode.children.every((author) => {
+          if (thresholdOfInfluence <= topAuthorThreshold) {
+            author.responder.forEach((article) => {
+              // const filteredMessages = article.message.filter(e => e.push_tag === '推');
+              const filteredMessages = article.message.filter(e => e.push_tag);
+              // console.log(filteredMessages);
+              const maximumLength = Math.min(topNumOfComments, filteredMessages.length);
+              if (article.message.length >= articleInfluenceThreshold) {
+                for (let i = 0; i < maximumLength; i += 1) {
+                  // console.log(filteredMessages[i]);
+                  const existedLink = cellData.links.find((l) => {
+                    const user_id = filteredMessages[i].push_userid;
+                    const author_id = author.id;
+                    return l.source === user_id && l.target === author.id;
+                  });
+                  if (existedLink) {
+                    existedLink.value += 1;
+                  } else {
+                    cellData.links.push({
+                      source: filteredMessages[i].push_userid,
+                      target: author.id,
+                      color: '#ffbb78',
+                      tag: 0,
+                      value: 1,
+                    });
+                  }
+                }
+              }
+            });
+            thresholdOfInfluence += 1;
+            return true;
+          }
+          return false;
+        });
+      }
+
+      function nodeLinksToArticle(termNode, thresholdOfInfluence, topNumOfComments) {
+        termNode.children.every((author) => {
+          if (thresholdOfInfluence <= topAuthorThreshold) {
+            author.responder.forEach((article) => {
+              // const filteredMessages = article.message.filter(e => e.push_tag === '推');
+              const filteredMessages = article.message.filter(e => e.push_tag);
+              // console.log(filteredMessages);
+              const maximumLength = Math.min(topNumOfComments, filteredMessages.length);
+              if (article.message.length >= articleInfluenceThreshold) {
+                for (let i = 0; i < maximumLength; i += 1) {
+                  // console.log(filteredMessages[i]);
+                  const existedLink = cellData.links.find((l) => {
+                    const user_id = filteredMessages[i].push_userid;
+                    const author_id = author.id;
+                    return l.source === user_id && l.target === author.id;
+                  });
+                  if (existedLink) {
+                    existedLink.value += 1;
+                  } else {
+                    // cellData.links.push({
+                    //   source: filteredMessages[i].push_userid,
+                    //   target: author.id,
+                    //   color: '#ffbb78',
+                    //   tag: 0,
+                    //   value: 1,
+                    // });
+                    cellData.links.push({
+                      source: filteredMessages[i].push_userid,
+                      target: article.articleId,
+                      color: '#ffbb78',
+                      tag: 1,
+                      value: 1,
+                    });
+                  }
+                }
+              }
+            });
+            thresholdOfInfluence += 1;
+            return true;
+          }
+          return false;
+        });
       }
 
       function adjIsEquivalent(a, b) {
