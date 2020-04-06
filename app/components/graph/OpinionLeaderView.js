@@ -5,6 +5,7 @@ import React from 'react';
 import * as d3 from 'd3';
 import { OpinionLeader } from './OpinionLeader';
 import { commentTimeline } from './commentTimeline';
+import { userActivityTimeline } from './userActivityTimeline';
 import WordTree from './wordTree';
 
 class OpinionLeaderView extends React.Component {
@@ -76,6 +77,7 @@ class OpinionLeaderView extends React.Component {
         .then((res) => {
           console.log(res);
           if (res.title === 'search') {
+            userActivityTimeline(res.list[1][0], commentTimelineSvg, e);
             // this.changeList(res, 0);
           } else {
             const error = {
