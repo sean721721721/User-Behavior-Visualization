@@ -72,6 +72,7 @@ export default function OpinionLeader(cellNodes, cellLinks, beforeThisDate,
   const authorNodes = cellNodes.filter(node => node.influence);
   const articleNodes = [];
   cellNodes.forEach((node) => {
+    node.tag = 0;
     if (node.responder) {
       node.responder.forEach((a) => {
         articleNodes.push(a);
@@ -297,6 +298,7 @@ export default function OpinionLeader(cellNodes, cellLinks, beforeThisDate,
     .attr('stroke-width', d => (d.group === 1 ? 2 : 0.9))
     .attr('stroke-opacity', d => (d.influence ? 1 : 0));
 
+  const selectedArticleNodes = [];
   cellNodeEnter.on('mouseover', (d) => { mouseevent(d, 'mouseover'); })
     .on('mouseout', (d) => { mouseevent(d, 'mouseout'); })
     .on('click', articleNodeClicked);
@@ -357,11 +359,19 @@ export default function OpinionLeader(cellNodes, cellLinks, beforeThisDate,
 
   function articleNodeClicked(d) {
     // console.log(d);
-    submit(d);
+    // submit(d);
+    selectedArticleNodes.push(d.title);
     const adj = cellLinks.filter(e => e.target.index === d.index);
     adj.forEach((n) => {
-      console.log(d3.selectAll(`.circle.nodes.circle_${n.source.index}`));
-      d3.selectAll(`.circle.nodes.circle_${n.source.index}`).style('stroke', 'red');
+      const data = d3.selectAll(`circle.nodes.circle_${n.source.index}`).data();
+      data.forEach((e) => {
+        e.tag += 1;
+      });
+      d3.selectAll(`circle.nodes`)
+        .style('stroke', 'red')
+        .style('stroke-width', e => (e.tag === selectedArticleNodes.length ? 1 : 0))
+        .style('stroke-opacity', 1);
+      console.log(data);
     });
   }
 
