@@ -17,7 +17,7 @@ export default function userActivityTimeline(data, svg, user) {
   const xScaleWidth = w - 110;
   const timePeriod = 3;
   const timeScaleObjArr = [];
-  const articleArr = sortedArticleArray(data.nodes);
+  const articleArr = sortedArticleArray(data);
   console.log(articleArr);
 
   const yScale = d3.scalePoint()
@@ -49,7 +49,8 @@ export default function userActivityTimeline(data, svg, user) {
         .enter()
         .append('circle')
         .attr('r', (e) => {
-          return e.push_userid === user.id ? 5 : 2;
+          // return e.push_userid === user.id ? 5 : 2;
+          return user.some(u => u === e.push_userid) ? 5 : 2;
         })
         .attr('fill', e => commentTypeColor(e.push_tag))
         .attr('cy', yScale(d.title))
@@ -58,19 +59,15 @@ export default function userActivityTimeline(data, svg, user) {
           return xScale[i](new Date(date.setFullYear(year)));
         })
         .attr('stroke-width', (e) => {
-          return e.push_userid === user.id ? 1 : 0;
+          // return e.push_userid === user.id ? 1 : 0;
+          return user.some(u => u === e.push_userid) ? 1 : 0;
         })
         .attr('stroke', 'black');
     });
 
 
   function sortedArticleArray(arr) {
-    const tempArr = [];
-    arr.forEach((e) => {
-      e.articles.forEach((a) => {
-        tempArr.push(a);
-      });
-    });
+    const tempArr = arr;
     tempArr.sort((a, b) => new Date(a.date) - new Date(b.date));
     return tempArr;
   }

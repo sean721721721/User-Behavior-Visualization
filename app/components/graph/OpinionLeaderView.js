@@ -22,6 +22,21 @@ class OpinionLeaderView extends React.Component {
     let commentTimelineSvg = d3.select('#commentTimeline');
     // if (data) {
     // }
+
+    function resArrayToArticlesArray(resArray) {
+      const articlesArray = [];
+      resArray.forEach((arr) => {
+        arr.forEach((term) => {
+          term.articles.forEach((a) => {
+            if (!articlesArray.some(e => e.articleId === a.articleId)) {
+              articlesArray.push(a);
+            }
+          });
+        });
+      });
+      return articlesArray;
+    }
+
     function getReqstr(id) {
       const {
         menuprops: {
@@ -56,7 +71,7 @@ class OpinionLeaderView extends React.Component {
     }
 
     function handleSubmit(e) {
-      console.log(e);
+      // console.log(e);
       // e.preventDefault();
       const myRequest = [];
       e.forEach((id) => {
@@ -69,8 +84,8 @@ class OpinionLeaderView extends React.Component {
       fetch(myRequest[0])
         .then(response => response.json())
         .then((response) => {
-          resArr.push(response);
-          console.log(response);
+          resArr.push(response.list[1][0].nodes);
+          // console.log(response);
           if (response.title !== 'search') {
             const error = { message: 'Fail to fetch' };
             throw error;
@@ -79,11 +94,20 @@ class OpinionLeaderView extends React.Component {
             fetch(myRequest[i])
               .then(res => res.json())
               .then((res) => {
-                resArr.push(res);
-                console.log(res);
+                resArr.push(res.list[1][0].nodes);
+                // console.log(res);
                 if (res.title !== 'search') {
                   const error = { message: 'Fail to fetch' };
                   throw error;
+                }
+                return res;
+              })
+              .then(() => {
+                // console.log(resArr);
+                if (i === myRequest.length - 1) {
+                  const articlesArr = resArrayToArticlesArray(resArr);
+                  console.log(articlesArr);
+                  userActivityTimeline(articlesArr, commentTimelineSvg, e);
                 }
               });
           }
@@ -91,7 +115,6 @@ class OpinionLeaderView extends React.Component {
         .catch((error) => {
           console.log(error);
         });
-
       // fetch(myRequest[0])
       //   .then((response) => {
       //     if (response.status >= 200 && response.status < 300) {
