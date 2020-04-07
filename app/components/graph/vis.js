@@ -53,8 +53,8 @@ class Graph extends Component {
     // console.log(this.state, nextState);
     const { opState: thisOpState, ...thisWithoutOpState } = this.props;
     const { opState: nextOpstate, ...nextWithoutOpState } = nextProps;
-    console.log(this.props, nextProps);
-    console.log(thisWithoutOpState, nextWithoutOpState);
+    // console.log(this.props, nextProps);
+    // console.log(thisWithoutOpState, nextWithoutOpState);
     if (!this.state.hover) {
       if (JSON.stringify(thisWithoutOpState) === JSON.stringify(nextWithoutOpState)) {
         if (JSON.stringify(this.state.word) === JSON.stringify(nextState.word)) {
@@ -1425,7 +1425,7 @@ class Graph extends Component {
   }
 
   render() {
-    console.log('render: ', this.state);
+    // console.log('render: ', this.state);
     const {
       cellData,
       beforeThisDate,

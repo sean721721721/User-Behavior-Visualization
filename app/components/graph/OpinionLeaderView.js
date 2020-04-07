@@ -58,40 +58,67 @@ class OpinionLeaderView extends React.Component {
     function handleSubmit(e) {
       console.log(e);
       // e.preventDefault();
-      const url = encodeURI(getReqstr(e.id));
-      const myRequest = new Request(url, {
-        method: 'get',
+      const myRequest = [];
+      e.forEach((id) => {
+        const url = encodeURI(getReqstr(id));
+        myRequest.push(new Request(url, {
+          method: 'get',
+        }));
       });
-
-      fetch(myRequest)
+      const resArr = [];
+      fetch(myRequest[0])
+        .then(response => response.json())
         .then((response) => {
-          if (response.status >= 200 && response.status < 300) {
-          // console.log(response.status);
-            console.log(response);
-            return response.json();
-          }
-          const error = new Error(response.statusText);
-          error.response = response;
-          throw error;
-        })
-        .then((res) => {
-          console.log(res);
-          if (res.title === 'search') {
-            userActivityTimeline(res.list[1][0], commentTimelineSvg, e);
-            // this.changeList(res, 0);
-          } else {
-            const error = {
-              message: 'Fail to fetch',
-            };
+          resArr.push(response);
+          console.log(response);
+          if (response.title !== 'search') {
+            const error = { message: 'Fail to fetch' };
             throw error;
           }
-        // data 才是實際的 JSON 資料
+          for (let i = 1; i < myRequest.length; i += 1) {
+            fetch(myRequest[i])
+              .then(res => res.json())
+              .then((res) => {
+                resArr.push(res);
+                console.log(res);
+                if (res.title !== 'search') {
+                  const error = { message: 'Fail to fetch' };
+                  throw error;
+                }
+              });
+          }
         })
         .catch((error) => {
-          console.log('Error');
-          this.setState(prevState => ({ ...prevState, responseError: true, errorType: error }));
           console.log(error);
         });
+
+      // fetch(myRequest[0])
+      //   .then((response) => {
+      //     if (response.status >= 200 && response.status < 300) {
+      //       console.log(response);
+      //       return response.json();
+      //     }
+      //     const error = new Error(response.statusText);
+      //     error.response = response;
+      //     throw error;
+      //   })
+      //   .then((res) => {
+      //     const resArr = [];
+      //     resArr.push(res);
+      //     console.log(res);
+      //     if (res.title === 'search') {
+      //       userActivityTimeline(res.list[1][0], commentTimelineSvg, e);
+      //     } else {
+      //       const error = { message: 'Fail to fetch' };
+      //       throw error;
+      //     }
+      //   // data 才是實際的 JSON 資料
+      //   })
+      //   .catch((error) => {
+      //     console.log('Error');
+      //     this.setState(prevState => ({ ...prevState, responseError: true, errorType: error }));
+      //     console.log(error);
+      //   });
     }
 
     if (cellData.nodes) {
@@ -117,6 +144,7 @@ class OpinionLeaderView extends React.Component {
           />
           <svg id="articleCell" width="100%" height="94%" />
         </div>
+        <div className="selectedUserTable" style={{ height: '400px', overflowY: 'scroll' }} />
         <div
           className="commentTimeline"
           style={{

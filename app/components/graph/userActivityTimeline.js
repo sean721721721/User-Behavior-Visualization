@@ -9,6 +9,7 @@
 import * as d3 from 'd3';
 
 export default function userActivityTimeline(data, svg, user) {
+  console.log(data);
   svg.selectAll('*').remove();
   // svg.attr('viewBox', '0 0 960 500');
   const h = parseFloat(d3.select('.commentTimeline').style('height'));
@@ -21,7 +22,7 @@ export default function userActivityTimeline(data, svg, user) {
 
   const yScale = d3.scalePoint()
     .domain(articleArr.map(e => e.title)) // This is what is written on the Axis: from 0 to 100
-    .range([0, 100]); // This is where the axis is placed: from 100 px to 800px
+    .range([0, articleArr.length * 20]); // This is where the axis is placed: from 100 px to 800px
 
   const xScale = respondingTimeScaleArray(articleArr);
   // d3.scaleTime()
