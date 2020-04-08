@@ -13,7 +13,7 @@
     "cors": "^2.8.5",
     "d3": "^5.9.7",
     "express-session": "^1.16.2",
-    "helmet": "^3.21.2",
+    "helmet": "^3.22.0",
     "jieba": "^1.0.0",
     "jquery": "^3.4.1",
     "jsnetworkx": "^0.3.4",

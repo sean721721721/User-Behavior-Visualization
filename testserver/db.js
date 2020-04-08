@@ -7,6 +7,8 @@ var fbschema = require('./models/postSchema.js');
 // Use native promises
 mongoose.Promise = global.Promise;
 var options = {
+    useUnifiedTopology: true,
+    useNewUrlParser: true,
     // useMongoClient: true
 };
 
