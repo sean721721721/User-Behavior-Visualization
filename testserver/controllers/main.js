@@ -78,6 +78,7 @@ function redirecturl(req, res) {
     user2: body.user2,
     keyword2: body.keyword2,
     keyword4: body.keyword4,
+    activity: body.activity,
     co: body.co,
   });
   res.redirect(`/query?${querystr}`);

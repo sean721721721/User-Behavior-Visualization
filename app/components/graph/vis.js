@@ -1425,7 +1425,7 @@ class Graph extends Component {
   }
 
   render() {
-    // console.log('render: ', this.state);
+    console.log('render: ', this.state);
     const {
       cellData,
       beforeThisDate,

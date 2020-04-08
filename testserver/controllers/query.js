@@ -352,6 +352,7 @@ let callback = function callback(req, res) {
     let time2 = req.params.time2;
     let time3 = req.params.time3;
     let time4 = req.params.time4;
+    let activity = req.params.activity;
     let queryobj1 = queryobj(req, res, time1, time2, author1, user1, keyword1, keyword3);
     let queryobj2 = queryobj(req, res, time3, time4, user2, keyword2, keyword4);
     let samequery =
@@ -395,6 +396,7 @@ let callback = function callback(req, res) {
               
 
               // console.log(titleWordList[0]);
+              if (activity) return datalist;
               let [set,initLinks] = ns.setNodes(titleWordList[0], queryobj1.date, titleCuttedWords, res.result);
               // res.result.forEach(a=>{
               //   console.log(a.article_title);

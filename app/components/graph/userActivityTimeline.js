@@ -9,26 +9,48 @@
 import * as d3 from 'd3';
 
 export default function userActivityTimeline(data, svg, user) {
-  console.log(data);
+  console.log(user);
   svg.selectAll('*').remove();
   // svg.attr('viewBox', '0 0 960 500');
   const h = parseFloat(d3.select('.commentTimeline').style('height'));
   const w = parseFloat(d3.select('.commentTimeline').style('width'));
   const xScaleWidth = w - 110;
-  const timePeriod = 3;
+  const timePeriod = 1;
   const timeScaleObjArr = [];
   const articleArr = sortedArticleArray(data);
-  console.log(articleArr);
+  const color = d3.schemeTableau10;
 
   const yScale = d3.scalePoint()
-    .domain(articleArr.map(e => e.title)) // This is what is written on the Axis: from 0 to 100
+    .domain(articleArr.map(e => e.article_title)) // This is what is written on the Axis: from 0 to 100
     .range([0, articleArr.length * 20]); // This is where the axis is placed: from 100 px to 800px
 
   const xScale = respondingTimeScaleArray(articleArr);
   // d3.scaleTime()
   //   .domain([]) // This is what is written on the Axis: from 0 to 100
   //   .range([100, 800]); // This is where the axis is placed: from 100 px to 800px
+  const legends = svg.append('g').attr('transform', 'translate(50,25)');
+  legends.selectAll('mydots')
+    .data(user)
+    .enter()
+    .append('circle')
+    .attr('cx', (d, i) => i * 100)
+    .attr('cy', 0)
+    .attr('r', 7)
+    .style('fill', (d, i) => color[i]);
 
+  legends.selectAll('mylabels')
+    .data(user)
+    .enter()
+    .append('text')
+    .attr('x', (d, i) => 12 + i * 100)
+    .attr('y', 0)
+    .style('fill', (d, i) => color[i])
+    .text(d => d)
+    .attr('font-size', '12px')
+    .attr('text-anchor', 'left')
+    .style('alignment-baseline', 'middle');
+
+  svg.attr('height', articleArr.length * 20 + 100);
   // Draw the axis
   svg
     .append('g')
@@ -40,29 +62,26 @@ export default function userActivityTimeline(data, svg, user) {
     .data(articleArr)
     .enter()
     .each((d, i) => {
-      console.log(d, i);
       const year = new Date(d.date).getFullYear();
-      console.log(year);
       svg.append('g').attr('transform', 'translate(0,50)')
         .selectAll('circle')
-        .data(d.message)
+        .data(d.messages)
         .enter()
         .append('circle')
-        .attr('r', (e) => {
-          // return e.push_userid === user.id ? 5 : 2;
-          return user.some(u => u === e.push_userid) ? 5 : 2;
+        .attr('r', e => (user.some(u => u === e.push_userid) ? 5 : 0) )
+        .attr('fill', (e) => {
+          const index = user.findIndex(u => u === e.push_userid);
+          return index !== -1 ? color[index] : commentTypeColor(e.push_tag);
         })
-        .attr('fill', e => commentTypeColor(e.push_tag))
-        .attr('cy', yScale(d.title))
+        .attr('cy', yScale(d.article_title))
         .attr('cx', (e) => {
           const date = new Date(e.push_ipdatetime);
           return xScale[i](new Date(date.setFullYear(year)));
-        })
-        .attr('stroke-width', (e) => {
-          // return e.push_userid === user.id ? 1 : 0;
-          return user.some(u => u === e.push_userid) ? 1 : 0;
-        })
-        .attr('stroke', 'black');
+        });
+      // .attr('stroke-width', (e) => {
+      //   return user.some(u => u === e.push_userid) ? 1 : 0;
+      // })
+      // .attr('stroke', 'black');
     });
 
 

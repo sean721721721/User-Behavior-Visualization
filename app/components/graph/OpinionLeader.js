@@ -383,6 +383,7 @@ export default function OpinionLeader(cellNodes, cellLinks, beforeThisDate,
 
   function drawSelectedUserTable(tableSvg, nodes) {
     const selectedUserDiv = d3.selectAll('.selectedUserTable');
+    selectedUserDiv.selectAll('*').remove();
     const table = selectedUserDiv.append('table');
     table.append('tr').append('td')
       .text('ID')
@@ -403,6 +404,7 @@ export default function OpinionLeader(cellNodes, cellLinks, beforeThisDate,
 
     selectedUserDiv.append('button')
       .style('type', 'button')
+      .style('height', '30px')
       .text('Click Me!')
       .on('click', (d) => {
         console.log(d);

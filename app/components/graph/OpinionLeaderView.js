@@ -26,12 +26,10 @@ class OpinionLeaderView extends React.Component {
     function resArrayToArticlesArray(resArray) {
       const articlesArray = [];
       resArray.forEach((arr) => {
-        arr.forEach((term) => {
-          term.articles.forEach((a) => {
-            if (!articlesArray.some(e => e.articleId === a.articleId)) {
-              articlesArray.push(a);
-            }
-          });
+        arr.forEach((a) => {
+          if (!articlesArray.some(e => e.article_id === a.article_id)) {
+            articlesArray.push(a);
+          }
         });
       });
       return articlesArray;
@@ -53,25 +51,27 @@ class OpinionLeaderView extends React.Component {
         },
       } = data.opState;
 
+      const beginDate = d3.select('#date1').attr('value');
+      const endDate = d3.select('#date2').attr('value');
       // make url string for request data
       const strminvar1 = `min${varname1}=${minvar1}` || '';
       const strmaxvar1 = `max${varname1}=${maxvar1}` || '';
       const strposttype = `posttype=${posttype}` || '';
       const strpage1 = `page1=${pagename1}` || '';
-      const strtime1 = `time1=${date1}` || '';
-      const strtime2 = `time2=${date2}` || '';
+      const strtime1 = `time1=${beginDate}` || '';
+      const strtime2 = `time2=${endDate}` || '';
       const struser1 = `user1=${id}` || '';
       const strauthor1 = `author1=${author1}` || '';
       const strkeyword1 = `keyword1=${''}` || '';
       const strkeyword3 = `keyword3=${keyword3}` || '';
+      const stractivity = `activity=${1}` || '';
       const searchurl = '/searching?';
       const str = `${searchurl + strminvar1}&${strmaxvar1}&${strposttype}&`
-      + `${strpage1}&${strtime1}&${strtime2}&${strauthor1}&${struser1}&${strkeyword1}&${strkeyword3}&`;
+      + `${strpage1}&${strtime1}&${strtime2}&${strauthor1}&${struser1}&${strkeyword1}&${strkeyword3}&${stractivity}&`;
       return str;
     }
 
     function handleSubmit(e) {
-      // console.log(e);
       // e.preventDefault();
       const myRequest = [];
       e.forEach((id) => {
@@ -81,33 +81,26 @@ class OpinionLeaderView extends React.Component {
         }));
       });
       const resArr = [];
+      const min = Math.min(myRequest.length, 10);
+      console.log(myRequest);
       fetch(myRequest[0])
         .then(response => response.json())
         .then((response) => {
-          resArr.push(response.list[1][0].nodes);
-          // console.log(response);
-          if (response.title !== 'search') {
-            const error = { message: 'Fail to fetch' };
-            throw error;
-          }
-          for (let i = 1; i < myRequest.length; i += 1) {
+          console.log(response);
+          resArr.push(response[0][0]);
+          for (let i = 1; i < min; i += 1) {
             fetch(myRequest[i])
               .then(res => res.json())
               .then((res) => {
-                resArr.push(res.list[1][0].nodes);
-                // console.log(res);
-                if (res.title !== 'search') {
-                  const error = { message: 'Fail to fetch' };
-                  throw error;
-                }
+                console.log(res);
+                resArr.push(res[0][0]);
                 return res;
               })
               .then(() => {
-                // console.log(resArr);
-                if (i === myRequest.length - 1) {
+                if (i === min - 1) {
+                  console.log(resArr);
                   const articlesArr = resArrayToArticlesArray(resArr);
-                  console.log(articlesArr);
-                  userActivityTimeline(articlesArr, commentTimelineSvg, e);
+                  userActivityTimeline(articlesArr, commentTimelineSvg, e.slice(0, min));
                 }
               });
           }
@@ -167,7 +160,7 @@ class OpinionLeaderView extends React.Component {
           />
           <svg id="articleCell" width="100%" height="94%" />
         </div>
-        <div className="selectedUserTable" style={{ height: '400px', overflowY: 'scroll' }} />
+        <div className="selectedUserTable" style={{ maxHeight: '700px', overflowY: 'scroll' }} />
         <div
           className="commentTimeline"
           style={{
@@ -175,6 +168,7 @@ class OpinionLeaderView extends React.Component {
             // top: '15px',
             // left: '15px',
             overflowY: 'scroll',
+            maxHeight: '400px',
             // width: '280px',
             // height: '400px',
             // backgroundColor: '#e8e8e8',
@@ -183,7 +177,7 @@ class OpinionLeaderView extends React.Component {
             // boxShadow: 'inset 1px 1px 6px 2px rgba(0,0,0, .25)',
           }}
         >
-          <svg id="commentTimeline" width="100%" height="700px" />
+          <svg id="commentTimeline" width="100%" height="auto" />
         </div>
         <WordTree word={word} optionsWord={optionsWord} />
       </div>
