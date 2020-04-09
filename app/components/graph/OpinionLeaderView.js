@@ -75,9 +75,11 @@ class OpinionLeaderView extends React.Component {
 
     function buildUserList(userLists, articles, userId) {
       const authorList = [];
+      let totalReplyCount = 0;
       articles.forEach((article) => {
         if (article.messages.some(e => e.push_userid === userId)) {
           const existedAuthorList = authorList.find(e => e.author === article.author);
+          totalReplyCount += 1;
           if (existedAuthorList) {
             existedAuthorList.count += 1;
           } else {
@@ -85,7 +87,7 @@ class OpinionLeaderView extends React.Component {
           }
         }
       });
-      userLists.push({ id: userId, reply: authorList });
+      userLists.push({ id: userId, reply: authorList, totalReplyCount });
     }
 
     function handleSubmit(e) {

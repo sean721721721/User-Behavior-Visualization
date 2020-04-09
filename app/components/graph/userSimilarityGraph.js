@@ -24,20 +24,30 @@ export default function userSimilarityGraph(data, svg, user) {
 
   const nodes = user.map(e => ({ name: e }));
   console.log(nodes);
+  const userTotalReplyCount = data.map(e => e.totalReplyCount);
+  console.log(userTotalReplyCount);
   const edges = computeUserSimilarity(data, user);
   const edgesWeight = edges.map(e => e.value);
   console.log(edges);
   console.log(edgesWeight);
   const linkWidthScale = d3.scaleLinear()
     .domain([Math.min(...edgesWeight), Math.max(...edgesWeight)])
-    .range([0, 10]);
-  const dataset = { nodes, edges };
+    .range([0, 20]);
+  const linkStrengthScale = d3.scaleLinear()
+    .domain([Math.min(...edgesWeight), Math.max(...edgesWeight)])
+    .range([0, 1]);
+
+  const nodesSize = d3.scaleLinear()
+    .domain([Math.min(...userTotalReplyCount), Math.max(...userTotalReplyCount)])
+    .range([2, 10]);
+
+  const dataset = { nodes: data, edges };
 
   svg = svg.append('g').attr('transform', 'scale(1, 1)');
 
   const simulation = d3.forceSimulation()
-    .force('link', d3.forceLink().id(d => d.name))
-    .force('charge', d3.forceManyBody())
+    .force('link', d3.forceLink().id(d => d.id))
+    .force('charge', d3.forceManyBody().strength(-1000))
     .force('center', d3.forceCenter(w / 2, h / 2));
 
   const link = svg.selectAll('line')
@@ -45,6 +55,7 @@ export default function userSimilarityGraph(data, svg, user) {
     .enter()
     .append('line')
     .style('stroke', '#ccc')
+    .style('stroke-opacity', 0.5)
     .style('stroke-width', (d) => {
       return linkWidthScale(d.value);
     });
@@ -57,7 +68,10 @@ export default function userSimilarityGraph(data, svg, user) {
     .append('g');
 
   const circles = node.append('circle')
-    .attr('r', 10)
+    .attr('r', (d) => {
+      console.log(d.totalReplyCount, nodesSize(d.totalReplyCount));
+      return nodesSize(d.totalReplyCount);
+    })
     .attr('fill', (d, i) => color[i])
     .call(d3.drag()
       .on('start', dragstarted)
@@ -65,12 +79,12 @@ export default function userSimilarityGraph(data, svg, user) {
       .on('end', dragended));
 
   const lables = node.append('text')
-    .text(d => d.name)
+    .text(d => d.id)
     .attr('x', 6)
     .attr('y', 3);
 
   node.append('title')
-    .text(d => d.name);
+    .text(d => d.id);
 
   simulation
     .nodes(dataset.nodes)
@@ -78,9 +92,9 @@ export default function userSimilarityGraph(data, svg, user) {
 
   simulation.force('link')
     .links(dataset.edges)
-    .distance(d => 200)
+    .distance(d => 50)
     // .strength(d => Math.min(1, 0.1 * d.value));
-    .strength(d => 0.3);
+    .strength(d => linkStrengthScale(d.value));
 
   function dragstarted(d) {
     if (!d3.event.active) simulation.alphaTarget(0.3).restart();
@@ -111,7 +125,7 @@ export default function userSimilarityGraph(data, svg, user) {
   }
 
   function computeUserSimilarity(userAuthorRelationShipArr, userArr) {
-    const userListArray = [];
+    let userListArray = [];
     for (let i = 0; i < userAuthorRelationShipArr.length - 1; i += 1) {
       const temp = userAuthorRelationShipArr[i];
       for (let j = i + 1; j < userAuthorRelationShipArr.length; j += 1) {
@@ -120,12 +134,14 @@ export default function userSimilarityGraph(data, svg, user) {
         temp.reply.forEach((e) => {
           const existedSameAuthor = next.reply.find(a => a.author === e.author);
           if (existedSameAuthor) {
-            linkValue += Math.min(e.count, existedSameAuthor.count);
+            linkValue += e.count / temp.totalReplyCount;
+            linkValue += existedSameAuthor.count / next.totalReplyCount;
           }
         });
         userListArray.push({ source: temp.id, target: next.id, value: linkValue });
       }
     }
+    // userListArray = userListArray.filter(e => e.value >= 1);
     return userListArray;
   }
 }
