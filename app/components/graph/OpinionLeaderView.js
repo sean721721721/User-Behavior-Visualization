@@ -6,6 +6,7 @@ import * as d3 from 'd3';
 import { OpinionLeader } from './OpinionLeader';
 import { commentTimeline } from './commentTimeline';
 import { userActivityTimeline } from './userActivityTimeline';
+import { userSimilarityGraph } from './userSimilarityGraph';
 import WordTree from './wordTree';
 
 class OpinionLeaderView extends React.Component {
@@ -20,6 +21,7 @@ class OpinionLeaderView extends React.Component {
     } = data;
     let articleCellSvg = d3.select('#articleCell');
     let commentTimelineSvg = d3.select('#commentTimeline');
+    let userSimilaritySvg = d3.select('#timeLine');
     // if (data) {
     // }
 
@@ -71,9 +73,25 @@ class OpinionLeaderView extends React.Component {
       return str;
     }
 
+    function buildUserList(userLists, articles, userId) {
+      const authorList = [];
+      articles.forEach((article) => {
+        if (article.messages.some(e => e.push_userid === userId)) {
+          const existedAuthorList = authorList.find(e => e.author === article.author);
+          if (existedAuthorList) {
+            existedAuthorList.count += 1;
+          } else {
+            authorList.push({ author: article.author, count: 1 });
+          }
+        }
+      });
+      userLists.push({ id: userId, reply: authorList });
+    }
+
     function handleSubmit(e) {
       // e.preventDefault();
       const myRequest = [];
+      const userListArray = [];
       e.forEach((id) => {
         const url = encodeURI(getReqstr(id));
         myRequest.push(new Request(url, {
@@ -86,21 +104,21 @@ class OpinionLeaderView extends React.Component {
       fetch(myRequest[0])
         .then(response => response.json())
         .then((response) => {
-          console.log(response);
           resArr.push(response[0][0]);
+          buildUserList(userListArray, response[0][0], e[0]);
           for (let i = 1; i < min; i += 1) {
             fetch(myRequest[i])
               .then(res => res.json())
               .then((res) => {
-                console.log(res);
                 resArr.push(res[0][0]);
+                buildUserList(userListArray, res[0][0], e[i]);
                 return res;
               })
               .then(() => {
                 if (i === min - 1) {
-                  console.log(resArr);
                   const articlesArr = resArrayToArticlesArray(resArr);
                   userActivityTimeline(articlesArr, commentTimelineSvg, e.slice(0, min));
+                  userSimilarityGraph(userListArray, userSimilaritySvg, e.slice(0, min));
                 }
               });
           }
@@ -108,40 +126,14 @@ class OpinionLeaderView extends React.Component {
         .catch((error) => {
           console.log(error);
         });
-      // fetch(myRequest[0])
-      //   .then((response) => {
-      //     if (response.status >= 200 && response.status < 300) {
-      //       console.log(response);
-      //       return response.json();
-      //     }
-      //     const error = new Error(response.statusText);
-      //     error.response = response;
-      //     throw error;
-      //   })
-      //   .then((res) => {
-      //     const resArr = [];
-      //     resArr.push(res);
-      //     console.log(res);
-      //     if (res.title === 'search') {
-      //       userActivityTimeline(res.list[1][0], commentTimelineSvg, e);
-      //     } else {
-      //       const error = { message: 'Fail to fetch' };
-      //       throw error;
-      //     }
-      //   // data 才是實際的 JSON 資料
-      //   })
-      //   .catch((error) => {
-      //     console.log('Error');
-      //     this.setState(prevState => ({ ...prevState, responseError: true, errorType: error }));
-      //     console.log(error);
-      //   });
     }
 
     if (cellData.nodes) {
       if (data.$this.state.hover !== 1) {
         console.log('do OPView rendering');
         OpinionLeader(cellData.nodes, cellData.links,
-          beforeThisDate, articleCellSvg, cellForceSimulation, totalAuthorInfluence, data.$this, optionsWord, handleSubmit);
+          beforeThisDate, articleCellSvg, cellForceSimulation,
+          totalAuthorInfluence, data.$this, optionsWord, handleSubmit);
       }
       commentTimeline(cellData.nodes, commentTimelineSvg, data.$this);
     }
