@@ -56,9 +56,7 @@ export default function userSimilarityGraph(data, svg, user) {
     .append('line')
     .style('stroke', '#ccc')
     .style('stroke-opacity', 0.5)
-    .style('stroke-width', (d) => {
-      return linkWidthScale(d.value);
-    });
+    .style('stroke-width', d => linkWidthScale(d.value));
 
   const node = svg.append('g')
     .attr('class', 'nodes')
@@ -68,10 +66,7 @@ export default function userSimilarityGraph(data, svg, user) {
     .append('g');
 
   const circles = node.append('circle')
-    .attr('r', (d) => {
-      console.log(d.totalReplyCount, nodesSize(d.totalReplyCount));
-      return nodesSize(d.totalReplyCount);
-    })
+    .attr('r', d => nodesSize(d.totalReplyCount))
     .attr('fill', (d, i) => color[i])
     .call(d3.drag()
       .on('start', dragstarted)
@@ -125,7 +120,7 @@ export default function userSimilarityGraph(data, svg, user) {
   }
 
   function computeUserSimilarity(userAuthorRelationShipArr, userArr) {
-    let userListArray = [];
+    const userListArray = [];
     for (let i = 0; i < userAuthorRelationShipArr.length - 1; i += 1) {
       const temp = userAuthorRelationShipArr[i];
       for (let j = i + 1; j < userAuthorRelationShipArr.length; j += 1) {

@@ -43,18 +43,18 @@ class Grid extends React.Component {
         },
         initPage1: {
           pagename: 'Gossiping',
-          since: '2019-05-01',
+          since: '2019-04-15',
           until: '2019-05-02',
-          wordfilter: '丁守中',
+          wordfilter: '',
           idfilter: '',
           contentfilter: '',
-          authorfilter: '',
+          authorfilter: 'hahacha (快樂跳恰恰)',
         },
         initPage2: {
           pagename: 'Gossiping',
           since: '2018-06-01',
           until: '2018-06-10',
-          wordfilter: '柯文哲',
+          wordfilter: '',
           idfilter: '',
           contentfilter: '丁守中',
         },
@@ -303,12 +303,12 @@ class Grid extends React.Component {
     console.log(e);
     console.log(url);
     console.log(myRequest);
-      // fetch(myRequest)
-      //   .then(res => res.json())
-      //   .then((res) => {
-      //     console.log(res);
-      //     this.changeList(res, 0);
-      //   });
+    // fetch(myRequest)
+    //   .then(res => res.json())
+    //   .then((res) => {
+    //     console.log(res);
+    //     this.changeList(res, 0);
+    //   });
     fetch(myRequest)
       .then((response) => {
         if (response.status >= 200 && response.status < 300) {

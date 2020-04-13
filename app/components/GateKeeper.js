@@ -60,8 +60,8 @@ class GateKeeper extends Component {
     }
     // console.log(min, max);
     const xScale = d3.scaleTime().domain([min, max]).range([0, 100]);
-    const colorScale = d3.scaleLinear().domain([0, 1]).range([0.0, 0.5]);
-    const color = d3.interpolateSinebow;
+    // const colorScale = d3.scaleLinear().domain([0, 1]).range([0.0, 0.5]);
+    // const color = d3.interpolateSinebow;
     d3.select(this.myRef.current).select('p').selectAll('*').remove();
 
     const nevigator = d3.select(this.myRef.current).select('p');

@@ -1,3 +1,4 @@
+/* eslint-disable max-len */
 /* eslint-disable no-underscore-dangle */
 /* eslint-disable no-console */
 /* eslint-disable linebreak-style */
@@ -14,6 +15,7 @@ import * as d3 from 'd3';
 // import * as sententree from 'sententree';
 // import { max } from 'moment';
 // import { Row, Form } from 'antd';
+// eslint-disable-next-line import/no-unresolved
 import netClustering from 'netclustering';
 import * as jsnx from 'jsnetworkx';
 import Chart from 'react-google-charts';
@@ -114,9 +116,7 @@ export default function OpinionLeader(cellNodes, cellLinks, beforeThisDate,
   //   .call(d3.zoom().scaleExtent([1 / 2, 8]).on('zoom', articleCellZoomed))
   //   .append('g');
   svg = svg.append('g')
-    .attr('transform', (d) => {
-      return `translate(${w / 3}, ${h / 2}) scale(1.3,1.3)`;
-    });
+    .attr('transform', d => `translate(${w / 3}, ${h / 2}) scale(1.3,1.3)`);
   let cellLink = svg.selectAll('line')
     .data(cellLinks);
 
@@ -190,9 +190,7 @@ export default function OpinionLeader(cellNodes, cellLinks, beforeThisDate,
     .outerRadius((w / 3) / 1.3);
 
   articlePath.enter().append('path')
-    .attr('fill', (d) => {
-      return 'white';
-    })
+    .attr('fill', 'white')
     .attr('d', articleArc)
     .attr('stroke', 'black')
     .attr('stroke-width', '0.2px');
@@ -289,9 +287,6 @@ export default function OpinionLeader(cellNodes, cellLinks, beforeThisDate,
       // console.log(d);
       if (d.articleId) return color[articleArr.findIndex(a => a === d.articleId) + 1];
       return color[0];
-      if (d.cluster) return color[d.cluster];
-      const index = authorArr.findIndex(e => e === d.id);
-      return color[index];
     })
     .style('fill-opacity', 1)
     .attr('stroke', 'black')
@@ -576,7 +571,8 @@ export default function OpinionLeader(cellNodes, cellLinks, beforeThisDate,
     const dot_self_storke_opacity = (event === 'mouseover') ? 1 : 1;
 
     // clear out
-    // d3.selectAll('circle.nodes').attr('r', e => e.radius).style('stroke-opacity', dot_self_storke_opacity).style('stroke', '#000')
+    // d3.selectAll('circle.nodes').attr('r', e => e.radius)
+    //   .style('stroke-opacity', dot_self_storke_opacity).style('stroke', '#000')
     //   .style('stroke-width', dot_self_stroke_width);
     d3.selectAll('line').attr('marker-end', 'none').style('stroke', 'rgb(208,211,212)').style('stroke-opacity', 0.3);
     d3.selectAll('text.background-text').style('fill', 'rgb(208,211,212)').style('stroke', 'rgb(208,211,212)');
@@ -614,7 +610,7 @@ export default function OpinionLeader(cellNodes, cellLinks, beforeThisDate,
     //   .style('stroke', dot_self_color)
     //   .transition()
     //   .duration(800)
-    // // .attr('r', e => ((event === 'mouseover') ? node_r(e.highlight_mode) : node_r(e.normal_mode)))
+    //   .attr('r', e => ((event === 'mouseover') ? node_r(e.highlight_mode) : node_r(e.normal_mode)))
     //   .style('opacity', dot_selected_opacity)
     //   .style('stroke-width', dot_self_stroke_width);
     // // to dots
@@ -679,10 +675,7 @@ export default function OpinionLeader(cellNodes, cellLinks, beforeThisDate,
     const links = JSON.parse(JSON.stringify(filteredLinks));
     for (let i = 0; i < links.length; i += 1) {
       // console.log(links[i]);
-      links[i].source = dataNodes.findIndex(ele => 
-        // console.log(ele.id, filteredLinks[i].source, ele.id === filteredLinks[i].source.id);
-        ele.id === filteredLinks[i].source.id || ele.id === filteredLinks[i].source
-      );
+      links[i].source = dataNodes.findIndex(ele => ele.id === filteredLinks[i].source.id || ele.id === filteredLinks[i].source);
       links[i].target = dataNodes.findIndex(ele => (ele.id === filteredLinks[i].target
         || ele.articleId === filteredLinks[i].target));
     }

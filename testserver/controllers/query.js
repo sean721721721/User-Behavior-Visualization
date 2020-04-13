@@ -90,7 +90,11 @@ let queryobj = function queryobj(req, res, time1, time2, authorid, userid, tkeyw
     };
   }
   if (userid !== undefined) {
-    queryobj['messages.push_userid'] = userid;
+    queryobj['$or'] = [];
+    console.log('userid:', userid);
+    userid.forEach((id) => {
+      queryobj['$or'].push({'messages.push_userid': id});
+    });
   }
   if (authorid !== undefined) {
     queryobj['author'] = authorid;
@@ -340,12 +344,12 @@ let callback = function callback(req, res) {
   } else {
     console.log('go db');
     let page1 = req.params.page1;
-    let user1 = req.params.user1;
+    let user1 = req.params.user1 ? req.params.user1.split(',') : undefined;
     let author1 = req.params.author1;
     let keyword1 = req.params.keyword1;
     let keyword3 = req.params.keyword3;
     let page2 = req.params.page2;
-    let user2 = req.params.user2;
+    let user2 = undefined;
     let keyword2 = req.params.keyword2;
     let keyword4 = req.params.keyword4;
     let time1 = req.params.time1;

@@ -22,20 +22,6 @@ class OpinionLeaderView extends React.Component {
     let articleCellSvg = d3.select('#articleCell');
     let commentTimelineSvg = d3.select('#commentTimeline');
     let userSimilaritySvg = d3.select('#timeLine');
-    // if (data) {
-    // }
-
-    function resArrayToArticlesArray(resArray) {
-      const articlesArray = [];
-      resArray.forEach((arr) => {
-        arr.forEach((a) => {
-          if (!articlesArray.some(e => e.article_id === a.article_id)) {
-            articlesArray.push(a);
-          }
-        });
-      });
-      return articlesArray;
-    }
 
     function getReqstr(id) {
       const {
@@ -45,10 +31,10 @@ class OpinionLeaderView extends React.Component {
           },
           initPage1: {
             pagename: pagename1,
-            since: date1,
-            until: date2,
+            // since: date1,
+            // until: date2,
             contentfilter: keyword3,
-            authorfilter: author1,
+            // authorfilter: author1,
           },
         },
       } = data.opState;
@@ -63,7 +49,7 @@ class OpinionLeaderView extends React.Component {
       const strtime1 = `time1=${beginDate}` || '';
       const strtime2 = `time2=${endDate}` || '';
       const struser1 = `user1=${id}` || '';
-      const strauthor1 = `author1=${author1}` || '';
+      const strauthor1 = `author1=${''}` || '';
       const strkeyword1 = `keyword1=${''}` || '';
       const strkeyword3 = `keyword3=${keyword3}` || '';
       const stractivity = `activity=${1}` || '';
@@ -94,36 +80,23 @@ class OpinionLeaderView extends React.Component {
       // e.preventDefault();
       const myRequest = [];
       const userListArray = [];
-      e.forEach((id) => {
-        const url = encodeURI(getReqstr(id));
-        myRequest.push(new Request(url, {
-          method: 'get',
-        }));
-      });
-      const resArr = [];
-      const min = Math.min(myRequest.length, 10);
+      const min = Math.min(e.length, 10);
+      const url = encodeURI(getReqstr(e.slice(0, min)));
+      myRequest.push(new Request(url, {
+        method: 'get',
+      }));
       console.log(myRequest);
+      const resArr = [];
       fetch(myRequest[0])
         .then(response => response.json())
         .then((response) => {
           resArr.push(response[0][0]);
-          buildUserList(userListArray, response[0][0], e[0]);
-          for (let i = 1; i < min; i += 1) {
-            fetch(myRequest[i])
-              .then(res => res.json())
-              .then((res) => {
-                resArr.push(res[0][0]);
-                buildUserList(userListArray, res[0][0], e[i]);
-                return res;
-              })
-              .then(() => {
-                if (i === min - 1) {
-                  const articlesArr = resArrayToArticlesArray(resArr);
-                  userActivityTimeline(articlesArr, commentTimelineSvg, e.slice(0, min));
-                  userSimilarityGraph(userListArray, userSimilaritySvg, e.slice(0, min));
-                }
-              });
+          for (let i = 0; i < e.length; i += 1) {
+            buildUserList(userListArray, response[0][0], e[i]);
           }
+          const articlesArr = resArr[0];
+          userActivityTimeline(articlesArr, commentTimelineSvg, e.slice(0, min));
+          userSimilarityGraph(userListArray, userSimilaritySvg, e.slice(0, min));
         })
         .catch((error) => {
           console.log(error);
