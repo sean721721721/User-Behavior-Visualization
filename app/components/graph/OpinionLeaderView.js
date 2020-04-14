@@ -81,7 +81,8 @@ class OpinionLeaderView extends React.Component {
       const myRequest = [];
       const userListArray = [];
       const min = Math.min(e.length, 10);
-      const url = encodeURI(getReqstr(e.slice(0, min)));
+      const fixedUserArr = e.slice(0, min);
+      const url = encodeURI(getReqstr(fixedUserArr));
       myRequest.push(new Request(url, {
         method: 'get',
       }));
@@ -91,12 +92,12 @@ class OpinionLeaderView extends React.Component {
         .then(response => response.json())
         .then((response) => {
           resArr.push(response[0][0]);
-          for (let i = 0; i < e.length; i += 1) {
-            buildUserList(userListArray, response[0][0], e[i]);
+          for (let i = 0; i < fixedUserArr.length; i += 1) {
+            buildUserList(userListArray, response[0][0], fixedUserArr[i]);
           }
           const articlesArr = resArr[0];
-          userActivityTimeline(articlesArr, commentTimelineSvg, e.slice(0, min));
-          userSimilarityGraph(userListArray, userSimilaritySvg, e.slice(0, min));
+          userActivityTimeline(articlesArr, commentTimelineSvg, fixedUserArr);
+          userSimilarityGraph(userListArray, userSimilaritySvg, fixedUserArr);
         })
         .catch((error) => {
           console.log(error);
