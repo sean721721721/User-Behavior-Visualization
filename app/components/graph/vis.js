@@ -1465,7 +1465,7 @@ class Graph extends Component {
         />
         <div id="googleChart" />
         {/* <WordTree word={word} /> */}
-        <div className="heatMap" style={{ border: '2px solid gray' }}>
+        <div className="heatMap" style={{ border: '2px solid gray', height: 'fit-content', overflowX: 'scroll' }}>
           <svg id="timeLine" width="100%" height="600px" />
         </div>
         {/* </div> */}

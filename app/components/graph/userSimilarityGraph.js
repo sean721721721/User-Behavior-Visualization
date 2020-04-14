@@ -98,7 +98,7 @@ export default function userSimilarityGraph(data, svg, user) {
   const height = 450 - margin.top - margin.bottom;
 
   // Labels of row and columns
-  const myGroups = getAllAuthorId(data);
+  const myGroups = getAllAuthorId(data); // author
   const myVars = user;
   console.log(myGroups, myVars);
 
@@ -107,8 +107,10 @@ export default function userSimilarityGraph(data, svg, user) {
     .range([0, myGroups.length * 20])
     .domain(myGroups)
     .padding(0.05);
+  svg.attr('width', myGroups.length * 20 + 60);
+  svg = svg.append('g').attr('transform', 'translate(60,20)');
   svg.append('g')
-    .attr('transform', `translate(30,${myVars.length * 20 + 20})`)
+    .attr('transform', `translate(0,${myVars.length * 20})`)
     .attr('class', 'authorAxisX')
     .call(d3.axisBottom(x));
 
@@ -117,9 +119,7 @@ export default function userSimilarityGraph(data, svg, user) {
     .range([myVars.length * 20, 0])
     .domain(myVars)
     .padding(0.05);
-  svg.append('g')
-    .attr('transform', 'translate(30,20)')
-    .call(d3.axisLeft(y));
+  svg.append('g').call(d3.axisLeft(y));
 
   // Build color scale
   const userColor = userColorScaleArray(data);
@@ -127,6 +127,7 @@ export default function userSimilarityGraph(data, svg, user) {
   const myColor = d3.scaleLinear()
     .range([d3.interpolateRdYlGn(0.4), d3.interpolateRdYlGn(0.1)])
     .domain([1, 10]);
+  const scaleExponent = d3.scalePow().exponent(2);
 
   // Read the data
   svg.selectAll()
@@ -135,7 +136,6 @@ export default function userSimilarityGraph(data, svg, user) {
     .each((d, i) => {
       svg.append('g')
         .attr('class', `${d.id}`)
-        .attr('transform', 'translate(30,20)')
         .selectAll('rect')
         .data(d.reply)
         .enter()
@@ -145,8 +145,8 @@ export default function userSimilarityGraph(data, svg, user) {
         .attr('width', x.bandwidth())
         .attr('height', y.bandwidth())
         .style('fill', (d2) => {
-          console.log(d2.count, userColor[d.id](d2.count));
-          return userColor[d.id](d2.count);
+          // console.log(d2.count, userColor[d.id](d2.count));
+          return userColor[d.id](scaleExponent(d2.count));
         });
     });
 
@@ -160,11 +160,21 @@ export default function userSimilarityGraph(data, svg, user) {
 
   function getAllAuthorId(d) {
     const authorID = [];
+    let authorList = [];
     d.forEach((usr) => {
       usr.reply.forEach((re) => {
-        if (!authorID.some(e => e === re.author)) authorID.push(re.author);
+        if (!authorList.some(e => e.id === re.author)) {
+          authorList.push({ id: re.author, count: re.count });
+        } else {
+          authorList.find(e => e.id === re.author).count += re.count;
+        }
       });
     });
+    authorList = authorList.sort((a, b) => (a.count < b.count ? 1 : -1));
+    authorList.forEach((e) => {
+      authorID.push(e.id);
+    });
+    console.log(authorList);
     return authorID;
   }
 

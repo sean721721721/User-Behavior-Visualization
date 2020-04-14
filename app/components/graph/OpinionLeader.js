@@ -117,6 +117,20 @@ export default function OpinionLeader(cellNodes, cellLinks, beforeThisDate,
   //   .append('g');
   svg = svg.append('g')
     .attr('transform', d => `translate(${w / 3}, ${h / 2}) scale(1.3,1.3)`);
+
+  svg.append('defs').append('marker')
+    .attr('id', 'arrowhead')
+    .attr('viewBox', '-0 -5 10 10')
+    .attr('refX', 13)
+    .attr('refY', 0)
+    .attr('orient', 'auto')
+    .attr('markerWidth', 8)
+    .attr('markerHeight', 8)
+    .attr('xoverflow', 'visible')
+    .append('svg:path')
+    .attr('d', 'M 0,-5 L 10 ,0 L 0,5')
+    .attr('fill', '#999')
+    .style('stroke', 'none');
   let cellLink = svg.selectAll('line')
     .data(cellLinks);
 
@@ -125,6 +139,7 @@ export default function OpinionLeader(cellNodes, cellLinks, beforeThisDate,
   // .append('g')
     .append('line')
     .attr('class', 'links')
+    .attr('marker-end', 'url(#arrowhead)')
     .style('z-index', -1)
   // .attr('visibility', 'hidden')
     .attr('stroke', 'gray')
@@ -347,7 +362,7 @@ export default function OpinionLeader(cellNodes, cellLinks, beforeThisDate,
 
   forceSimulation.force('collision', d3.forceCollide(d => d.radius));
 
-  const simulationDurationInMs = 120000; // 20 seconds
+  const simulationDurationInMs = 6000; // 20 seconds
 
   const startTime = Date.now();
   const endTime = startTime + simulationDurationInMs;
@@ -574,14 +589,14 @@ export default function OpinionLeader(cellNodes, cellLinks, beforeThisDate,
     // d3.selectAll('circle.nodes').attr('r', e => e.radius)
     //   .style('stroke-opacity', dot_self_storke_opacity).style('stroke', '#000')
     //   .style('stroke-width', dot_self_stroke_width);
-    d3.selectAll('line').attr('marker-end', 'none').style('stroke', 'rgb(208,211,212)').style('stroke-opacity', 0.3);
+    d3.selectAll('line').style('stroke', 'rgb(208,211,212)').style('stroke-opacity', 0.3);
     d3.selectAll('text.background-text').style('fill', 'rgb(208,211,212)').style('stroke', 'rgb(208,211,212)');
 
     // color lines
     d3.selectAll(`line.to${d.index}`).each((e) => {
       e.type = 'in';
     })
-      .attr('marker-end', e => ((event === 'mouseover') ? `url(#${e.type})` : 'none'))
+      // .attr('marker-end', e => ((event === 'mouseover') ? `url(#${e.type})` : 'none'))
       .style('stroke', line_in_color)
       .transition()
       .duration(500)
@@ -590,7 +605,7 @@ export default function OpinionLeader(cellNodes, cellLinks, beforeThisDate,
     d3.selectAll(`line.from${d.index}`).each((e) => {
       e.type = 'out';
     })
-      .attr('marker-end', e => ((event === 'mouseover') ? `url(#${e.type})` : 'none'))
+      // .attr('marker-end', e => ((event === 'mouseover') ? `url(#${e.type})` : 'none'))
       .style('stroke', line_out_color)
       .transition()
       .duration(500)
