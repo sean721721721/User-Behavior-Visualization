@@ -366,43 +366,19 @@ export default function OpinionLeader(cellNodes, cellLinks, beforeThisDate,
     // submit(d);
     const adj = cellLinks.filter(e => e.target.index === d.index);
     const selectedUser = [];
-    if (selectedArticleNodes.some(e => e === d.title)) {
-      const index = selectedArticleNodes.findIndex(e => e === d.title);
-      selectedArticleNodes.splice(index, 1);
-      // selectedArticleNodes.push(d.title);
-      adj.forEach((n) => {
-        const data = d3.selectAll(`circle.nodes.circle_${n.source.index}`).data();
-        data.forEach((e) => {
-          e.tag -= 1;
-        });
-        d3.selectAll('circle.nodes')
-          .style('stroke', 'red')
-          .style('stroke-width', e => (e.tag === selectedArticleNodes.length ? 1 : 0))
-          .style('stroke-opacity', 1);
-        // if (data[0].tag === selectedArticleNodes.length) {
-        //   data[0].containUsers.forEach((e) => {
-        //     selectedUser.push(e);
-        //   });
-        // }
+    const index = selectedArticleNodes.findIndex(e => e === d.title);
+    if (index !== -1) selectedArticleNodes.splice(index, 1);
+    else selectedArticleNodes.push(d.title);
+    adj.forEach((n) => {
+      const data = d3.selectAll(`circle.nodes.circle_${n.source.index}`).data();
+      data.forEach((e) => {
+        e.tag += index === -1 ? 1 : -1;
       });
-    } else {
-      selectedArticleNodes.push(d.title);
-      adj.forEach((n) => {
-        const data = d3.selectAll(`circle.nodes.circle_${n.source.index}`).data();
-        data.forEach((e) => {
-          e.tag += 1;
-        });
-        d3.selectAll('circle.nodes')
-          .style('stroke', 'red')
-          .style('stroke-width', e => (e.tag === selectedArticleNodes.length ? 1 : 0))
-          .style('stroke-opacity', 1);
-        // if (data[0].tag === selectedArticleNodes.length) {
-        //   data[0].containUsers.forEach((e) => {
-        //     selectedUser.push(e);
-        //   });
-        // }
-      });
-    }
+      d3.selectAll('circle.nodes')
+        .style('stroke', 'red')
+        .style('stroke-width', e => (e.tag === selectedArticleNodes.length ? 1 : 0))
+        .style('stroke-opacity', 1);
+    });
     const data = svg.selectAll('circle.nodes').data();
     console.log(data);
     data.forEach((e) => {

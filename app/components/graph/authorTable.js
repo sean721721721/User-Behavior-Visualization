@@ -158,7 +158,7 @@ export default function AuthorTable(nodes, div, callback) {
         });
       }
     });
-    [ n, l ] = mergeCellDataNodes(n, l);
+    [n, l] = mergeCellDataNodes(n, l);
     console.log(n, l);
     const graph = new jsnx.Graph();
     buildGraph(graph, n, l, null);
@@ -327,7 +327,6 @@ export default function AuthorTable(nodes, div, callback) {
         const n1 = node_data.find(n => n.id === l1.source);
         n1.weight += Math.abs(l1.value / l1.num);
       });
-
     }
     function pageRank(node_data, link_data, d) {
       const total_num = node_data.length;
@@ -335,7 +334,7 @@ export default function AuthorTable(nodes, div, callback) {
       const tolerance = 1e-6;
       const loopMax = 1;
       for (let k = 0; k < loopMax; k += 1) {
-        let newPageRank = [];
+        const newPageRank = [];
         for (let i = 0; i < total_num; i += 1) {
           let total_rightFormula = 0;
           for (let j = 0; j < link_num; j += 1) {
