@@ -9,8 +9,8 @@
 import * as d3 from 'd3';
 
 export default function userSimilarityGraph(data, svg, user) {
-  console.log(user);
-  console.log(data);
+  // console.log(user);
+  // console.log(data);
   svg.selectAll('*').remove();
   // svg.attr('viewBox', '0 0 960 500');
   // const h = parseFloat(d3.select('#timeLine').style('height'));
@@ -100,7 +100,7 @@ export default function userSimilarityGraph(data, svg, user) {
   // Labels of row and columns
   const myGroups = getAllAuthorId(data); // author
   const myVars = user;
-  console.log(myGroups, myVars);
+  // console.log(myGroups, myVars);
 
   // Build X scales and axis:
   const x = d3.scaleBand()
@@ -123,7 +123,7 @@ export default function userSimilarityGraph(data, svg, user) {
 
   // Build color scale
   const userColor = userColorScaleArray(data);
-  console.log(userColor);
+  // console.log(userColor);
   const myColor = d3.scaleLinear()
     .range([d3.interpolateRdYlGn(0.4), d3.interpolateRdYlGn(0.1)])
     .domain([1, 10]);
@@ -174,7 +174,7 @@ export default function userSimilarityGraph(data, svg, user) {
     authorList.forEach((e) => {
       authorID.push(e.id);
     });
-    console.log(authorList);
+    // console.log(authorList);
     return authorID;
   }
 
@@ -182,7 +182,7 @@ export default function userSimilarityGraph(data, svg, user) {
     const scaleArray = {};
     d.forEach((usr) => {
       scaleArray[usr.id] = d3.scaleLinear()
-        .range([d3.interpolateYlOrRd(0.0), d3.interpolateYlOrRd(1)])
+        .range([d3.interpolateYlOrRd(0.2), d3.interpolateYlOrRd(0.8)])
         .domain([1, usr.totalReplyCount]);
     });
     return scaleArray;
