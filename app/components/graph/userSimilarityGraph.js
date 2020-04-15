@@ -10,7 +10,7 @@ import * as d3 from 'd3';
 
 export default function userSimilarityGraph(data, svg, user) {
   // console.log(user);
-  // console.log(data);
+  console.log(data);
   svg.selectAll('*').remove();
   // svg.attr('viewBox', '0 0 960 500');
   // const h = parseFloat(d3.select('#timeLine').style('height'));

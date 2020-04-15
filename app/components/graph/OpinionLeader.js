@@ -102,7 +102,7 @@ export default function OpinionLeader(cellNodes, cellLinks, beforeThisDate,
       const articleRatio = author.responder.filter(
         e => e.message.length >= articleInfluenceThreshold,
       );
-      console.log(articleRatio);
+      // console.log(articleRatio);
       return (360 * author.influenceRatio) * (d.message.length / author.influence);
     })
     .sort(null);
@@ -381,7 +381,6 @@ export default function OpinionLeader(cellNodes, cellLinks, beforeThisDate,
         .style('stroke-opacity', 0.6);
     });
     const data = svg.selectAll('circle.nodes').data();
-    console.log(data);
     data.forEach((e) => {
       if (e.tag === selectedArticleNodes.length) {
         e.containUsers.forEach((u) => {
@@ -389,7 +388,6 @@ export default function OpinionLeader(cellNodes, cellLinks, beforeThisDate,
         });
       }
     });
-    console.log(selectedUser);
     console.log(cellNodes);
     drawSelectedUserTable(svg, selectedUser);
   }

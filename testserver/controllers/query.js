@@ -380,7 +380,7 @@ let callback = function callback(req, res) {
           resolve(
             findquery(page1, queryobj1, ptt, limit, sort).then(res => {
               console.log('q1 lenght: ' + res.result.length);
-              const queryArticleFilter = 50;
+              const queryArticleFilter = activity ? 0 : 50;
               // console.log('res.result', res.result);
               res.result = res.result.filter(post => post.message_count.all > queryArticleFilter);
               // Remove article content

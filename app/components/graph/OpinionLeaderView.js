@@ -60,6 +60,7 @@ class OpinionLeaderView extends React.Component {
     }
 
     function buildUserList(userLists, articles, userId) {
+      console.log(articles, userId);
       const authorList = [];
       let totalReplyCount = 0;
       articles.forEach((article) => {
