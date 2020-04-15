@@ -128,7 +128,7 @@ class OpinionLeaderView extends React.Component {
           />
           <svg id="articleCell" width="100%" height="94%" />
         </div>
-        <div className="selectedUserTable" style={{ maxHeight: '700px', overflowY: 'scroll' }} />
+        <div className="selectedUserTable d-flex flex-column" style={{ margin: '20px 0px', maxHeight: '700px', minHeight: '400px' }} />
         <div
           className="commentTimeline"
           style={{
@@ -136,6 +136,7 @@ class OpinionLeaderView extends React.Component {
             // top: '15px',
             // left: '15px',
             overflowY: 'scroll',
+            minHeight: '400px',
             maxHeight: '400px',
             // width: '280px',
             // height: '400px',

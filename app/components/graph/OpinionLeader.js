@@ -300,9 +300,10 @@ export default function OpinionLeader(cellNodes, cellLinks, beforeThisDate,
     })
     .attr('fill', (d) => {
       // console.log(d);
-      if (d.articleId) return color[articleArr.findIndex(a => a === d.articleId) + 2]; // article nodes
-      if (d.influence) return color[0]; // author node
-      return color[1];
+      if (d.articleId) return color[2];
+      // if (d.articleId) return color[articleArr.findIndex(a => a === d.articleId) + 2]; // article nodes
+      if (d.influence) return color[1]; // author node
+      return color[0];
     })
     .style('fill-opacity', 1)
     .attr('stroke', 'black')
@@ -315,7 +316,7 @@ export default function OpinionLeader(cellNodes, cellLinks, beforeThisDate,
     .on('click', articleNodeClicked);
 
   const cellLables = cellNodeEnter.append('text')
-    .text(d => (d.titleTerm ? '' : d.articleId))
+    .text(d => (d.titleTerm ? '' : d.title))
     .style('text-anchor', 'middle')
     .attr('font-family', 'Microsoft JhengHei')
     .attr('font-size', '10px')
@@ -375,9 +376,9 @@ export default function OpinionLeader(cellNodes, cellLinks, beforeThisDate,
         e.tag += index === -1 ? 1 : -1;
       });
       d3.selectAll('circle.nodes')
-        .style('stroke', 'red')
-        .style('stroke-width', e => (e.tag === selectedArticleNodes.length ? 1 : 0))
-        .style('stroke-opacity', 1);
+        .style('stroke', e => (e.tag === selectedArticleNodes.length ? 'red' : 'black'))
+        .style('stroke-width', e => (e.tag === selectedArticleNodes.length ? 2 : 1))
+        .style('stroke-opacity', 0.6);
     });
     const data = svg.selectAll('circle.nodes').data();
     console.log(data);
@@ -396,7 +397,23 @@ export default function OpinionLeader(cellNodes, cellLinks, beforeThisDate,
   function drawSelectedUserTable(tableSvg, nodes) {
     const selectedUserDiv = d3.selectAll('.selectedUserTable');
     selectedUserDiv.selectAll('*').remove();
-    const table = selectedUserDiv.append('table');
+
+    const buttonDiv = selectedUserDiv.append('div')
+      .attr('class', 'p-2 d-flex justify-content-center');
+    buttonDiv.append('button')
+      .style('type', 'button')
+      .attr('class', 'btn btn-primary')
+      .text('Submit!')
+      .on('click', (d) => {
+        console.log(d);
+        selectedUserClick(nodes);
+      });
+
+    const tableDiv = selectedUserDiv.append('div')
+      .style('border', 'black 1px solid')
+      .style('max-height', '400px')
+      .style('overflow-y', 'scroll');
+    const table = tableDiv.append('table');
     table.append('tr').append('td')
       .text('ID')
       .style('background', color[0])
@@ -408,20 +425,10 @@ export default function OpinionLeader(cellNodes, cellLinks, beforeThisDate,
       .attr('class', 'userDataRow')
       .style('padding', '0px')
       .append('td')
-      .style('padding', '0px')
       .text(d => d);
 
     d3.selectAll('.userDataRow').filter(':nth-child(even)')
       .style('background', 'whitesmoke');
-
-    selectedUserDiv.append('button')
-      .style('type', 'button')
-      .style('height', '30px')
-      .text('Click Me!')
-      .on('click', (d) => {
-        console.log(d);
-        selectedUserClick(nodes);
-      });
   }
 
   function selectedUserClick(d) {

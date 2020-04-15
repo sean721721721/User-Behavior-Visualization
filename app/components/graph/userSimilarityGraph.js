@@ -144,7 +144,9 @@ export default function userSimilarityGraph(data, svg, user) {
         .attr('y', y(d.id))
         .attr('width', x.bandwidth())
         .attr('height', y.bandwidth())
-        .style('fill', d2 => userColor[d.id](scaleExponent(d2.count)));
+        .style('fill', d2 => userColor[d.id](scaleExponent(d2.count)))
+        .append('title')
+        .text(d2 => d2.count);
     });
 
   svg.selectAll('g.authorAxisX')
