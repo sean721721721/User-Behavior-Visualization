@@ -389,10 +389,11 @@ export default function OpinionLeader(cellNodes, cellLinks, beforeThisDate,
       }
     });
     console.log(cellNodes);
-    drawSelectedUserTable(svg, selectedUser);
+    drawSelectedUserTable(selectedUser);
   }
 
-  function drawSelectedUserTable(tableSvg, nodes) {
+  function drawSelectedUserTable(nodes) {
+    const userArr = nodes;
     const selectedUserDiv = d3.selectAll('.selectedUserTable');
     selectedUserDiv.selectAll('*').remove();
 
@@ -404,7 +405,7 @@ export default function OpinionLeader(cellNodes, cellLinks, beforeThisDate,
       .text('Submit!')
       .on('click', (d) => {
         console.log(d);
-        selectedUserClick(nodes);
+        selectedUserClick(userArr);
       });
 
     const tableDiv = selectedUserDiv.append('div')
@@ -417,20 +418,31 @@ export default function OpinionLeader(cellNodes, cellLinks, beforeThisDate,
       .style('background', color[0])
       .style('color', 'white');
     const tr = table.selectAll('tr.user')
-      .data(nodes)
+      .data(userArr)
       .enter()
       .append('tr')
       .attr('class', 'userDataRow')
       .style('padding', '0px')
       .append('td')
-      .text(d => d);
+      .text(d => d)
+      .on('click', (d) => {
+        clickUserTable(d, userArr);
+        console.log(userArr);
+
+      });
 
     d3.selectAll('.userDataRow').filter(':nth-child(even)')
       .style('background', 'whitesmoke');
   }
 
+  function clickUserTable(d, arr) {
+    const index = arr.findIndex(e => e === d);
+    arr.splice(index, 1);
+    drawSelectedUserTable(arr);
+  }
+
   function selectedUserClick(d) {
-    // console.log(d);
+    console.log(d);
     submit(d);
   }
 
