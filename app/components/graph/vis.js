@@ -389,7 +389,7 @@ class Graph extends Component {
           }
           return 'green';
         })
-        .style('fill-opacity', 0.2)
+        .style('fill-opacity', 0.3)
         .style('stroke', 'white')
         .style('stroke-width', '0');
 
@@ -562,12 +562,19 @@ class Graph extends Component {
           }
           return `${5 + centrality(selectedCentrality, d)}px`;
         })
-        .attr('color', '#000')
+        .attr('fill', 'rgb(0,0,0)')
         .attr('y', (d) => {
           if (NodeHiding) return 0;
           return d.group !== 1 ? 3 : centrality(selectedCentrality, d) * 2 + 5;
         });
-
+        // .style('stroke', (d) => {
+        //   if (d.group === 1) {
+        //     const cluster = d.cluster % 19;
+        //     const betweennessColor = d3.hsl(color[cluster]);
+        //     return betweennessColor;
+        //   }
+        // });
+        // style="fill: none; stroke: rgb(0, 0, 0); font-size: 48px; visibility: visible;"
       nodeEnter.append('title')
         .text(d => d.titleTerm);
       node = nodeEnter.merge(node);
@@ -599,7 +606,7 @@ class Graph extends Component {
       simulation.alphaDecay(0.005)
         .force('link')
         .links(set.links)
-        .distance(d => 500 / strengthScale(d.value));
+        .distance(d => 100 / strengthScale(d.value));
       // .strength((d) => {
       //   console.log(strengthScale(d.value));
       //   return strengthScale(d.value);

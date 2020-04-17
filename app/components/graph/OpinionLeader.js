@@ -311,6 +311,7 @@ export default function OpinionLeader(cellNodes, cellLinks, beforeThisDate,
     .attr('stroke-opacity', 1);
 
   const selectedArticleNodes = [];
+  const selecedUserGroupNodes = [];
   cellNodeEnter.on('mouseover', (d) => { mouseevent(d, 'mouseover'); })
     .on('mouseout', (d) => { mouseevent(d, 'mouseout'); })
     .on('click', articleNodeClicked);
@@ -365,11 +366,12 @@ export default function OpinionLeader(cellNodes, cellLinks, beforeThisDate,
   function articleNodeClicked(d) {
     // console.log(d);
     // submit(d);
-    const adj = cellLinks.filter(e => e.target.index === d.index);
     const selectedUser = [];
+    const adj = cellLinks.filter(e => e.target.index === d.index);
     const index = selectedArticleNodes.findIndex(e => e === d.title);
     if (index !== -1) selectedArticleNodes.splice(index, 1);
-    else selectedArticleNodes.push(d.title);
+    else if (!d.containUsers) selectedArticleNodes.push(d.title);
+    // article nodes
     adj.forEach((n) => {
       const data = d3.selectAll(`circle.nodes.circle_${n.source.index}`).data();
       data.forEach((e) => {
@@ -380,6 +382,8 @@ export default function OpinionLeader(cellNodes, cellLinks, beforeThisDate,
         .style('stroke-width', e => (e.tag === selectedArticleNodes.length ? 2 : 1))
         .style('stroke-opacity', 0.6);
     });
+
+    // push userid to selectedUser
     const data = svg.selectAll('circle.nodes').data();
     data.forEach((e) => {
       if (e.tag === selectedArticleNodes.length) {
