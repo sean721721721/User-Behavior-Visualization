@@ -81,7 +81,7 @@ class OpinionLeaderView extends React.Component {
       // e.preventDefault();
       const myRequest = [];
       const userListArray = [];
-      const min = Math.min(e.length, 10);
+      const min = Math.min(e.length, 50);
       const fixedUserArr = e.slice(0, min);
       const url = encodeURI(getReqstr(fixedUserArr));
       myRequest.push(new Request(url, {

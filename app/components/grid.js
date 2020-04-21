@@ -49,6 +49,7 @@ class Grid extends React.Component {
           idfilter: '',
           contentfilter: '',
           authorfilter: 'hahacha (快樂跳恰恰)',
+          commentfilter: 500,
         },
         initPage2: {
           pagename: 'Gossiping',
@@ -248,6 +249,7 @@ class Grid extends React.Component {
           contentfilter: keyword3,
           idfilter: user1,
           authorfilter: author1,
+          commentfilter: commentThreshold,
         },
         initPage2: {
           pagename: pagename2,
@@ -272,6 +274,7 @@ class Grid extends React.Component {
     const strauthor1 = `author1=${author1}` || '';
     const strkeyword1 = `keyword1=${keyword1}` || '';
     const strkeyword3 = `keyword3=${keyword3}` || '';
+    const strcommentThreshold = `commentThreshold=${commentThreshold}` || '';
     const strpage2 = `page2=${pagename2}` || '';
     const struser2 = `user2=${user2}` || '';
     const strtime3 = `time3=${date3}` || '';
@@ -281,7 +284,7 @@ class Grid extends React.Component {
     const strco = `co=${type}` || '';
     const searchurl = '/searching?';
     const str = `${searchurl + strminvar1}&${strmaxvar1}&${strposttype}&`
-      + `${strpage1}&${strtime1}&${strtime2}&${strauthor1}&${struser1}&${strkeyword1}&${strkeyword3}&`
+      + `${strpage1}&${strtime1}&${strtime2}&${strauthor1}&${struser1}&${strkeyword1}&${strkeyword3}&${strcommentThreshold}&`
       + `${strpage2}&${strtime3}&${strtime4}&${struser2}&${strkeyword2}&${strkeyword4}&${strco}`;
     return str;
   }

@@ -11,6 +11,7 @@ import * as d3 from 'd3';
 export default function userSimilarityGraph(data, svg, user) {
   // console.log(user);
   console.log(data);
+  console.log(user);
   svg.selectAll('*').remove();
   // svg.attr('viewBox', '0 0 960 500');
   // const h = parseFloat(d3.select('#timeLine').style('height'));
@@ -100,62 +101,128 @@ export default function userSimilarityGraph(data, svg, user) {
   // Labels of row and columns
   const myGroups = getAllAuthorId(data); // author
   const myVars = user;
-  // console.log(myGroups, myVars);
 
-  // Build X scales and axis:
-  const x = d3.scaleBand()
-    .range([0, myGroups.length * 20])
-    .domain(myGroups)
-    .padding(0.05);
-  svg.attr('width', myGroups.length * 20 + 60);
-  svg = svg.append('g').attr('transform', 'translate(60,20)');
-  svg.append('g')
-    .attr('transform', `translate(0,${myVars.length * 20})`)
-    .attr('class', 'authorAxisX')
-    .call(d3.axisBottom(x));
+  adjacencyMatrixNoAuthor();
 
-  // Build X scales and axis:
-  const y = d3.scaleBand()
-    .range([myVars.length * 20, 0])
-    .domain(myVars)
-    .padding(0.05);
-  svg.append('g').call(d3.axisLeft(y));
+  function adjacencyMatrixNoAuthor() {
+    const similarity = computeUserSimilarity(data, user);
+    const x = d3.scaleBand()
+      .range([0, myVars.length * 20])
+      .domain(myVars)
+      .padding(0.05);
+    // svg.attr('width', myVars.length * 20 + 60);
+    svg = svg.append('g')
+      .attr('transform', 'scale(1) translate(100,100)');
+    svg.append('g')
+      // .attr('transform', `translate(0,${myVars.length * 20})`)
+      .attr('class', 'authorAxisX')
+      .call(d3.axisTop(x));
 
-  // Build color scale
-  const userColor = userColorScaleArray(data);
-  // console.log(userColor);
-  const myColor = d3.scaleLinear()
-    .range([d3.interpolateRdYlGn(0.4), d3.interpolateRdYlGn(0.1)])
-    .domain([1, 10]);
-  const scaleExponent = d3.scalePow().exponent(2);
+    // Build X scales and axis:
+    const y = d3.scaleBand()
+      .range([0, myVars.length * 20])
+      .domain(myVars)
+      .padding(0.05);
+    svg.append('g').call(d3.axisLeft(y));
 
-  // Read the data
-  svg.selectAll()
-    .data(data)
-    .enter()
-    .each((d, i) => {
-      svg.append('g')
-        .attr('class', `${d.id}`)
-        .selectAll('rect')
-        .data(d.reply)
-        .enter()
-        .append('rect')
-        .attr('x', d2 => x(d2.author))
-        .attr('y', y(d.id))
-        .attr('width', x.bandwidth())
-        .attr('height', y.bandwidth())
-        .style('fill', d2 => userColor[d.id](scaleExponent(d2.count)))
-        .append('title')
-        .text(d2 => d2.count);
-    });
+    // Build color scale
+    const userColor = userColorScaleArray(data);
+    // console.log(userColor);
+    const myColor = d3.scaleLinear()
+      .range([d3.interpolateYlOrRd(0), d3.interpolateYlOrRd(0.8)])
+      .domain([0, 1]);
+    const scaleExponent = d3.scalePow().exponent(2);
 
-  svg.selectAll('g.authorAxisX')
-    .selectAll('text')
-    .attr('y', 0)
-    .attr('x', 9)
-    .attr('dy', '.35em')
-    .attr('transform', 'rotate(90)')
-    .style('text-anchor', 'start');
+    // Read the data
+    svg.append('g').selectAll()
+      .data(similarity)
+      .enter()
+      .append('rect')
+      .attr('x', d => x(d.target))
+      .attr('y', d => y(d.source))
+      .attr('width', x.bandwidth())
+      .attr('height', y.bandwidth())
+      .style('fill', d => myColor(d.value / 2))
+      .append('title')
+      .text(d => d.value);
+    svg.append('g').selectAll()
+      .data(similarity)
+      .enter()
+      .append('rect')
+      .attr('x', d => x(d.source))
+      .attr('y', d => y(d.target))
+      .attr('width', x.bandwidth())
+      .attr('height', y.bandwidth())
+      .style('fill', d => myColor(d.value / 2))
+      .append('title')
+      .text(d => d.value);
+
+
+    svg.selectAll('g.authorAxisX')
+      .selectAll('text')
+      .attr('y', 0)
+      .attr('x', 9)
+      .attr('dy', '.35em')
+      .attr('transform', 'rotate(-90)')
+      .style('text-anchor', 'start');
+  }
+
+  function heatMapWithAuthor() {
+    // Build X scales and axis:
+    const x = d3.scaleBand()
+      .range([0, myGroups.length * 20])
+      .domain(myGroups)
+      .padding(0.05);
+    svg.attr('width', myGroups.length * 20 + 60);
+    svg = svg.append('g').attr('transform', 'translate(60,20)');
+    svg.append('g')
+      .attr('transform', `translate(0,${myVars.length * 20})`)
+      .attr('class', 'authorAxisX')
+      .call(d3.axisBottom(x));
+
+    // Build X scales and axis:
+    const y = d3.scaleBand()
+      .range([myVars.length * 20, 0])
+      .domain(myVars)
+      .padding(0.05);
+    svg.append('g').call(d3.axisLeft(y));
+
+    // Build color scale
+    const userColor = userColorScaleArray(data);
+    // console.log(userColor);
+    const myColor = d3.scaleLinear()
+      .range([d3.interpolateRdYlGn(0.4), d3.interpolateRdYlGn(0.1)])
+      .domain([1, 10]);
+    const scaleExponent = d3.scalePow().exponent(2);
+
+    // Read the data
+    svg.selectAll()
+      .data(data)
+      .enter()
+      .each((d, i) => {
+        svg.append('g')
+          .attr('class', `${d.id}`)
+          .selectAll('rect')
+          .data(d.reply)
+          .enter()
+          .append('rect')
+          .attr('x', d2 => x(d2.author))
+          .attr('y', y(d.id))
+          .attr('width', x.bandwidth())
+          .attr('height', y.bandwidth())
+          .style('fill', d2 => userColor[d.id](scaleExponent(d2.count)))
+          .append('title')
+          .text(d2 => d2.count);
+      });
+
+    svg.selectAll('g.authorAxisX')
+      .selectAll('text')
+      .attr('y', 0)
+      .attr('x', 9)
+      .attr('dy', '.35em')
+      .attr('transform', 'rotate(90)')
+      .style('text-anchor', 'start');
+  }
 
   function getAllAuthorId(d) {
     const authorID = [];

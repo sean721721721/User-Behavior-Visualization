@@ -39,7 +39,7 @@ let logger = winston.createLogger({
   exitOnError: false,
 });
 
-let queryobj = function queryobj(req, res, time1, time2, authorid, userid, tkeyword, ckeyword) {
+let queryobj = function queryobj(req, res, time1, time2, authorid, userid, tkeyword, ckeyword, comments) {
   let queryobj = {};
   if (req.params.posttype) {
     if (req.params.posttype === 'PTT') {
@@ -98,6 +98,12 @@ let queryobj = function queryobj(req, res, time1, time2, authorid, userid, tkeyw
   }
   if (authorid !== undefined) {
     queryobj['author'] = authorid;
+  }
+  if (comments !== undefined) {
+    console.log('comments:', comments);
+    queryobj['message_count.all'] = {
+      $gte: Number(comments),
+    };
   }
   if (req.params.postid) {
     queryobj['id'] = req.params.postid;
@@ -348,6 +354,7 @@ let callback = function callback(req, res) {
     let author1 = req.params.author1;
     let keyword1 = req.params.keyword1;
     let keyword3 = req.params.keyword3;
+    let commentAll = req.params.commentThreshold;
     let page2 = req.params.page2;
     let user2 = undefined;
     let keyword2 = req.params.keyword2;
@@ -357,7 +364,7 @@ let callback = function callback(req, res) {
     let time3 = req.params.time3;
     let time4 = req.params.time4;
     let activity = req.params.activity;
-    let queryobj1 = queryobj(req, res, time1, time2, author1, user1, keyword1, keyword3);
+    let queryobj1 = queryobj(req, res, time1, time2, author1, user1, keyword1, keyword3, commentAll);
     let queryobj2 = queryobj(req, res, time3, time4, user2, keyword2, keyword4);
     let samequery =
       page1 === page2 &&
@@ -380,7 +387,7 @@ let callback = function callback(req, res) {
           resolve(
             findquery(page1, queryobj1, ptt, limit, sort).then(res => {
               console.log('q1 lenght: ' + res.result.length);
-              const queryArticleFilter = activity ? 0 : 50;
+              const queryArticleFilter = activity ? 0 : 500;
               // console.log('res.result', res.result);
               res.result = res.result.filter(post => post.message_count.all > queryArticleFilter);
               // Remove article content

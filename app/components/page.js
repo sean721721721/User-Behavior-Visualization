@@ -42,7 +42,7 @@ class Page extends React.Component {
     const {
       show,
       init: {
-        pagename, since, until, wordfilter, authorfilter, idfilter, contentfilter,
+        pagename, since, until, wordfilter, authorfilter, idfilter, contentfilter, commentfilter,
       },
       onChange,
       handlePT,
@@ -163,6 +163,18 @@ class Page extends React.Component {
                 onChange={handlePT}
               />
             </label>
+            <label htmlFor="x">
+                comment threshold:
+              <input
+                className="form-control"
+                type="commentThreshold"
+                name="commentfilter"
+                id="commentThreshold"
+                placeholder="500"
+                value={commentfilter}
+                onChange={handlePT}
+              />
+            </label>
           </fieldset>
           <Button name="submit" type="button" size="sm" onClick={e => this.getCR(e, 'All')}>
                 New Submit
@@ -185,6 +197,7 @@ Page.propTypes = {
     idfilter: PropTypes.string,
     authorfilter: PropTypes.string,
     contentfilter: PropTypes.string,
+    commentfilter: PropTypes.number,
   }).isRequired,
   onChange: PropTypes.func.isRequired,
   handlePT: PropTypes.func.isRequired,
