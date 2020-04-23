@@ -7,9 +7,11 @@
 /* eslint-disable camelcase */
 /* eslint-disable no-param-reassign */
 import * as d3 from 'd3';
+import * as math from 'mathjs';
 
 export default function userSimilarityGraph(data, svg, user) {
   // console.log(user);
+  console.log(math.sqrt(-4));
   console.log(data);
   console.log(user);
   svg.selectAll('*').remove();
@@ -106,13 +108,23 @@ export default function userSimilarityGraph(data, svg, user) {
 
   function adjacencyMatrixNoAuthor() {
     const similarity = computeUserSimilarity(data, user);
+    const matrix = [];
+    for (let i = 0; i < user.length; i += 1) {
+      matrix.push(Array(user.length).fill(1));
+    }
+    similarity.forEach((e) => {
+      matrix[user.findIndex(u => u === e.source)][user.findIndex(u => u === e.target)] = e.value;
+      matrix[user.findIndex(u => u === e.target)][user.findIndex(u => u === e.source)] = e.value;
+    });
+    console.log(similarity);
+    console.log(matrix);
     const x = d3.scaleBand()
       .range([0, myVars.length * 20])
       .domain(myVars)
       .padding(0.05);
     // svg.attr('width', myVars.length * 20 + 60);
     svg = svg.append('g')
-      .attr('transform', 'scale(1) translate(100,100)');
+      .attr('transform', 'scale(0.5) translate(100,100)');
     svg.append('g')
       // .attr('transform', `translate(0,${myVars.length * 20})`)
       .attr('class', 'authorAxisX')
