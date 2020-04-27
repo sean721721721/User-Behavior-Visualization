@@ -7,6 +7,9 @@
 /* eslint-disable camelcase */
 /* eslint-disable no-param-reassign */
 import * as d3 from 'd3';
+import * as science from 'science';
+import * as Queue from 'tiny-queue';
+import * as reorder from 'reorder.js/index';
 import * as math from 'mathjs';
 
 export default function userSimilarityGraph(data, svg, user) {
@@ -105,70 +108,140 @@ export default function userSimilarityGraph(data, svg, user) {
   const myVars = user;
 
   adjacencyMatrixNoAuthor();
+  // heatMapWithAuthor();
 
   function adjacencyMatrixNoAuthor() {
+    svg.attr('height', user.length * 20 + 150);
+    svg.attr('width', user.length * 20 + 1500);
     const similarity = computeUserSimilarity(data, user);
     const matrix = [];
+    let origMatrix = [];
     for (let i = 0; i < user.length; i += 1) {
-      matrix.push(Array(user.length).fill(1));
+      matrix.push(Array(user.length).fill(2));
+      origMatrix.push(Array(user.length).fill(2));
+    }
+    const axisDomain = [];
+    for (let i = 0; i < user.length; i += 1) {
+      axisDomain.push(i);
     }
     similarity.forEach((e) => {
       matrix[user.findIndex(u => u === e.source)][user.findIndex(u => u === e.target)] = e.value;
       matrix[user.findIndex(u => u === e.target)][user.findIndex(u => u === e.source)] = e.value;
+      origMatrix[user.findIndex(u => u === e.source)][user.findIndex(u => u === e.target)] = e.value;
+      origMatrix[user.findIndex(u => u === e.target)][user.findIndex(u => u === e.source)] = e.value;
     });
+    console.log(origMatrix);
     console.log(similarity);
+    // enlarge the difference between user
+    for (let i = 0; i < user.length; i += 1) {
+      matrix[i] = matrix[i].map(e => (e >= 1 ? 2 : e));
+      // matrix[i] = matrix[i].map(e => (e < 1.5 && e >= 1 ? 1 : e));
+      // matrix[i] = matrix[i].map(e => (e < 1 ? 0 : e));
+      // origMatrix[i] = origMatrix[i].map(e => (e < 1 ? 0 : 2));
+    }
     console.log(matrix);
-    const x = d3.scaleBand()
-      .range([0, myVars.length * 20])
-      .domain(myVars)
-      .padding(0.05);
-    // svg.attr('width', myVars.length * 20 + 60);
-    svg = svg.append('g')
-      .attr('transform', 'scale(0.5) translate(100,100)');
-    svg.append('g')
-      // .attr('transform', `translate(0,${myVars.length * 20})`)
-      .attr('class', 'authorAxisX')
-      .call(d3.axisTop(x));
 
-    // Build X scales and axis:
-    const y = d3.scaleBand()
-      .range([0, myVars.length * 20])
-      .domain(myVars)
+    const newUserAxisValues = [];
+    for (let i = 0; i < user.length; i += 1) {
+      newUserAxisValues.push(Array(user.length).fill(''));
+    }
+
+    let gra = reorder.mat2graph(matrix);
+    let perm = reorder.spectral_order(gra);
+    console.log(perm);
+    let tempUser = [...user];
+    for (let j = 0; j < user.length; j += 1) {
+      newUserAxisValues[j] = tempUser[perm[j]];
+    }
+    tempUser = [...newUserAxisValues];
+    console.log(newUserAxisValues);
+    let permuted_mat = reorder.permute(matrix, perm);
+    permuted_mat = reorder.transpose(permuted_mat);
+    permuted_mat = reorder.permute(permuted_mat, perm);
+    permuted_mat = reorder.transpose(permuted_mat);
+    origMatrix = reorder.permute(origMatrix, perm);
+    origMatrix = reorder.transpose(origMatrix);
+    origMatrix = reorder.permute(origMatrix, perm);
+    origMatrix = reorder.transpose(origMatrix);
+
+    for (let i = 0; i < 100; i += 1) {
+      gra = reorder.mat2graph(permuted_mat);
+      perm = reorder.spectral_order(gra);
+      console.log(perm);
+      for (let j = 0; j < user.length; j += 1) {
+        newUserAxisValues[j] = tempUser[perm[j]];
+      }
+      tempUser = [...newUserAxisValues];
+      console.log(newUserAxisValues);
+      permuted_mat = reorder.permute(permuted_mat, perm);
+      permuted_mat = reorder.transpose(permuted_mat);
+      permuted_mat = reorder.permute(permuted_mat, perm);
+      permuted_mat = reorder.transpose(permuted_mat);
+      origMatrix = reorder.permute(origMatrix, perm);
+      origMatrix = reorder.transpose(origMatrix);
+      origMatrix = reorder.permute(origMatrix, perm);
+      origMatrix = reorder.transpose(origMatrix);
+    }
+    // let permuted_mat = matrix;
+    // let newUserAxisValues = user;
+    console.log(permuted_mat);
+    console.log(newUserAxisValues);
+
+    const x = d3.scaleBand()
+      .range([0, axisDomain.length * 20])
+      .domain(axisDomain)
       .padding(0.05);
-    svg.append('g').call(d3.axisLeft(y));
+
+    const leftSvg = svg.append('g')
+      .attr('transform', 'scale(1) translate(100,100)');
+    leftSvg.append('g')
+      .attr('class', 'authorAxisX')
+      .call(d3.axisTop(x).tickFormat((d, i) => newUserAxisValues[i]));
+
+    const y = d3.scaleBand()
+      .range([0, axisDomain.length * 20])
+      .domain(axisDomain)
+      .padding(0.05);
+    leftSvg.append('g').call(d3.axisLeft(y).tickFormat((d, i) => newUserAxisValues[i]));
 
     // Build color scale
     const userColor = userColorScaleArray(data);
-    // console.log(userColor);
     const myColor = d3.scaleLinear()
       .range([d3.interpolateYlOrRd(0), d3.interpolateYlOrRd(0.8)])
       .domain([0, 1]);
     const scaleExponent = d3.scalePow().exponent(2);
 
-    // Read the data
-    svg.append('g').selectAll()
-      .data(similarity)
-      .enter()
-      .append('rect')
-      .attr('x', d => x(d.target))
-      .attr('y', d => y(d.source))
-      .attr('width', x.bandwidth())
-      .attr('height', y.bandwidth())
-      .style('fill', d => myColor(d.value / 2))
-      .append('title')
-      .text(d => d.value);
-    svg.append('g').selectAll()
-      .data(similarity)
-      .enter()
-      .append('rect')
-      .attr('x', d => x(d.source))
-      .attr('y', d => y(d.target))
-      .attr('width', x.bandwidth())
-      .attr('height', y.bandwidth())
-      .style('fill', d => myColor(d.value / 2))
-      .append('title')
-      .text(d => d.value);
-
+    for (let i = 0; i < permuted_mat.length; i += 1) {
+      leftSvg.append('g').selectAll()
+        .data(permuted_mat[i])
+        .enter()
+        .append('rect')
+        .attr('x', (d, index) => x(index))
+        .attr('y', y(i))
+        .attr('width', x.bandwidth())
+        .attr('height', y.bandwidth())
+        .style('fill', d => myColor(d / 2))
+        .append('title')
+        .text(d => d);
+    }
+    const rightSvg = svg.append('g')
+      .attr('transform', 'scale(1) translate(1500,100)');
+    rightSvg.append('g').attr('class', 'authorAxisX')
+      .call(d3.axisTop(x).tickFormat((d, i) => newUserAxisValues[i]));
+    rightSvg.append('g').call(d3.axisLeft(y).tickFormat((d, i) => newUserAxisValues[i]));
+    for (let i = 0; i < permuted_mat.length; i += 1) {
+      rightSvg.append('g').selectAll()
+        .data(origMatrix[i])
+        .enter()
+        .append('rect')
+        .attr('x', (d, index) => x(index))
+        .attr('y', y(i))
+        .attr('width', x.bandwidth())
+        .attr('height', y.bandwidth())
+        .style('fill', d => myColor(d / 2))
+        .append('title')
+        .text(d => d);
+    }
 
     svg.selectAll('g.authorAxisX')
       .selectAll('text')

@@ -23,6 +23,18 @@ class OpinionLeaderView extends React.Component {
     let commentTimelineSvg = d3.select('#commentTimeline');
     let userSimilaritySvg = d3.select('#timeLine');
 
+    function resArrayToArticlesArray(resArray) {
+      const articlesArray = [];
+      resArray.forEach((arr) => {
+        arr.forEach((a) => {
+          if (!articlesArray.some(e => e.article_id === a.article_id)) {
+            articlesArray.push(a);
+          }
+        });
+      });
+      return articlesArray;
+    }
+
     function getReqstr(id) {
       const {
         menuprops: {
@@ -60,7 +72,7 @@ class OpinionLeaderView extends React.Component {
     }
 
     function buildUserList(userLists, articles, userId) {
-      console.log(articles, userId);
+      // console.log(articles, userId);
       const authorList = [];
       let totalReplyCount = 0;
       articles.forEach((article) => {
@@ -79,26 +91,65 @@ class OpinionLeaderView extends React.Component {
 
     function handleSubmit(e) {
       // e.preventDefault();
+      const userNumsPerRequest = 50;
+      const { length } = e;
       const myRequest = [];
       const userListArray = [];
-      const min = Math.min(e.length, 50);
-      const fixedUserArr = e.slice(0, min);
-      const url = encodeURI(getReqstr(fixedUserArr));
-      myRequest.push(new Request(url, {
-        method: 'get',
-      }));
+      const min = Math.min(e.length, userNumsPerRequest);
+      const fixedUserArr = [e.slice(0, min)];
+      console.log(fixedUserArr);
+      const url = [encodeURI(getReqstr(fixedUserArr[0]))];
+      for (let i = 1; i < length / userNumsPerRequest; i += 1) {
+        fixedUserArr.push(e.slice(i * userNumsPerRequest, (i + 1) * userNumsPerRequest));
+        console.log(fixedUserArr);
+        url.push(encodeURI(getReqstr(fixedUserArr[i])));
+      }
+      url.forEach((u) => {
+        myRequest.push(new Request(u, {
+          method: 'get',
+        }));
+      });
+      console.log(url);
       console.log(myRequest);
       const resArr = [];
       fetch(myRequest[0])
         .then(response => response.json())
         .then((response) => {
           resArr.push(response[0][0]);
-          for (let i = 0; i < fixedUserArr.length; i += 1) {
-            buildUserList(userListArray, response[0][0], fixedUserArr[i]);
+          for (let j = 0; j < fixedUserArr[0].length; j += 1) {
+            buildUserList(userListArray, response[0][0], fixedUserArr[0][j]);
           }
-          const articlesArr = resArr[0];
-          userActivityTimeline(articlesArr, commentTimelineSvg, fixedUserArr);
-          userSimilarityGraph(userListArray, userSimilaritySvg, fixedUserArr);
+          if (myRequest.length === 1) {
+            userActivityTimeline(response[0][0], commentTimelineSvg, fixedUserArr[0]);
+            userSimilarityGraph(userListArray, userSimilaritySvg, fixedUserArr[0]);
+          }
+          for (let i = 1; i < myRequest.length; i += 1) {
+            fetch(myRequest[i])
+              .then(res => res.json())
+              .then((res) => {
+                resArr.push(res[0][0]);
+                console.log(res[0][0]);
+                for (let j = 0; j < fixedUserArr[i].length; j += 1) {
+                  buildUserList(userListArray, res[0][0], fixedUserArr[i][j]);
+                }
+                return res;
+              })
+              .then(() => {
+                if (i === myRequest.length - 1) {
+                  const articlesArr = resArrayToArticlesArray(resArr);
+                  console.log(articlesArr);
+                  let usrArr = [];
+                  for (let j = 0; j < fixedUserArr.length; j += 1) {
+                    usrArr = usrArr.concat(fixedUserArr[j]);
+                  }
+                  userActivityTimeline(articlesArr, commentTimelineSvg, usrArr);
+                  userSimilarityGraph(userListArray, userSimilaritySvg, usrArr);
+                }
+              });
+          }
+          // const articlesArr = resArr[0];
+          // userActivityTimeline(articlesArr, commentTimelineSvg, fixedUserArr);
+          // userSimilarityGraph(userListArray, userSimilaritySvg, fixedUserArr);
         })
         .catch((error) => {
           console.log(error);
