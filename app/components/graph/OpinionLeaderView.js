@@ -91,17 +91,17 @@ class OpinionLeaderView extends React.Component {
 
     function handleSubmit(e) {
       // e.preventDefault();
-      const userNumsPerRequest = 50;
+      const userNumsPerRequest = 30;
       const { length } = e;
       const myRequest = [];
       const userListArray = [];
       const min = Math.min(e.length, userNumsPerRequest);
       const fixedUserArr = [e.slice(0, min)];
-      console.log(fixedUserArr);
+      // console.log(fixedUserArr);
       const url = [encodeURI(getReqstr(fixedUserArr[0]))];
       for (let i = 1; i < length / userNumsPerRequest; i += 1) {
         fixedUserArr.push(e.slice(i * userNumsPerRequest, (i + 1) * userNumsPerRequest));
-        console.log(fixedUserArr);
+        // console.log(fixedUserArr);
         url.push(encodeURI(getReqstr(fixedUserArr[i])));
       }
       url.forEach((u) => {
@@ -109,8 +109,8 @@ class OpinionLeaderView extends React.Component {
           method: 'get',
         }));
       });
-      console.log(url);
-      console.log(myRequest);
+      // console.log(url);
+      // console.log(myRequest);
       const resArr = [];
       fetch(myRequest[0])
         .then(response => response.json())
@@ -128,16 +128,17 @@ class OpinionLeaderView extends React.Component {
               .then(res => res.json())
               .then((res) => {
                 resArr.push(res[0][0]);
-                console.log(res[0][0]);
+                // console.log(res[0][0]);
                 for (let j = 0; j < fixedUserArr[i].length; j += 1) {
                   buildUserList(userListArray, res[0][0], fixedUserArr[i][j]);
                 }
                 return res;
               })
               .then(() => {
-                if (i === myRequest.length - 1) {
+                console.log(`recieveDataCount: ${resArr.length}, total: ${myRequest.length}`);
+                if (resArr.length === myRequest.length) {
                   const articlesArr = resArrayToArticlesArray(resArr);
-                  console.log(articlesArr);
+                  // console.log(articlesArr);
                   let usrArr = [];
                   for (let j = 0; j < fixedUserArr.length; j += 1) {
                     usrArr = usrArr.concat(fixedUserArr[j]);

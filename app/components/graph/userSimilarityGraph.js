@@ -117,7 +117,7 @@ export default function userSimilarityGraph(data, svg, user) {
     const matrix = [];
     let origMatrix = [];
     for (let i = 0; i < user.length; i += 1) {
-      matrix.push(Array(user.length).fill(2));
+      matrix.push(Array(user.length).fill(0.1));
       origMatrix.push(Array(user.length).fill(2));
     }
     const axisDomain = [];
@@ -154,7 +154,7 @@ export default function userSimilarityGraph(data, svg, user) {
       newUserAxisValues[j] = tempUser[perm[j]];
     }
     tempUser = [...newUserAxisValues];
-    console.log(newUserAxisValues);
+    // console.log(newUserAxisValues);
     let permuted_mat = reorder.permute(matrix, perm);
     permuted_mat = reorder.transpose(permuted_mat);
     permuted_mat = reorder.permute(permuted_mat, perm);
@@ -164,7 +164,7 @@ export default function userSimilarityGraph(data, svg, user) {
     origMatrix = reorder.permute(origMatrix, perm);
     origMatrix = reorder.transpose(origMatrix);
 
-    for (let i = 0; i < 100; i += 1) {
+    for (let i = 0; i < 10; i += 1) {
       gra = reorder.mat2graph(permuted_mat);
       perm = reorder.spectral_order(gra);
       console.log(perm);
@@ -172,7 +172,7 @@ export default function userSimilarityGraph(data, svg, user) {
         newUserAxisValues[j] = tempUser[perm[j]];
       }
       tempUser = [...newUserAxisValues];
-      console.log(newUserAxisValues);
+      // console.log(newUserAxisValues);
       permuted_mat = reorder.permute(permuted_mat, perm);
       permuted_mat = reorder.transpose(permuted_mat);
       permuted_mat = reorder.permute(permuted_mat, perm);
@@ -193,7 +193,7 @@ export default function userSimilarityGraph(data, svg, user) {
       .padding(0.05);
 
     const leftSvg = svg.append('g')
-      .attr('transform', 'scale(1) translate(100,100)');
+      .attr('transform', 'scale(0.5) translate(100,100)');
     leftSvg.append('g')
       .attr('class', 'authorAxisX')
       .call(d3.axisTop(x).tickFormat((d, i) => newUserAxisValues[i]));
@@ -225,7 +225,7 @@ export default function userSimilarityGraph(data, svg, user) {
         .text(d => d);
     }
     const rightSvg = svg.append('g')
-      .attr('transform', 'scale(1) translate(1500,100)');
+      .attr('transform', 'scale(0.5) translate(1500,100)');
     rightSvg.append('g').attr('class', 'authorAxisX')
       .call(d3.axisTop(x).tickFormat((d, i) => newUserAxisValues[i]));
     rightSvg.append('g').call(d3.axisLeft(y).tickFormat((d, i) => newUserAxisValues[i]));

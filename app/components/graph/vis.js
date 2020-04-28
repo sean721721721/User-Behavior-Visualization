@@ -16,6 +16,9 @@ import * as d3 from 'd3';
 // import { Row, Form } from 'antd';
 import Chart from 'react-google-charts';
 import netClustering from 'netclustering';
+import * as science from 'science';
+import * as Queue from 'tiny-queue';
+import * as reorder from 'reorder.js/index';
 import sentiment from 'multilang-sentiment';
 import { string } from 'prop-types';
 import * as jsnx from 'jsnetworkx';
@@ -98,6 +101,35 @@ class Graph extends Component {
   }
 
   drawwithlabels() {
+    let matrix = [
+      [0, 0, 0, 1, 1, 1, 0, 0],
+      [1, 1, 1, 0, 0, 0, 0, 0],
+      [1, 1, 1, 0, 0, 0, 0, 0],
+      [0, 0, 0, 1, 1, 1, 0, 0],
+      [1, 1, 1, 0, 0, 0, 0, 0],
+      [0, 0, 0, 1, 1, 1, 0, 0],
+      [0, 0, 0, 0, 0, 0, 1, 0],
+      [0, 0, 0, 0, 0, 0, 0, 1],
+    ]
+    let gra = reorder.mat2graph(matrix);
+    let perm = reorder.spectral_order(gra);
+    console.log(perm);
+    let permuted_mat = reorder.permute(matrix, perm);
+    // permuted_mat = reorder.transpose(permuted_mat);
+    // permuted_mat = reorder.permute(permuted_mat, perm);
+    // permuted_mat = reorder.transpose(permuted_mat);
+
+    // for (let i = 0; i < 10; i += 1) {
+    //   gra = reorder.mat2graph(permuted_mat);
+    //   perm = reorder.spectral_order(gra);
+    //   console.log(perm);
+    //   permuted_mat = reorder.permute(permuted_mat, perm);
+    //   permuted_mat = reorder.transpose(permuted_mat);
+    //   permuted_mat = reorder.permute(permuted_mat, perm);
+    //   permuted_mat = reorder.transpose(permuted_mat);
+
+    // }
+    console.log(permuted_mat);
 
     console.log('draw');
     console.log(this.props);
