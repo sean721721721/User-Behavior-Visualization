@@ -402,10 +402,12 @@ export default function OpinionLeader(cellNodes, cellLinks, beforeThisDate,
     selectedUserDiv.selectAll('*').remove();
 
     const buttonDiv = selectedUserDiv.append('div')
-      .attr('class', 'p-2 d-flex justify-content-center');
+      .attr('class', 'p-2 d-flex justify-content-center')
+      .attr('id', 'submitDiv');
     buttonDiv.append('button')
       .style('type', 'button')
       .attr('class', 'btn btn-primary')
+      .attr('id', 'submitUsers')
       .text('Submit!')
       .on('click', (d) => {
         console.log(d);

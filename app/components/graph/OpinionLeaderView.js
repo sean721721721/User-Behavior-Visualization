@@ -7,6 +7,7 @@ import { OpinionLeader } from './OpinionLeader';
 import { commentTimeline } from './commentTimeline';
 import { userActivityTimeline } from './userActivityTimeline';
 import { userSimilarityGraph } from './userSimilarityGraph';
+import { loading } from './loading';
 import WordTree from './wordTree';
 
 class OpinionLeaderView extends React.Component {
@@ -111,11 +112,13 @@ class OpinionLeaderView extends React.Component {
       });
       // console.log(url);
       // console.log(myRequest);
+      loading(0, myRequest.length, commentTimelineSvg);
       const resArr = [];
       fetch(myRequest[0])
         .then(response => response.json())
         .then((response) => {
           resArr.push(response[0][0]);
+          loading(resArr.length, myRequest.length, commentTimelineSvg);
           for (let j = 0; j < fixedUserArr[0].length; j += 1) {
             buildUserList(userListArray, response[0][0], fixedUserArr[0][j]);
           }
@@ -128,6 +131,7 @@ class OpinionLeaderView extends React.Component {
               .then(res => res.json())
               .then((res) => {
                 resArr.push(res[0][0]);
+                loading(resArr.length, myRequest.length, commentTimelineSvg);
                 // console.log(res[0][0]);
                 for (let j = 0; j < fixedUserArr[i].length; j += 1) {
                   buildUserList(userListArray, res[0][0], fixedUserArr[i][j]);

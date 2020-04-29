@@ -18,84 +18,6 @@ export default function userSimilarityGraph(data, svg, user) {
   console.log(data);
   console.log(user);
   svg.selectAll('*').remove();
-  // svg.attr('viewBox', '0 0 960 500');
-  // const h = parseFloat(d3.select('#timeLine').style('height'));
-  // const w = parseFloat(d3.select('#timeLine').style('width'));
-  // const xScaleWidth = w - 110;
-  // const timePeriod = 1;
-  // const timeScaleObjArr = [];
-  // const color = d3.schemeTableau10;
-  // const width = 500;
-  // const height = 500;
-
-  // const nodes = user.map(e => ({ name: e }));
-  // console.log(nodes);
-  // const userTotalReplyCount = data.map(e => e.totalReplyCount);
-  // console.log(userTotalReplyCount);
-  // const edges = computeUserSimilarity(data, user);
-  // const edgesWeight = edges.map(e => e.value);
-  // console.log(edges);
-  // console.log(edgesWeight);
-  // const linkWidthScale = d3.scaleLinear()
-  //   .domain([Math.min(...edgesWeight), Math.max(...edgesWeight)])
-  //   .range([0, 20]);
-  // const linkStrengthScale = d3.scaleLinear()
-  //   .domain([Math.min(...edgesWeight), Math.max(...edgesWeight)])
-  //   .range([0, 1]);
-
-  // const nodesSize = d3.scaleLinear()
-  //   .domain([Math.min(...userTotalReplyCount), Math.max(...userTotalReplyCount)])
-  //   .range([2, 10]);
-
-  // const dataset = { nodes: data, edges };
-
-  // svg = svg.append('g').attr('transform', 'scale(1, 1)');
-
-  // const simulation = d3.forceSimulation()
-  //   .force('link', d3.forceLink().id(d => d.id))
-  //   .force('charge', d3.forceManyBody().strength(-1000))
-  //   .force('center', d3.forceCenter(w / 2, h / 2));
-
-  // const link = svg.selectAll('line')
-  //   .data(dataset.edges)
-  //   .enter()
-  //   .append('line')
-  //   .style('stroke', '#ccc')
-  //   .style('stroke-opacity', 0.5)
-  //   .style('stroke-width', d => linkWidthScale(d.value));
-
-  // const node = svg.append('g')
-  //   .attr('class', 'nodes')
-  //   .selectAll('g')
-  //   .data(dataset.nodes)
-  //   .enter()
-  //   .append('g');
-
-  // const circles = node.append('circle')
-  //   .attr('r', d => nodesSize(d.totalReplyCount))
-  //   .attr('fill', (d, i) => color[i])
-  //   .call(d3.drag()
-  //     .on('start', dragstarted)
-  //     .on('drag', dragged)
-  //     .on('end', dragended));
-
-  // const lables = node.append('text')
-  //   .text(d => d.id)
-  //   .attr('x', 6)
-  //   .attr('y', 3);
-
-  // node.append('title')
-  //   .text(d => d.id);
-
-  // simulation
-  //   .nodes(dataset.nodes)
-  //   .on('tick', ticked);
-
-  // simulation.force('link')
-  //   .links(dataset.edges)
-  //   .distance(d => 50)
-  //   // .strength(d => Math.min(1, 0.1 * d.value));
-  //   .strength(d => linkStrengthScale(d.value));
   // set the dimensions and margins of the graph
   const margin = {
     top: 30, right: 30, bottom: 30, left: 30,
@@ -125,16 +47,20 @@ export default function userSimilarityGraph(data, svg, user) {
       axisDomain.push(i);
     }
     similarity.forEach((e) => {
-      matrix[user.findIndex(u => u === e.source)][user.findIndex(u => u === e.target)] = e.value;
-      matrix[user.findIndex(u => u === e.target)][user.findIndex(u => u === e.source)] = e.value;
-      origMatrix[user.findIndex(u => u === e.source)][user.findIndex(u => u === e.target)] = e.value;
-      origMatrix[user.findIndex(u => u === e.target)][user.findIndex(u => u === e.source)] = e.value;
+      const sourceUserIndex = user.findIndex(u => u === e.source);
+      const targetUserIndex = user.findIndex(u => u === e.target);
+      matrix[sourceUserIndex][targetUserIndex] = e.value;
+      matrix[targetUserIndex][sourceUserIndex] = e.value;
+      origMatrix[sourceUserIndex][targetUserIndex] = e.value;
+      origMatrix[targetUserIndex][sourceUserIndex] = e.value;
     });
+
     console.log(origMatrix);
     console.log(similarity);
+
     // enlarge the difference between user
     for (let i = 0; i < user.length; i += 1) {
-      matrix[i] = matrix[i].map(e => (e >= 1 ? 2 : e));
+      matrix[i] = matrix[i].map(e => (e >= 1.5 ? 2 : 0));
       // matrix[i] = matrix[i].map(e => (e < 1.5 && e >= 1 ? 1 : e));
       // matrix[i] = matrix[i].map(e => (e < 1 ? 0 : e));
       // origMatrix[i] = origMatrix[i].map(e => (e < 1 ? 0 : 2));
@@ -210,6 +136,36 @@ export default function userSimilarityGraph(data, svg, user) {
       .range([d3.interpolateYlOrRd(0), d3.interpolateYlOrRd(0.8)])
       .domain([0, 1]);
     const scaleExponent = d3.scalePow().exponent(2);
+    const Tooltip = d3.select('.heatMap')
+      .append('div')
+      .style('opacity', 0)
+      .attr('class', 'tooltip')
+      .style('background-color', 'white')
+      .style('border', 'solid')
+      .style('border-width', '2px')
+      .style('border-radius', '5px')
+      .style('padding', '5px');
+
+    // Three function that change the tooltip when user hover / move / leave a cell
+    const mouseover = (d) => {
+      console.log('mouseover');
+      console.log(this);
+      Tooltip
+        .style('opacity', 1)
+        .html(`similarity: ${Math.round(d * 100) / 100}`)
+        .style('left', `${d3.event.pageX + 25}px`)
+        .style('top', `${d3.event.pageY}px`);
+      d3.select(this)
+        .style('stroke', 'black')
+        .style('opacity', 1);
+    };
+    const mouseout = (d) => {
+      Tooltip
+        .style('opacity', 0);
+      d3.select(this)
+        .style('stroke', 'none')
+        .style('opacity', 0.8);
+    };
 
     for (let i = 0; i < permuted_mat.length; i += 1) {
       leftSvg.append('g').selectAll()
@@ -221,9 +177,10 @@ export default function userSimilarityGraph(data, svg, user) {
         .attr('width', x.bandwidth())
         .attr('height', y.bandwidth())
         .style('fill', d => myColor(d / 2))
-        .append('title')
-        .text(d => d);
+        .on('mouseover', mouseover)
+        .on('mouseout', mouseout);
     }
+
     const rightSvg = svg.append('g')
       .attr('transform', 'scale(0.5) translate(1500,100)');
     rightSvg.append('g').attr('class', 'authorAxisX')
@@ -239,8 +196,8 @@ export default function userSimilarityGraph(data, svg, user) {
         .attr('width', x.bandwidth())
         .attr('height', y.bandwidth())
         .style('fill', d => myColor(d / 2))
-        .append('title')
-        .text(d => d);
+        .on('mouseover', mouseover)
+        .on('mouseout', mouseout);
     }
 
     svg.selectAll('g.authorAxisX')
@@ -279,6 +236,37 @@ export default function userSimilarityGraph(data, svg, user) {
       .range([d3.interpolateRdYlGn(0.4), d3.interpolateRdYlGn(0.1)])
       .domain([1, 10]);
     const scaleExponent = d3.scalePow().exponent(2);
+    const Tooltip = d3.select('#timeLine')
+      .append('div')
+      .style('opacity', 0)
+      .attr('class', 'tooltip')
+      .style('background-color', 'white')
+      .style('border', 'solid')
+      .style('border-width', '2px')
+      .style('border-radius', '5px')
+      .style('padding', '5px');
+
+    // Three function that change the tooltip when user hover / move / leave a cell
+    const mouseover = function (d) {
+      Tooltip
+        .style('opacity', 1);
+      d3.select(this)
+        .style('stroke', 'black')
+        .style('opacity', 1);
+    };
+    const mousemove = function (d) {
+      Tooltip
+        .html(`The exact value of<br>this cell is: ${d.value}`)
+        .style('left', `${d3.mouse(this)[0] + 70}px`)
+        .style('top', `${d3.mouse(this)[1]}px`);
+    };
+    const mouseleave = function (d) {
+      Tooltip
+        .style('opacity', 0);
+      d3.select(this)
+        .style('stroke', 'none')
+        .style('opacity', 0.8);
+    };
 
     // Read the data
     svg.selectAll()
@@ -296,6 +284,9 @@ export default function userSimilarityGraph(data, svg, user) {
           .attr('width', x.bandwidth())
           .attr('height', y.bandwidth())
           .style('fill', d2 => userColor[d.id](scaleExponent(d2.count)))
+          .on('mouseover', mouseover)
+          .on('mousemove', mousemove)
+          .on('mouseleave', mouseleave)
           .append('title')
           .text(d2 => d2.count);
       });
