@@ -75,19 +75,29 @@ class OpinionLeaderView extends React.Component {
     function buildUserList(userLists, articles, userId) {
       // console.log(articles, userId);
       const authorList = [];
+      const articleList = [];
       let totalReplyCount = 0;
       articles.forEach((article) => {
         if (article.messages.some(e => e.push_userid === userId)) {
-          const existedAuthorList = authorList.find(e => e.author === article.author);
+          const existedAuthor = authorList.find(e => e.author === article.author);
+          const existedArticle = articleList.find(e => e.article_id === article.article_id);
           totalReplyCount += 1;
-          if (existedAuthorList) {
-            existedAuthorList.count += 1;
+          if (existedAuthor) {
+            existedAuthor.count += 1;
           } else {
             authorList.push({ author: article.author, count: 1 });
           }
+          if (!existedArticle) {
+            articleList.push(article);
+          }
         }
       });
-      userLists.push({ id: userId, reply: authorList, totalReplyCount });
+      userLists.push({
+        id: userId,
+        reply: authorList,
+        totalReplyCount,
+        repliedArticle: articleList,
+      });
     }
 
     function handleSubmit(e) {

@@ -26,7 +26,34 @@ export default function userActivityTimeline(data, svg, user) {
     .range([0, articleArr.length * 20]);
 
   const xScale = respondingTimeScaleArray(articleArr);
+  const Tooltip = d3.select('.heatMap')
+    .append('div')
+    .style('opacity', 0)
+    .attr('class', 'tooltip')
+    .style('background-color', 'white')
+    .style('border', 'solid')
+    .style('border-width', '2px')
+    .style('border-radius', '5px')
+    .style('padding', '5px');
 
+  // Three function that change the tooltip when user hover / move / leave a cell
+  const mouseover = (d) => {
+    Tooltip
+      .style('opacity', 1)
+      .html(`${d.push_tag} ${d.push_userid}: ${d.push_content}`)
+      .style('left', `${d3.event.pageX + 25}px`)
+      .style('top', `${d3.event.pageY}px`);
+    d3.select(this)
+      .style('stroke', 'black')
+      .style('opacity', 1);
+  };
+  const mouseout = (d) => {
+    Tooltip
+      .style('opacity', 0);
+    d3.select(this)
+      .style('stroke', 'none')
+      .style('opacity', 0.8);
+  };
   const legends = svg.append('g').attr('transform', 'translate(50,25)');
   legends.selectAll('mydots')
     .data(user)
@@ -57,7 +84,8 @@ export default function userActivityTimeline(data, svg, user) {
     .call(d3.axisLeft(yScale));
 
   // Add 1 circle for the group B:
-  svg.selectAll('circle')
+  svg.append('g')
+    .selectAll('circle')
     .data(articleArr)
     .enter()
     .each((d, i) => {
@@ -76,7 +104,9 @@ export default function userActivityTimeline(data, svg, user) {
         .attr('cx', (e) => {
           const date = new Date(e.push_ipdatetime);
           return xScale[i](new Date(date.setFullYear(year)));
-        });
+        })
+        .on('mouseover', mouseover)
+        .on('mouseout', mouseout);
       // .attr('stroke-width', (e) => {
       //   return user.some(u => u === e.push_userid) ? 1 : 0;
       // })
