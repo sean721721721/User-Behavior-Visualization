@@ -11,9 +11,11 @@ import * as science from 'science';
 import * as Queue from 'tiny-queue';
 import * as reorder from 'reorder.js/index';
 import * as math from 'mathjs';
+import { userActivityTimeline } from './userActivityTimeline';
 
-export default function userSimilarityGraph(data, svg, user) {
+export default function userSimilarityGraph(data, svg, user, articles) {
   // console.log(user);
+  let commentTimelineSvg = d3.select('#commentTimeline');
   console.log(math.sqrt(-4));
   console.log(data);
   console.log(user);
@@ -36,24 +38,14 @@ export default function userSimilarityGraph(data, svg, user) {
     svg.attr('height', user.length * 20 + 150);
     svg.attr('width', user.length * 20 + 1500);
     const similarity = computeUserSimilarity(data, user);
-    const matrix = [];
-    let origMatrix = [];
-    for (let i = 0; i < user.length; i += 1) {
-      matrix.push(Array(user.length).fill(0.1));
-      origMatrix.push(Array(user.length).fill(2));
-    }
+    // const matrix = [];
+    // let origMatrix = [];
+    const newUserAxisValues = [];
     const axisDomain = [];
     for (let i = 0; i < user.length; i += 1) {
       axisDomain.push(i);
     }
-    similarity.forEach((e) => {
-      const sourceUserIndex = user.findIndex(u => u === e.source);
-      const targetUserIndex = user.findIndex(u => u === e.target);
-      matrix[sourceUserIndex][targetUserIndex] = e.value;
-      matrix[targetUserIndex][sourceUserIndex] = e.value;
-      origMatrix[sourceUserIndex][targetUserIndex] = e.value;
-      origMatrix[targetUserIndex][sourceUserIndex] = e.value;
-    });
+    const [matrix, origMatrix] = relationToMatrix(similarity);    
 
     console.log(origMatrix);
     console.log(similarity);
@@ -66,52 +58,10 @@ export default function userSimilarityGraph(data, svg, user) {
       // origMatrix[i] = origMatrix[i].map(e => (e < 1 ? 0 : 2));
     }
     console.log(matrix);
-
-    const newUserAxisValues = [];
-    for (let i = 0; i < user.length; i += 1) {
-      newUserAxisValues.push(Array(user.length).fill(''));
-    }
-
-    let gra = reorder.mat2graph(matrix);
-    let perm = reorder.spectral_order(gra);
-    console.log(perm);
-    let tempUser = [...user];
-    for (let j = 0; j < user.length; j += 1) {
-      newUserAxisValues[j] = tempUser[perm[j]];
-    }
-    tempUser = [...newUserAxisValues];
-    // console.log(newUserAxisValues);
-    let permuted_mat = reorder.permute(matrix, perm);
-    permuted_mat = reorder.transpose(permuted_mat);
-    permuted_mat = reorder.permute(permuted_mat, perm);
-    permuted_mat = reorder.transpose(permuted_mat);
-    origMatrix = reorder.permute(origMatrix, perm);
-    origMatrix = reorder.transpose(origMatrix);
-    origMatrix = reorder.permute(origMatrix, perm);
-    origMatrix = reorder.transpose(origMatrix);
-
-    for (let i = 0; i < 10; i += 1) {
-      gra = reorder.mat2graph(permuted_mat);
-      perm = reorder.spectral_order(gra);
-      console.log(perm);
-      for (let j = 0; j < user.length; j += 1) {
-        newUserAxisValues[j] = tempUser[perm[j]];
-      }
-      tempUser = [...newUserAxisValues];
-      // console.log(newUserAxisValues);
-      permuted_mat = reorder.permute(permuted_mat, perm);
-      permuted_mat = reorder.transpose(permuted_mat);
-      permuted_mat = reorder.permute(permuted_mat, perm);
-      permuted_mat = reorder.transpose(permuted_mat);
-      origMatrix = reorder.permute(origMatrix, perm);
-      origMatrix = reorder.transpose(origMatrix);
-      origMatrix = reorder.permute(origMatrix, perm);
-      origMatrix = reorder.transpose(origMatrix);
-    }
-    // let permuted_mat = matrix;
-    // let newUserAxisValues = user;
-    console.log(permuted_mat);
-    console.log(newUserAxisValues);
+    const [
+      permuted_mat,
+      permuted_origMat,
+    ] = matrixReordering(matrix, origMatrix, newUserAxisValues);
 
     const x = d3.scaleBand()
       .range([0, axisDomain.length * 20])
@@ -119,10 +69,16 @@ export default function userSimilarityGraph(data, svg, user) {
       .padding(0.05);
 
     const leftSvg = svg.append('g')
-      .attr('transform', 'scale(0.5) translate(100,100)');
+      .attr('transform', 'scale(1) translate(100,100)');
     leftSvg.append('g')
       .attr('class', 'authorAxisX')
       .call(d3.axisTop(x).tickFormat((d, i) => newUserAxisValues[i]));
+    
+    console.log(leftSvg.selectAll('.authorAxisX .tick'));
+    leftSvg.selectAll('.authorAxisX .tick')
+      .on('click', (d) => {
+        click(d);
+      });
 
     const y = d3.scaleBand()
       .range([0, axisDomain.length * 20])
@@ -148,8 +104,6 @@ export default function userSimilarityGraph(data, svg, user) {
 
     // Three function that change the tooltip when user hover / move / leave a cell
     const mouseover = (d) => {
-      console.log('mouseover');
-      console.log(this);
       Tooltip
         .style('opacity', 1)
         .html(`similarity: ${Math.round(d * 100) / 100}`)
@@ -166,6 +120,19 @@ export default function userSimilarityGraph(data, svg, user) {
         .style('stroke', 'none')
         .style('opacity', 0.8);
     };
+    let selectedUser = [];
+    const click = (d) => {
+      console.log(d);
+      if (!selectedUser.includes(newUserAxisValues[d])) {
+        selectedUser.push(newUserAxisValues[d]);
+      } else {
+        selectedUser = selectedUser.filter(e => e !== newUserAxisValues[d]);
+      }
+      if (selectedUser.length >= 1) {
+        const filteredArticles = articles.filter(art => art.messages.some(m => selectedUser.includes(m.push_userid)));
+        userActivityTimeline(filteredArticles, commentTimelineSvg, selectedUser);
+      }
+    }
 
     for (let i = 0; i < permuted_mat.length; i += 1) {
       leftSvg.append('g').selectAll()
@@ -182,13 +149,13 @@ export default function userSimilarityGraph(data, svg, user) {
     }
 
     const rightSvg = svg.append('g')
-      .attr('transform', 'scale(0.5) translate(1500,100)');
+      .attr('transform', `scale(1) translate(${axisDomain.length * 20 + 200},100)`);
     rightSvg.append('g').attr('class', 'authorAxisX')
       .call(d3.axisTop(x).tickFormat((d, i) => newUserAxisValues[i]));
     rightSvg.append('g').call(d3.axisLeft(y).tickFormat((d, i) => newUserAxisValues[i]));
     for (let i = 0; i < permuted_mat.length; i += 1) {
       rightSvg.append('g').selectAll()
-        .data(origMatrix[i])
+        .data(permuted_origMat[i])
         .enter()
         .append('rect')
         .attr('x', (d, index) => x(index))
@@ -209,6 +176,72 @@ export default function userSimilarityGraph(data, svg, user) {
       .style('text-anchor', 'start');
   }
 
+  function relationToMatrix(sim) {
+    const mat = [];
+    const origMat = [];
+    for (let i = 0; i < user.length; i += 1) {
+      mat.push(Array(user.length).fill(0.1));
+      origMat.push(Array(user.length).fill(2));
+    }
+
+    sim.forEach((e) => {
+      const sourceUserIndex = user.findIndex(u => u === e.source);
+      const targetUserIndex = user.findIndex(u => u === e.target);
+      mat[sourceUserIndex][targetUserIndex] = e.value;
+      mat[targetUserIndex][sourceUserIndex] = e.value;
+      origMat[sourceUserIndex][targetUserIndex] = e.value;
+      origMat[targetUserIndex][sourceUserIndex] = e.value;
+    });
+    return [mat, origMat];
+  }
+
+  function matrixReordering(mat, origMat, userAxis) {
+    for (let i = 0; i < user.length; i += 1) {
+      userAxis.push(Array(user.length).fill(''));
+    }
+
+    let gra = reorder.mat2graph(mat);
+    let perm = reorder.spectral_order(gra);
+    console.log(perm);
+    let tempUser = [...user];
+    for (let j = 0; j < user.length; j += 1) {
+      userAxis[j] = tempUser[perm[j]];
+    }
+    tempUser = [...userAxis];
+    // console.log(userAxis);
+    let permutedMat = reorder.permute(mat, perm);
+    permutedMat = reorder.transpose(permutedMat);
+    permutedMat = reorder.permute(permutedMat, perm);
+    permutedMat = reorder.transpose(permutedMat);
+    let originalMat = reorder.permute(origMat, perm);
+    originalMat = reorder.transpose(originalMat);
+    originalMat = reorder.permute(originalMat, perm);
+    originalMat = reorder.transpose(originalMat);
+
+    for (let i = 0; i < 10; i += 1) {
+      gra = reorder.mat2graph(permutedMat);
+      perm = reorder.spectral_order(gra);
+      console.log(perm);
+      for (let j = 0; j < user.length; j += 1) {
+        userAxis[j] = tempUser[perm[j]];
+      }
+      tempUser = [...userAxis];
+      // console.log(userAxis);
+      permutedMat = reorder.permute(permutedMat, perm);
+      permutedMat = reorder.transpose(permutedMat);
+      permutedMat = reorder.permute(permutedMat, perm);
+      permutedMat = reorder.transpose(permutedMat);
+      originalMat = reorder.permute(originalMat, perm);
+      originalMat = reorder.transpose(originalMat);
+      originalMat = reorder.permute(originalMat, perm);
+      originalMat = reorder.transpose(originalMat);
+    }
+    // let permuted_mat = matrix;
+    // let userAxis = user;
+    console.log(permutedMat);
+    console.log(userAxis);
+    return [permutedMat, originalMat];
+  }
   function heatMapWithAuthor() {
     // Build X scales and axis:
     const x = d3.scaleBand()

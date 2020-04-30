@@ -20,7 +20,7 @@ class OpinionLeaderView extends React.Component {
       totalAuthorInfluence,
       optionsWord,
     } = data;
-    let articleCellSvg = d3.select('#articleCell');
+    let articleCellSvg = d3.select('#graph');
     let commentTimelineSvg = d3.select('#commentTimeline');
     let userSimilaritySvg = d3.select('#timeLine');
 
@@ -124,7 +124,7 @@ class OpinionLeaderView extends React.Component {
           }
           if (myRequest.length === 1) {
             userActivityTimeline(response[0][0], commentTimelineSvg, fixedUserArr[0]);
-            userSimilarityGraph(userListArray, userSimilaritySvg, fixedUserArr[0]);
+            userSimilarityGraph(userListArray, userSimilaritySvg, fixedUserArr[0], response[0][0]);
           }
           for (let i = 1; i < myRequest.length; i += 1) {
             fetch(myRequest[i])
@@ -148,7 +148,7 @@ class OpinionLeaderView extends React.Component {
                     usrArr = usrArr.concat(fixedUserArr[j]);
                   }
                   userActivityTimeline(articlesArr, commentTimelineSvg, usrArr);
-                  userSimilarityGraph(userListArray, userSimilaritySvg, usrArr);
+                  userSimilarityGraph(userListArray, userSimilaritySvg, usrArr, articlesArr);
                 }
               });
           }
@@ -177,15 +177,18 @@ class OpinionLeaderView extends React.Component {
     const { word, optionsWord } = data;
     return (
       <div className="opinionLeaderView">
-        <div className="articleCell">
+        {/* <div className="articleCell">
           <div
             className="opinionLeaderfilterBar"
             id="timeSlider"
             style={{ width: '100%', height: '25px', padding: '0px 10px' }}
           />
           <svg id="articleCell" width="100%" height="94%" />
+        </div> */}
+        <div className="heatMap" style={{ borderRight: '2px solid gray', overflowX: 'scroll', maxHeight: '700px', minHeight: '400px' }}>
+          <svg id="timeLine" width="100%" height="600px" />
         </div>
-        <div className="selectedUserTable d-flex flex-column" style={{ margin: '20px 0px', maxHeight: '700px', minHeight: '400px' }} />
+        {/* <div className="selectedUserTable d-flex flex-column" style={{ margin: '20px 0px', maxHeight: '700px', minHeight: '400px' }} /> */}
         <div
           className="commentTimeline"
           style={{

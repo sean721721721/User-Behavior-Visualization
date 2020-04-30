@@ -381,7 +381,8 @@ path:hover {
     display: grid;
     grid-column: sscol3 / sscol4;
     grid-row: ssrow1 / ssrow2;
-    grid-template-rows: [nwrow1] 30px [nwrow2] 400px [nwrow3] 300px [nwrowend];
+    grid-template-columns: [nwcol1] 8fr [nwcol2] 2fr [nwcolend];
+    grid-template-rows: [nwrow1] 0px [nwrow2] 400px [nwrow3] 300px [nwrowend];
 }  
 
 .filterBar {
@@ -394,7 +395,7 @@ path:hover {
 .termMap {
     // border: 2px solid gray;
     display: grid;
-    // grid-column: sscol3 / sscol4;
+    grid-column: nwcol1 / nwcol2;
     grid-row: nwrow2 / nwrow3;
     // grid-template-rows: [nwrow1] 0.1fr [nwrow2] 0.9fr [nwrowend];
 }
@@ -402,7 +403,7 @@ path:hover {
 .authorList {
     border-top: 2px solid gray;
     display: grid;
-    // grid-column: sscol3 / sscol4;
+    grid-column: nwcol1 / nwcolend;
     grid-row: nwrow3 / nwrowend;
     // grid-template-rows: [nwrow1] 0.1fr [nwrow2] 0.9fr [nwrowend];
 }
@@ -416,7 +417,7 @@ path:hover {
     grid-template-columns: [accol1] 4fr [accol2] 1fr [accol3] 5fr [accolend];
 }
 
-.articleCell {
+.heatMap {
     display: grid;
     grid-column: accol1 / accol2;
     grid-row: acrow1 / acrow2;
@@ -432,8 +433,8 @@ path:hover {
 .selectedUserTable {
     display: grid;
     // border-top: 2px solid gray;
-    grid-column: accol2 / accol3;
-    grid-row: acrow1 / acrow2;
+    grid-column: nwcol2 / nwcolend;
+    grid-row: nwrow2 / nwrow3;
 }
 
 .wordTree {
@@ -442,11 +443,11 @@ path:hover {
     grid-row: acrow1 / acrow2;
 }
 
-.heatMap {
-    display: grid;
-    grid-column: sscol1 / sscolend;
-    grid-row:ssrow3 / ssrowend;
-}
+// .heatMap {
+//     display: grid;
+//     grid-column: sscol1 / sscolend;
+//     grid-row:ssrow3 / ssrowend;
+// }
 
 .detailview {
     overflow-y: scroll;

@@ -101,7 +101,7 @@ class Graph extends Component {
   }
 
   drawwithlabels() {
-    let matrix = [
+    const matrix = [
       [0, 0, 0, 1, 1, 1, 0, 0],
       [1, 1, 1, 0, 0, 0, 0, 0],
       [1, 1, 1, 0, 0, 0, 0, 0],
@@ -110,11 +110,11 @@ class Graph extends Component {
       [0, 0, 0, 1, 1, 1, 0, 0],
       [0, 0, 0, 0, 0, 0, 1, 0],
       [0, 0, 0, 0, 0, 0, 0, 1],
-    ]
-    let gra = reorder.mat2graph(matrix);
-    let perm = reorder.spectral_order(gra);
+    ];
+    const gra = reorder.mat2graph(matrix);
+    const perm = reorder.spectral_order(gra);
     console.log(perm);
-    let permuted_mat = reorder.permute(matrix, perm);
+    const permuted_mat = reorder.permute(matrix, perm);
     // permuted_mat = reorder.transpose(permuted_mat);
     // permuted_mat = reorder.permute(permuted_mat, perm);
     // permuted_mat = reorder.transpose(permuted_mat);
@@ -143,6 +143,8 @@ class Graph extends Component {
     const timeScale = d3.scaleTime().domain([startDate, endDate]).range([0, 100]);
     const { set: propsSet } = this.props;
     let set = JSON.parse(JSON.stringify(propsSet));
+    const authorSet = removeTermLayer(set);
+    console.log(authorSet);
     // console.log(set);
     let link;
     let node;
@@ -829,6 +831,7 @@ class Graph extends Component {
         update();
       }
       function clicked(d) {
+        console.log(d);
         console.log('clicked');
         const opWord = d.titleTerm.split(' ')[0];
         $this.setState({
@@ -896,7 +899,7 @@ class Graph extends Component {
                       tag: 0,
                       value: 1,
                     });
-                    console.log(cellData);
+                    // console.log(cellData);
                     article.message.every((mes) => {
                       let cuttedPushContent = '';
                       mes.cutted_push_content.forEach((w) => {
@@ -1425,6 +1428,20 @@ class Graph extends Component {
       const edge_data = set.links.map(d => [d.source, d.target, d.value]);
       G.addNodesFrom(node_data);
       G.addEdgesFrom(edge_data);
+    }
+
+    function removeTermLayer(data) {
+      if (!data) return [];
+      const { nodes: termNodes } = data;
+      const authorNodes = [];
+      termNodes.forEach((termnode) => {
+        termnode.children.forEach((user) => {
+          if (!authorNodes.includes(e => e.id === user.id)) {
+            authorNodes.push(user);
+          }
+        });
+      });
+      return { children: authorNodes };
     }
 
     function communityDetecting() {

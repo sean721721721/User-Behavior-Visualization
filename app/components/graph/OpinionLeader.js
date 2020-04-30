@@ -24,8 +24,8 @@ import fetch from '../../reducers/fetch';
 
 export default function OpinionLeader(cellNodes, cellLinks, beforeThisDate,
   svg, forceSimulation, totalInfluence, $this, optionsWord, submit) {
-  const w = parseFloat(d3.select('#articleCell').style('width'));
-  const h = parseFloat(d3.select('#articleCell').style('height'));
+  const w = parseFloat(d3.select('#graph').style('width'));
+  const h = parseFloat(d3.select('#graph').style('height'));
   const G = new jsnx.Graph();
   const color = d3.schemeTableau10;
   const articleInfluenceThreshold = 100;
@@ -392,7 +392,7 @@ export default function OpinionLeader(cellNodes, cellLinks, beforeThisDate,
         });
       }
     });
-    console.log(cellNodes);
+    // console.log(cellNodes);
     drawSelectedUserTable(selectedUser);
   }
 
@@ -415,8 +415,10 @@ export default function OpinionLeader(cellNodes, cellLinks, beforeThisDate,
       });
 
     const tableDiv = selectedUserDiv.append('div')
-      .style('border', 'black 1px solid')
-      .style('max-height', '400px')
+      .style('border', 'gray 1px solid')
+      .style('border-right', '0px')
+      .style('border-bottom', '0px')
+      .style('max-height', 'fit-content')
       .style('overflow-y', 'scroll');
     const table = tableDiv.append('table');
     table.append('tr').append('td')
@@ -434,7 +436,6 @@ export default function OpinionLeader(cellNodes, cellLinks, beforeThisDate,
       .on('click', (d) => {
         clickUserTable(d, userArr);
         console.log(userArr);
-
       });
 
     d3.selectAll('.userDataRow').filter(':nth-child(even)')
@@ -448,7 +449,7 @@ export default function OpinionLeader(cellNodes, cellLinks, beforeThisDate,
   }
 
   function selectedUserClick(d) {
-    console.log(d);
+    // console.log(d);
     submit(d);
   }
 
@@ -707,7 +708,7 @@ export default function OpinionLeader(cellNodes, cellLinks, beforeThisDate,
   }
 
   function responderCommunityDetecting(dataNodes, dataLinks) {
-    console.log(dataLinks);
+    // console.log(dataLinks);
     // const filteredLinks = dataLinks.filter(l => l.tag === 1 || l.tag === 0);
     const authorCluster = dataNodes.filter(e => e.influence);
     dataNodes = dataNodes.filter(e => !e.influence);
@@ -722,7 +723,7 @@ export default function OpinionLeader(cellNodes, cellLinks, beforeThisDate,
     // console.log(index, testLinks);
     // console.log(links);
     // console.log(filteredLinks);
-    console.log(dataNodes, links);
+    // console.log(dataNodes, links);
     netClustering.cluster(dataNodes, links);
     console.log('community detecting done');
   }

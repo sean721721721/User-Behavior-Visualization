@@ -9,8 +9,8 @@
 import * as d3 from 'd3';
 
 export default function userActivityTimeline(data, svg, user) {
-  // console.log(user);
-  // console.log(data);
+  console.log(user);
+  console.log(data);
   svg.selectAll('*').remove();
   // svg.attr('viewBox', '0 0 960 500');
   const h = parseFloat(d3.select('.commentTimeline').style('height'));
@@ -26,9 +26,7 @@ export default function userActivityTimeline(data, svg, user) {
     .range([0, articleArr.length * 20]);
 
   const xScale = respondingTimeScaleArray(articleArr);
-  // d3.scaleTime()
-  //   .domain([]) // This is what is written on the Axis: from 0 to 100
-  //   .range([100, 800]); // This is where the axis is placed: from 100 px to 800px
+
   const legends = svg.append('g').attr('transform', 'translate(50,25)');
   legends.selectAll('mydots')
     .data(user)
@@ -69,7 +67,7 @@ export default function userActivityTimeline(data, svg, user) {
         .data(d.messages)
         .enter()
         .append('circle')
-        .attr('r', e => (user.some(u => u === e.push_userid) ? 5 : 0))
+        .attr('r', e => (user.includes(e.push_userid) ? 5 : 0))
         .attr('fill', (e) => {
           const index = user.findIndex(u => u === e.push_userid);
           return index !== -1 ? color[index] : commentTypeColor(e.push_tag);

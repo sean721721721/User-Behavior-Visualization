@@ -294,7 +294,7 @@ class Grid extends React.Component {
   }
 
   handleSubmit(e) {
-    console.log(e);
+    // console.log(e);
     e.preventDefault();
     this.setState(prevState => ({
       ...prevState, isLoading: true, responseError: false, errorType: '',
@@ -303,9 +303,9 @@ class Grid extends React.Component {
     const myRequest = new Request(url, {
       method: 'get',
     });
-    console.log(e);
+    // console.log(e);
     console.log(url);
-    console.log(myRequest);
+    // console.log(myRequest);
     // fetch(myRequest)
     //   .then(res => res.json())
     //   .then((res) => {
