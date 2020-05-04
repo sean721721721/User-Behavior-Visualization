@@ -542,7 +542,9 @@ class Graph extends Component {
       const authorNodes = [];
       termNodes.forEach((termnode) => {
         termnode.children.forEach((user) => {
-          if (!authorNodes.includes(e => e.id === user.id)) {
+          console.log(authorNodes);
+          console.log(authorNodes.some(e => e.id === user.id), user.id);
+          if (!authorNodes.some(e => e.id === user.id)) {
             authorNodes.push(user);
           }
         });
@@ -597,6 +599,9 @@ class Graph extends Component {
           <svg id="timeLine" width="100%" height="600px" />
         </div> */}
         {/* </div> */}
+        <div className="userDailyActivity" style={{ border: '2px solid gray', height: 'fit-content', overflowX: 'scroll' }}>
+          <svg id="userDailyActivity" width="100%" height="100%" style={{}} />
+        </div>
       </div>
     );
   }
