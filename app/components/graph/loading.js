@@ -37,7 +37,7 @@ export default function loading(temp, total, svg) {
       .duration(1000)
       .attr('width', 200 * (temp / total));
     svg.selectAll('text')
-      .text(`${100 * Math.round(temp / total)} %`)
+      .text(`${Math.round(100 * (temp / total))} %`)
       .transition()
       .duration(1000)
       .attr('x', (w / 2 - 100) + 200 * (temp / total) + 10)

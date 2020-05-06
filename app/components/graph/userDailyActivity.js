@@ -1,3 +1,4 @@
+/* eslint-disable no-loop-func */
 /* eslint-disable no-underscore-dangle */
 /* eslint-disable no-console */
 /* eslint-disable linebreak-style */
@@ -11,6 +12,7 @@ import * as d3 from 'd3';
 export default function userDailyActivity(data, user, svg, begin, end) {
   console.log(user);
   console.log(data);
+  console.log(begin);
   svg.selectAll('*').remove();
   const h = parseFloat(d3.select('.commentTimeline').style('height'));
   const w = parseFloat(d3.select('.commentTimeline').style('width'));
@@ -19,15 +21,15 @@ export default function userDailyActivity(data, user, svg, begin, end) {
   console.log(userListByReplyCountPerHours);
   const color = d3.schemeTableau10;
   const myColor = d3.scaleLinear()
-    .range([d3.interpolateYlOrRd(0), d3.interpolateYlOrRd(0.8)])
+    .range([d3.interpolateYlGn(0), d3.interpolateYlGn(0.8)])
     .domain([0, 10]);
   const xScale = getXScale(begin, end);
   const yDomain = getYDomain(begin, end);
   console.log(yDomain);
-  const domain = oneToNArray(24);
+  const xDomain = oneToNArray(24);
   const x = d3.scaleBand()
     .range([0, 24 * gridSize])
-    .domain(domain)
+    .domain(xDomain)
     .padding(0.05);
   const y = d3.scaleBand()
     .range([0, yDomain.length * gridSize])
@@ -83,16 +85,16 @@ export default function userDailyActivity(data, user, svg, begin, end) {
     .attr('text-anchor', 'left')
     .style('alignment-baseline', 'middle');
 
-  svg.attr('height', user.length * (yDomain.length + 5) * gridSize);
+  svg.attr('height', `${200 + user.length * (yDomain.length + 5) * gridSize}`);
   let userOffset = 0;
   for (let i = 0; i < userListByReplyCountPerHours.length; i += 1) {
     if (i !== 0) {
-      userOffset = userOffset + userListByReplyCountPerHours[i - 1].totalDate + 1;
+      userOffset = userOffset + yDomain.length + 10;
     }
     svg.append('g')
       .attr('transform', () => {
-        if (i === 0) return 'translate(100, 100)';
-        return `translate(100, ${userOffset * gridSize + 100})`;
+        if (i === 0) return 'translate(200, 100)';
+        return `translate(200, ${userOffset * gridSize + 100})`;
       })
       .selectAll()
       .data(userListByReplyCountPerHours[i].time)
@@ -100,12 +102,55 @@ export default function userDailyActivity(data, user, svg, begin, end) {
       .append('rect')
       .attr('x', (d, index) => x(d.hours))
       // eslint-disable-next-line no-loop-func
-      .attr('y', d => y(`${d.month}/${d.date}`))
+      .attr('y', d => y(`${d.month + 1}/${d.date}`))
       .attr('width', x.bandwidth())
       .attr('height', x.bandwidth())
       .style('fill', d => myColor(d.reply.length))
+      .attr('border', '0.5px solid black')
       .on('mouseover', d => mouseover(data[i], d))
       .on('mouseout', mouseout);
+
+    svg.append('g')
+      .attr('transform', () => {
+        if (i === 0) return 'translate(10, 100)';
+        return `translate(10, ${userOffset * gridSize + 100})`;
+      })
+      .append('text')
+      .text(userListByReplyCountPerHours[i].id);
+
+    svg.append('g')
+      .attr('class', 'yAxis')
+      .attr('transform', () => {
+        if (i === 0) return 'translate(200, 100)';
+        return `translate(200, ${userOffset * gridSize + 100})`;
+      })
+      .call(d3.axisLeft(y).tickSize(0));
+    svg.append('g')
+      .attr('class', 'xAxis')
+      .attr('transform', () => {
+        if (i === 0) return 'translate(200, 100)';
+        return `translate(200, ${userOffset * gridSize + 100})`;
+      })
+      .call(d3.axisTop(x).tickSize(0));
+    svg.selectAll('.yAxis')
+      .selectAll('.tick')
+      .selectAll('text')
+      .style('color', (d) => {
+        const date = new Date(`${new Date(begin).getFullYear()}/${d}`);
+        console.log(d);
+        console.log(date);
+        console.log(date.getDay());
+        if (date.getDay() > 0 && date.getDay() < 6) return 'black';
+        return 'lightgray';
+      });
+    svg.selectAll('.xAxis')
+      .selectAll('.tick')
+      .selectAll('text')
+      .style('color', (d) => {
+        console.log(d);
+        if (d >= 8 && d <= 18) return 'black';
+        return 'lightgray';
+      });
   }
   // svg.append('g')
   //   .selectAll('circle')
@@ -194,11 +239,11 @@ export default function userDailyActivity(data, user, svg, begin, end) {
     const month = beginDate.getMonth();
     const date = beginDate.getDate();
     const arr = [];
-    arr.push(`${beginDate.getMonth()}/${beginDate.getDate()}`);
+    arr.push(`${beginDate.getMonth() + 1}/${beginDate.getDate()}`);
     for (let i = 0; i < diffDays + 3; i += 1) {
       const tempDate = new Date(beginDate.setDate(beginDate.getDate() + 1));
       // console.log(tempDate);
-      arr.push(`${tempDate.getMonth()}/${tempDate.getDate()}`);
+      arr.push(`${tempDate.getMonth() + 1}/${tempDate.getDate()}`);
     }
     return arr;
   }

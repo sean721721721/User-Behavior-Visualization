@@ -137,7 +137,7 @@ class OpinionLeaderView extends React.Component {
           }
           if (myRequest.length === 1) {
             // userActivityTimeline(response[0][0], commentTimelineSvg, fixedUserArr[0]);
-            userDailyActivity(response[0][0], fixedUserArr[0], commentTimelineSvg, beginDate, endDate);
+            // userDailyActivity(response[0][0], fixedUserArr[0], commentTimelineSvg, beginDate, endDate);
             userSimilarityGraph(userListArray, userSimilaritySvg, fixedUserArr[0], response[0][0]);
           }
           for (let i = 1; i < myRequest.length; i += 1) {
@@ -162,7 +162,7 @@ class OpinionLeaderView extends React.Component {
                     usrArr = usrArr.concat(fixedUserArr[j]);
                   }
                   // userActivityTimeline(articlesArr, commentTimelineSvg, usrArr);
-                  userDailyActivity(articlesArr, usrArr, commentTimelineSvg, beginDate, endDate);
+                  // userDailyActivity(articlesArr, usrArr, commentTimelineSvg, beginDate, endDate);
                   userSimilarityGraph(userListArray, userSimilaritySvg, usrArr, articlesArr);
                 }
               });
