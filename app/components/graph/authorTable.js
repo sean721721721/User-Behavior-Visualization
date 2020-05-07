@@ -106,7 +106,7 @@ export default function AuthorTable(nodes, div, callback) {
     const pushAuthor = JSON.parse(JSON.stringify(d));
     pushAuthor.id = pushAuthor.oldId;
     topicWithSelectedAuthor.children.push(pushAuthor);
-    console.log(topicWithSelectedAuthor);
+    // console.log(topicWithSelectedAuthor);
     callback(topicWithSelectedAuthor, pushAuthor.id);
     authorIndex += 1;
   }

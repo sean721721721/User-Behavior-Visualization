@@ -10,22 +10,22 @@
 import * as d3 from 'd3';
 
 export default function userDailyActivity(data, user, svg, begin, end) {
-  console.log(user);
-  console.log(data);
-  console.log(begin);
+  // console.log(user);
+  // console.log(data);
+  // console.log(begin);
   svg.selectAll('*').remove();
   const h = parseFloat(d3.select('.commentTimeline').style('height'));
   const w = parseFloat(d3.select('.commentTimeline').style('width'));
   const gridSize = 12;
   const userListByReplyCountPerHours = computeUserListByReplyCountPerHours(data, user);
-  console.log(userListByReplyCountPerHours);
+  // console.log(userListByReplyCountPerHours);
   const color = d3.schemeTableau10;
   const myColor = d3.scaleLinear()
     .range([d3.interpolateYlGn(0), d3.interpolateYlGn(0.8)])
     .domain([0, 10]);
   const xScale = getXScale(begin, end);
   const yDomain = getYDomain(begin, end);
-  console.log(yDomain);
+  // console.log(yDomain);
   const xDomain = oneToNArray(24);
   const x = d3.scaleBand()
     .range([0, 24 * gridSize])
@@ -137,9 +137,6 @@ export default function userDailyActivity(data, user, svg, begin, end) {
       .selectAll('text')
       .style('color', (d) => {
         const date = new Date(`${new Date(begin).getFullYear()}/${d}`);
-        console.log(d);
-        console.log(date);
-        console.log(date.getDay());
         if (date.getDay() > 0 && date.getDay() < 6) return 'black';
         return 'lightgray';
       });
@@ -147,7 +144,6 @@ export default function userDailyActivity(data, user, svg, begin, end) {
       .selectAll('.tick')
       .selectAll('text')
       .style('color', (d) => {
-        console.log(d);
         if (d >= 8 && d <= 18) return 'black';
         return 'lightgray';
       });
@@ -194,7 +190,7 @@ export default function userDailyActivity(data, user, svg, begin, end) {
       article.messages.forEach((mes) => {
         const userIndex = userList.findIndex(e => e.id === mes.push_userid);
         if (userIndex !== -1) {
-          console.log(userIndex);
+          // console.log(userIndex);
           const date = new Date(mes.push_ipdatetime).getDate();
           const month = new Date(mes.push_ipdatetime).getMonth();
           const hours = new Date(mes.push_ipdatetime).getHours();

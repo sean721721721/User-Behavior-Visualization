@@ -7005,18 +7005,18 @@ class Graph extends Component {
     mat = reorder.permute(mat, [5, 1, 2, 3, 4, 0]);
     mat = reorder.transpose(mat);
     mat = reorder.permute(mat, [5, 1, 2, 3, 4, 0]);
-    console.log(mat);
+    // console.log(mat);
     let gra = reorder.mat2graph(mat);
     let perm = reorder.spectral_order(gra);
-    console.log(perm);
+    // console.log(perm);
     // console.log(userAxis);
     let permutedMat = reorder.permute(mat, perm);
     permutedMat = reorder.transpose(permutedMat);
     permutedMat = reorder.permute(permutedMat, perm);
     permutedMat = reorder.transpose(permutedMat);
-    console.log(permutedMat);
+    // console.log(permutedMat);
     console.log('draw');
-    console.log(this.props);
+    // console.log(this.props);
     const $this = this;
     const { date } = this.props;
     const { word: titleTermArr } = this.props;
@@ -7028,7 +7028,7 @@ class Graph extends Component {
     const { set: propsSet } = this.props;
     const set = JSON.parse(JSON.stringify(propsSet));
     const authorSet = removeTermLayer(set);
-    console.log(authorSet);
+    // console.log(authorSet);
     const authorTable = d3.select('#authorList');
 
     let link;
@@ -7373,7 +7373,7 @@ class Graph extends Component {
         if (data.links[i].source === data.links[i].target) console.log(data.links[i]);
       }
       // console.log(count);
-      console.log(data);
+      // console.log(data);
     }
     function nodeLinksToArticle(termNode, thresholdOfInfluence, topNumOfComments) {
       termNode.children.every((author) => {
@@ -7424,8 +7424,8 @@ class Graph extends Component {
       const authorNodes = [];
       termNodes.forEach((termnode) => {
         termnode.children.forEach((user) => {
-          console.log(authorNodes);
-          console.log(authorNodes.some(e => e.id === user.id), user.id);
+          // console.log(authorNodes);
+          // console.log(authorNodes.some(e => e.id === user.id), user.id);
           if (!authorNodes.some(e => e.id === user.id)) {
             authorNodes.push(user);
           }
@@ -7436,7 +7436,7 @@ class Graph extends Component {
   }
 
   render() {
-    console.log('render: ', this.state);
+    // console.log('render: ', this.state);
     const {
       cellData,
       beforeThisDate,

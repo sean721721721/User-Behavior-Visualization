@@ -13136,7 +13136,15 @@ class OpinionLeaderView extends React.Component {
         "__v": 0
       }
     ]
-
+    const testSimilarUser = ["sasintw", "ahw12000", "OutBai", "imsphzzz"];
+    const testSimilarUserList = [
+      {id: "sasintw", reply: [1,2,3], totalReplyCount: 6, repliedArticle: [{article_id: 1},{article_id: 2},{article_id: 3}]},
+      {id: "ahw12000", reply: [1,2,3], totalReplyCount: 64, repliedArticle: [{article_id: 4},{article_id: 5},{article_id: 6}]},
+      {id: "OutBai", reply: [1,2,3], totalReplyCount: 24, repliedArticle: [{article_id: 1},{article_id: 3},{article_id: 4}]},
+      {id: "imsphzzz", reply: [1,2,3], totalReplyCount: 88, repliedArticle: [{article_id: 1},{article_id: 2},{article_id: 6}]},
+    ]
+    const articleArr = [1,2,3];
+    userSimilarityGraph(testSimilarUserList, userSimilaritySvg, testSimilarUser, articleArr);
     userDailyActivity(testData, testUser, commentTimelineSvg, beginDate, endDate);
 
   }
