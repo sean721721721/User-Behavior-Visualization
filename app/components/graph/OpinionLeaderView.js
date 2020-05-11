@@ -13142,22 +13142,34 @@ class OpinionLeaderView extends React.Component {
         id: "sasintw",
         reply: [{author: 'a', count: 2}, {author: 'b', count: 1}],
         totalReplyCount: 6,
-        repliedArticle: [{article_id: 1, article_title: 'A'},{article_id: 2, article_title: 'B'},{article_id: 3, article_title: 'C'}]},
+        repliedArticle: [
+          {article_id: 1, article_title: 'A', date: "2019-04-15T00:15:32.000Z", messages:[{push_userid: 'sasintw', push_ipdatetime: "04/15 08:16"},{push_userid: 'ahw12000', push_ipdatetime: "04/15 08:30"}]},
+          {article_id: 2, article_title: 'B', date: "2019-04-15T00:36:32.000Z", messages:[{push_userid: 'sasintw',push_ipdatetime: "04/15 09:51"},{push_userid: 'ahw12000', push_ipdatetime: "04/15 19:22"}]},
+          {article_id: 3, article_title: 'C', date: "2019-04-15T00:42:00.000Z", messages:[{push_userid: 'sasintw',push_ipdatetime: "04/15 09:51"},{push_userid: 'ahw12000', push_ipdatetime: "04/15 19:22"}]}]},
       {
         id: "ahw12000",
         reply: [{author: 'b', count: 2}, {author: 'c', count: 1}],
         totalReplyCount: 64,
-        repliedArticle: [{article_id: 4, article_title: 'D'},{article_id: 5, article_title: 'E'},{article_id: 6, article_title: 'F'}]},
+        repliedArticle: [
+          {article_id: 4, article_title: 'D', date: "2019-04-15T01:02:06.000Z", messages:[{push_userid: 'sasintw',push_ipdatetime: "04/15 09:51"},{push_userid: 'ahw12000', push_ipdatetime: "04/15 19:22"}]},
+          {article_id: 5, article_title: 'E', date: "2019-04-15T01:55:20.000Z", messages:[{push_userid: 'sasintw',push_ipdatetime: "04/15 09:51"},{push_userid: 'ahw12000', push_ipdatetime: "04/15 19:22"}]},
+          {article_id: 6, article_title: 'F', date: "2019-04-15T02:13:24.000Z", messages:[{push_userid: 'sasintw',push_ipdatetime: "04/15 09:51"},{push_userid: 'ahw12000', push_ipdatetime: "04/15 19:22"}]}]},
       {
         id: "OutBai",
         reply: [{author: 'a', count: 1}, {author: 'b', count: 2}],
         totalReplyCount: 24,
-        repliedArticle: [{article_id: 1, article_title: 'A'},{article_id: 3, article_title: 'C'},{article_id: 4, article_title: 'D'}]},
+        repliedArticle: [
+          {article_id: 1, article_title: 'A', date: "2019-04-15T00:15:32.000Z" , messages:[{push_userid: 'sasintw',push_ipdatetime: "04/15 09:51"},{push_userid: 'OutBai', push_ipdatetime: "04/15 19:22"}]},
+          {article_id: 3, article_title: 'C', date: "2019-04-15T00:42:00.000Z", messages:[{push_userid: 'OutBai',push_ipdatetime: "04/15 09:51"},{push_userid: 'ahw12000', push_ipdatetime: "04/15 19:22"}]},
+          {article_id: 4, article_title: 'D', date: "2019-04-15T01:02:06.000Z", messages:[{push_userid: 'sasintw',push_ipdatetime: "04/15 09:51"},{push_userid: 'OutBai', push_ipdatetime: "04/15 19:22"}]}]},
       {
         id: "imsphzzz",
         reply: [{author: 'a', count: 2}, {author: 'c', count: 1}],
         totalReplyCount: 88,
-        repliedArticle: [{article_id: 1, article_title: 'A'},{article_id: 2, article_title: 'B'},{article_id: 6, article_title: 'F'}]},
+        repliedArticle: [
+          {article_id: 1, article_title: 'A', date: "2019-04-15T00:15:32.000Z" , messages:[{push_userid: 'imsphzzz',push_ipdatetime: "04/15 09:51"},{push_userid: 'ahw12000', push_ipdatetime: "04/15 19:22"}]},
+          {article_id: 2, article_title: 'B', date: "2019-04-15T00:36:32.000Z" , messages:[{push_userid: 'sasintw',push_ipdatetime: "04/15 09:51"},{push_userid: 'imsphzzz', push_ipdatetime: "04/15 19:22"}]},
+          {article_id: 6, article_title: 'F', date: "2019-04-15T02:13:24.000Z", messages:[{push_userid: 'imsphzzz',push_ipdatetime: "04/15 09:51"},{push_userid: 'ahw12000', push_ipdatetime: "04/15 19:22"}]}]},
     ]
     const articleArr = [
       {article_title: 'A', author:'a'},

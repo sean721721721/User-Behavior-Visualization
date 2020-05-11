@@ -366,16 +366,30 @@ export default function userSimilarityGraph(data, svg, user, articles) {
         .range([0, newUserAxisValues.length * gridSize]);
 
       for (let i = 0; i < data.length; i += 1) {
-        articleGroup.append('g').selectAll('circle')
+        articleGroup.append('g')
+          .attr('class', data[i].id)
+          .selectAll('circle')
           .data(data[i].repliedArticle)
           .enter()
-          .append('circle')
-          .attr('cx', d => xScale(d.article_title) + (gridSize / 2))
-          .attr('cy', yScale(data[i].id) + (gridSize / 2))
-          .attr('r', 6)
-          .attr('fill', () => {
-            const u = community.find(e => e.id === data[i].id);
-            return color[u.community];
+          .append('g', d => d.article_id)
+          .each((d, index, nodes) => {
+            const lastPushTime = d.messages[d.messages.length - 1].setFullYear(new Date(d.date).getFullYear();
+            const lengthScale = d3.scaleLinear()
+              .domain([new Date(d.date), new Date(lastPushTime)])
+              .range([0, gridSize]);
+
+            d3.select(nodes[index]).selectAll('rect')
+              .data(d.messages.filter(e => e.push_userid === data[i].id))
+              .enter()
+              .append('rect')
+              .attr('x', xScale(d.article_title))
+              .attr('y', yScale(data[i].id))
+              .attr('height', gridSize)
+              .attr('width', gridSize)
+              .attr('fill', () => {
+                const u = community.find(e => e.id === data[i].id);
+                return color[u.community];
+              });
           })
           .append('title')
           .text(d => `${data[i].id} title: ${d.article_title}`);
@@ -423,14 +437,6 @@ export default function userSimilarityGraph(data, svg, user, articles) {
       authorGroup.append('g')
         .attr('class', 'articleYAxis')
         .call(d3.axisLeft(yScale));
-      // authorGroup.selectAll('.articleXAxis')
-      //   .selectAll('.tick')
-      //   .selectAll('text')
-      //   .attr('y', 0)
-      //   .attr('x', 9)
-      //   .attr('dy', '.35em')
-      //   .attr('transform', 'rotate(-90)')
-      //   .style('text-anchor', 'start');
     }
 
     function drawAuthorArticleMatrix() {
