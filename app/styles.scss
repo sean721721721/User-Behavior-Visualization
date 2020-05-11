@@ -419,7 +419,7 @@ path:hover {
 
 .heatMap {
     display: grid;
-    grid-column: accol1 / accol2;
+    grid-column: accol1 / accolend;
     grid-row: acrow1 / acrow2;
 }
 
@@ -437,11 +437,11 @@ path:hover {
     grid-row: nwrow2 / nwrow3;
 }
 
-.wordTree {
-    display: grid;
-    grid-column: accol3 / accolend;
-    grid-row: acrow1 / acrow2;
-}
+// .wordTree {
+//     display: grid;
+//     grid-column: accol3 / accolend;
+//     grid-row: acrow1 / acrow2;
+// }
 
 // .heatMap {
 //     display: grid;

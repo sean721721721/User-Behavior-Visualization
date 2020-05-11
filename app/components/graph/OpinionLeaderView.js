@@ -13138,12 +13138,35 @@ class OpinionLeaderView extends React.Component {
     ]
     const testSimilarUser = ["sasintw", "ahw12000", "OutBai", "imsphzzz"];
     const testSimilarUserList = [
-      {id: "sasintw", reply: [1,2,3], totalReplyCount: 6, repliedArticle: [{article_id: 1},{article_id: 2},{article_id: 3}]},
-      {id: "ahw12000", reply: [1,2,3], totalReplyCount: 64, repliedArticle: [{article_id: 4},{article_id: 5},{article_id: 6}]},
-      {id: "OutBai", reply: [1,2,3], totalReplyCount: 24, repliedArticle: [{article_id: 1},{article_id: 3},{article_id: 4}]},
-      {id: "imsphzzz", reply: [1,2,3], totalReplyCount: 88, repliedArticle: [{article_id: 1},{article_id: 2},{article_id: 6}]},
+      {
+        id: "sasintw",
+        reply: [{author: 'a', count: 2}, {author: 'b', count: 1}],
+        totalReplyCount: 6,
+        repliedArticle: [{article_id: 1, article_title: 'A'},{article_id: 2, article_title: 'B'},{article_id: 3, article_title: 'C'}]},
+      {
+        id: "ahw12000",
+        reply: [{author: 'b', count: 2}, {author: 'c', count: 1}],
+        totalReplyCount: 64,
+        repliedArticle: [{article_id: 4, article_title: 'D'},{article_id: 5, article_title: 'E'},{article_id: 6, article_title: 'F'}]},
+      {
+        id: "OutBai",
+        reply: [{author: 'a', count: 1}, {author: 'b', count: 2}],
+        totalReplyCount: 24,
+        repliedArticle: [{article_id: 1, article_title: 'A'},{article_id: 3, article_title: 'C'},{article_id: 4, article_title: 'D'}]},
+      {
+        id: "imsphzzz",
+        reply: [{author: 'a', count: 2}, {author: 'c', count: 1}],
+        totalReplyCount: 88,
+        repliedArticle: [{article_id: 1, article_title: 'A'},{article_id: 2, article_title: 'B'},{article_id: 6, article_title: 'F'}]},
     ]
-    const articleArr = [1,2,3];
+    const articleArr = [
+      {article_title: 'A', author:'a'},
+      {article_title: 'B', author:'a'},
+      {article_title: 'C', author:'b'},
+      {article_title: 'D', author:'b'},
+      {article_title: 'E', author:'b'},
+      {article_title: 'F', author:'c'},
+    ];
     userSimilarityGraph(testSimilarUserList, userSimilaritySvg, testSimilarUser, articleArr);
     userDailyActivity(testData, testUser, commentTimelineSvg, beginDate, endDate);
 
@@ -13185,7 +13208,7 @@ class OpinionLeaderView extends React.Component {
         >
           <svg id="commentTimeline" width="100%" height="auto" />
         </div>
-        <WordTree word={word} optionsWord={optionsWord} />
+        {/* <WordTree word={word} optionsWord={optionsWord} /> */}
       </div>
     );
   }
