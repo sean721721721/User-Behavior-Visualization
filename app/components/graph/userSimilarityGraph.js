@@ -12,9 +12,9 @@ import * as Queue from 'tiny-queue';
 import * as reorder from 'reorder.js/index';
 import * as math from 'mathjs';
 import netClustering from 'netclustering';
+import CheckboxGroup from 'antd/lib/checkbox/Group';
 import jLouvain from './jLouvain';
 import { userActivityTimeline } from './userActivityTimeline';
-import CheckboxGroup from 'antd/lib/checkbox/Group';
 
 export default function userSimilarityGraph(data, svg, user, articles) {
   // console.log(user);
@@ -36,7 +36,7 @@ export default function userSimilarityGraph(data, svg, user, articles) {
   // Labels of row and columns
   const myGroups = getAllAuthorId(data); // author
   const myVars = user;
-
+  const clickedUser = [];
   adjacencyMatrixNoAuthor();
   // heatMapWithAuthor();
 
@@ -100,7 +100,9 @@ export default function userSimilarityGraph(data, svg, user, articles) {
     const [
       secondOrdering_matByAuthor,
       secondOrdering_origMatByAuthor,
-    ] = matrixReorderingByCommunity(permuted_matByAuthor, permuted_origMatByAuthor, communityByAuthor, newUserAxisValuesByAuthor);
+    ] = matrixReorderingByCommunity(
+      permuted_matByAuthor, permuted_origMatByAuthor, communityByAuthor, newUserAxisValuesByAuthor,
+    );
 
     const gridSize = 20;
     const x = d3.scaleBand()
@@ -109,9 +111,10 @@ export default function userSimilarityGraph(data, svg, user, articles) {
       .padding(0.05);
 
     const leftSvg = group.append('g')
+      .attr('class', 'leftSvg')
       .attr('transform', 'scale(1) translate(100,100)');
     leftSvg.append('g')
-      .attr('transform', `scale(1) translate(0,0)`)
+      .attr('transform', 'scale(1) translate(0,0)')
       .attr('class', 'authorAxisX')
       .call(d3.axisTop(x).tickFormat((d, i) => newUserAxisValues[i]));
 
@@ -123,7 +126,7 @@ export default function userSimilarityGraph(data, svg, user, articles) {
       .attr('class', 'authorAxisY').call(d3.axisLeft(y).tickFormat((d, i) => newUserAxisValues[i]));
     leftSvg.selectAll('.tick')
       .on('click', (d) => {
-        click(d);
+        tickClick(d);
       });
     // Build color scale
     const userColor = userColorScaleArray(data);
@@ -165,8 +168,68 @@ export default function userSimilarityGraph(data, svg, user, articles) {
         .style('stroke', 'none')
         .style('opacity', 0.8);
     };
+
+    const rectClick = (d, index, i) => {
+      const xID = newUserAxisValues[index];
+      const yID = newUserAxisValues[i];
+      const xUser = data.find(e => e.id === xID);
+      const yUser = data.find(e => e.id === yID);
+      console.log(d3.select('.leftSvg').selectAll('rect'));
+      d3.select('.leftSvg')
+        .selectAll('rect')
+        .attr('stroke', 'white');
+      d3.select('.rightSvg')
+        .selectAll('rect')
+        .transition()
+        .duration(500)
+        .attr('stroke', 'white');
+      d3.selectAll(`.x${index}`)
+        .transition()
+        .duration(500)
+        .attr('stroke', 'black');
+      d3.selectAll(`.y${i}`)
+        .transition()
+        .duration(500)
+        .attr('stroke', 'black');
+
+      const bothRepliedArticles = xUser.repliedArticle.filter(
+        e => yUser.repliedArticle.some(e2 => e2.article_id === e.article_id),
+      );
+      console.log(bothRepliedArticles);
+      articles.sort((a, b) => {
+        if (bothRepliedArticles.find(e => e.article_title === b.article_title)) return 1;
+        return -1;
+      });
+      console.log('sorted articles', articles);
+      const bothRepliedAuthors = xUser.reply.filter(
+        e => yUser.reply.some(e2 => e2.author === e.author),
+      );
+
+      bothRepliedAuthors.forEach((e) => {
+        const existed = yUser.reply.find(e2 => e2.author === e.author);
+        e.count += existed.count;
+      });
+
+      authorArr.sort((a, b) => {
+        const speA = bothRepliedAuthors.find(e => e.author === a.id);
+        if (speA) {
+          const speB = bothRepliedAuthors.find(e => e.author === b.id);
+          if (speB) {
+            if (speA.count > speB.count) return -1;
+            return 1;
+          }
+          return -1;
+        }
+        return 1;
+      });
+      console.log('bothRepliedAuthors', bothRepliedAuthors);
+      console.log('sorted authors', authorArr);
+      drawUserRepliedArticleMatrix(articles);
+      drawUserRepliedAuthorMatrix(authorArr);
+      drawAuthorArticleMatrix(articles, authorArr);
+    };
     let selectedUser = [];
-    const click = (d) => {
+    const tickClick = (d) => {
       console.log(d);
       if (!selectedUser.includes(newUserAxisValues[d])) {
         selectedUser.push(newUserAxisValues[d]);
@@ -174,7 +237,9 @@ export default function userSimilarityGraph(data, svg, user, articles) {
         selectedUser = selectedUser.filter(e => e !== newUserAxisValues[d]);
       }
       if (selectedUser.length >= 1) {
-        const filteredArticles = articles.filter(art => art.messages.some(m => selectedUser.includes(m.push_userid)));
+        const filteredArticles = articles.filter(
+          art => art.messages.some(m => selectedUser.includes(m.push_userid)),
+        );
         userActivityTimeline(filteredArticles, commentTimelineSvg, selectedUser);
       }
     };
@@ -185,13 +250,20 @@ export default function userSimilarityGraph(data, svg, user, articles) {
     // const data_ready = pie(d3.entries(data1));
     const [maxRepliedSameArticles, maxRepliedArticles] = computeScaleMaximum();
     console.log('maxRepliedSameArticles, maxRepliedArticles', maxRepliedSameArticles, maxRepliedArticles);
-    const circleRadiusScaleForSameArticles = d3.scaleLinear().domain([0, maxRepliedSameArticles]).range([0, 10]);
-    const circleRadiusScaleForRepliedArticles = d3.scaleLinear().domain([0, maxRepliedArticles]).range([0, 10]);
+    const circleRadiusScaleForSameArticles = d3.scaleLinear()
+      .domain([0, maxRepliedSameArticles]).range([0, 10]);
+    const circleRadiusScaleForRepliedArticles = d3.scaleLinear()
+      .domain([0, maxRepliedArticles]).range([0, 10]);
     for (let i = 0; i < permuted_mat.length; i += 1) {
       leftSvg.append('g').selectAll()
         .data(secondOrdering_mat[i])
         .enter()
         .append('rect')
+        .attr('class', (d, index) => {
+          const xUserID = newUserAxisValues[index];
+          const yUserID = newUserAxisValues[i];
+          return `${xUserID} ${yUserID} y${i} x${index}`;
+        })
         .attr('x', (d, index) => x(index))
         .attr('y', y(i))
         .attr('width', x.bandwidth())
@@ -207,12 +279,14 @@ export default function userSimilarityGraph(data, svg, user, articles) {
           }
           return leftMyColor(d);
         })
+        .attr('stroke', 'white')
         .attr('visibility', (d, index) => {
-          if (i > index) return 'visible';
+          if (i < index) return 'visible';
           return 'hidden';
         })
         .on('mouseover', (d, index) => mouseover(d, index, i))
-        .on('mouseout', mouseout);
+        .on('mouseout', mouseout)
+        .on('click', (d, index) => rectClick(d, index, i));
 
       // circle heatMap
       leftSvg.append('g').selectAll()
@@ -248,7 +322,8 @@ export default function userSimilarityGraph(data, svg, user, articles) {
           return 'hidden';
         })
         .on('mouseover', (d, index) => mouseover(d, index, i))
-        .on('mouseout', mouseout);
+        .on('mouseout', mouseout)
+        .on('click', (d, index) => rectClick(d, index, i));
     }
 
     // piechart in heatmap
@@ -278,12 +353,13 @@ export default function userSimilarityGraph(data, svg, user, articles) {
       .style('text-anchor', 'start');
 
     const rightSvg = group.append('g')
+      .attr('class', 'rightSvg')
       .attr('transform', 'scale(1) translate(100, 100)');
     rightSvg.append('g').attr('class', 'authorAxisX').call(d3.axisTop(x).tickFormat((d, i) => newUserAxisValuesByAuthor[i]));
     rightSvg.append('g').attr('class', 'authorAxisY').call(d3.axisLeft(y).tickFormat((d, i) => newUserAxisValuesByAuthor[i]));
     rightSvg.selectAll('.tick')
       .on('click', (d) => {
-        click(d);
+        tickClick(d);
       });
 
     for (let i = 0; i < permuted_mat.length; i += 1) {
@@ -292,12 +368,27 @@ export default function userSimilarityGraph(data, svg, user, articles) {
         .data(secondOrdering_matByAuthor[i])
         .enter()
         .append('rect')
+        .attr('class', (d, index) => {
+          const actualXUserIndex = newUserAxisValues.findIndex(
+            e => e === newUserAxisValuesByAuthor[index],
+          );
+          const actualYUserIndex = newUserAxisValues.findIndex(
+            e => e === newUserAxisValuesByAuthor[i],
+          );
+          const xUserID = newUserAxisValues[actualXUserIndex];
+          const yUserID = newUserAxisValues[actualYUserIndex];
+          return `${xUserID} ${yUserID} y${actualYUserIndex} x${actualXUserIndex}`;
+        })
         .attr('x', (d, index) => {
-          const actualXUserIndex = newUserAxisValues.findIndex(e => e === newUserAxisValuesByAuthor[index]);
+          const actualXUserIndex = newUserAxisValues.findIndex(
+            e => e === newUserAxisValuesByAuthor[index],
+          );
           return x(actualXUserIndex);
         })
         .attr('y', () => {
-          const actualYUserIndex = newUserAxisValues.findIndex(e => e === newUserAxisValuesByAuthor[i]);
+          const actualYUserIndex = newUserAxisValues.findIndex(
+            e => e === newUserAxisValuesByAuthor[i],
+          );
           return y(actualYUserIndex);
         })
         .attr('width', x.bandwidth())
@@ -313,18 +404,28 @@ export default function userSimilarityGraph(data, svg, user, articles) {
           }
           return leftMyColor(d);
         })
+        .attr('stroke', 'white')
         .attr('visibility', (d, index) => {
-          const actualXUserIndex = newUserAxisValues.findIndex(e => e === newUserAxisValuesByAuthor[index]);
-          const actualYUserIndex = newUserAxisValues.findIndex(e => e === newUserAxisValuesByAuthor[i]);
-          if (actualYUserIndex >= actualXUserIndex) return 'hidden';
+          const actualXUserIndex = newUserAxisValues.findIndex(
+            e => e === newUserAxisValuesByAuthor[index],
+          );
+          const actualYUserIndex = newUserAxisValues.findIndex(
+            e => e === newUserAxisValuesByAuthor[i],
+          );
+          if (actualYUserIndex <= actualXUserIndex) return 'hidden';
           return 'visible';
         })
         .on('mouseover', (d, index) => {
-          const actualXUserIndex = newUserAxisValues.findIndex(e => e === newUserAxisValuesByAuthor[index]);
-          const actualYUserIndex = newUserAxisValues.findIndex(e => e === newUserAxisValuesByAuthor[i]);
+          const actualXUserIndex = newUserAxisValues.findIndex(
+            e => e === newUserAxisValuesByAuthor[index],
+          );
+          const actualYUserIndex = newUserAxisValues.findIndex(
+            e => e === newUserAxisValuesByAuthor[i],
+          );
           mouseover(d, actualXUserIndex, actualYUserIndex);
         })
-        .on('mouseout', mouseout);
+        .on('mouseout', mouseout)
+        .on('click', (d, index) => rectClick(d, index, i));
     }
     rightSvg.selectAll('.authorAxisX')
       .attr('visibility', 'hidden')
@@ -348,16 +449,22 @@ export default function userSimilarityGraph(data, svg, user, articles) {
         const index = community.findIndex(e => e.id === newUserAxisValues[d]);
         return color[community[index].community];
       });
-
-    drawUserRepliedArticleMatrix();
-    drawUserRepliedAuthorMatrix();
-    drawAuthorArticleMatrix();
-    function drawUserRepliedArticleMatrix() {
-      const articleGroup = group.append('g')
-        .attr('transform', `translate(${newUserAxisValues.length * gridSize + 100}, 100)`);
-      const article_titles = articles.map(e => e.article_title);
+    const articleGroup = group.append('g')
+      .attr('class', 'articleGroup')
+      .attr('transform', `translate(${newUserAxisValues.length * gridSize + 100}, 100)`);
+    const authorGroup = group.append('g')
+      .attr('class', 'authorGroup')
+      .attr('transform', `translate(100, ${newUserAxisValues.length * gridSize + 100})`);
+    const authorArticleGroup = group.append('g')
+      .attr('class', 'authorArticleGroup');
+    drawUserRepliedArticleMatrix(articles);
+    drawUserRepliedAuthorMatrix(authorArr);
+    drawAuthorArticleMatrix(articles, authorArr);
+    function drawUserRepliedArticleMatrix(articleArray) {
+      articleGroup.selectAll('*').remove();
+      const article_titles = articleArray.map(e => e.article_title);
       const xScale = d3.scaleBand()
-        .range([0, article_titles.length * gridSize])
+        .range([0, article_titles.length * (gridSize / 4)])
         .domain(article_titles)
         .padding(0.05);
 
@@ -373,19 +480,21 @@ export default function userSimilarityGraph(data, svg, user, articles) {
           .enter()
           .append('g', d => d.article_id)
           .each((d, index, nodes) => {
-            const lastPushTime = d.messages[d.messages.length - 1].setFullYear(new Date(d.date).getFullYear();
-            const lengthScale = d3.scaleLinear()
+            const postYear = new Date(d.date).getFullYear();
+            const lastPushTime = new Date(d.messages[d.messages.length - 1]
+              .push_ipdatetime).setFullYear(postYear);
+            const pushPositionScale = d3.scaleLinear()
               .domain([new Date(d.date), new Date(lastPushTime)])
-              .range([0, gridSize]);
+              .range([0, gridSize - 1]);
 
             d3.select(nodes[index]).selectAll('rect')
               .data(d.messages.filter(e => e.push_userid === data[i].id))
               .enter()
               .append('rect')
-              .attr('x', xScale(d.article_title))
-              .attr('y', yScale(data[i].id))
-              .attr('height', gridSize)
-              .attr('width', gridSize)
+              .attr('x', e => xScale(d.article_title))
+              .attr('y', e => yScale(data[i].id) + pushPositionScale(new Date(e.push_ipdatetime).setFullYear(postYear)))
+              .attr('height', 1)
+              .attr('width', gridSize / 4)
               .attr('fill', () => {
                 const u = community.find(e => e.id === data[i].id);
                 return color[u.community];
@@ -407,16 +516,15 @@ export default function userSimilarityGraph(data, svg, user, articles) {
         .style('text-anchor', 'start');
     }
 
-    function drawUserRepliedAuthorMatrix() {
-      const authorGroup = group.append('g')
-        .attr('transform', `translate(100, ${newUserAxisValues.length * gridSize + 100})`);
+    function drawUserRepliedAuthorMatrix(authorArray) {
+      authorGroup.selectAll('*').remove();
       const xScale = d3.scaleBand()
         .domain(newUserAxisValues)
         .range([0, newUserAxisValues.length * gridSize]);
 
       const yScale = d3.scaleBand()
-        .range([0, authorArr.length * gridSize])
-        .domain(authorArr.map(e => e.id))
+        .range([0, authorArray.length * gridSize])
+        .domain(authorArray.map(e => e.id))
         .padding(0.05);
 
       for (let i = 0; i < data.length; i += 1) {
@@ -424,6 +532,7 @@ export default function userSimilarityGraph(data, svg, user, articles) {
           .data(data[i].reply)
           .enter()
           .append('circle')
+          .attr('class', `${data[i].id}`)
           .attr('cx', d => xScale(data[i].id) + (gridSize / 2))
           .attr('cy', d => yScale(d.author) + (gridSize / 2))
           .attr('r', 6)
@@ -439,22 +548,22 @@ export default function userSimilarityGraph(data, svg, user, articles) {
         .call(d3.axisLeft(yScale));
     }
 
-    function drawAuthorArticleMatrix() {
+    function drawAuthorArticleMatrix(articleArray, authorArray) {
       const offset = newUserAxisValues.length * gridSize + 100;
-      const authorArticleGroup = group.append('g')
-        .attr('transform', `translate(${offset}, ${offset})`);
-      const article_titles = articles.map(e => e.article_title);
+      authorArticleGroup.selectAll('*').remove();
+      authorArticleGroup.attr('transform', `translate(${offset}, ${offset})`);
+      const article_titles = articleArray.map(e => e.article_title);
       const xScale = d3.scaleBand()
         .range([0, article_titles.length * gridSize])
         .domain(article_titles)
         .padding(0.05);
       const yScale = d3.scaleBand()
-        .range([0, authorArr.length * gridSize])
-        .domain(authorArr.map(e => e.id))
+        .range([0, authorArray.length * gridSize])
+        .domain(authorArray.map(e => e.id))
         .padding(0.05);
       for (let i = 0; i < data.length; i += 1) {
         authorArticleGroup.append('g').selectAll('circle')
-          .data(articles)
+          .data(articleArray)
           .enter()
           .append('circle')
           .attr('cx', d => xScale(d.article_title) + (gridSize / 2))
@@ -467,7 +576,6 @@ export default function userSimilarityGraph(data, svg, user, articles) {
           .append('title')
           .text(d => `${data[i].id} title: ${d.article_title}`);
       }
-      
     }
 
     function computeScaleMaximum() {
@@ -480,9 +588,11 @@ export default function userSimilarityGraph(data, svg, user, articles) {
           const xUser = data.find(e => e.id === xUserID);
           const yUser = data.find(e => e.id === yUserID);
           if (i !== j) {
-            const sameArticlesNum = xUser.repliedArticle.filter((value1) => {
-              return yUser.repliedArticle.some(value2 => value2.article_id === value1.article_id);
-            }).length;
+            const sameArticlesNum = xUser.repliedArticle.filter(
+              value1 => yUser.repliedArticle.some(
+                value2 => value2.article_id === value1.article_id,
+              ),
+            ).length;
             maxSame = sameArticlesNum > maxSame ? sameArticlesNum : maxSame;
           }
           maxArticles = xUser.repliedArticle.length > maxArticles
@@ -502,9 +612,9 @@ export default function userSimilarityGraph(data, svg, user, articles) {
           const xUser = data.find(e => e.id === xUserID);
           console.log(xUser);
           const yUser = data.find(e => e.id === yUserID);
-          const sameArticlesNum = xUser.repliedArticle.filter((value1) => {
-            return yUser.repliedArticle.some(value2 => value2.article_id === value1.article_id);
-          }).length;
+          const sameArticlesNum = xUser.repliedArticle.filter(
+            value1 => yUser.repliedArticle.some(value2 => value2.article_id === value1.article_id),
+          ).length;
           const pieData = {
             xUserID: xUser.repliedArticle.length - sameArticlesNum,
             sameAritcles: sameArticlesNum,
@@ -547,7 +657,7 @@ export default function userSimilarityGraph(data, svg, user, articles) {
             console.log(d.data.key);
             if (d.data.key === 'xUserID') return 0;
             if (d.data.key === 'yUserID') return 0;
-            if (d.data.key === 'sameAritcles') return 1;
+            return 1;
           });
       }
     }
@@ -662,97 +772,6 @@ export default function userSimilarityGraph(data, svg, user, articles) {
     permutedMat = reorder.permute(permutedMat, perm);
     permutedMat = reorder.transpose(permutedMat);
     return [permutedMat, origMat];
-  }
-
-  function heatMapWithAuthor() {
-    // Build X scales and axis:
-    const x = d3.scaleBand()
-      .range([0, myGroups.length * 20])
-      .domain(myGroups)
-      .padding(0.05);
-    group.attr('width', myGroups.length * 20 + 60);
-    group = group.append('g').attr('transform', 'translate(60,20)');
-    group.append('g')
-      .attr('transform', `translate(0,${myVars.length * 20})`)
-      .attr('class', 'authorAxisX')
-      .call(d3.axisBottom(x));
-
-    // Build X scales and axis:
-    const y = d3.scaleBand()
-      .range([myVars.length * 20, 0])
-      .domain(myVars)
-      .padding(0.05);
-    group.append('g').call(d3.axisLeft(y));
-
-    // Build color scale
-    const userColor = userColorScaleArray(data);
-    // console.log(userColor);
-    const myColor = d3.scaleLinear()
-      .range([d3.interpolateRdYlGn(0.4), d3.interpolateRdYlGn(0.1)])
-      .domain([1, 10]);
-    const scaleExponent = d3.scalePow().exponent(2);
-    const Tooltip = d3.select('#timeLine')
-      .append('div')
-      .style('opacity', 0)
-      .attr('class', 'tooltip')
-      .style('background-color', 'white')
-      .style('border', 'solid')
-      .style('border-width', '2px')
-      .style('border-radius', '5px')
-      .style('padding', '5px');
-
-    // Three function that change the tooltip when user hover / move / leave a cell
-    const mouseover = function (d) {
-      Tooltip
-        .style('opacity', 1);
-      d3.select(this)
-        .style('stroke', 'black')
-        .style('opacity', 1);
-    };
-    const mousemove = function (d) {
-      Tooltip
-        .html(`The exact value of<br>this cell is: ${d.value}`)
-        .style('left', `${d3.mouse(this)[0] + 70}px`)
-        .style('top', `${d3.mouse(this)[1]}px`);
-    };
-    const mouseleave = function (d) {
-      Tooltip
-        .style('opacity', 0);
-      d3.select(this)
-        .style('stroke', 'none')
-        .style('opacity', 0.8);
-    };
-
-    // Read the data
-    group.selectAll()
-      .data(data)
-      .enter()
-      .each((d, i) => {
-        group.append('g')
-          .attr('class', `${d.id}`)
-          .selectAll('rect')
-          .data(d.reply)
-          .enter()
-          .append('rect')
-          .attr('x', d2 => x(d2.author))
-          .attr('y', y(d.id))
-          .attr('width', x.bandwidth())
-          .attr('height', y.bandwidth())
-          .style('fill', d2 => userColor[d.id](scaleExponent(d2.count)))
-          .on('mouseover', mouseover)
-          .on('mousemove', mousemove)
-          .on('mouseleave', mouseleave)
-          .append('title')
-          .text(d2 => d2.count);
-      });
-
-    group.selectAll('g.authorAxisX')
-      .selectAll('text')
-      .attr('y', 0)
-      .attr('x', 9)
-      .attr('dy', '.35em')
-      .attr('transform', 'rotate(90)')
-      .style('text-anchor', 'start');
   }
 
   function getAllAuthorId(d) {
