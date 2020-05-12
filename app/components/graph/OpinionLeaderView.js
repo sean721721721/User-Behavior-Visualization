@@ -87,8 +87,9 @@ class OpinionLeaderView extends React.Component {
           totalReplyCount += 1;
           if (existedAuthor) {
             existedAuthor.count += 1;
+            existedAuthor.articles.push({ article_title: article.article_title });
           } else {
-            authorList.push({ author: article.author, count: 1 });
+            authorList.push({ author: article.author, count: 1, articles: [{ article_title: article.article_title }] });
           }
           if (!existedArticle) {
             articleList.push(article);
@@ -113,11 +114,11 @@ class OpinionLeaderView extends React.Component {
       const fixedUserArr = [e.slice(0, min)];
       // console.log(fixedUserArr);
       const url = [encodeURI(getReqstr(fixedUserArr[0]))];
-      for (let i = 1; i < length / userNumsPerRequest; i += 1) {
-        fixedUserArr.push(e.slice(i * userNumsPerRequest, (i + 1) * userNumsPerRequest));
-        // console.log(fixedUserArr);
-        url.push(encodeURI(getReqstr(fixedUserArr[i])));
-      }
+      // for (let i = 1; i < length / userNumsPerRequest; i += 1) {
+      //   fixedUserArr.push(e.slice(i * userNumsPerRequest, (i + 1) * userNumsPerRequest));
+      //   // console.log(fixedUserArr);
+      //   url.push(encodeURI(getReqstr(fixedUserArr[i])));
+      // }
       url.forEach((u) => {
         myRequest.push(new Request(u, {
           method: 'get',
@@ -13140,36 +13141,39 @@ class OpinionLeaderView extends React.Component {
     const testSimilarUserList = [
       {
         id: "sasintw",
-        reply: [{author: 'a', count: 2}, {author: 'b', count: 1}],
+        reply: [
+          {author: 'a', count: 2, articles: [{article_title: 'A',article_title: 'B'}]},
+          {author: 'b', count: 1, articles: [{article_title: 'C'}]}
+        ],
         totalReplyCount: 6,
         repliedArticle: [
-          {article_id: 1, article_title: 'A', date: "2019-04-15T00:15:32.000Z", messages:[{push_userid: 'sasintw', push_ipdatetime: "04/15 08:16"},{push_userid: 'ahw12000', push_ipdatetime: "04/15 08:30"}]},
-          {article_id: 2, article_title: 'B', date: "2019-04-15T00:36:32.000Z", messages:[{push_userid: 'sasintw',push_ipdatetime: "04/15 09:51"},{push_userid: 'imsphzzz', push_ipdatetime: "04/15 19:22"}]},
-          {article_id: 3, article_title: 'C', date: "2019-04-15T00:42:00.000Z", messages:[{push_userid: 'sasintw',push_ipdatetime: "04/15 09:51"},{push_userid: 'OutBai', push_ipdatetime: "04/15 19:22"}]}]},
+          {article_id: 1, article_title: 'A', date: "2019-04-15T00:15:32.000Z", messages:[{push_userid: 'sasintw', push_tag: '推',push_ipdatetime: "04/15 08:16"},{push_userid: 'ahw12000', push_tag: '→',push_ipdatetime: "04/15 08:30"}]},
+          {article_id: 2, article_title: 'B', date: "2019-04-15T00:36:32.000Z", messages:[{push_userid: 'sasintw',push_tag: '→',push_ipdatetime: "04/15 09:51"},{push_userid: 'imsphzzz', push_tag: '推',push_ipdatetime: "04/15 19:22"}]},
+          {article_id: 3, article_title: 'C', date: "2019-04-15T00:42:00.000Z", messages:[{push_userid: 'sasintw',push_tag: '推',push_ipdatetime: "04/15 09:51"},{push_userid: 'OutBai', push_tag: '噓',push_ipdatetime: "04/15 19:22"}]}]},
       {
         id: "ahw12000",
-        reply: [{author: 'b', count: 2}, {author: 'c', count: 1}],
+        reply: [{author: 'b', count: 2,articles: [{article_title: 'D',article_title: 'E'}]}, {author: 'c', count: 1,articles: [{article_title: 'F'}]}],
         totalReplyCount: 64,
         repliedArticle: [
-          {article_id: 4, article_title: 'D', date: "2019-04-15T01:02:06.000Z", messages:[{push_userid: 'OutBai',push_ipdatetime: "04/15 09:51"},{push_userid: 'ahw12000', push_ipdatetime: "04/15 19:22"}]},
-          {article_id: 5, article_title: 'E', date: "2019-04-15T01:55:20.000Z", messages:[{push_userid: 'ggggg',push_ipdatetime: "04/15 09:51"},{push_userid: 'ahw12000', push_ipdatetime: "04/15 19:22"}]},
-          {article_id: 6, article_title: 'F', date: "2019-04-15T02:13:24.000Z", messages:[{push_userid: 'imsphzzz',push_ipdatetime: "04/15 09:51"},{push_userid: 'ahw12000', push_ipdatetime: "04/15 19:22"}]}]},
+          {article_id: 4, article_title: 'D', date: "2019-04-15T01:02:06.000Z", messages:[{push_userid: 'OutBai',push_tag: '噓',push_ipdatetime: "04/15 09:51"},{push_userid: 'ahw12000',push_tag: '推', push_ipdatetime: "04/15 19:22"}]},
+          {article_id: 5, article_title: 'E', date: "2019-04-15T01:55:20.000Z", messages:[{push_userid: 'ggggg',push_tag: '推',push_ipdatetime: "04/15 09:51"},{push_userid: 'ahw12000',push_tag: '→', push_ipdatetime: "04/15 19:22"}]},
+          {article_id: 6, article_title: 'F', date: "2019-04-15T02:13:24.000Z", messages:[{push_userid: 'imsphzzz',push_tag: '→',push_ipdatetime: "04/15 09:51"},{push_userid: 'ahw12000', push_tag: '推',push_ipdatetime: "04/15 19:22"}]}]},
       {
         id: "OutBai",
-        reply: [{author: 'a', count: 1}, {author: 'b', count: 2}],
+        reply: [{author: 'a', count: 1,articles: [{article_title: 'A',article_title: 'C'}]}, {author: 'b', count: 2,articles: [{article_title: 'D'}]}],
         totalReplyCount: 24,
         repliedArticle: [
-          {article_id: 1, article_title: 'A', date: "2019-04-15T00:15:32.000Z" , messages:[{push_userid: 'sasintw',push_ipdatetime: "04/15 09:51"},{push_userid: 'OutBai', push_ipdatetime: "04/15 20:22"}]},
-          {article_id: 3, article_title: 'C', date: "2019-04-15T00:42:00.000Z", messages:[{push_userid: 'sasintw',push_ipdatetime: "04/15 09:51"},{push_userid: 'OutBai', push_ipdatetime: "04/15 19:22"}]},
-          {article_id: 4, article_title: 'D', date: "2019-04-15T01:02:06.000Z", messages:[{push_userid: 'ahw12000',push_ipdatetime: "04/15 09:51"},{push_userid: 'OutBai', push_ipdatetime: "04/15 19:22"}]}]},
+          {article_id: 1, article_title: 'A', date: "2019-04-15T00:15:32.000Z" , messages:[{push_userid: 'sasintw',push_tag: '→',push_ipdatetime: "04/15 09:51"},{push_userid: 'OutBai', push_tag: '推',push_ipdatetime: "04/15 20:22"}]},
+          {article_id: 3, article_title: 'C', date: "2019-04-15T00:42:00.000Z", messages:[{push_userid: 'sasintw',push_tag: '推',push_ipdatetime: "04/15 09:51"},{push_userid: 'OutBai', push_tag: '→',push_ipdatetime: "04/15 19:22"}]},
+          {article_id: 4, article_title: 'D', date: "2019-04-15T01:02:06.000Z", messages:[{push_userid: 'ahw12000',push_tag: '推',push_ipdatetime: "04/15 09:51"},{push_userid: 'OutBai',push_tag: '噓', push_ipdatetime: "04/15 19:22"}]}]},
       {
         id: "imsphzzz",
-        reply: [{author: 'a', count: 2}, {author: 'c', count: 1}],
+        reply: [{author: 'a', count: 2,articles: [{article_title: 'A',article_title: 'B'}]}, {author: 'c', count: 1,articles: [{article_title: 'F'}]}],
         totalReplyCount: 88,
         repliedArticle: [
-          {article_id: 1, article_title: 'A', date: "2019-04-15T00:15:32.000Z" , messages:[{push_userid: 'imsphzzz',push_ipdatetime: "04/15 09:51"},{push_userid: 'ahw12000', push_ipdatetime: "04/15 19:22"}]},
-          {article_id: 2, article_title: 'B', date: "2019-04-15T00:36:32.000Z" , messages:[{push_userid: 'sasintw',push_ipdatetime: "04/15 09:51"},{push_userid: 'imsphzzz', push_ipdatetime: "04/15 19:22"}]},
-          {article_id: 6, article_title: 'F', date: "2019-04-15T02:13:24.000Z", messages:[{push_userid: 'imsphzzz',push_ipdatetime: "04/15 09:51"},{push_userid: 'ahw12000', push_ipdatetime: "04/15 19:22"}]}]},
+          {article_id: 1, article_title: 'A', date: "2019-04-15T00:15:32.000Z" , messages:[{push_userid: 'imsphzzz',push_tag: '噓',push_ipdatetime: "04/15 09:51"},{push_userid: 'ahw12000',push_tag: '推', push_ipdatetime: "04/15 19:22"}]},
+          {article_id: 2, article_title: 'B', date: "2019-04-15T00:36:32.000Z" , messages:[{push_userid: 'sasintw',push_tag: '→',push_ipdatetime: "04/15 09:51"},{push_userid: 'imsphzzz',push_tag: '噓', push_ipdatetime: "04/15 19:22"}]},
+          {article_id: 6, article_title: 'F', date: "2019-04-15T02:13:24.000Z", messages:[{push_userid: 'imsphzzz',push_tag: '推',push_ipdatetime: "04/15 10:51"},{push_userid: 'ahw12000',push_tag: '→', push_ipdatetime: "04/15 19:22"}]}]},
     ]
     const articleArr = [
       {
@@ -13177,9 +13181,9 @@ class OpinionLeaderView extends React.Component {
         article_title: 'A',
         date: "2019-04-15T00:15:32.000Z" ,
         messages:[
-          {push_userid: 'imsphzzz',push_ipdatetime: "04/15 09:51"},
-          {push_userid: 'OutBai', push_ipdatetime: "04/15 19:22"},
-          {push_userid: 'sasintw', push_ipdatetime: "04/15 20:22"}
+          {push_userid: 'imsphzzz',push_tag: '推',push_ipdatetime: "04/15 09:51"},
+          {push_userid: 'OutBai',push_tag: '→', push_ipdatetime: "04/15 19:22"},
+          {push_userid: 'sasintw', push_tag: '推',push_ipdatetime: "04/15 20:22"}
         ],
         author:'a',
       },
@@ -13188,8 +13192,8 @@ class OpinionLeaderView extends React.Component {
         article_title: 'B',
         date: "2019-04-15T00:36:32.000Z" ,
         messages:[
-          {push_userid: 'sasintw',push_ipdatetime: "04/15 09:51"},
-          {push_userid: 'imsphzzz', push_ipdatetime: "04/15 19:22"}
+          {push_userid: 'sasintw',push_tag: '噓',push_ipdatetime: "04/15 09:51"},
+          {push_userid: 'imsphzzz', push_tag: '→',push_ipdatetime: "04/15 19:22"}
         ],
         author:'a',
       },
@@ -13198,8 +13202,8 @@ class OpinionLeaderView extends React.Component {
         article_title: 'C',
         date: "2019-04-15T00:42:00.000Z",
         messages:[
-          {push_userid: 'sasintw',push_ipdatetime: "04/15 09:51"},
-          {push_userid: 'OutBai', push_ipdatetime: "04/15 19:22"}
+          {push_userid: 'sasintw',push_tag: '推',push_ipdatetime: "04/15 09:51"},
+          {push_userid: 'OutBai',push_tag: '→', push_ipdatetime: "04/15 19:22"}
         ],
         author:'b',
       },
@@ -13207,21 +13211,21 @@ class OpinionLeaderView extends React.Component {
         article_id: 4,
         article_title: 'D',
         date: "2019-04-15T01:02:06.000Z",
-        messages:[{push_userid: 'ahw12000',push_ipdatetime: "04/15 09:51"},{push_userid: 'OutBai', push_ipdatetime: "04/15 19:22"}],
+        messages:[{push_userid: 'ahw12000',push_tag: '推',push_ipdatetime: "04/15 09:51"},{push_userid: 'OutBai',push_tag: '噓', push_ipdatetime: "04/15 19:22"}],
         author:'b',
       },
       {
         article_id: 5,
         article_title: 'E',
         date: "2019-04-15T01:55:20.000Z",
-        messages:[{push_userid: 'ggggg',push_ipdatetime: "04/15 09:51"},{push_userid: 'ahw12000', push_ipdatetime: "04/15 19:22"}],
+        messages:[{push_userid: 'ggggg',push_tag: '噓',push_ipdatetime: "04/15 09:51"},{push_userid: 'ahw12000', push_tag: '→',push_ipdatetime: "04/15 19:22"}],
         author:'b'
       },
       {
         article_id: 6,
         article_title: 'F',
         date: "2019-04-15T02:13:24.000Z",
-        messages:[{push_userid: 'imsphzzz',push_ipdatetime: "04/15 09:51"},{push_userid: 'ahw12000', push_ipdatetime: "04/15 19:22"}],
+        messages:[{push_userid: 'imsphzzz', push_tag: '噓', push_ipdatetime: "04/15 09:51"},{push_userid: 'ahw12000',push_tag: '推', push_ipdatetime: "04/15 19:22"}],
         author:'c'},
     ];
     userSimilarityGraph(testSimilarUserList, userSimilaritySvg, testSimilarUser, articleArr);
@@ -13253,7 +13257,7 @@ class OpinionLeaderView extends React.Component {
             // top: '15px',
             // left: '15px',
             overflowY: 'scroll',
-            minHeight: '400px',
+            minHeight: '0px',
             maxHeight: '400px',
             // width: '280px',
             // height: '400px',
