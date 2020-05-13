@@ -7016,7 +7016,7 @@ class Graph extends Component {
     permutedMat = reorder.transpose(permutedMat);
     // console.log(permutedMat);
     console.log('draw');
-    // console.log(this.props);
+    console.log(this.props);
     const $this = this;
     const { date } = this.props;
     const { word: titleTermArr } = this.props;

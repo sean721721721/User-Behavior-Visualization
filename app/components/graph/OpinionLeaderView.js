@@ -85,11 +85,22 @@ class OpinionLeaderView extends React.Component {
           const existedAuthor = authorList.find(e => e.author === article.author);
           const existedArticle = articleList.find(e => e.article_id === article.article_id);
           totalReplyCount += 1;
+          const pushContent = article.messages.filter(e => e.push_userid === userId);
           if (existedAuthor) {
             existedAuthor.count += 1;
-            existedAuthor.articles.push({ article_title: article.article_title });
+            existedAuthor.articles.push({
+              article_title: article.article_title,
+              push_content: pushContent,
+            });
           } else {
-            authorList.push({ author: article.author, count: 1, articles: [{ article_title: article.article_title }] });
+            authorList.push({
+              author: article.author,
+              count: 1,
+              articles: [{
+                article_title: article.article_title,
+                push_content: pushContent,
+              }],
+            });
           }
           if (!existedArticle) {
             articleList.push(article);
@@ -13160,7 +13171,7 @@ class OpinionLeaderView extends React.Component {
           {article_id: 6, article_title: 'F', date: "2019-04-15T02:13:24.000Z", messages:[{push_userid: 'imsphzzz',push_tag: '→',push_ipdatetime: "04/15 09:51"},{push_userid: 'ahw12000', push_tag: '推',push_ipdatetime: "04/15 19:22"}]}]},
       {
         id: "OutBai",
-        reply: [{author: 'a', count: 1,articles: [{article_title: 'A',article_title: 'C'}]}, {author: 'b', count: 2,articles: [{article_title: 'D'}]}],
+        reply: [{author: 'a', count: 1,articles: [{article_title: 'A'}]}, {author: 'b', count: 2,articles: [{article_title: 'C',article_title: 'D'}]}],
         totalReplyCount: 24,
         repliedArticle: [
           {article_id: 1, article_title: 'A', date: "2019-04-15T00:15:32.000Z" , messages:[{push_userid: 'sasintw',push_tag: '→',push_ipdatetime: "04/15 09:51"},{push_userid: 'OutBai', push_tag: '推',push_ipdatetime: "04/15 20:22"}]},
@@ -13246,7 +13257,7 @@ class OpinionLeaderView extends React.Component {
           />
           <svg id="articleCell" width="100%" height="94%" />
         </div> */}
-        <div className="heatMap" style={{ borderRight: '2px solid gray', overflowX: 'scroll', maxHeight: '700px', minHeight: '400px' }}>
+        <div className="heatMap" style={{ borderRight: '2px solid gray', overflow: 'scroll', maxHeight: '700px', minHeight: '400px' }}>
           <svg id="timeLine" width="100%" height="600px" />
         </div>
         {/* <div className="selectedUserTable d-flex flex-column" style={{ margin: '20px 0px', maxHeight: '700px', minHeight: '400px' }} /> */}

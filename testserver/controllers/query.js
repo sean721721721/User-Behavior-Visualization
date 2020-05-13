@@ -414,7 +414,7 @@ let callback = function callback(req, res) {
               // })
               // console.log(titleCuttedWords.length, res.result.length);
               console.log('setNodes is done!');
-              return { list: [queryobj1.date, [set, initLinks], titleCuttedWords], previous: [res.previous], next: [res.next] };
+              return { list: [queryobj1.date, [set, initLinks], titleCuttedWords, res.result], previous: [res.previous], next: [res.next] };
               // return { list: [res.result, wordlist, titleWordList, queryobj1.date,titleCuttedWords, set], previous: [res.previous], next: [res.next] };
             }),
           );
