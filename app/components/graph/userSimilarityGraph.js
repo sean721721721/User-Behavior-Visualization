@@ -20,6 +20,7 @@ export default function userSimilarityGraph(data, svg, user, articles) {
   // console.log(user);
   const commentTimelineSvg = d3.select('#commentTimeline');
   console.log(math.sqrt(-4));
+  // data = data.filter(e => e.repliedArticle.length > 1);
   console.log(data);
   console.log(user);
   console.log(articles);
@@ -238,7 +239,7 @@ export default function userSimilarityGraph(data, svg, user, articles) {
       console.log('bothRepliedAuthors', bothRepliedAuthors);
       console.log('sorted authors', authorArr);
       updateArticleMatrix(articles);
-      // drawUserRepliedArticleMatrix(articles);
+      drawUserRepliedArticleMatrix(articles);
       drawUserRepliedAuthorMatrix(authorArr);
       drawAuthorArticleMatrix(articles, authorArr);
     };
@@ -492,7 +493,7 @@ export default function userSimilarityGraph(data, svg, user, articles) {
           .attr('x1', i * xScale.bandwidth())
           .attr('x2', i * xScale.bandwidth())
           .attr('y1', 0)
-          .attr('y2', newUserAxisValues.length * gridSize)
+          .attr('y2', (newUserAxisValues.length + authorArr.length) * gridSize)
           .attr('stroke-width', '1px')
           .attr('stroke', 'black');
       }
@@ -545,7 +546,23 @@ export default function userSimilarityGraph(data, svg, user, articles) {
           })
           .append('title')
           .text(d => `${data[i].id} title: ${d.article_title}`);
+          
       }
+      articleGroup.append('g')
+        .attr('class', 'articleXAxis')
+        .call(d3.axisTop(xScale));
+      articleGroup.selectAll('.articleXAxis')
+        .selectAll('.tick')
+        .selectAll('text')
+        .attr('y', 0)
+        .attr('x', 3)
+        .attr('dy', '.35em')
+        .attr('transform', 'rotate(-90)')
+        .style('text-anchor', 'start')
+        .style('font-size', 'medium');
+      articleGroup.select('.articleXAxis')
+        .selectAll('line')
+        .remove();
     }
     function updateArticleMatrix(articleArray) {
       articleGroup.selectAll('.articleXAxis').remove();
@@ -573,8 +590,8 @@ export default function userSimilarityGraph(data, svg, user, articles) {
               .data(d.messages.filter(e => e.push_userid === data[i].id))
               .transition()
               .duration(1000)
-              .attr('x', e => xScale(d.article_title))
-              .attr('y', e => yScale(data[i].id) + pushPositionScale(new Date(e.push_ipdatetime).setFullYear(postYear)));
+              .attr('x', e => xScale(d.article_title) + pushPositionScale(new Date(e.push_ipdatetime).setFullYear(postYear)))
+              .attr('y', e => yScale(data[i].id));
           })
           .append('title')
           .text(d => `${data[i].id} title: ${d.article_title}`);
@@ -586,11 +603,14 @@ export default function userSimilarityGraph(data, svg, user, articles) {
       //   .selectAll('.tick')
       //   .selectAll('text')
       //   .attr('y', 0)
-      //   .attr('x', 9)
+      //   .attr('x', -3)
       //   .attr('dy', '.35em')
       //   .attr('transform', 'rotate(-90)')
       //   .style('text-anchor', 'start')
-      //   .style('font-size', '6');
+      //   .style('font-size', 'medium');
+      // articleGroup.select('.articleXAxis')
+      //   .selectAll('line')
+      //   .remove();
     }
     function drawUserRepliedAuthorMatrix(authorArray) {
       authorGroup.selectAll('*').remove();
@@ -665,7 +685,7 @@ export default function userSimilarityGraph(data, svg, user, articles) {
             .attr('y1', yScale(authorArray[i].id) + (yScale.bandwidth() * j / postNum))
             .attr('y2', yScale(authorArray[i].id) + (yScale.bandwidth() * j / postNum))
             .attr('x1', 0)
-            .attr('x2', newUserAxisValues.length * gridSize)
+            .attr('x2', (newUserAxisValues.length + articles.length) * gridSize)
             .attr('stroke-width', '0.5px')
             .attr('stroke', 'gray');
         }
@@ -673,7 +693,7 @@ export default function userSimilarityGraph(data, svg, user, articles) {
           .attr('y1', yScale(authorArray[i].id))
           .attr('y2', yScale(authorArray[i].id))
           .attr('x1', 0)
-          .attr('x2', newUserAxisValues.length * gridSize)
+          .attr('x2', (newUserAxisValues.length + articles.length) * gridSize)
           .attr('stroke-width', '1px')
           .attr('stroke', 'black');
       }
@@ -705,28 +725,44 @@ export default function userSimilarityGraph(data, svg, user, articles) {
       authorArticleGroup.attr('transform', `translate(${offset}, ${offset})`);
       const article_titles = articleArray.map(e => e.article_title);
       const xScale = d3.scaleBand()
-        .range([0, article_titles.length * (gridSize / 4)])
-        .domain(article_titles)
-        .padding(0.05);
+        .range([0, article_titles.length * gridSize])
+        .domain(article_titles);
       const yScale = d3.scaleBand()
-        .range([0, authorArray.length * (gridSize / 2)])
+        .range([0, authorArray.length * gridSize])
         .domain(authorArray.map(e => e.id))
         .padding(0.05);
-      for (let i = 0; i < data.length; i += 1) {
-        authorArticleGroup.append('g').selectAll('circle')
-          .data(articleArray)
-          .enter()
-          .append('circle')
-          .attr('cx', d => xScale(d.article_title) + (gridSize / 8))
-          .attr('cy', d => yScale(d.author) + (gridSize / 4))
-          .attr('r', gridSize / 8)
-          .attr('fill', () => {
-            const u = community.find(e => e.id === data[i].id);
-            return color[u.community];
-          })
-          .append('title')
-          .text(d => `${data[i].id} title: ${d.article_title}`);
-      }
+      authorArticleGroup.append('g').selectAll('circle')
+        .data(articleArray)
+        .enter()
+        .append('rect')
+        .attr('x', d => xScale(d.article_title))
+        .attr('y', (d) => {
+          const author = authorArray.find(e => e.id === d.author);
+          console.log(author);
+          const articlesIndex = author.articles.findIndex(
+            a => a.article_title === d.article_title,
+          );
+          const ratio = articlesIndex / author.articles.length;
+          return yScale(d.author) + (yScale.bandwidth() * ratio);
+        })
+        .attr('width', gridSize)
+        .attr('height', (d) => {
+          const author = authorArray.find(e => e.id === d.author);
+          const articlesIndex = author.articles.findIndex(
+            a => a.article_title === d.article_title,
+          );
+          const ratio = articlesIndex / author.articles.length;
+          if (articlesIndex === author.articles.length - 1) {
+            return gridSize - (yScale.bandwidth() * ratio) - 0.5;
+          }
+          return gridSize / author.articles.length - 0.5;
+        })
+        // .attr('fill', () => {
+        //   const u = community.find(e => e.id === data[i].id);
+        //   return color[u.community];
+        // })
+        // .append('title')
+        // .text(d => `${data[i].id} title: ${d.article_title}`);
     }
 
     function computeScaleMaximum() {

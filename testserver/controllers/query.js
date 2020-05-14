@@ -7,6 +7,7 @@ let dl = require('../models/datalist.js');
 let winston = require('winston');
 let db = require('../db');
 let ns= require('../models/nodeSet.js')
+let sg= require('../models/dataPreprocessForSimilarityGraph.js')
 // import bar from '../models/nodeSet.js'
 // console.log(ns.setNodes());
 // Use native promises
@@ -387,9 +388,9 @@ let callback = function callback(req, res) {
           resolve(
             findquery(page1, queryobj1, ptt, limit, sort).then(res => {
               console.log('q1 lenght: ' + res.result.length);
-              const queryArticleFilter = activity ? 0 : 500;
+              // const queryArticleFilter = activity ? 0 : 500;
               // console.log('res.result', res.result);
-              res.result = res.result.filter(post => post.message_count.all > queryArticleFilter);
+              // res.result = res.result.filter(post => post.message_count.all > queryArticleFilter);
               // Remove article content
               res.result.forEach(function(result){
                 result.content = ' ';
@@ -397,7 +398,28 @@ let callback = function callback(req, res) {
                 // message.push_content = '';
                 // })
               })
-              
+              if (activity) {
+                res.result.forEach(function(result){
+                  result.messages = result.messages.filter((mes, index) => {
+                    if (index === result.messages.length - 1) return true;
+                    return user1.includes(mes.push_userid);
+                  })
+                });
+                console.log('messages filter Done');
+                let userListArray = [];
+                for (let i = 0; i < user1.length; i += 1) {
+                  sg.buildUserList(userListArray, res.result, user1[i]);
+                }
+                console.log('buildUserList Done');
+                // const similarity = sg.computeUserSimilarityByArticles(userListArray)
+                console.log('compute Similarity Done');
+                // console.log(res.result);
+                return {
+                  articles: res.result,
+                  userListArray,
+                  // similarity,
+                };
+              }
               let datalist = dl.bindpostlist(res.result, ptt);
               // let postlist = datalist[0];
               let wordlist = datalist[1];
@@ -405,9 +427,7 @@ let callback = function callback(req, res) {
               let titleCuttedWords = datalist[3];
               console.log('datalist.js done!');
               
-
               // console.log(titleWordList[0]);
-              if (activity) return datalist;
               let [set,initLinks] = ns.setNodes(titleWordList[0], queryobj1.date, titleCuttedWords, res.result);
               // res.result.forEach(a=>{
               //   console.log(a.article_title);

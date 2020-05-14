@@ -251,8 +251,8 @@ export default function AuthorTable(nodes, div, callback) {
     const link = [];
     const alpha = 0.85;
     console.log(new Date());
-    // computeSentimentMatrix(selectedNode, node, link);
-    // computeTotalWeightOfEachNode(node, link);
+    computeSentimentMatrix(selectedNode, node, link);
+    computeTotalWeightOfEachNode(node, link);
     // pageRank(node, link, alpha);
     // console.log(node, link);
     selectedNode.children.forEach((e) => {

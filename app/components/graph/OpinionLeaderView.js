@@ -4,6 +4,7 @@
 import React from 'react';
 import * as d3 from 'd3';
 import { OpinionLeader } from './OpinionLeader';
+import { treemap } from './opinionleaderTreemap';
 import { commentTimeline } from './commentTimeline';
 import { userActivityTimeline } from './userActivityTimeline';
 import { userSimilarityGraph } from './userSimilarityGraph';
@@ -21,10 +22,12 @@ class OpinionLeaderView extends React.Component {
       totalAuthorInfluence,
       optionsWord,
     } = data;
+    console.log(data);
     let articleCellSvg = d3.select('#graph');
     let commentTimelineSvg = d3.select('#commentTimeline');
     let userSimilaritySvg = d3.select('#timeLine');
     // let userDailyActivitySvg = d3.select('#userDailyActivity');
+    const boardname = d3.select('#pagename1').attr('value');
     const beginDate = d3.select('#date1').attr('value');
     const endDate = d3.select('#date2').attr('value');
     function resArrayToArticlesArray(resArray) {
@@ -61,7 +64,7 @@ class OpinionLeaderView extends React.Component {
       const strminvar1 = `min${varname1}=${minvar1}` || '';
       const strmaxvar1 = `max${varname1}=${maxvar1}` || '';
       const strposttype = `posttype=${posttype}` || '';
-      const strpage1 = `page1=${pagename1}` || '';
+      const strpage1 = `page1=${boardname}` || '';
       const strtime1 = `time1=${beginDate}` || '';
       const strtime2 = `time2=${endDate}` || '';
       const struser1 = `user1=${id}` || '';
@@ -117,7 +120,7 @@ class OpinionLeaderView extends React.Component {
 
     function handleSubmit(e) {
       // e.preventDefault();
-      const userNumsPerRequest = 30;
+      const userNumsPerRequest = 90;
       const { length } = e;
       const myRequest = [];
       const userListArray = [];
@@ -125,11 +128,11 @@ class OpinionLeaderView extends React.Component {
       const fixedUserArr = [e.slice(0, min)];
       // console.log(fixedUserArr);
       const url = [encodeURI(getReqstr(fixedUserArr[0]))];
-      // for (let i = 1; i < length / userNumsPerRequest; i += 1) {
-      //   fixedUserArr.push(e.slice(i * userNumsPerRequest, (i + 1) * userNumsPerRequest));
-      //   // console.log(fixedUserArr);
-      //   url.push(encodeURI(getReqstr(fixedUserArr[i])));
-      // }
+      for (let i = 1; i < length / userNumsPerRequest; i += 1) {
+        fixedUserArr.push(e.slice(i * userNumsPerRequest, (i + 1) * userNumsPerRequest));
+        // console.log(fixedUserArr);
+        url.push(encodeURI(getReqstr(fixedUserArr[i])));
+      }
       url.forEach((u) => {
         myRequest.push(new Request(u, {
           method: 'get',
@@ -142,25 +145,32 @@ class OpinionLeaderView extends React.Component {
       fetch(myRequest[0])
         .then(response => response.json())
         .then((response) => {
-          resArr.push(response[0][0]);
+          console.log(response);
+          resArr.push(response);
           loading(resArr.length, myRequest.length, commentTimelineSvg);
-          for (let j = 0; j < fixedUserArr[0].length; j += 1) {
-            buildUserList(userListArray, response[0][0], fixedUserArr[0][j]);
-          }
+          // for (let j = 0; j < fixedUserArr[0].length; j += 1) {
+          //   buildUserList(userListArray, response, fixedUserArr[0][j]);
+          // }
           if (myRequest.length === 1) {
             // userActivityTimeline(response[0][0], commentTimelineSvg, fixedUserArr[0]);
             // userDailyActivity(response[0][0], fixedUserArr[0], commentTimelineSvg, beginDate, endDate);
-            userSimilarityGraph(userListArray, userSimilaritySvg, fixedUserArr[0], response[0][0]);
+            userSimilarityGraph(
+              response.userListArray,
+              userSimilaritySvg,
+              fixedUserArr[0],
+              response.articles,
+              // response.similarity,
+            );
           }
           for (let i = 1; i < myRequest.length; i += 1) {
             fetch(myRequest[i])
               .then(res => res.json())
               .then((res) => {
-                resArr.push(res[0][0]);
+                resArr.push(res);
                 loading(resArr.length, myRequest.length, commentTimelineSvg);
                 // console.log(res[0][0]);
                 for (let j = 0; j < fixedUserArr[i].length; j += 1) {
-                  buildUserList(userListArray, res[0][0], fixedUserArr[i][j]);
+                  buildUserList(userListArray, res, fixedUserArr[i][j]);
                 }
                 return res;
               })
@@ -189,11 +199,15 @@ class OpinionLeaderView extends React.Component {
     }
 
     if (cellData.nodes) {
+      console.log(cellData);
       if (data.$this.state.hover !== 1) {
         console.log('do OPView rendering');
-        OpinionLeader(cellData.nodes, cellData.links,
+        treemap(cellData.nodes, cellData.links,
           beforeThisDate, articleCellSvg, cellForceSimulation,
           totalAuthorInfluence, data.$this, optionsWord, handleSubmit);
+        // OpinionLeader(cellData.nodes, cellData.links,
+        //   beforeThisDate, articleCellSvg, cellForceSimulation,
+        //   totalAuthorInfluence, data.$this, optionsWord, handleSubmit);
       }
       commentTimeline(cellData.nodes, commentTimelineSvg, data.$this);
     }
@@ -13239,7 +13253,47 @@ class OpinionLeaderView extends React.Component {
         messages:[{push_userid: 'imsphzzz', push_tag: '噓', push_ipdatetime: "04/15 09:51"},{push_userid: 'ahw12000',push_tag: '推', push_ipdatetime: "04/15 19:22"}],
         author:'c'},
     ];
-    userSimilarityGraph(testSimilarUserList, userSimilaritySvg, testSimilarUser, articleArr);
+    const similarity = [
+      {
+        "source": "sasintw",
+        "target": "ahw12000",
+        "value": 0,
+        "weight": 0
+      },
+      {
+        "source": "sasintw",
+        "target": "OutBai",
+        "value": 0.5,
+        "weight": 5
+      },
+      {
+        "source": "sasintw",
+        "target": "imsphzzz",
+        "value": 0.5,
+        "weight": 5
+      },
+      {
+        "source": "ahw12000",
+        "target": "OutBai",
+        "value": 0.2,
+        "weight": 2
+      },
+      {
+        "source": "ahw12000",
+        "target": "imsphzzz",
+        "value": 0.2,
+        "weight": 2
+      },
+      {
+        "source": "OutBai",
+        "target": "imsphzzz",
+        "value": 0.2,
+        "weight": 2
+      }
+    ];
+    userSimilarityGraph(testSimilarUserList, userSimilaritySvg, testSimilarUser, articleArr, 
+      // similarity,
+    );
     userDailyActivity(testData, testUser, commentTimelineSvg, beginDate, endDate);
 
   }

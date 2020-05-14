@@ -58,7 +58,7 @@ class Graph extends Component {
     const { opState: thisOpState, ...thisWithoutOpState } = this.props;
     const { opState: nextOpstate, ...nextWithoutOpState } = nextProps;
     const { hover, word } = this.state;
-    // console.log(this.props, nextProps);
+    console.log(this.props, nextProps);
     // console.log(thisWithoutOpState, nextWithoutOpState);
     if (!hover) {
       if (JSON.stringify(thisWithoutOpState) === JSON.stringify(nextWithoutOpState)) {
