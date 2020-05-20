@@ -253,7 +253,7 @@ export default function AuthorTable(nodes, div, callback) {
     console.log(new Date());
     computeSentimentMatrix(selectedNode, node, link);
     computeTotalWeightOfEachNode(node, link);
-    // pageRank(node, link, alpha);
+    pageRank(node, link, alpha);
     // console.log(node, link);
     selectedNode.children.forEach((e) => {
       const authorNode = node.find(e1 => e1.id === e.id);

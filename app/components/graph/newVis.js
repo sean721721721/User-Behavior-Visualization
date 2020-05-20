@@ -7030,7 +7030,6 @@ class Graph extends Component {
     const authorSet = removeTermLayer(set);
     // console.log(authorSet);
     const authorTable = d3.select('#authorList');
-
     let link;
     let node;
     let links;

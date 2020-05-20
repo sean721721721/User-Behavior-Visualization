@@ -43,11 +43,16 @@ export default function treemap(cellNodes, cellLinks, beforeThisDate,
   authorNodes.forEach((n) => {
     console.log(n);
     const articles = [];
+    let totalComments = 0;
+    n.responder.forEach((a) => {
+      totalComments += a.message.length;
+    });
     n.responder.forEach((a) => {
       articles.push({
         name: a.title,
         group: 'A',
-        value: a.message.length,
+        value: (a.message.length * n.pageRank) / totalComments,
+        message_count: a.message_count,
         colname: 'level3',
         messages: a.message.slice(0, 100),
         tag: 0,
@@ -114,7 +119,7 @@ export default function treemap(cellNodes, cellLinks, beforeThisDate,
   // prepare a color scale
   const color = d3.scaleOrdinal()
     .domain(['boss1', 'boss2', 'boss3'])
-    .range(['#402D54', '#D18975', '#8FD175']);
+    .range(d3.schemeTableau10);
 
     // And a opacity scale
   const opacity = d3.scaleLinear()
@@ -166,7 +171,11 @@ export default function treemap(cellNodes, cellLinks, beforeThisDate,
     .append('text')
     .attr('x', d => d.x0 + 5) // +10 to adjust position (more right)
     .attr('y', d => d.y0 + 35) // +20 to adjust position (lower)
-    .text(d => d.data.value)
+    .text((d) => {
+      // const { message_count } = d.data;
+      // return `Total Comment: ${message_count[0].count + message_count[1].count + message_count[2].count}<br>
+      //   push: ${message_count[0].count}, boo: ${message_count[1].count}, neutral: ${message_count[2].count}`;
+    })
     .attr('font-size', '11px')
     .attr('fill', 'white');
 
