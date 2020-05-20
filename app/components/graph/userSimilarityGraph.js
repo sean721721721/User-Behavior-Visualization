@@ -765,7 +765,7 @@ export default function userSimilarityGraph(data, svg, user, articles) {
           .attr('transform', `translate(${articleOffset}, 0)`);
         const transform = xAxis.select(`.${newUserAxisValues[i]}`).attr('transform');
         const translate = transform.substring(transform.indexOf('(') + 1, transform.indexOf(')')).split(',');
-        const offSet = parseInt(translate[0], 10) + highlightArticles.length * gridSize;
+        const offSet = parseInt(translate[0], 10) + highlightArticles.length;
         if (i > userIndex) {
           xAxis.select(`.${newUserAxisValues[i]}`)
             .transition()
