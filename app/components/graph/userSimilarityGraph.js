@@ -123,21 +123,13 @@ export default function userSimilarityGraph(data, svg, user, articles) {
     const leftSvg = group.append('g')
       .attr('class', 'leftSvg')
       .attr('transform', 'scale(1) translate(100,100)');
-    leftSvg.append('g')
-      .attr('transform', 'scale(1) translate(0,0)')
-      .attr('class', 'authorAxisX')
-      .call(d3.axisTop(x).tickFormat((d, i) => newUserAxisValues[i]));
 
     const y = d3.scaleBand()
       .range([0, axisDomain.length * gridSize])
       .domain(axisDomain)
       .padding(0.05);
-    leftSvg.append('g')
-      .attr('class', 'authorAxisY').call(d3.axisLeft(y).tickFormat((d, i) => newUserAxisValues[i]));
-    leftSvg.selectAll('.tick')
-      .on('click', (d) => {
-        tickClick(d);
-      });
+    builduserGroupAxis();
+    
     // Build color scale
     const userColor = userColorScaleArray(data);
     const myColor = d3.scaleLinear()
@@ -197,7 +189,6 @@ export default function userSimilarityGraph(data, svg, user, articles) {
       const yID = newUserAxisValues[i];
       const xUser = data.find(e => e.id === xID);
       const yUser = data.find(e => e.id === yID);
-      console.log(d3.select('.leftSvg').selectAll('rect'));
       d3.select('.leftSvg')
         .selectAll('rect')
         .attr('stroke', 'white');
@@ -218,7 +209,6 @@ export default function userSimilarityGraph(data, svg, user, articles) {
       const bothRepliedArticles = xUser.repliedArticle.filter(
         e => yUser.repliedArticle.some(e2 => e2.article_id === e.article_id),
       );
-      console.log(bothRepliedArticles);
       articles.sort((a, b) => {
         if (bothRepliedArticles.find(e => e.article_title === b.article_title)) return 1;
         return -1;
@@ -318,6 +308,7 @@ export default function userSimilarityGraph(data, svg, user, articles) {
         .data(secondOrdering_mat[i])
         .enter()
         .append('circle')
+        .attr('class', (d, index) => `x${index} y${i}`)
         .attr('cx', (d, index) => x(index) + (x.bandwidth() / 2))
         .attr('cy', y(i) + (y.bandwidth() / 2))
         .attr('r', (d, index) => {
@@ -353,41 +344,6 @@ export default function userSimilarityGraph(data, svg, user, articles) {
 
     // piechart in heatmap
     // drawPieChartHeatmap();
-    group.selectAll('.authorAxisY')
-      .selectAll('.tick')
-      .selectAll('line')
-      .remove();
-    group.selectAll('.authorAxisX')
-      .selectAll('.tick')
-      .selectAll('line')
-      .remove();
-    group.selectAll('.authorAxisX')
-      .selectAll('.tick')
-      .selectAll('text')
-      .style('font-size', 'medium')
-      .style('color', (d) => {
-        const index = community.findIndex(e => e.id === newUserAxisValues[d]);
-        return color[community[index].community];
-      });
-    group.selectAll('.authorAxisY')
-      .selectAll('.tick')
-      .selectAll('text')
-      .style('text-anchor', 'end')
-      .attr('x', -3)
-      .attr('dy', '.35em')
-      .style('font-size', 'medium')
-      .style('color', (d) => {
-        const index = community.findIndex(e => e.id === newUserAxisValues[d]);
-        return color[community[index].community];
-      });
-    group.selectAll('g.authorAxisX')
-      .selectAll('text')
-      .attr('y', 0)
-      .attr('x', 3)
-      .attr('dy', '.35em')
-      .attr('transform', 'rotate(-90)')
-      .style('text-anchor', 'start');
-
     const rightSvg = group.append('g')
       .attr('class', 'rightSvg')
       .attr('transform', 'scale(1) translate(100, 100)');
@@ -485,6 +441,59 @@ export default function userSimilarityGraph(data, svg, user, articles) {
     drawUserRepliedArticleMatrix(articlesOrderByCommunity);
     drawUserRepliedAuthorMatrix(authorArr);
     drawAuthorArticleMatrix(articlesOrderByCommunity, authorArr);
+    function builduserGroupAxis() {
+      leftSvg.append('g')
+        .attr('transform', 'scale(1) translate(0,0)')
+        .attr('class', 'authorAxisX')
+        .call(d3.axisTop(x).tickFormat((d, i) => newUserAxisValues[i]));
+      const leftSvgTicks = leftSvg.select('.authorAxisX')
+        .selectAll('.tick')
+        .attr('class', (d, i) => {
+          return `tick ${newUserAxisValues[i]}`;
+        });
+      leftSvg.append('g')
+        .attr('class', 'authorAxisY').call(d3.axisLeft(y).tickFormat((d, i) => newUserAxisValues[i]));
+      leftSvg.selectAll('.tick')
+        .on('click', (d) => {
+          tickClick(d);
+        });
+      group.selectAll('.authorAxisY')
+        .selectAll('.tick')
+        .selectAll('line')
+        .remove();
+      group.selectAll('.authorAxisX')
+        .selectAll('.tick')
+        .selectAll('line')
+        .remove();
+      group.selectAll('.authorAxisX')
+        .selectAll('.tick')
+        .selectAll('text')
+        .style('font-size', 'medium')
+        .style('color', (d) => {
+          const index = community.findIndex(e => e.id === newUserAxisValues[d]);
+          return color[community[index].community];
+        });
+      group.selectAll('.authorAxisY')
+        .selectAll('.tick')
+        .selectAll('text')
+        .style('text-anchor', 'end')
+        .attr('x', -3)
+        .attr('dy', '.35em')
+        .style('font-size', 'medium')
+        .style('color', (d) => {
+          const index = community.findIndex(e => e.id === newUserAxisValues[d]);
+          return color[community[index].community];
+        });
+      group.selectAll('g.authorAxisX')
+        .selectAll('text')
+        .attr('y', 0)
+        .attr('x', 3)
+        .attr('dy', '.35em')
+        .attr('transform', 'rotate(-90)')
+        .style('text-anchor', 'start');
+      group.selectAll('path')
+        .attr('opacity', 0);
+    }
     function drawUserRepliedArticleMatrix(articleArray) {
       // articleGroup.selectAll('*').remove();
       articleGroup.selectAll('.articleXAxis').remove();
@@ -608,6 +617,7 @@ export default function userSimilarityGraph(data, svg, user, articles) {
     function updateArticleMatrix(articleArray, highlightArticles, userIndex) {
       console.log(userIndex);
       articleGroup.selectAll('.articleXAxis').remove();
+      articleGroup.selectAll('line').remove();
       const article_titles = articleArray.map(e => e.article_title);
       const xScale = d3.scaleBand()
         .range([0, article_titles.length * gridSize])
@@ -621,6 +631,12 @@ export default function userSimilarityGraph(data, svg, user, articles) {
         articleGroup.select(`g.${data[i].id}`)
           .selectAll('g')
           .data(data[i].repliedArticle)
+          .attr('opacity', (d) => {
+            if (highlightArticles.some(e => e.article_title === d.article_title)) {
+              return 1;
+            }
+            return 0;
+          })
           .each((d, index, nodes) => {
             const postYear = new Date(d.date).getFullYear();
             const lastPushTime = new Date(d.messages[d.messages.length - 1]
@@ -633,40 +649,31 @@ export default function userSimilarityGraph(data, svg, user, articles) {
               .transition()
               .duration(1000)
               .attr('x', (e) => {
-                if (highlightArticles.some(a => a.article_title === d.article_title)) {
-                  console.log(((newUserAxisValues.length - userIndex - 1) * gridSize));
-                  return xScale(d.article_title)
-                    + pushPositionScale(new Date(e.push_ipdatetime).setFullYear(postYear))
-                    - ((newUserAxisValues.length - userIndex - 1) * gridSize);
-                }
-                return xScale(d.article_title)
-                + pushPositionScale(new Date(e.push_ipdatetime).setFullYear(postYear))
-                  + ((newUserAxisValues.length - userIndex - 1) * gridSize);
+                const commentOffset = pushPositionScale(new Date(e.push_ipdatetime)
+                  .setFullYear(postYear));
+                const userOffset = (newUserAxisValues.length - userIndex - 1) * gridSize;
+                return xScale(d.article_title) + commentOffset - userOffset;
               })
               .attr('y', e => yScale(data[i].id));
           });
-        // .append('title')
-        // .text(d => `${data[i].id} title: ${d.article_title}`);
       }
-      // articleGroup.append('g')
-      //   .attr('class', 'articleXAxis')
-      //   .call(d3.axisTop(xScale));
-      // articleGroup.selectAll('.articleXAxis')
-      //   .selectAll('.tick')
-      //   .selectAll('text')
-      //   .attr('y', 0)
-      //   .attr('x', -3)
-      //   .attr('dy', '.35em')
-      //   .attr('transform', 'rotate(-90)')
-      //   .style('text-anchor', 'start')
-      //   .style('font-size', 'medium');
-      // articleGroup.select('.articleXAxis')
-      //   .selectAll('line')
-      //   .remove();
     }
 
     function updateUserMatrix(highlightArticles, userIndex) {
-
+      leftSvg.select('.authorAxisX').remove();
+      leftSvg.select('.authorAxisY').remove();
+      builduserGroupAxis();
+      const xAxis = leftSvg.select('.authorAxisX');
+      for (let i = userIndex + 1; i < newUserAxisValues.length; i += 1) {      
+        leftSvg.selectAll(`.x${i}`)
+          .attr('transform', `translate(${highlightArticles.length * gridSize}, 0)`);
+        rightSvg.selectAll(`.x${i}`)
+          .attr('transform', `translate(${highlightArticles.length * gridSize}, 0)`);
+        const transform = xAxis.select(`.${newUserAxisValues[i]}`).attr('transform');
+        const translate = transform.substring(transform.indexOf('(') + 1, transform.indexOf(')')).split(',');
+        const offSet = parseInt(translate[0], 10) + highlightArticles.length * gridSize;
+        xAxis.select(`.${newUserAxisValues[i]}`).attr('transform', `translate(${offSet}, 0)`);
+      }
     }
     function drawUserRepliedAuthorMatrix(authorArray) {
       authorGroup.selectAll('*').remove();
