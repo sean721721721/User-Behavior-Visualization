@@ -129,7 +129,7 @@ export default function userSimilarityGraph(data, svg, user, articles) {
       .range([0, axisDomain.length * gridSize])
       .domain(axisDomain)
       .padding(0.05);
-    builduserGroupAxis();
+    builduserGroupAxis(newUserAxisValues);
 
     // Build color scale
     const userColor = userColorScaleArray(data);
@@ -240,7 +240,7 @@ export default function userSimilarityGraph(data, svg, user, articles) {
       console.log('bothRepliedAuthors', bothRepliedAuthors);
       console.log('sorted authors', authorArr);
       updateArticleMatrix(articles, bothRepliedArticles, index);
-      updateUserMatrix(bothRepliedArticles, index);
+      updateUserMatrix(bothRepliedArticles, index, i);
       d3.selectAll(`.tick.${yID}`)
         .selectAll('text')
         .style('font-size', 'x-large');
@@ -450,19 +450,21 @@ export default function userSimilarityGraph(data, svg, user, articles) {
     drawUserRepliedArticleMatrix(articlesOrderByCommunity);
     drawUserRepliedAuthorMatrix(authorArr);
     drawAuthorArticleMatrix(articlesOrderByCommunity, authorArr);
-    function builduserGroupAxis(axis_x, axis_y) {
+
+    function builduserGroupAxis(axisValue, axis_x, axis_y) {
+      console.log(axisValue);
       leftSvg.append('g')
         .attr('transform', 'scale(1) translate(0,0)')
         .attr('class', 'authorAxisX')
-        .call(d3.axisTop(x).tickFormat((d, i) => newUserAxisValues[i]));
+        .call(d3.axisTop(x).tickFormat((d, i) => axisValue[i]));
       const leftSvgTicksX = leftSvg.select('.authorAxisX')
         .selectAll('.tick')
-        .attr('class', (d, i) => `tick ${newUserAxisValues[i]}`);
+        .attr('class', (d, i) => `tick ${axisValue[i]}`);
       leftSvg.append('g')
-        .attr('class', 'authorAxisY').call(d3.axisLeft(y).tickFormat((d, i) => newUserAxisValues[i]));
+        .attr('class', 'authorAxisY').call(d3.axisLeft(y).tickFormat((d, i) => axisValue[i]));
       const leftSvgTicksY = leftSvg.select('.authorAxisY')
         .selectAll('.tick')
-        .attr('class', (d, i) => `tick ${newUserAxisValues[i]}`);
+        .attr('class', (d, i) => `tick ${axisValue[i]}`);
       leftSvg.selectAll('.tick')
         .on('click', (d) => {
           tickClick(d);
@@ -480,7 +482,7 @@ export default function userSimilarityGraph(data, svg, user, articles) {
         .selectAll('text')
         .style('font-size', 'medium')
         .style('color', (d) => {
-          const index = community.findIndex(e => e.id === newUserAxisValues[d]);
+          const index = community.findIndex(e => e.id === axisValue[d]);
           return color(community[index].community);
         });
       group.selectAll('.authorAxisY')
@@ -491,7 +493,7 @@ export default function userSimilarityGraph(data, svg, user, articles) {
         .attr('dy', '.35em')
         .style('font-size', 'medium')
         .style('color', (d) => {
-          const index = community.findIndex(e => e.id === newUserAxisValues[d]);
+          const index = community.findIndex(e => e.id === axisValue[d]);
           return color(community[index].community);
         });
       group.selectAll('g.authorAxisX')
@@ -750,11 +752,12 @@ export default function userSimilarityGraph(data, svg, user, articles) {
       }
     }
 
-    function updateUserMatrix(highlightArticles, userIndex) {
+    function updateUserMatrix(highlightArticles, matrixX, matrixY) {
       leftSvg.select('.authorAxisX').remove();
       leftSvg.select('.authorAxisY').remove();
-      builduserGroupAxis();
+      builduserGroupAxis(newUserAxisValues);
       const xAxis = leftSvg.select('.authorAxisX');
+      const yAxis = leftSvg.select('.authorAxisY');
       leftSvgLineGroup.selectAll('*').remove();
       const lineDomain = [];
       for (let i = 0; i <= highlightArticles.length; i += 1) {
@@ -763,7 +766,16 @@ export default function userSimilarityGraph(data, svg, user, articles) {
       const lineXScale = d3.scaleBand()
         .range([0, (highlightArticles.length + 1) * 2])
         .domain(lineDomain);
-      const userOffset = (userIndex + 1) * gridSize;
+      const userOffset = (matrixX + 1) * gridSize;
+      let indexSmall = matrixX;
+      let indexLarge = matrixY;
+      if (matrixX > matrixY) {
+        indexSmall = matrixY;
+        indexLarge = matrixX;
+      }
+      // move X
+      console.log(indexSmall, indexLarge);
+      // moveRectToLeftTopCorner(indexSmall, indexLarge);
       for (let j = 0; j <= highlightArticles.length; j += 1) {
         leftSvgLineGroup
           .append('line')
@@ -796,7 +808,14 @@ export default function userSimilarityGraph(data, svg, user, articles) {
           .attr('y2', i * 20)
           .attr('stroke-width', '0.1px')
           .attr('stroke', 'black');
-        const articleOffset = i > userIndex ? highlightArticles.length * 2 : 0;
+        let articleOffset = i > matrixX ? highlightArticles.length * 2 : 0;
+        articleOffset = i < matrixX ? -100 : articleOffset;
+        // if (i !== matrixY && i !== matrixX) {
+        //   leftSvg.selectAll(`.x${i}`)
+        //     .attr('transform', `translate(${articleOffset}, 0)`);
+        //   rightSvg.selectAll(`.x${i}`)
+        //     .attr('transform', `translate(${articleOffset}, 0)`);
+        // }
         leftSvg.selectAll(`.x${i}`)
           .transition()
           .duration(1000)
@@ -805,15 +824,126 @@ export default function userSimilarityGraph(data, svg, user, articles) {
           .transition()
           .duration(1000)
           .attr('transform', `translate(${articleOffset}, 0)`);
-        const transform = xAxis.select(`.${newUserAxisValues[i]}`).attr('transform');
-        const translate = transform.substring(transform.indexOf('(') + 1, transform.indexOf(')')).split(',');
-        const offSet = parseInt(translate[0], 10) + highlightArticles.length * 2;
-        if (i > userIndex) {
+        const transformX = xAxis.select(`.${newUserAxisValues[i]}`).attr('transform');
+        const translateX = transformX.substring(transformX.indexOf('(') + 1, transformX.indexOf(')')).split(',');
+        const offSetX = parseInt(translateX[0], 10) + highlightArticles.length * 2;
+        const transformY = yAxis.select(`.${newUserAxisValues[i]}`).attr('transform');
+        const translateY = transformY.substring(transformY.indexOf('(') + 1, transformY.indexOf(')')).split(',');
+        const offSetY = parseInt(translateY[1], 10);
+        yAxis.select(`.${newUserAxisValues[i]}`)
+          .transition()
+          .duration(1000)
+          .attr('transform', `translate(${matrixX * gridSize}, ${offSetY})`);
+        if (i > matrixX) {
           xAxis.select(`.${newUserAxisValues[i]}`)
             .transition()
             .duration(1000)
-            .attr('transform', `translate(${offSet}, 0)`);
+            .attr('transform', `translate(${offSetX}, 0)`);
+        } else if (i < matrixX) {
+          xAxis.select(`.${newUserAxisValues[i]}`)
+            .transition()
+            .duration(1000)
+            .attr('transform', `translate(${parseInt(translateX[0], 10) + articleOffset}, 0)`);
         }
+      }
+      function moveRectToLeftTopCorner(s, l) {
+        const refAxis = newUserAxisValues.slice();
+        while (newUserAxisValues.shift() !== undefined);
+        if (s !== l) {
+          newUserAxisValues.push(refAxis[s]);
+          newUserAxisValues.push(refAxis[l]);
+        } else {
+          newUserAxisValues.push(refAxis[s]);
+        }
+        leftSvg.selectAll(`.x${s}`)
+          // .transition()
+          // .duration(1000)
+          .attr('x', x(0))
+          .attr('cx', x(0) + (x.bandwidth() / 2));
+        rightSvg.selectAll(`.x${s}`)
+          // .transition()
+          // .duration(1000)
+          .attr('x', x(0))
+          .attr('cx', x(0) + (x.bandwidth() / 2));
+        // move Y
+        leftSvg.selectAll(`.y${s}`)
+          .attr('y', y(0))
+          .attr('cy', y(0) + (y.bandwidth() / 2));
+        rightSvg.selectAll(`.y${s}`)
+          .attr('y', y(0))
+          .attr('cy', y(0) + (y.bandwidth() / 2));
+        if (s !== l) {
+          leftSvg.selectAll(`.x${l}`)
+            .attr('x', x(1))
+            .attr('cx', x(1) + (x.bandwidth() / 2));
+          rightSvg.selectAll(`.x${l}`)
+            .attr('x', x(1))
+            .attr('cx', x(1) + (x.bandwidth() / 2));
+          leftSvg.selectAll(`.y${l}`)
+            .attr('y', y(1))
+            .attr('cy', y(1) + (y.bandwidth() / 2));
+          rightSvg.selectAll(`.y${l}`)
+            .attr('y', y(1))
+            .attr('cy', y(1) + (y.bandwidth() / 2));
+        }
+        for (let i = 0; i < refAxis.length; i += 1) {
+          if (i !== s && i !== l) newUserAxisValues.push(refAxis[i]);
+          if (s !== l) {
+            if (i < s) {
+              leftSvg.selectAll(`.x${i}`)
+                .transition()
+                .duration(1000)
+                .attr('x', x(i + 2))
+                .attr('cx', x(i + 2) + (x.bandwidth() / 2));
+              rightSvg.selectAll(`.x${i}`)
+                .transition()
+                .duration(1000)
+                .attr('x', x(i + 2))
+                .attr('cx', x(i + 2) + (x.bandwidth() / 2));
+              leftSvg.selectAll(`.y${i}`)
+                .attr('y', y(i + 2))
+                .attr('cy', y(i + 2) + (y.bandwidth() / 2));
+              rightSvg.selectAll(`.y${i}`)
+                .attr('y', y(i + 2))
+                .attr('cy', y(i + 2) + (y.bandwidth() / 2));
+            } else if (i < l) {
+              leftSvg.selectAll(`.x${i}`)
+                .transition()
+                .duration(1000)
+                .attr('x', x(i + 1))
+                .attr('cx', x(i + 1) + (x.bandwidth() / 2));
+              rightSvg.selectAll(`.x${i}`)
+                .transition()
+                .duration(1000)
+                .attr('x', x(i + 1))
+                .attr('cx', x(i + 1) + (x.bandwidth() / 2));
+              leftSvg.selectAll(`.y${i}`)
+                .attr('y', y(i + 1))
+                .attr('cy', y(i + 1) + (y.bandwidth() / 2));
+              rightSvg.selectAll(`.y${i}`)
+                .attr('y', y(i + 1))
+                .attr('cy', y(i + 1) + (y.bandwidth() / 2));
+            }
+          } else if (i < s) {
+            leftSvg.selectAll(`.x${i}`)
+              .transition()
+              .duration(1000)
+              .attr('x', x(i + 1))
+              .attr('cx', x(i + 1) + (x.bandwidth() / 2));
+            rightSvg.selectAll(`.x${i}`)
+              .transition()
+              .duration(1000)
+              .attr('x', x(i + 1))
+              .attr('cx', x(i + 1) + (x.bandwidth() / 2));
+            leftSvg.selectAll(`.y${i}`)
+              .attr('y', y(i + 1))
+              .attr('cy', y(i + 1) + (y.bandwidth() / 2));
+            rightSvg.selectAll(`.y${i}`)
+              .attr('y', y(i + 1))
+              .attr('cy', y(i + 1) + (y.bandwidth() / 2));
+          }
+        }
+        builduserGroupAxis(newUserAxisValues);
       }
     }
     function drawUserRepliedAuthorMatrix(authorArray) {
