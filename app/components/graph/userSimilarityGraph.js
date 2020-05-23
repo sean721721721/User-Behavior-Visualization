@@ -127,7 +127,7 @@ export default function userSimilarityGraph(data, svg, user, articles) {
 
     const y = d3.scaleBand()
       .range([0, axisDomain.length * gridSize])
-      .domain(axisDomain)
+      .domain(axisDomain);
       // .padding(0.05);
     builduserGroupAxis(newUserAxisValues);
 
@@ -659,13 +659,13 @@ export default function userSimilarityGraph(data, svg, user, articles) {
               .data(d.messages.filter(e => e.push_userid === data[i].id))
               .enter()
               .append('rect')
-              .attr('x', (e) => {
+              .attr('x', e => 
                 // const timeDiff =
                 // new Date(new Date(e.push_ipdatetime).setFullYear(postYear)) - new Date(d.date);
                 // console.log('ID:', data[i].id, 'minutes:', timeDiff / 1000 / 60);
-                return xScale(d.article_title)
-                  + pushPositionScale(new Date(dateFormat(e)).setFullYear(postYear));
-              })
+                 xScale(d.article_title)
+                  + pushPositionScale(new Date(dateFormat(e)).setFullYear(postYear))
+              )
               .attr('y', e => yScale(data[i].id))
               .attr('height', yScale.bandwidth())
               .attr('width', 1)
@@ -797,6 +797,98 @@ export default function userSimilarityGraph(data, svg, user, articles) {
               .remove();
           });
       }
+
+      const highlightArticleXScale2 = d3.scaleBand()
+        .range([0, highlightArticle_id.length * 2])
+        .domain(highlightArticle_id);
+      const yScale2 = d3.scaleBand()
+        .domain(newUserAxisValues)
+        .range([0, newUserAxisValues.length * gridSize * 2]);
+
+      const brush = d3.brushX()
+        .extent([[0, 0], [highlightArticle_id.length, newUserAxisValues.length * gridSize]])
+        .on('brush end', brushed);
+
+      // const zoom = d3.zoom()
+      //   .scaleExtent([1, Infinity])
+      //   .translateExtent([[0, 0], [width, height]])
+      //   .extent([[0, 0], [width, height]])
+      //   .on('zoom', zoomed);
+
+      svg.append('defs').append('clipPath')
+        .attr('id', 'clip')
+        .append('rect')
+        .attr('width', width)
+        .attr('height', height);
+
+      const focus = svg.append('g')
+        .attr('class', 'focus')
+        .attr('transform', `translate(${100},${0})`);
+
+      const context = articleGroup;
+
+
+      highlightArticleXScale2.domain(highlightArticleXScale.domain());
+      yScale2.domain(yScale.domain());
+
+      // focus.append('path')
+      //   .datum(data)
+      //   .attr('class', 'area')
+      //   .attr('d', area);
+
+      // focus.append('g')
+      //   .attr('class', 'axis axis--x')
+      //   .attr('transform', `translate(0,${height})`)
+      //   .call(xAxis);
+
+      // focus.append('g')
+      //   .attr('class', 'axis axis--y')
+      //   .call(yAxis);
+
+      // context.append('path')
+      //   .datum(data)
+      //   .attr('class', 'area')
+      //   .attr('d', area2);
+
+      // context.append('g')
+      //   .attr('class', 'axis axis--x')
+      //   .attr('transform', `translate(0,${height2})`)
+      //   .call(xAxis2);
+
+      context.append('g')
+        .attr('class', 'brush')
+        .call(brush)
+        .call(brush.move, highlightArticleXScale.range());
+
+      // svg.append('rect')
+      //   .attr('class', 'zoom')
+      //   .attr('width', width)
+      //   .attr('height', height)
+      //   .attr('transform', `translate(${margin.left},${margin.top})`)
+      //   .call(zoom);
+
+      function brushed() {
+        if (d3.event.sourceEvent && d3.event.sourceEvent.type === 'zoom') return; // ignore brush-by-zoom
+        const s = d3.event.selection || highlightArticleXScale2.range();
+        const newDomain = highlightArticle_id.slice(s[0] / 2, s[1] / 2);
+
+        highlightArticleXScale.domain(newDomain);
+        // focus.select('.area').attr('d', area);
+        // focus.select('.axis--x').call(xAxis);
+        // svg.select('.zoom').call(zoom.transform, d3.zoomIdentity
+        //   .scale(width / (s[1] - s[0]))
+        //   .translate(-s[0], 0));
+      }
+
+      // function zoomed() {
+      //   if (d3.event.sourceEvent && d3.event.sourceEvent.type === 'brush') return; // ignore zoom-by-brush
+      //   let t = d3.event.transform;
+      //   x.domain(t.rescaleX(x2).domain());
+      //   focus.select('.area').attr('d', area);
+      //   focus.select('.axis--x').call(xAxis);
+      //   context.select('.brush').call(brush.move, x.range().map(t.invertX, t));
+      // }
+
     }
 
     function updateUserMatrix(highlightArticles, matrixX, matrixY) {
@@ -1152,6 +1244,8 @@ export default function userSimilarityGraph(data, svg, user, articles) {
       // .append('title')
       // .text(d => `${data[i].id} title: ${d.article_title}`);
     }
+
+    
 
     function dateFormat(mes) {
       let dat = '';

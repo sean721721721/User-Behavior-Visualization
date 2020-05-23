@@ -49,7 +49,7 @@ export default function AuthorTable(nodes, div, callback) {
   const th = authorTable.append('tr');
   th.append('th').attr('class', 'tableHeader id')
     .attr('width', '25%')
-    .text('UserID');
+    .text('AuthorID');
   th.append('th').attr('class', 'tableHeader deltaLength')
     .attr('width', '25%')
     .text('LPR');

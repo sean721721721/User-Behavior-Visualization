@@ -128,7 +128,7 @@ class Page extends React.Component {
               />
             </label>
             <label htmlFor="x">
-                Author:
+                AuthorID:
               <input
                 className="form-control"
                 type="authorid1"
@@ -177,7 +177,7 @@ class Page extends React.Component {
             </label>
           </fieldset>
           <Button name="submit" type="button" size="sm" onClick={e => this.getCR(e, 'All')}>
-                New Submit
+                Query Submit
           </Button>
         </div>
       );
