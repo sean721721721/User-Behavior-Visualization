@@ -807,7 +807,7 @@ export default function userSimilarityGraph(data, svg, user, articles) {
         .domain(newUserAxisValues)
         .range([0, newUserAxisValues.length * gridSize * 2]);
 
-      const brush = d3.brushX()
+      const brush = d3.brush()
         .extent([[0, 0], [highlightArticle_id.length * 2, newUserAxisValues.length * gridSize]])
         .on('brush end', brushed);
 
@@ -851,7 +851,11 @@ export default function userSimilarityGraph(data, svg, user, articles) {
           return `translate(-${userOffset}, 0)`;
         })
         .call(brush)
-        .call(brush.move, [0, Math.min(highlightArticleXScale2.range()[1], 50)]);
+        .call(brush.move, [[0, 0],
+          [
+            Math.min(highlightArticleXScale2.range()[1], 50),
+            Math.min(yScale.range()[1], gridSize * 4),
+          ]]);
 
       // svg.append('rect')
       //   .attr('class', 'zoom')
@@ -863,9 +867,12 @@ export default function userSimilarityGraph(data, svg, user, articles) {
       function brushed() {
         if (d3.event.sourceEvent && d3.event.sourceEvent.type === 'zoom') return; // ignore brush-by-zoom
         const s = d3.event.selection || highlightArticleXScale2.range();
-        const newDomain = highlightArticle_id.slice(s[0] / 2, s[1] / 2);
+        const newDomainX = highlightArticle_id.slice(s[0][0] / 2, s[1][0] / 2);
+        focusScaleX.domain(newDomainX);
 
-        focusScaleX.domain(newDomain);
+        const newDomainY = newUserAxisValues.slice(s[0][1] / gridSize, s[1][1] / gridSize);
+        console.log(newDomainY);
+        yScale.domain(newDomainY);
 
         focusLineGroup.selectAll('*').remove();
         focusLineGroup.append('g');
@@ -873,9 +880,9 @@ export default function userSimilarityGraph(data, svg, user, articles) {
         for (let i = 0; i <= yScale.domain().length; i += 1) {
           focusLineGroup.append('line')
             .attr('x1', 0)
-            .attr('y1', i * gridSize)
-            .attr('x2', focusScaleX.domain().length * focusScaleX.bandwidth())
-            .attr('y2', i * gridSize)
+            .attr('y1', i * yScale.bandwidth())
+            .attr('x2', focusScaleX.range()[1])
+            .attr('y2', i * yScale.bandwidth())
             .attr('stroke-width', '0.5px')
             .attr('stroke', 'black');
         }
@@ -885,11 +892,13 @@ export default function userSimilarityGraph(data, svg, user, articles) {
             .attr('x1', i * focusScaleX.bandwidth() / 5)
             .attr('y1', 0)
             .attr('x2', i * focusScaleX.bandwidth() / 5)
-            .attr('y2', yScale.domain().length * gridSize)
+            .attr('y2', yScale.range()[1])
             .attr('stroke-width', '0.5px')
             .attr('stroke', i % 5 ? 'lightgray' : 'black');
         }
         // focus.select('.area').attr('d', area);
+        focus.select('.axis--y')
+          .call(d3.axisLeft(yScale));
         focus.select('.axis--x')
           .call(d3.axisBottom(focusScaleX)
             .tickFormat((d, i) => highlightArticles[i].article_title));
@@ -932,8 +941,8 @@ export default function userSimilarityGraph(data, svg, user, articles) {
             .each((d, index, nodes) => {
               const postYear = new Date(d.date).getFullYear();
               d3.select(nodes[index]).selectAll('rect')
-                .transition()
-                .duration(1000)
+                // .transition()
+                // .duration(1000)
                 .attr('x', (e) => {
                   const date = dateFormat(e);
                   const commentTime = new Date(new Date(date).setFullYear(postYear));
