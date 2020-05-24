@@ -769,6 +769,9 @@ export default function userSimilarityGraph(data, svg, user, articles) {
         .range([0, article_titles.length * 2])
         .domain(article_titles);
       const highlightArticleXScale = d3.scaleBand()
+        .range([0, highlightArticle_id.length * 2])
+        .domain(highlightArticle_id);
+      const focusScaleX = d3.scaleBand()
         .range([0, highlightArticle_id.length * focusGridWidth])
         .domain(highlightArticle_id);
       const yScale = d3.scaleBand()
@@ -865,7 +868,7 @@ export default function userSimilarityGraph(data, svg, user, articles) {
       const context = articleGroup;
 
 
-      highlightArticleXScale2.domain(highlightArticleXScale.domain());
+      highlightArticleXScale2.domain(focusScaleX.domain());
       yScale2.domain(yScale.domain());
 
       // for (let i = 0; i < data.length; i += 1) {
@@ -909,7 +912,7 @@ export default function userSimilarityGraph(data, svg, user, articles) {
           return `translate(-${userOffset}, 0)`;
         })
         .call(brush)
-        .call(brush.move, highlightArticleXScale.range());
+        .call(brush.move, highlightArticleXScale2.range());
 
       // svg.append('rect')
       //   .attr('class', 'zoom')
@@ -923,7 +926,7 @@ export default function userSimilarityGraph(data, svg, user, articles) {
         const s = d3.event.selection || highlightArticleXScale2.range();
         const newDomain = highlightArticle_id.slice(s[0] / 2, s[1] / 2);
 
-        highlightArticleXScale.domain(newDomain);
+        focusScaleX.domain(newDomain);
 
         focusLineGroup.selectAll('*').remove();
         focusLineGroup.append('g');
@@ -932,17 +935,17 @@ export default function userSimilarityGraph(data, svg, user, articles) {
           focusLineGroup.append('line')
             .attr('x1', 0)
             .attr('y1', i * gridSize)
-            .attr('x2', highlightArticleXScale.domain().length * focusGridWidth)
+            .attr('x2', focusScaleX.domain().length * focusScaleX.bandwidth())
             .attr('y2', i * gridSize)
             .attr('stroke-width', '1px')
             .attr('stroke', 'black');
         }
         // vertical
-        for (let i = 0; i <= highlightArticleXScale.domain().length; i += 1) {
+        for (let i = 0; i <= focusScaleX.domain().length; i += 1) {
           focusLineGroup.append('line')
-            .attr('x1', i * focusGridWidth)
+            .attr('x1', i * focusScaleX.bandwidth())
             .attr('y1', 0)
-            .attr('x2', i * focusGridWidth)
+            .attr('x2', i * focusScaleX.bandwidth())
             .attr('y2', yScale.domain().length * gridSize)
             .attr('stroke-width', '1px')
             .attr('stroke', 'black');
@@ -952,11 +955,12 @@ export default function userSimilarityGraph(data, svg, user, articles) {
         // svg.select('.zoom').call(zoom.transform, d3.zoomIdentity
         //   .scale(width / (s[1] - s[0]))
         //   .translate(-s[0], 0));
-
+        // console.log(highlightArticle_id);
         for (let i = 0; i < data.length; i += 1) {
           focus.select(`.${data[i].id}`)
             .selectAll('g')
-            .attr('transform', d => `translate(${highlightArticleXScale(d.article_id)},0)`);
+            .attr('transform', d => `translate(${focusScaleX(d.article_id)},0)`)
+            .attr('opacity', d => (focusScaleX(d.article_id) !== undefined ? 1 : 0));
         }
       }
 
