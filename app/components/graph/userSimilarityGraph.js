@@ -239,7 +239,7 @@ export default function userSimilarityGraph(data, svg, user, articles) {
       });
       console.log('bothRepliedAuthors', bothRepliedAuthors);
       console.log('sorted authors', authorArr);
-      updateArticleMatrix(articles, bothRepliedArticles, index);
+      updateArticleMatrix(articles, bothRepliedArticles, index, i);
       updateUserMatrix(bothRepliedArticles, index, i);
       d3.select('.authorAxisY').selectAll(`.tick.${yID}`)
         .selectAll('text')
@@ -719,7 +719,7 @@ export default function userSimilarityGraph(data, svg, user, articles) {
         .remove();
       // lineGroup.selectAll('line').remove();
     }
-    function updateArticleMatrix(articleArray, highlightArticles, userIndex) {
+    function updateArticleMatrix(articleArray, highlightArticles, userX, userY) {
       articleGroup.selectAll('.articleXAxis').remove();
       articleGroup.select('.lineGroup').selectAll('line').remove();
       const article_titles = articleArray.map(e => e.article_title);
@@ -775,7 +775,7 @@ export default function userSimilarityGraph(data, svg, user, articles) {
               })
               .attr('transform', () => {
                 if (highlightArticles.some(e => e.article_id === d.article_id)) {
-                  const userOffset = (newUserAxisValues.length - userIndex - 1) * gridSize;
+                  const userOffset = (newUserAxisValues.length - userX - 1) * gridSize;
                   return `translate(${highlightArticleXScale(d.article_id) - userOffset}, ${y(i)})`;
                 }
                 return '';
@@ -789,7 +789,7 @@ export default function userSimilarityGraph(data, svg, user, articles) {
                 let commentOffset = 0;
                 // const commentOffset = pushPositionScale(new Date(e.push_ipdatetime)
                 //   .setFullYear(postYear));
-                const userOffset = (newUserAxisValues.length - userIndex - 1) * gridSize;
+                const userOffset = (newUserAxisValues.length - userX - 1) * gridSize;
                 return xScale(d.article_title) + commentOffset - userOffset;
               })
               .attr('y', e => yScale(data[i].id))
@@ -847,7 +847,7 @@ export default function userSimilarityGraph(data, svg, user, articles) {
       context.append('g')
         .attr('class', 'brush')
         .attr('transform', () => {
-          const userOffset = (newUserAxisValues.length - userIndex - 1) * gridSize;
+          const userOffset = (newUserAxisValues.length - userX - 1) * gridSize;
           return `translate(-${userOffset}, 0)`;
         })
         .call(brush)
@@ -898,6 +898,27 @@ export default function userSimilarityGraph(data, svg, user, articles) {
           .attr('dy', '.35em')
           .style('writing-mode', 'tb')
           .style('text-anchor', 'start');
+        focus.selectAll('.axis--y')
+          .selectAll('text')
+          .style('color', (d) => {
+            const index = community.findIndex(e => e.id === d);
+            return color(community[index].community);
+          });
+        d3.select('.axis--y').selectAll('.tick')
+          .attr('class', d => `tick ${d}`);
+        d3.select('.axis--y').selectAll(`.${newUserAxisValues[userX]}`)
+          .selectAll('text')
+          .transition()
+          .duration(1000)
+          .style('font-size', '25px')
+          .style('stroke', 'black');
+        d3.select('.axis--y').selectAll(`.${newUserAxisValues[userY]}`)
+          .selectAll('text')
+          .transition()
+          .duration(1000)
+          .style('font-size', '25px')
+          .style('stroke', 'black');
+
         // svg.select('.zoom').call(zoom.transform, d3.zoomIdentity
         //   .scale(width / (s[1] - s[0]))
         //   .translate(-s[0], 0));
@@ -911,6 +932,8 @@ export default function userSimilarityGraph(data, svg, user, articles) {
             .each((d, index, nodes) => {
               const postYear = new Date(d.date).getFullYear();
               d3.select(nodes[index]).selectAll('rect')
+                .transition()
+                .duration(1000)
                 .attr('x', (e) => {
                   const date = dateFormat(e);
                   const commentTime = new Date(new Date(date).setFullYear(postYear));
