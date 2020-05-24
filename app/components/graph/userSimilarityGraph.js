@@ -943,6 +943,8 @@ export default function userSimilarityGraph(data, svg, user, articles) {
               d3.select(nodes[index]).selectAll('rect')
                 // .transition()
                 // .duration(1000)
+                .attr('height', yScale.bandwidth())
+                .attr('y', yScale(data[i].id))
                 .attr('x', (e) => {
                   const date = dateFormat(e);
                   const commentTime = new Date(new Date(date).setFullYear(postYear));
