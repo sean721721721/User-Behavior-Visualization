@@ -654,6 +654,7 @@ export default function userSimilarityGraph(data, svg, user, articles) {
           .enter()
           .append('g', d => d.article_id)
           .attr('transform', d => `translate(${xScale(d.article_title)},0)`)
+          .attr('visibility', 'hidden')
           .each((d, index, nodes) => {
             const postYear = new Date(d.date).getFullYear();
             const lastPushTimeWithoutYear = dateFormat(d.messages[d.messages.length - 1]);
@@ -666,9 +667,9 @@ export default function userSimilarityGraph(data, svg, user, articles) {
               .data(d.messages.filter(e => e.push_userid === data[i].id))
               .enter()
               .append('rect')
-              .attr('x', e => pushPositionScale(new Date(dateFormat(e)).setFullYear(postYear)))
-              .attr('y', e => yScale(data[i].id))
-              .attr('height', yScale.bandwidth())
+              // .attr('x', e => pushPositionScale(new Date(dateFormat(e)).setFullYear(postYear)))
+              // .attr('y', e => yScale(data[i].id))
+              // .attr('height', yScale.bandwidth())
               .attr('width', 1)
               .attr('fill', (e) => {
                 switch (e.push_tag) {
@@ -738,7 +739,7 @@ export default function userSimilarityGraph(data, svg, user, articles) {
         .domain(highlightArticle_id);
 
       const yScale = d3.scaleBand().domain(newUserAxisValues)
-        .range([0, newUserAxisValues.length * gridSize]);
+        .range([0, Math.min(newUserAxisValues.length * gridSize, 400)]);
 
       highlightArticle_id.forEach((id) => {
         data.forEach((usr) => {
@@ -937,12 +938,10 @@ export default function userSimilarityGraph(data, svg, user, articles) {
             .selectAll('g')
             // .data(data[i].repliedArticle.filter(e => highlightArticle_id.some(e1 => e1 === e.article_id)))
             .attr('transform', d => `translate(${focusScaleX(d.article_id)},0)`)
-            .attr('visibility', d => (focusScaleX(d.article_id) !== undefined ? 'visible' : 'hidden'))
+            .attr('visibility', d => (yScale(data[i].id) !== undefined && focusScaleX(d.article_id) !== undefined ? 'visible' : 'hidden'))
             .each((d, index, nodes) => {
               const postYear = new Date(d.date).getFullYear();
               d3.select(nodes[index]).selectAll('rect')
-                // .transition()
-                // .duration(1000)
                 .attr('height', yScale.bandwidth())
                 .attr('y', yScale(data[i].id))
                 .attr('x', (e) => {
