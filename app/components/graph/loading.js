@@ -9,8 +9,8 @@
 import * as d3 from 'd3';
 
 export default function loading(temp, total, svg) {
-  const h = parseFloat(d3.select('#commentTimeline').style('height'));
-  const w = parseFloat(d3.select('#commentTimeline').style('width'));
+  const h = parseFloat(d3.select('#timeLine').style('height'));
+  const w = parseFloat(d3.select('#timeLine').style('width'));
   const color = d3.schemeTableau10;
   if (temp === 0) {
     // d3.select('#submitUsers')

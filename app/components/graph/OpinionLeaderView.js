@@ -140,14 +140,14 @@ class OpinionLeaderView extends React.Component {
       });
       // console.log(url);
       // console.log(myRequest);
-      loading(0, myRequest.length, commentTimelineSvg);
+      loading(0, myRequest.length, userSimilaritySvg);
       const resArr = [];
       fetch(myRequest[0])
         .then(response => response.json())
         .then((response) => {
           console.log(response);
           resArr.push(response);
-          loading(resArr.length, myRequest.length, commentTimelineSvg);
+          loading(resArr.length, myRequest.length, userSimilaritySvg);
           // for (let j = 0; j < fixedUserArr[0].length; j += 1) {
           //   buildUserList(userListArray, response, fixedUserArr[0][j]);
           // }
@@ -167,7 +167,7 @@ class OpinionLeaderView extends React.Component {
               .then(res => res.json())
               .then((res) => {
                 resArr.push(res);
-                loading(resArr.length, myRequest.length, commentTimelineSvg);
+                loading(resArr.length, myRequest.length, userSimilaritySvg);
                 // console.log(res[0][0]);
                 for (let j = 0; j < fixedUserArr[i].length; j += 1) {
                   buildUserList(userListArray, res, fixedUserArr[i][j]);
@@ -209,7 +209,7 @@ class OpinionLeaderView extends React.Component {
         //   beforeThisDate, articleCellSvg, cellForceSimulation,
         //   totalAuthorInfluence, data.$this, optionsWord, handleSubmit);
       }
-      commentTimeline(cellData.nodes, commentTimelineSvg, data.$this);
+      // commentTimeline(cellData.nodes, commentTimelineSvg, data.$this);
     }
 
     const testUser = ['sasintw'];
@@ -13294,7 +13294,7 @@ class OpinionLeaderView extends React.Component {
     userSimilarityGraph(testSimilarUserList, userSimilaritySvg, testSimilarUser, articleArr, 
       // similarity,
     );
-    userDailyActivity(testData, testUser, commentTimelineSvg, beginDate, endDate);
+    // userDailyActivity(testData, testUser, commentTimelineSvg, beginDate, endDate);
 
   }
 
@@ -13311,11 +13311,11 @@ class OpinionLeaderView extends React.Component {
           />
           <svg id="articleCell" width="100%" height="94%" />
         </div> */}
-        <div className="heatMap" style={{ borderRight: '2px solid gray', overflow: 'scroll', maxHeight: '700px', minHeight: '400px' }}>
+        <div className="heatMap" style={{ borderRight: '2px solid gray', overflow: 'scroll', maxHeight: '800px', minHeight: '400px' }}>
           <svg id="timeLine" width="100%" height="600px" />
         </div>
         {/* <div className="selectedUserTable d-flex flex-column" style={{ margin: '20px 0px', maxHeight: '700px', minHeight: '400px' }} /> */}
-        <div
+        {/* <div
           className="commentTimeline"
           style={{
             // position: 'absolute',
@@ -13333,7 +13333,7 @@ class OpinionLeaderView extends React.Component {
           }}
         >
           <svg id="commentTimeline" width="100%" height="auto" />
-        </div>
+        </div> */}
         {/* <WordTree word={word} optionsWord={optionsWord} /> */}
       </div>
     );

@@ -420,15 +420,15 @@ path:hover {
 .heatMap {
     display: grid;
     grid-column: accol1 / accolend;
-    grid-row: acrow1 / acrow2;
+    grid-row: acrow1 / acrowend;
 }
 
-.commentTimeline {
-    display: grid;
-    border-top: 2px solid gray;
-    grid-column: accol1 / accolend;
-    grid-row: acrow2 / acrowend;
-}
+// .commentTimeline {
+//     display: grid;
+//     border-top: 2px solid gray;
+//     grid-column: accol1 / accolend;
+//     grid-row: acrowend / acrowend;
+// }
 
 .selectedUserTable {
     display: grid;

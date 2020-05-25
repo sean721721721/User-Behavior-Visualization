@@ -254,11 +254,16 @@ export default function AuthorTable(nodes, div, callback) {
     computeSentimentMatrix(selectedNode, node, link);
     computeTotalWeightOfEachNode(node, link);
     pageRank(node, link, alpha);
-    // console.log(node, link);
+    console.log(node, link);
+    const minPageRank = findMinimumPagerank(node);
+    console.log(minPageRank);
     selectedNode.children.forEach((e) => {
       const authorNode = node.find(e1 => e1.id === e.id);
-      e.pageRank = authorNode ? authorNode.pageRank : 0;
+      console.log(authorNode);
+      e.pageRank = authorNode ? authorNode.pageRank + minPageRank + 1 : minPageRank + 1;
     });
+    console.log(node);
+    console.log(selectedNode.children);
     console.log(new Date());
 
     function computeSentimentMatrix(termNode, n, l) {
@@ -364,6 +369,13 @@ export default function AuthorTable(nodes, div, callback) {
         console.log(`leaderPageRank: ${err}, total_num * tolerance: ${total_num * tolerance}`);
         if (err < total_num * tolerance) break;
       }
+    }
+    function findMinimumPagerank(node_data) {
+      let min = 0;
+      node_data.forEach((n) => {
+        if (n.pageRank < min) min = n.pageRank;
+      });
+      return min;
     }
   }
   // WordTree({ word: [['ag v'], ['ag c']] });
