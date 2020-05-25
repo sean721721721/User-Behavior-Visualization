@@ -198,17 +198,17 @@ class OpinionLeaderView extends React.Component {
         });
     }
 
-    if (cellData.nodes) {
+    if (cellData.children) {
       console.log(cellData);
-      if (data.$this.state.hover !== 1) {
+      // if (data.$this.state.hover !== 1) {
         console.log('do OPView rendering');
-        treemap(cellData.nodes, cellData.links,
+        treemap(cellData.children,
           beforeThisDate, articleCellSvg, cellForceSimulation,
           totalAuthorInfluence, data.$this, optionsWord, handleSubmit);
         // OpinionLeader(cellData.nodes, cellData.links,
         //   beforeThisDate, articleCellSvg, cellForceSimulation,
         //   totalAuthorInfluence, data.$this, optionsWord, handleSubmit);
-      }
+      // }
       // commentTimeline(cellData.nodes, commentTimelineSvg, data.$this);
     }
 

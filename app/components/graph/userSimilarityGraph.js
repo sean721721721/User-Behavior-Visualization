@@ -664,7 +664,8 @@ export default function userSimilarityGraph(data, svg, user, articles) {
           .selectAll('circle')
           .data(datas[i].repliedArticle)
           .enter()
-          .append('g', d => d.article_id)
+          .append('g')
+          .attr('class', d => d.article_id)
           .attr('transform', d => `translate(${xScale(d.article_title)},0)`)
           .attr('visibility', 'hidden')
           .each((d, index, nodes) => {
@@ -992,6 +993,17 @@ export default function userSimilarityGraph(data, svg, user, articles) {
           // .enter()
           // .exit()
           // .remove();
+          highlightArticle_id.forEach((articleID) => {
+            if (!data[i].repliedArticle.some(e => e.article_id === articleID)) {
+              focus.select(`.${datas[i].id}`).append('g')
+                .attr('class', articleID)
+                .append('rect')
+                .attr('x', 0)
+                .attr('y', 0)
+                .attr('width', '100px')
+                .attr('height', '100px')
+            }
+          });
         }
       }
 

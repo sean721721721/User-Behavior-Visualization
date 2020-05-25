@@ -22,7 +22,7 @@ import Chart from 'react-google-charts';
 import fetch from '../../reducers/fetch';
 // import jieba from 'nodejieba';
 
-export default function treemap(cellNodes, cellLinks, beforeThisDate,
+export default function treemap(cellNodes, beforeThisDate,
   svg, forceSimulation, totalInfluence, $this, optionsWord, submit) {
   const margin = {
     top: 10, right: 10, bottom: 10, left: 10,
@@ -31,7 +31,7 @@ export default function treemap(cellNodes, cellLinks, beforeThisDate,
   const h = parseFloat(d3.select('#graph').style('height'));
   const width = w - margin.left - margin.right;
   const height = h - margin.top - margin.bottom;
-  console.log(cellNodes, cellLinks);
+  console.log(cellNodes);
   // append the svg object to the body of the page
   svg.selectAll('*').remove();
   const articleTreemap = svg.append('g')

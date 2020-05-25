@@ -11,12 +11,13 @@ import React, { Component, PureComponent } from 'react';
 // import { connect } from 'react-redux';
 // import { push } from 'react-router-redux';
 import * as d3 from 'd3';
+import OpinionLeaderView from './OpinionLeaderView';
 // import * as sententree from 'sententree';
 // import { max } from 'moment';
 // import { Row, Form } from 'antd';
 import * as jsnx from 'jsnetworkx';
 
-export default function AuthorTable(nodes, div, callback) {
+export default function AuthorTable(nodes, div, $this, callback) {
   console.log(nodes);
   div.selectAll('*').remove();
   const authorList = JSON.parse(JSON.stringify(nodes));
@@ -27,8 +28,7 @@ export default function AuthorTable(nodes, div, callback) {
   authorIdPreprocessing(authorList.children);
   leaderPageRank(authorList);
   // computeSentimentMatrix(authorList);
-  console.log(authorList.children);
-
+  const articleCellSvg = d3.select('#graph');
   let authorIndex = 0;
   // compute author's influence
   authorList.children.forEach((author) => {
@@ -42,6 +42,7 @@ export default function AuthorTable(nodes, div, callback) {
   authorList.children.sort((a, b) => d3.descending(a.pageRank, b.pageRank));
   const topicWithSelectedAuthor = JSON.parse(JSON.stringify(noCuttedAuthorIdList));
   topicWithSelectedAuthor.children = [];
+  callback({ children: authorList.children }, 'test');
   // console.log(authorList.children);
   // console.log(div);
   const authorTable = div.append('table');
@@ -106,7 +107,7 @@ export default function AuthorTable(nodes, div, callback) {
     const pushAuthor = JSON.parse(JSON.stringify(d));
     pushAuthor.id = pushAuthor.oldId;
     topicWithSelectedAuthor.children.push(pushAuthor);
-    // console.log(topicWithSelectedAuthor);
+    console.log(topicWithSelectedAuthor, pushAuthor);
     callback(topicWithSelectedAuthor, pushAuthor.id);
     authorIndex += 1;
   }
