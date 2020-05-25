@@ -994,14 +994,15 @@ export default function userSimilarityGraph(data, svg, user, articles) {
           // .exit()
           // .remove();
           highlightArticle_id.forEach((articleID) => {
-            if (!data[i].repliedArticle.some(e => e.article_id === articleID)) {
+            if (!datas[i].repliedArticle.some(e => e.article_id === articleID)) {
               focus.select(`.${datas[i].id}`).append('g')
                 .attr('class', articleID)
                 .append('rect')
-                .attr('x', 0)
-                .attr('y', 0)
-                .attr('width', '100px')
-                .attr('height', '100px')
+                .attr('x', focusScaleX(articleID))
+                .attr('y', yScale(datas[i].id))
+                .attr('width', focusScaleX.bandwidth())
+                .attr('height', yScale.bandwidth())
+                .attr('fill', 'lightgray');
             }
           });
         }
