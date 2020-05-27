@@ -41,7 +41,7 @@ export default function userSimilarityGraph(data, svg, user, articles) {
   const myGroups = getAllAuthorId(data); // author
   const myVars = user;
   const clickedUser = [];
-  const similarThresh = 0.3;
+  const similarThresh = 0.1;
   adjacencyMatrixNoAuthor(similarThresh);
   // heatMapWithAuthor();
 

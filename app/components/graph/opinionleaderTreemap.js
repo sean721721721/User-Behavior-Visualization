@@ -38,9 +38,13 @@ export default function treemap(cellNodes, beforeThisDate,
     .attr('transform',
       `translate(${margin.left},${margin.top})`);
   const selectedArticleNodes = [];
+
+
   const data = { children: [] };
   const authorNodes = cellNodes.filter(e => e.responder);
-  authorNodes.forEach((n) => {
+  authorNodes.sort((a, b) => b.pageRank - a.pagrRank);
+  const top20Authors = authorNodes.filter((d, index) => index < 20);
+  top20Authors.forEach((n) => {
     console.log(n);
     const articles = [];
     let totalComments = 0;
@@ -60,6 +64,16 @@ export default function treemap(cellNodes, beforeThisDate,
     });
     data.children.push({ name: n.id, children: articles });
   });
+
+  // const newAuthorNodes = cellNodes.map((e) => {
+  //   return {
+  //     name: e.id,
+  //     value: e.pageRank,
+  //   };
+  // });
+  // console.log(newAuthorNodes);
+  // const data = { children: [{name: 'Authors', children: newAuthorNodes }] };
+
   console.log(data);
   // read json data
   // const data = {
@@ -108,13 +122,13 @@ export default function treemap(cellNodes, beforeThisDate,
   // };
   // Give the data to this cluster layout:
   const root = d3.hierarchy(data).sum(d => d.value); // Here the size of each leave is given in the 'value' field in input data
-
+  console.log(root);
   // Then d3.treemap computes the position of each element of the hierarchy
   d3.treemap()
     .size([width, height])
-    .paddingTop(28)
-    .paddingRight(7)
-    .paddingInner(3)(root);
+    .paddingTop(15)
+    .paddingRight(10)
+    .paddingInner(0)(root);
 
   // prepare a color scale
   const color = d3.scaleOrdinal()
@@ -123,7 +137,7 @@ export default function treemap(cellNodes, beforeThisDate,
 
     // And a opacity scale
   const opacity = d3.scaleLinear()
-    .domain([10, 30])
+    .domain([0, 1])
     .range([0.5, 1]);
 
     // use this information to add rectangles:
@@ -148,8 +162,9 @@ export default function treemap(cellNodes, beforeThisDate,
     .enter()
     .append('text')
     .attr('x', d => d.x0 + 5) // +10 to adjust position (more right)
-    .attr('y', d => d.y0 + 20) // +20 to adjust position (lower)
+    .attr('y', d => d.y0 + 15) // +20 to adjust position (lower)
     .text((d) => {
+      console.log(d);
       const length = d.x1 - d.x0;
       const title = d.data.name.replace('mister_', '');
       if (title.length > 10) {
@@ -160,7 +175,7 @@ export default function treemap(cellNodes, beforeThisDate,
       // const name = d.data.name.split(' ')[0];
       // return name;
     })
-    .attr('font-size', '19px')
+    .attr('font-size', '11px')
     .attr('fill', 'white');
 
   // and to add the text labels
@@ -176,7 +191,7 @@ export default function treemap(cellNodes, beforeThisDate,
       // return `Total Comment: ${message_count[0].count + message_count[1].count + message_count[2].count}<br>
       //   push: ${message_count[0].count}, boo: ${message_count[1].count}, neutral: ${message_count[2].count}`;
     })
-    .attr('font-size', '11px')
+    .attr('font-size', '8px')
     .attr('fill', 'white');
 
   // Add title for the 3 groups
@@ -186,12 +201,12 @@ export default function treemap(cellNodes, beforeThisDate,
     .enter()
     .append('text')
     .attr('x', d => d.x0)
-    .attr('y', d => d.y0 + 21)
+    .attr('y', d => d.y0 + 11)
     .text((d) => {
       const name = d.data.name.split(' ')[0];
       return name;
     })
-    .attr('font-size', '19px')
+    .attr('font-size', '12px')
     .attr('fill', d => color(d.data.name));
   let selectedUser = [];
   function articleNodeClicked(d) {
