@@ -715,9 +715,7 @@ export default function userSimilarityGraph(data, svg, user, articles) {
                 authorGroupMouseover(tooltipString);
               })
               .on('mouseout', mouseout);
-          })
-          .append('title')
-          .text(d => `${datas[i].id} title: ${d.article_title}`);
+          });
       }
       articleGroup.selectAll('.articleXAxis')
         .selectAll('.tick')
@@ -885,7 +883,7 @@ export default function userSimilarityGraph(data, svg, user, articles) {
         focusScaleX.domain(newDomainX);
 
         const newDomainY = newUserAxisValues.slice(s[0][1] / gridSize, s[1][1] / gridSize);
-        console.log(newDomainY);
+        // console.log(newDomainY);
         yScale.domain(newDomainY);
 
         focusLineGroup.selectAll('*').remove();
@@ -949,52 +947,56 @@ export default function userSimilarityGraph(data, svg, user, articles) {
         for (let i = 0; i < datas.length; i += 1) {
           focus.select(`.${datas[i].id}`)
             .selectAll('g')
-            // .data(datas[i].repliedArticle.filter(e => highlightArticle_id.some(e1 => e1 === e.article_id)))
-            .attr('transform', (d) => {
-              return `translate(${focusScaleX(d.article_id)},0)`;
-            })
+            // .data(datas[i].repliedArticle.filter(e =>
+            //   highlightArticle_id.some(e1 => e1 === e.article_id)))
+            // .attr('transform', d => `translate(${focusScaleX(d.article_id)},0)`)
             .attr('visibility', d => (yScale(datas[i].id) !== undefined && focusScaleX(d.article_id) !== undefined ? 'visible' : 'hidden'))
             .each((d, index, nodes) => {
-              const postYear = new Date(d.date).getFullYear();
-              d3.select(nodes[index]).selectAll('text').remove();
-              d3.select(nodes[index]).selectAll('rect')
-                // .attr('width', focusScaleX.bandwidth() > 100 ? focusScaleX.bandwidth() - 85 : focusScaleX.bandwidth())
-                .attr('width', focusScaleX.bandwidth())
-                .attr('height', e => (e.push_userid ? Math.max(yScale.bandwidth() / 50, 1) : yScale.bandwidth()))
-                // .attr('y', yScale(datas[i].id))
-                .attr('y', (e) => {
-                  if (!e.push_userid) return yScale(datas[i].id);
-                  const date = dateFormat(e);
-                  const commentTime = new Date(new Date(date).setFullYear(postYear));
-                  const timeDiff = commentTime - new Date(d.date);
-                  const timeGroup = timeDiff / 1000 / 60;
-                  let timeOffSet = 0;
-                  let start = 0;
-                  let end = 5;
-                  if (timeGroup <= 5) {
-                    timeOffSet = 0;
-                    start = 0;
-                  } else if (timeGroup <= 30) {
-                    timeOffSet = yScale.bandwidth() / 5;
-                    start = 5;
-                    end = 30;
-                  } else if (timeGroup <= 60) {
-                    timeOffSet = 2 * (yScale.bandwidth() / 5);
-                    start = 30;
-                    end = 60;
-                  } else if (timeGroup <= 180) {
-                    timeOffSet = 3 * (yScale.bandwidth() / 5);
-                    start = 60;
-                    end = 180;
-                  } else {
-                    timeOffSet = 4 * (yScale.bandwidth() / 5);
-                    start = 180;
-                    end = 1440;
-                  }
-                  const nonLinearTimeScale = d3.scaleLinear()
-                    .domain([start, end]).range([0, yScale.bandwidth() / 5]);
-                  return nonLinearTimeScale(timeGroup) + timeOffSet + yScale(datas[i].id);
-                });
+              const articleID = d3.select(nodes[index]).datum().article_id;
+              if (yScale(datas[i].id) !== undefined && focusScaleX(articleID) !== undefined) {
+                d3.select(nodes[index])
+                  .attr('transform', `translate(${focusScaleX(d.article_id)},0)`);
+                const postYear = new Date(d.date).getFullYear();
+                d3.select(nodes[index]).selectAll('text').remove();
+                d3.select(nodes[index]).selectAll('rect')
+                  // .attr('width', focusScaleX.bandwidth() > 100 ?
+                  // focusScaleX.bandwidth() - 85 : focusScaleX.bandwidth())
+                  .attr('width', focusScaleX.bandwidth())
+                  .attr('height', e => (e.push_userid ? Math.max(yScale.bandwidth() / 50, 1) : yScale.bandwidth()))
+                  // .attr('y', yScale(datas[i].id))
+                  .attr('y', (e) => {
+                    if (!e.push_userid) return yScale(datas[i].id);
+                    const date = dateFormat(e);
+                    const commentTime = new Date(new Date(date).setFullYear(postYear));
+                    const timeDiff = commentTime - new Date(d.date);
+                    const timeGroup = timeDiff / 1000 / 60;
+                    let timeOffSet = 0;
+                    let start = 0;
+                    let end = 5;
+                    if (timeGroup <= 5) {
+                      timeOffSet = 0;
+                      start = 0;
+                    } else if (timeGroup <= 30) {
+                      timeOffSet = yScale.bandwidth() / 5;
+                      start = 5;
+                      end = 30;
+                    } else if (timeGroup <= 60) {
+                      timeOffSet = 2 * (yScale.bandwidth() / 5);
+                      start = 30;
+                      end = 60;
+                    } else if (timeGroup <= 180) {
+                      timeOffSet = 3 * (yScale.bandwidth() / 5);
+                      start = 60;
+                      end = 180;
+                    } else {
+                      timeOffSet = 4 * (yScale.bandwidth() / 5);
+                      start = 180;
+                      end = 1440;
+                    }
+                    const nonLinearTimeScale = d3.scaleLinear()
+                      .domain([start, end]).range([0, yScale.bandwidth() / 5]);
+                    return nonLinearTimeScale(timeGroup) + timeOffSet + yScale(datas[i].id);
+                  });
               // if (focusScaleX.bandwidth() > 100 && d.messages) {
               //   console.log(d);
               //   d3.select(nodes[index]).selectAll('text')
@@ -1039,12 +1041,12 @@ export default function userSimilarityGraph(data, svg, user, articles) {
               //       return nonLinearTimeScale(timeGroup) + timeOffSet + yScale(datas[i].id);
               //     });
               // }
+              }
             });
           // .enter()
           // .exit()
           // .remove();
           highlightArticle_id.forEach((articleID) => {
-            console.log(articleID);
             const className = String(articleID).replace(/\./g, '');
             if (!datas[i].repliedArticle.some(e => e.article_id === articleID)) {
               focus.select(`.${datas[i].id}`)
@@ -1058,12 +1060,16 @@ export default function userSimilarityGraph(data, svg, user, articles) {
                 .attr('y', yScale(datas[i].id))
                 .attr('width', focusScaleX.bandwidth())
                 .attr('height', () => {
-                  console.log(className);
+                  // console.log(className);
                   return 300;
                 })
                 .attr('fill', 'lightgray');
             }
           });
+
+          // if (focusScaleX.bandwidth() > 200) {
+
+          // }
         }
       }
 
