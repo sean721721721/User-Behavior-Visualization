@@ -31,7 +31,6 @@ export default function treemap(cellNodes, beforeThisDate,
   const h = parseFloat(d3.select('#graph').style('height'));
   const width = w - margin.left - margin.right;
   const height = h - margin.top - margin.bottom;
-  console.log(cellNodes);
   // append the svg object to the body of the page
   svg.selectAll('*').remove();
   const articleTreemap = svg.append('g')
@@ -45,7 +44,6 @@ export default function treemap(cellNodes, beforeThisDate,
   authorNodes.sort((a, b) => b.pageRank - a.pagrRank);
   const top20Authors = authorNodes.filter((d, index) => index < 20);
   top20Authors.forEach((n) => {
-    console.log(n);
     const articles = [];
     let totalComments = 0;
     n.responder.forEach((a) => {
@@ -122,7 +120,6 @@ export default function treemap(cellNodes, beforeThisDate,
   // };
   // Give the data to this cluster layout:
   const root = d3.hierarchy(data).sum(d => d.value); // Here the size of each leave is given in the 'value' field in input data
-  console.log(root);
   // Then d3.treemap computes the position of each element of the hierarchy
   d3.treemap()
     .size([width, height])
@@ -164,7 +161,6 @@ export default function treemap(cellNodes, beforeThisDate,
     .attr('x', d => d.x0 + 5) // +10 to adjust position (more right)
     .attr('y', d => d.y0 + 15) // +20 to adjust position (lower)
     .text((d) => {
-      console.log(d);
       const length = d.x1 - d.x0;
       const title = d.data.name.replace('mister_', '');
       if (title.length > 10) {

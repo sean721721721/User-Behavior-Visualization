@@ -18,15 +18,15 @@ import { userActivityTimeline } from './userActivityTimeline';
 
 export default function userSimilarityGraph(data, svg, user, articles) {
   // console.log(user);
+  const svgScale = d3.scaleLinear().domain([1, 100]).range([1, 0.1]);
   const commentTimelineSvg = d3.select('#commentTimeline');
   const w = parseFloat(d3.select('.heatMap').style('width'));
   const h = parseFloat(d3.select('.heatMap').style('height'));
   const focusHeight = 500;
-  console.log(math.sqrt(-4));
   // data = data.filter(e => e.repliedArticle.length > 1);
-  console.log(data);
-  console.log(user);
-  console.log(articles);
+  // console.log(data);
+  // console.log(user);
+  // console.log(articles);
   svg.selectAll('*').remove();
   const authorArr = computeAuthorArray(articles);
   console.log('author array', authorArr);
@@ -54,26 +54,32 @@ export default function userSimilarityGraph(data, svg, user, articles) {
       .on('zoom', zoomed));
     svg = svg.append('g')
       .attr('class', 'position');
-    const group = svg.append('g');
+    const group = svg.append('g')
+      .attr('transform', 'translate(0,0)');
     function zoomed() {
-      group.attr('transform', d3.event.transform);
+      group.attr('transform', (d, index, nodes) => {
+        // const transformX = d3.select(nodes[index]).attr('transform');
+        // const translateX = transformX.substring(transformX.indexOf('(') + 1, transformX.indexOf(')')).split(',');
+        // const offSetX = parseInt(translateX[0], 10);
+        // console.log(d3.event.transform.x);
+        // return `scale (${d3.event.transform.k}) translate(${offSetX + d3.event.transform.x},${d3.event.transform.y})`;
+        return d3.event.transform;
+      });
     }
     const color = d => d3.schemeTableau10[d + 1];
-    console.log(d3.schemeTableau10[0]);
     // similarity for articles grouping
     // const articleSimilarity = computeArticleSimilarity(articles, data);
     // console.log('articleSimilarity', articleSimilarity);
     // const articleIds = articles.map(e => e.article_id);
     // const articlesCommunity = jLouvainClustering(articleIds, articleSimilarity);
     // console.log('articlesCommunity', articlesCommunity);
-    let articlesOrderByCommunity = articles;
+    const articlesOrderByCommunity = articles;
     // articlesOrderByCommunity = articlesOrdering(articles, articlesCommunity);
     // console.log('articlesOrderByCommunity', articlesOrderByCommunity);
     // Article Similarity
     const similarity = computeUserSimilarityByArticles(data, user);
-    console.log('similarity', similarity);
     const [datas, users, similaritys] = filterAlwaysNonSimilarUser(data, user, similarity, thresh);
-    console.log(datas, users, similaritys);
+    console.log('datas:', datas, 'users:', users, 'similaritys:', similaritys);
     // responderCommunityDetecting(nodes, similaritys);
     const newUserAxisValues = [];
     const axisDomain = [];
@@ -89,7 +95,7 @@ export default function userSimilarityGraph(data, svg, user, articles) {
       // matrix[i] = matrix[i].map(e => (e >= 0.5 && e < 2 ? 1 : e));
       // matrix[i] = matrix[i].map(e => e * 10);
     }
-    console.log('matrix', matrix);
+    // console.log('matrix', matrix);
     const [
       permuted_mat,
       permuted_origMat,
@@ -97,7 +103,8 @@ export default function userSimilarityGraph(data, svg, user, articles) {
     const [
       secondOrdering_mat,
       secondOrdering_origMat,
-    ] = matrixReorderingByCommunity(permuted_mat, permuted_origMat, community, newUserAxisValues, users);
+    ] = matrixReorderingByCommunity(permuted_mat, permuted_origMat,
+      community, newUserAxisValues, users);
 
     // Author Similarity
     // const authorSimilarity = computeUserSimilarity(datas, users);
@@ -120,7 +127,8 @@ export default function userSimilarityGraph(data, svg, user, articles) {
     //   secondOrdering_matByAuthor,
     //   secondOrdering_origMatByAuthor,
     // ] = matrixReorderingByCommunity(
-    //   permuted_matByAuthor, permuted_origMatByAuthor, communityByAuthor, newUserAxisValuesByAuthor, users,
+    //   permuted_matByAuthor, permuted_origMatByAuthor,
+    //   communityByAuthor, newUserAxisValuesByAuthor, users,
     // );
 
     const gridSize = 20;
@@ -131,8 +139,8 @@ export default function userSimilarityGraph(data, svg, user, articles) {
     d3.select('.position').attr('transform', `scale(1) translate(${w / 2 - x.range()[1] / 2},0)`);
     const leftSvg = group.append('g')
       .attr('class', 'leftSvg')
-      .attr('transform', 'scale(1) translate(0,100)');
-
+      .attr('transform', `scale(${svgScale(datas.length)}) translate(0,100)`);
+    
     const y = d3.scaleBand()
       .range([0, axisDomain.length * gridSize])
       .domain(axisDomain);
@@ -194,7 +202,6 @@ export default function userSimilarityGraph(data, svg, user, articles) {
     };
 
     const rectClick = (d, index, i) => {
-      console.log(index, i);
       const xID = newUserAxisValues[index];
       const yID = newUserAxisValues[i];
       const xUser = datas.find(e => e.id === xID);
@@ -286,7 +293,6 @@ export default function userSimilarityGraph(data, svg, user, articles) {
       .sort(null);
     // const datas_ready = pie(d3.entries(data1));
     const [maxRepliedSameArticles, maxRepliedArticles] = computeScaleMaximum();
-    console.log('maxRepliedSameArticles, maxRepliedArticles', maxRepliedSameArticles, maxRepliedArticles);
     const circleRadiusScaleForSameArticles = d3.scaleLinear()
       .domain([0, maxRepliedSameArticles]).range([0, 10]);
     const circleRadiusScaleForRepliedArticles = d3.scaleLinear()
@@ -455,7 +461,7 @@ export default function userSimilarityGraph(data, svg, user, articles) {
 
     const articleGroup = group.append('g')
       .attr('class', 'articleGroup')
-      .attr('transform', `translate(${newUserAxisValues.length * gridSize}, 100)`);
+      .attr('transform', `scale(${svgScale(datas.length)}) translate(${newUserAxisValues.length * gridSize}, 100)`);
     const authorGroup = group.append('g')
       .attr('class', 'authorGroup')
       .attr('transform', `translate(0, ${newUserAxisValues.length * gridSize})`);
@@ -553,11 +559,11 @@ export default function userSimilarityGraph(data, svg, user, articles) {
       //     .attr('stroke-width', '0.5px')
       //     .attr('stroke', 'black');
       // }
-      const focusOffSet = -w / 2 + (newUserAxisValues.length * gridSize) / 2 + 150;
-      console.log(w, newUserAxisValues.length, gridSize, focusOffSet);
+      const focusOffSetX = -w / 2 + (newUserAxisValues.length * gridSize) / 2 + 150;
+      const focusOffsetY = svgScale(datas.length) * (newUserAxisValues.length * gridSize + 120)
       const focus = svg.append('g')
         .attr('class', 'focus')
-        .attr('transform', `translate(${focusOffSet},${newUserAxisValues.length * gridSize + 120})`);
+        .attr('transform', `translate(${focusOffSetX},${focusOffsetY})`);
       for (let i = 0; i < datas.length; i += 1) {
         articleGroup.append('g')
           .attr('class', datas[i].id)
@@ -798,7 +804,7 @@ export default function userSimilarityGraph(data, svg, user, articles) {
               .transition()
               .duration(1000)
               .attr('x', (e) => {
-                let commentOffset = 0;
+                const commentOffset = 0;
                 // const commentOffset = pushPositionScale(new Date(e.push_ipdatetime)
                 //   .setFullYear(postYear));
                 const userOffset = (newUserAxisValues.length - userX - 1) * gridSize;
@@ -1059,10 +1065,7 @@ export default function userSimilarityGraph(data, svg, user, articles) {
                 // .attr('x', focusScaleX(articleID))
                 .attr('y', yScale(datas[i].id))
                 .attr('width', focusScaleX.bandwidth())
-                .attr('height', () => {
-                  // console.log(className);
-                  return 300;
-                })
+                .attr('height', 300)
                 .attr('fill', 'lightgray');
             }
           });
@@ -1456,7 +1459,6 @@ export default function userSimilarityGraph(data, svg, user, articles) {
         for (let j = 0; j < permuted_mat.length; j += 1) {
           const xUserID = newUserAxisValues[j];
           const yUserID = newUserAxisValues[i];
-          console.log(xUserID, yUserID);
           const xUser = datas.find(e => e.id === xUserID);
           const yUser = datas.find(e => e.id === yUserID);
           if (i !== j) {
@@ -1562,12 +1564,12 @@ export default function userSimilarityGraph(data, svg, user, articles) {
       origMat[targetUserIndex][sourceUserIndex] = e.value;
     });
 
-    console.log('origMat', origMat);
+    // console.log('origMat', origMat);
     return [mat, origMat];
   }
 
   function matrixReordering(mat, origMat, userAxis, users) {
-    console.log(mat, origMat, userAxis, users);
+    // console.log(mat, origMat, userAxis, users);
     for (let i = 0; i < users.length; i += 1) {
       userAxis.push(Array(users.length).fill(''));
     }
@@ -1589,10 +1591,10 @@ export default function userSimilarityGraph(data, svg, user, articles) {
     // }
     const orig_gra = reorder.mat2graph(origMat);
     const orig_perm = reorder.spectral_order(orig_gra);
-    console.log('permutation', perm);
+    // console.log('permutation', perm);
     let tempUser = [...users];
     for (let j = 0; j < users.length; j += 1) {
-      console.log(tempUser, perm, j);
+      // console.log(tempUser, perm, j);
       userAxis[j] = tempUser[perm[j]];
     }
     tempUser = [...userAxis];
@@ -1632,8 +1634,8 @@ export default function userSimilarityGraph(data, svg, user, articles) {
     // }
     // let permuted_mat = matrix;
     // let userAxis = user;
-    console.log('permutedMatrix', permutedMat);
-    console.log('userAxis', userAxis);
+    // console.log('permutedMatrix', permutedMat);
+    // console.log('userAxis', userAxis);
     return [permutedMat, originalMat];
   }
 
@@ -1648,7 +1650,7 @@ export default function userSimilarityGraph(data, svg, user, articles) {
         }
       });
     }
-    console.log('community permutation for matrix', perm);
+    // console.log('community permutation for matrix', perm);
     const tempUser = userAxis.slice();
     for (let j = 0; j < users.length; j += 1) {
       userAxis[j] = tempUser[perm[j]];
@@ -1836,7 +1838,6 @@ export default function userSimilarityGraph(data, svg, user, articles) {
         users = users.filter(e1 => e1 !== e);
       }
     });
-    console.log(datas, users, similaritys);
     return [datas, users, similaritys];
   }
   function jLouvainClustering(nodes, edges) {
@@ -1885,7 +1886,7 @@ export default function userSimilarityGraph(data, svg, user, articles) {
     for (let i = 0; i < keys.length; i += 1) {
       final.push({ id: nodes[keys[i]], community: community_assignment_result[keys[i]] });
     }
-    console.log('node after clustering', final);
+    // console.log('node after clustering', final);
     return final;
   }
 

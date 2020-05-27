@@ -22,7 +22,7 @@ class OpinionLeaderView extends React.Component {
       totalAuthorInfluence,
       optionsWord,
     } = data;
-    console.log(data);
+    // console.log(data);
     let articleCellSvg = d3.select('#graph');
     let commentTimelineSvg = d3.select('#commentTimeline');
     let userSimilaritySvg = d3.select('#timeLine');
@@ -199,7 +199,7 @@ class OpinionLeaderView extends React.Component {
     }
 
     if (cellData.children) {
-      console.log(cellData);
+      // console.log(cellData);
       // if (data.$this.state.hover !== 1) {
         console.log('do OPView rendering');
         treemap(cellData.children,

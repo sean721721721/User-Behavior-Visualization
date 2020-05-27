@@ -54,7 +54,7 @@ class Graph extends Component {
   }
 
   shouldComponentUpdate(nextProps, nextState) {
-    // console.log(this.state, nextState);
+    console.log(this.state, nextState);
     const { opState: thisOpState, ...thisWithoutOpState } = this.props;
     const { opState: nextOpstate, ...nextWithoutOpState } = nextProps;
     const { hover, word } = this.state;
@@ -7480,9 +7480,9 @@ class Graph extends Component {
           <svg id="timeLine" width="100%" height="600px" />
         </div> */}
         {/* </div> */}
-        <div className="userDailyActivity" style={{ border: '2px solid gray', height: 'fit-content', overflowX: 'scroll' }}>
+        {/* <div className="userDailyActivity" style={{ border: '2px solid gray', height: 'fit-content', overflowX: 'scroll' }}>
           <svg id="userDailyActivity" width="100%" height="100%" style={{}} />
-        </div>
+        </div> */}
       </div>
     );
   }

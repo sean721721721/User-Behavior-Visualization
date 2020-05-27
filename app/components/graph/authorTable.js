@@ -263,7 +263,7 @@ export default function AuthorTable(nodes, div, $this, callback) {
       console.log(authorNode);
       e.pageRank = authorNode ? authorNode.pageRank + minPageRank + 1 : minPageRank + 1;
     });
-    console.log(node);
+    // console.log(node);
     console.log(selectedNode.children);
     console.log(new Date());
 
