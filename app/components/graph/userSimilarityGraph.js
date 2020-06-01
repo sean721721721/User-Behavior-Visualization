@@ -1549,14 +1549,18 @@ export default function userSimilarityGraph(data, svg, user, articles) {
 
     function drawUserGroupRadial() {
       let filteredArticles = articles;
-      if (articles.length > 100) {
-        filteredArticles = articles.filter(e => e.message_count.all > 100);
-        console.log(filteredArticles);
-      }
+      filteredArticles = filteredArticles.filter((e) => {
+        return e.messages.some(mes => datas.some(usr => usr.id === mes.push_userid));
+      });
+      // if (articles.length > 100) {
+      //   filteredArticles = filteredArticles.filter(e => e.message_count.all > 100);
+      //   console.log(filteredArticles);
+      // }
 
       // similarity for articles grouping
-      const articleSimilarity = computeArticleSimilarity(articles, data);
-      const articleIds = articles.map(e => e.article_id);
+      const articleSimilarity = computeArticleSimilarity(filteredArticles, data);
+      console.log(articleSimilarity);
+      const articleIds = filteredArticles.map(e => e.article_id);
       const articlesCommunity = jLouvainClustering(articleIds, articleSimilarity);
       console.log('articlesCommunity', articlesCommunity);
       const radial = group.append('g')
@@ -1637,17 +1641,17 @@ export default function userSimilarityGraph(data, svg, user, articles) {
           });
         });
         console.log(communityEachLevelCount);
-        for (let i = 0; i < numOfArtCom; i += 1) {
+        for (let i = 0; i < communityEachLevelCount.length; i += 1) {
           const radialColor = d3.scaleLinear().domain([-1, 4]).range(['white', color(index)]);
-          const tempCommunity = communityEachLevelCount.find(e => e.community === i);
+          const tempCommunity = communityEachLevelCount[i].community;
           for (let j = 0; j < 5; j += 1) {
             groupRadial.append('g')
-              .attr('transform', `rotate(${360 * (i / numOfArtCom)})`)
+              .attr('transform', `rotate(${360 * (tempCommunity / numOfArtCom)})`)
               .append('line')
               .attr('x1', 0)
               .attr('y1', -5)
               .attr('x2', 0)
-              .attr('y2', -5 - 50 * (tempCommunity.level[j] / numOfArtOfEachComunity[i].length))
+              .attr('y2', -5 - 50 * (communityEachLevelCount[i].level[j] / numOfArtOfEachComunity[tempCommunity].length))
               .attr('opacity', communityEachLevelCount[i].level[j] === 0 ? 0 : 1)
               .attr('stroke-width', 5)
               .attr('stroke', radialColor(j));
@@ -1895,11 +1899,13 @@ export default function userSimilarityGraph(data, svg, user, articles) {
         const intersectUsers = temp.messages.length - tempdiff.length;
         const nextintersectArticles = next.messages.length - nextdiff.length;
         const similarity = intersectUsers / (temp.messages.length + next.messages.length - intersectUsers);
-        array.push({
-          source: temp.article_id,
-          target: next.article_id,
-          value: similarity,
-        });
+        if (similarity) {
+          array.push({
+            source: temp.article_id,
+            target: next.article_id,
+            value: similarity,
+          });
+        }
       }
     }
     return array;
