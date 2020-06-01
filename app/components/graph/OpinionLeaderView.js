@@ -3,14 +3,14 @@
 /* eslint-disable react/prop-types */
 import React from 'react';
 import * as d3 from 'd3';
-import { OpinionLeader } from './OpinionLeader';
+// import { OpinionLeader } from './OpinionLeader';
 import { treemap } from './opinionleaderTreemap';
-import { commentTimeline } from './commentTimeline';
-import { userActivityTimeline } from './userActivityTimeline';
+// import { commentTimeline } from './commentTimeline';
+// import { userActivityTimeline } from './userActivityTimeline';
 import { userSimilarityGraph } from './userSimilarityGraph';
-import { userDailyActivity } from './userDailyActivity';
+// import { userDailyActivity } from './userDailyActivity';
 import { loading } from './loading';
-import WordTree from './wordTree';
+// import WordTree from './wordTree';
 
 class OpinionLeaderView extends React.Component {
   componentDidUpdate() {
@@ -201,13 +201,13 @@ class OpinionLeaderView extends React.Component {
     if (cellData.children) {
       // console.log(cellData);
       // if (data.$this.state.hover !== 1) {
-        console.log('do OPView rendering');
-        treemap(cellData.children,
-          beforeThisDate, articleCellSvg, cellForceSimulation,
-          totalAuthorInfluence, data.$this, optionsWord, handleSubmit);
-        // OpinionLeader(cellData.nodes, cellData.links,
-        //   beforeThisDate, articleCellSvg, cellForceSimulation,
-        //   totalAuthorInfluence, data.$this, optionsWord, handleSubmit);
+      console.log('do OPView rendering');
+      treemap(cellData.children,
+        beforeThisDate, articleCellSvg, cellForceSimulation,
+        totalAuthorInfluence, data.$this, optionsWord, handleSubmit);
+      // OpinionLeader(cellData.nodes, cellData.links,
+      //   beforeThisDate, articleCellSvg, cellForceSimulation,
+      //   totalAuthorInfluence, data.$this, optionsWord, handleSubmit);
       // }
       // commentTimeline(cellData.nodes, commentTimelineSvg, data.$this);
     }

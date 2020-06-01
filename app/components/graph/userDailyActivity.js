@@ -214,7 +214,7 @@ export default function userDailyActivity(data, user, svg, begin, end) {
       const earliestDate = new Date(`${e.time[0].month}/${e.time[0].date}`);
       const latestDate = new Date(`${e.time[e.time.length - 1].month}/${e.time[e.time.length - 1].date}`);
       const diffTime = Math.abs(latestDate - earliestDate);
-      const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24)); 
+      const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
       e.totalDate = diffDays;
     });
     return userList;
