@@ -1563,9 +1563,9 @@ export default function userSimilarityGraph(data, svg, user, articles) {
       const articleIds = filteredArticles.map(e => e.article_id);
       const articlesCommunity = jLouvainClustering(articleIds, articleSimilarity);
       console.log('articlesCommunity', articlesCommunity);
-      const radial = group.append('g')
+      const radial = d3.select('#timeLine').append('g')
         .attr('class', 'radialGroup')
-        .attr('transform', 'translate(300, 100)');
+        .attr('transform', 'translate(110, 100)');
       const numOfArtCom = Math.max(...articlesCommunity.map(e => e.community)) + 1;
       const numOfArtOfEachComunity = [];
       for (let i = 0; i < numOfArtCom; i += 1) {
@@ -1573,7 +1573,13 @@ export default function userSimilarityGraph(data, svg, user, articles) {
         numOfArtOfEachComunity.push(tempCommunity);
       }
       console.log(numOfArtOfEachComunity);
+      const artComPie = d3.pie()
+        .value(d => d.length)
+        .sort(null);
+      const dataReady = artComPie(numOfArtOfEachComunity);
+      console.log(dataReady);
       const numOfUserCom = Math.max(...community.map(e => e.community));
+
       for (let i = 0; i <= numOfUserCom; i += 1) {
         const groupRadial = radial.append('g')
           .attr('class', `group_${i}`)
@@ -1631,30 +1637,38 @@ export default function userSimilarityGraph(data, svg, user, articles) {
           const levelFive = e.articles.filter(a => a.count >= 0.8).length;
           communityEachLevelCount.push({
             community: e.community,
-            level: [
-              levelOne,
-              levelTwo,
-              levelThree,
-              levelFour,
-              levelFive,
-            ],
+            level: [levelOne, levelTwo, levelThree, levelFour, levelFive],
           });
         });
         console.log(communityEachLevelCount);
         for (let i = 0; i < communityEachLevelCount.length; i += 1) {
-          const radialColor = d3.scaleLinear().domain([-1, 4]).range(['white', color(index)]);
+          const radialColor = d3.scaleLinear().domain([-1, 4]).range(['white', color(i % 10)]);
           const tempCommunity = communityEachLevelCount[i].community;
           for (let j = 0; j < 5; j += 1) {
+            // groupRadial.append('g')
+            //   .attr('transform', `rotate(${360 * (tempCommunity / numOfArtCom)})`)
+            //   .append('line')
+            //   .attr('x1', 0)
+            //   .attr('y1', -5)
+            //   .attr('x2', 0)
+            //   .attr('y2', -5 - 50 * (communityEachLevelCount[i].level[j] / numOfArtOfEachComunity[tempCommunity].length))
+            //   .attr('opacity', communityEachLevelCount[i].level[j] === 0 ? 0 : 1)
+            //   .attr('stroke-width', 5)
+            //   .attr('stroke', radialColor(j));
             groupRadial.append('g')
-              .attr('transform', `rotate(${360 * (tempCommunity / numOfArtCom)})`)
-              .append('line')
-              .attr('x1', 0)
-              .attr('y1', -5)
-              .attr('x2', 0)
-              .attr('y2', -5 - 50 * (communityEachLevelCount[i].level[j] / numOfArtOfEachComunity[tempCommunity].length))
-              .attr('opacity', communityEachLevelCount[i].level[j] === 0 ? 0 : 1)
-              .attr('stroke-width', 5)
-              .attr('stroke', radialColor(j));
+              .selectAll('path')
+              .data(dataReady)
+              .enter()
+              .append('path')
+              .attr('d', d3.arc()
+                .innerRadius(5)
+                .outerRadius(5 + 50 * (communityEachLevelCount[i].level[j] / numOfArtOfEachComunity[tempCommunity].length)))
+              .attr('fill', radialColor(j))
+              // .attr('stroke', 'black')
+              // .style('stroke-width', '0.5px')
+              .style('opacity', (d, dataIndex) => {
+                return dataIndex === tempCommunity ? 0.7 : 0;
+              });
           }
         }
       }

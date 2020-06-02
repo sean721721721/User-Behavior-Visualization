@@ -295,11 +295,12 @@ path:hover {
 
 .grid {
     margin: 0 0 0 0;
+    border-radius: 30px;
     // border: 2px solid #CCC;
     height: 95vh;
     display: grid;
     grid-gap: 1px;
-    grid-template-rows: [grow1] 100px [grow2] minmax(1px, 90vh) [growend];
+    grid-template-rows: [grow1] 90px [grow2] minmax(1px, 90vh) [growend];
 }
 
 .box {
@@ -366,7 +367,7 @@ path:hover {
     grid-column: col1 / colend;
     grid-row: grow2 / growend;
     display: grid;
-    grid-template-columns: [sscol1] 0.0fr [sscol2] 0.0fr [sscol3] 30fr [sscol4] 1fr [sscol5] 69fr [sscolend];
+    grid-template-columns: [sscol1] 0.0fr [sscol2] 0.0fr [sscol3] 30.3fr [sscol4] 0.4fr [sscol5] 69.3fr [sscolend];
     grid-template-rows: [ssrow1] auto [ssrow2] 10px [ssrow3] 0.2fr [ssrowend];
 }
 
@@ -378,6 +379,7 @@ path:hover {
 
 .network {
     border: 2px solid gray;
+    border-radius: 5px;
     display: grid;
     grid-column: sscol3 / sscol4;
     grid-row: ssrow1 / ssrow2;
@@ -410,6 +412,7 @@ path:hover {
 
 .opinionLeaderView {
     border: 2px solid gray;
+    border-radius: 5px;
     display: grid;
     grid-column: sscol5 / sscolend;
     grid-row: ssrow1 / ssrow2;
