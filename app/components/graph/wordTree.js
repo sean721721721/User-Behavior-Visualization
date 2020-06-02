@@ -1,7 +1,8 @@
+/* eslint-disable react/prop-types */
 import React from 'react';
 import Chart from 'react-google-charts';
-import {GoogleCharts} from 'google-charts';
-import sententree from 'sententree';
+// import { GoogleCharts } from 'google-charts';
+// import sententree from 'sententree';
 
 const WordTree = (props) => {
   const { optionsWord, word } = props;
@@ -17,7 +18,7 @@ const WordTree = (props) => {
   };
   return (
     <div className="wordTree">
-        <div id="vis"></div>
+      <div id="vis" />
       <Chart
         chartType="WordTree"
         width="100%"

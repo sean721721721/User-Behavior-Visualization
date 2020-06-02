@@ -42,7 +42,7 @@ export default function userSimilarityGraph(data, svg, user, articles) {
   const myGroups = getAllAuthorId(data); // author
   const myVars = user;
   const clickedUser = [];
-  const similarThresh = 0.1;
+  const similarThresh = 0.0;
   adjacencyMatrixNoAuthor(similarThresh);
   // heatMapWithAuthor();
 
@@ -141,7 +141,7 @@ export default function userSimilarityGraph(data, svg, user, articles) {
     const leftSvg = group.append('g')
       .attr('class', 'leftSvg')
       .attr('transform', `scale(${svgScale(datas.length)}) translate(0,100)`);
-    
+
     const y = d3.scaleBand()
       .range([0, axisDomain.length * gridSize])
       .domain(axisDomain);
@@ -571,7 +571,7 @@ export default function userSimilarityGraph(data, svg, user, articles) {
       //     .attr('stroke', 'black');
       // }
       const focusOffSetX = -w / 2 + (newUserAxisValues.length * gridSize) / 2 + 150;
-      const focusOffsetY = svgScale(datas.length) * (newUserAxisValues.length * gridSize + 120)
+      const focusOffsetY = svgScale(datas.length) * (newUserAxisValues.length * gridSize + 120);
       const focus = svg.append('g')
         .attr('class', 'focus')
         .attr('transform', `translate(${focusOffSetX},${focusOffsetY})`);
@@ -1549,9 +1549,9 @@ export default function userSimilarityGraph(data, svg, user, articles) {
 
     function drawUserGroupRadial() {
       let filteredArticles = articles;
-      filteredArticles = filteredArticles.filter((e) => {
-        return e.messages.some(mes => datas.some(usr => usr.id === mes.push_userid));
-      });
+      filteredArticles = filteredArticles.filter(
+        e => e.messages.some(mes => datas.some(usr => usr.id === mes.push_userid)),
+      );
       // if (articles.length > 100) {
       //   filteredArticles = filteredArticles.filter(e => e.message_count.all > 100);
       //   console.log(filteredArticles);
@@ -1583,7 +1583,7 @@ export default function userSimilarityGraph(data, svg, user, articles) {
       for (let i = 0; i <= numOfUserCom; i += 1) {
         const groupRadial = radial.append('g')
           .attr('class', `group_${i}`)
-          .attr('transform', `translate(0, ${i * 120})`);
+          .attr('transform', `translate(0, ${i * 140})`);
         for (let j = 0; j < 5; j += 1) {
           groupRadial.append('circle')
             .attr('cx', 0)
@@ -1593,6 +1593,16 @@ export default function userSimilarityGraph(data, svg, user, articles) {
             .attr('stroke', 'black')
             .attr('fill', 'white');
         }
+        // group legend
+        groupRadial.append('text')
+          .text(`group_${i}`)
+          .attr('x', -80)
+          .attr('y', -65);
+        groupRadial.append('circle')
+          .attr('cx', -90)
+          .attr('cy', -67.5)
+          .attr('r', 5)
+          .attr('fill', color(i));
         drawRadial(i);
       }
       function drawRadial(index) {
@@ -1642,7 +1652,7 @@ export default function userSimilarityGraph(data, svg, user, articles) {
         });
         console.log(communityEachLevelCount);
         for (let i = 0; i < communityEachLevelCount.length; i += 1) {
-          const radialColor = d3.scaleLinear().domain([-1, 4]).range(['white', color(i % 10)]);
+          const radialColor = d3.scaleLinear().domain([-1, 4]).range(['white', color(index)]);
           const tempCommunity = communityEachLevelCount[i].community;
           for (let j = 0; j < 5; j += 1) {
             // groupRadial.append('g')
@@ -1664,11 +1674,19 @@ export default function userSimilarityGraph(data, svg, user, articles) {
                 .innerRadius(5)
                 .outerRadius(5 + 50 * (communityEachLevelCount[i].level[j] / numOfArtOfEachComunity[tempCommunity].length)))
               .attr('fill', radialColor(j))
-              // .attr('stroke', 'black')
-              // .style('stroke-width', '0.5px')
-              .style('opacity', (d, dataIndex) => {
-                return dataIndex === tempCommunity ? 0.7 : 0;
-              });
+              .attr('stroke', 'black')
+              .style('stroke-width', '0.3px')
+              .style('opacity', (d, dataIndex) => (dataIndex === tempCommunity ? 0.7 : 0));
+            if (i === 0) {
+              // depth legend
+              groupRadial.append('g')
+                .append('rect')
+                .attr('x', 70)
+                .attr('y', -55 + (j * 10))
+                .attr('width', 10)
+                .attr('height', 10)
+                .attr('fill', radialColor(j));
+            }
           }
         }
       }
