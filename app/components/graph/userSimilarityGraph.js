@@ -42,7 +42,7 @@ export default function userSimilarityGraph(data, svg, user, articles) {
   const myGroups = getAllAuthorId(data); // author
   const myVars = user;
   const clickedUser = [];
-  const similarThresh = 0.0;
+  const similarThresh = 0.1;
   adjacencyMatrixNoAuthor(similarThresh);
   // heatMapWithAuthor();
 
@@ -68,19 +68,29 @@ export default function userSimilarityGraph(data, svg, user, articles) {
       });
     }
     const color = d => d3.schemeTableau10[d + 1];
-    // similarity for articles grouping
-    // const articleSimilarity = computeArticleSimilarity(articles, data);
-    // console.log('articleSimilarity', articleSimilarity);
-    // const articleIds = articles.map(e => e.article_id);
-    // const articlesCommunity = jLouvainClustering(articleIds, articleSimilarity);
-    // console.log('articlesCommunity', articlesCommunity);
-    const articlesOrderByCommunity = articles;
-    // articlesOrderByCommunity = articlesOrdering(articles, articlesCommunity);
-    // console.log('articlesOrderByCommunity', articlesOrderByCommunity);
     // Article Similarity
     const similarity = computeUserSimilarityByArticles(data, user);
     const [datas, users, similaritys] = filterAlwaysNonSimilarUser(data, user, similarity, thresh);
     console.log('datas:', datas, 'users:', users, 'similaritys:', similaritys);
+    // similarity for articles grouping
+    let filteredArticles = articles;
+    filteredArticles = filteredArticles.filter(
+      e => e.messages.some(mes => datas.some(usr => usr.id === mes.push_userid)),
+    );
+    // if (articles.length > 100) {
+    //   filteredArticles = filteredArticles.filter(e => e.message_count.all > 100);
+    //   console.log(filteredArticles);
+    // }
+
+    // similarity for articles grouping
+    const articleSimilarity = computeArticleSimilarity(filteredArticles, data);
+    console.log(articleSimilarity);
+    const articleIds = filteredArticles.map(e => e.article_id);
+    const articlesCommunity = jLouvainClustering(articleIds, articleSimilarity);
+    console.log('articlesCommunity', articlesCommunity);
+    // articlesOrderByCommunity = articlesOrdering(articles, articlesCommunity);
+    // console.log('articlesOrderByCommunity', articlesOrderByCommunity);
+    const articlesOrderByCommunity = filteredArticles;
     // responderCommunityDetecting(nodes, similaritys);
     const newUserAxisValues = [];
     const axisDomain = [];
@@ -203,72 +213,78 @@ export default function userSimilarityGraph(data, svg, user, articles) {
     };
 
     const rectClick = (d, index, i) => {
-      const xID = newUserAxisValues[index];
-      const yID = newUserAxisValues[i];
-      const xUser = datas.find(e => e.id === xID);
-      const yUser = datas.find(e => e.id === yID);
-      d3.select('.leftSvg')
-        .selectAll('rect')
-        .attr('stroke', 'white');
-      // d3.select('.rightSvg')
-      //   .selectAll('rect')
-      //   .transition()
-      //   .duration(500)
-      //   .attr('stroke', 'white');
-      d3.selectAll(`.x${index}`)
-        .transition()
-        .duration(500)
-        .attr('stroke', 'black');
-      d3.selectAll(`.y${i}`)
-        .transition()
-        .duration(500)
-        .attr('stroke', 'black');
+      let bothRepliedArticles = [];
+      if (i) {
+        const xID = newUserAxisValues[index];
+        const yID = newUserAxisValues[i];
+        const xUser = datas.find(e => e.id === xID);
+        const yUser = datas.find(e => e.id === yID);
+        d3.select('.leftSvg')
+          .selectAll('rect')
+          .attr('stroke', 'white');
+        // d3.select('.rightSvg')
+        //   .selectAll('rect')
+        //   .transition()
+        //   .duration(500)
+        //   .attr('stroke', 'white');
+        d3.selectAll(`.x${index}`)
+          .transition()
+          .duration(500)
+          .attr('stroke', 'black');
+        d3.selectAll(`.y${i}`)
+          .transition()
+          .duration(500)
+          .attr('stroke', 'black');
 
-      const bothRepliedArticles = xUser.repliedArticle.filter(
-        e => yUser.repliedArticle.some(e2 => e2.article_id === e.article_id),
-      );
+        bothRepliedArticles = xUser.repliedArticle.filter(
+          e => yUser.repliedArticle.some(e2 => e2.article_id === e.article_id),
+        );
+      } else {
+        const articleIdArr = d.map(e => e.article_id);
+        bothRepliedArticles = articles.filter(e => articleIdArr.some(e1 => e1 === e.article_id));
+      }
       articles.sort((a, b) => {
         if (bothRepliedArticles.find(e => e.article_title === b.article_title)) return 1;
         return -1;
       });
       console.log('sorted articles', articles);
-      const bothRepliedAuthors = xUser.reply.filter(
-        e => yUser.reply.some(e2 => e2.author === e.author),
-      );
+      // const bothRepliedAuthors = xUser.reply.filter(
+      //   e => yUser.reply.some(e2 => e2.author === e.author),
+      // );
 
-      bothRepliedAuthors.forEach((e) => {
-        const existed = yUser.reply.find(e2 => e2.author === e.author);
-        e.count += existed.count;
-      });
+      // bothRepliedAuthors.forEach((e) => {
+      //   const existed = yUser.reply.find(e2 => e2.author === e.author);
+      //   e.count += existed.count;
+      // });
 
-      authorArr.sort((a, b) => {
-        const speA = bothRepliedAuthors.find(e => e.author === a.id);
-        if (speA) {
-          const speB = bothRepliedAuthors.find(e => e.author === b.id);
-          if (speB) {
-            if (speA.count > speB.count) return -1;
-            return 1;
-          }
-          return -1;
-        }
-        return 1;
-      });
-      console.log('bothRepliedAuthors', bothRepliedAuthors);
-      console.log('sorted authors', authorArr);
+      // authorArr.sort((a, b) => {
+      //   const speA = bothRepliedAuthors.find(e => e.author === a.id);
+      //   if (speA) {
+      //     const speB = bothRepliedAuthors.find(e => e.author === b.id);
+      //     if (speB) {
+      //       if (speA.count > speB.count) return -1;
+      //       return 1;
+      //     }
+      //     return -1;
+      //   }
+      //   return 1;
+      // });
+      // console.log('bothRepliedAuthors', bothRepliedAuthors);
+      // console.log('sorted authors', authorArr);
       updateArticleMatrix(articles, bothRepliedArticles, index, i);
-      updateUserMatrix(bothRepliedArticles, index, i);
-      d3.select('.authorAxisY').selectAll(`.tick.${yID}`)
-        .selectAll('text')
-        .transition()
-        .duration(1000)
-        .style('font-size', '25px')
-        .style('stroke', 'black');
-      d3.select('.authorAxisY').selectAll(`.tick.${xID}`)
-        .selectAll('text')
-        .transition()
-        .duration(1000)
-        .style('font-size', '25px')
-        .style('stroke', 'black');
+      // updateUserMatrix(bothRepliedArticles, index, i);
+      // d3.select('.authorAxisY').selectAll(`.tick.${yID}`)
+      //   .selectAll('text')
+      //   .transition()
+      //   .duration(1000)
+      //   .style('font-size', '25px')
+      //   .style('stroke', 'black');
+      // d3.select('.authorAxisY').selectAll(`.tick.${xID}`)
+      //   .selectAll('text')
+      //   .transition()
+      //   .duration(1000)
+      //   .style('font-size', '25px')
+      //   .style('stroke', 'black');
       // drawUserRepliedArticleMatrix(articles);
       // drawUserRepliedAuthorMatrix(authorArr);
       // drawAuthorArticleMatrix(articles, authorArr);
@@ -459,10 +475,10 @@ export default function userSimilarityGraph(data, svg, user, articles) {
     //       rectClick(d, actualXUserIndex, actualYUserIndex);
     //     });
     // }
-
+    const artComWidth = 100 + Math.max(...articlesCommunity.map(e => e.community)) * 2;
     const articleGroup = group.append('g')
       .attr('class', 'articleGroup')
-      .attr('transform', `scale(${svgScale(datas.length)}) translate(${newUserAxisValues.length * gridSize}, 100)`);
+      .attr('transform', `scale(${svgScale(datas.length)}) translate(${newUserAxisValues.length * gridSize + artComWidth}, 100)`);
     const authorGroup = group.append('g')
       .attr('class', 'authorGroup')
       .attr('transform', `translate(0, ${newUserAxisValues.length * gridSize})`);
@@ -471,7 +487,8 @@ export default function userSimilarityGraph(data, svg, user, articles) {
     const leftSvgLineGroup = leftSvg.append('g');
     d3.select('#timeLine').attr('height', newUserAxisValues.length * gridSize + 100 + focusHeight + 300);
     drawUserRepliedArticleMatrix(articlesOrderByCommunity);
-    drawUserGroupRadial();
+    // drawUserGroupRadial();
+    drawUserGroupBipartiteRelations();
     // drawUserRepliedAuthorMatrix(authorArr);
     // drawAuthorArticleMatrix(articlesOrderByCommunity, authorArr);
 
@@ -570,7 +587,7 @@ export default function userSimilarityGraph(data, svg, user, articles) {
       //     .attr('stroke-width', '0.5px')
       //     .attr('stroke', 'black');
       // }
-      const focusOffSetX = -w / 2 + (newUserAxisValues.length * gridSize) / 2 + 150;
+      const focusOffSetX = -w / 2 + (newUserAxisValues.length * gridSize) / 2 + 400;
       const focusOffsetY = svgScale(datas.length) * (newUserAxisValues.length * gridSize + 120);
       const focus = svg.append('g')
         .attr('class', 'focus')
@@ -762,7 +779,7 @@ export default function userSimilarityGraph(data, svg, user, articles) {
 
       const highlightArticleXScale = d3.scaleBand().range([0, highlightArticle_id.length * 2])
         .domain(highlightArticle_id);
-      const focusWidth = w - 300;
+      const focusWidth = w - 500;
       const focusScaleX = d3.scaleBand().range([0, focusWidth])
         .domain(highlightArticle_id);
 
@@ -805,7 +822,7 @@ export default function userSimilarityGraph(data, svg, user, articles) {
               .attr('transform', () => {
                 if (highlightArticles.some(e => e.article_id === d.article_id)) {
                   const userOffset = (newUserAxisValues.length - userX - 1) * gridSize;
-                  return `translate(${highlightArticleXScale(d.article_id) - userOffset}, ${y(i)})`;
+                  return `translate(${highlightArticleXScale(d.article_id)}, ${y(i)})`;
                 }
                 return '';
               });
@@ -875,10 +892,10 @@ export default function userSimilarityGraph(data, svg, user, articles) {
       context.select('.brush').remove();
       context.append('g')
         .attr('class', 'brush')
-        .attr('transform', () => {
-          const userOffset = (newUserAxisValues.length - userX - 1) * gridSize;
-          return `translate(-${userOffset}, 0)`;
-        })
+        // .attr('transform', () => {
+        //   const userOffset = (newUserAxisValues.length - userX - 1) * gridSize;
+        //   return `translate(-${userOffset}, 0)`;
+        // })
         .call(brush)
         .call(brush.move, [[0, 0],
           [
@@ -1548,21 +1565,6 @@ export default function userSimilarityGraph(data, svg, user, articles) {
     }
 
     function drawUserGroupRadial() {
-      let filteredArticles = articles;
-      filteredArticles = filteredArticles.filter(
-        e => e.messages.some(mes => datas.some(usr => usr.id === mes.push_userid)),
-      );
-      // if (articles.length > 100) {
-      //   filteredArticles = filteredArticles.filter(e => e.message_count.all > 100);
-      //   console.log(filteredArticles);
-      // }
-
-      // similarity for articles grouping
-      const articleSimilarity = computeArticleSimilarity(filteredArticles, data);
-      console.log(articleSimilarity);
-      const articleIds = filteredArticles.map(e => e.article_id);
-      const articlesCommunity = jLouvainClustering(articleIds, articleSimilarity);
-      console.log('articlesCommunity', articlesCommunity);
       const radial = d3.select('#timeLine').append('g')
         .attr('class', 'radialGroup')
         .attr('transform', 'translate(110, 100)');
@@ -1679,6 +1681,11 @@ export default function userSimilarityGraph(data, svg, user, articles) {
               .style('opacity', (d, dataIndex) => (dataIndex === tempCommunity ? 0.7 : 0));
             if (i === 0) {
               // depth legend
+              groupRadial.append('text')
+                .text(`> ${Math.round((0 + 0.2 * j) * 10) / 10}`)
+                .attr('font-size', 9)
+                .attr('x', 85)
+                .attr('y', -47 + (j * 10));
               groupRadial.append('g')
                 .append('rect')
                 .attr('x', 70)
@@ -1688,6 +1695,172 @@ export default function userSimilarityGraph(data, svg, user, articles) {
                 .attr('fill', radialColor(j));
             }
           }
+        }
+      }
+    }
+
+    function drawUserGroupBipartiteRelations() {
+      const radial = leftSvg.append('g')
+        .attr('class', 'radialGroup')
+        .attr('transform', `translate(${newUserAxisValues.length * gridSize}, 0)`);
+      const numOfArtCom = Math.max(...articlesCommunity.map(e => e.community)) + 1;
+      const numOfArtOfEachComunity = [];
+      for (let i = 0; i < numOfArtCom; i += 1) {
+        const tempCommunity = articlesCommunity.filter(e => e.community === i);
+        numOfArtOfEachComunity.push(tempCommunity);
+      }
+      console.log(numOfArtOfEachComunity);
+      const artComPie = d3.pie()
+        .value(d => d.length)
+        .sort(null);
+      const dataReady = artComPie(numOfArtOfEachComunity);
+      console.log(dataReady);
+      const numOfUserCom = Math.max(...community.map(e => e.community)) + 1;
+      const comunityIndexY = [];
+      const temp = [];
+      for (let i = 0; i < numOfUserCom; i += 1) {
+        let axisIndex = 0;
+        newUserAxisValues.every((e, index) => {
+          axisIndex = index;
+          return temp.some(e1 => e1 === community.find(e2 => e2.id === e).community);
+        });
+        temp.push(community.find(e => e.id === newUserAxisValues[axisIndex]).community);
+        comunityIndexY.push(axisIndex);
+      }
+      console.log(comunityIndexY);
+      const articleGroupWidthScale = d3.scaleLinear().domain([0, filteredArticles.length]).range([0, 100]);
+      const articleGroupIndexArray = [];
+      const articleGroupXScale = [0];
+      const padding = 2;
+      for (let i = 0; i < numOfArtCom; i += 1) {
+        articleGroupIndexArray.push(i);
+        if (i < numOfArtCom - 1) {
+          articleGroupXScale.push(padding + articleGroupXScale[i] + articleGroupWidthScale(numOfArtOfEachComunity[i].length));
+        }
+      }
+      for (let i = 0; i < numOfUserCom; i += 1) {
+        const groupRadial = radial.append('g')
+          .attr('class', `group_${i}`);
+        let numOfUser = 0;
+        if (i === numOfUserCom - 1) numOfUser = newUserAxisValues.length - comunityIndexY[i];
+        else numOfUser = comunityIndexY[i + 1] - comunityIndexY[i];
+        for (let j = 0; j < numOfArtCom; j += 1) {
+          groupRadial.append('rect')
+            .attr('x', articleGroupXScale[j])
+            .attr('y', y(comunityIndexY[i]) + 1)
+            .attr('width', articleGroupWidthScale(numOfArtOfEachComunity[j].length))
+            .attr('height', numOfUser * gridSize - 2)
+            .attr('fill', 'white')
+            .attr('stroke', color(i))
+            .attr('stroke-width', '0.5px');
+        }
+        // group legend
+        // groupRadial.append('text')
+        //   .text(`group_${i}`)
+        //   .attr('x', -80)
+        //   .attr('y', -65);
+        // groupRadial.append('circle')
+        //   .attr('cx', -90)
+        //   .attr('cy', -67.5)
+        //   .attr('r', 5)
+        //   .attr('fill', color(i));
+        drawRelationRatio(i, numOfUser);
+      }
+      function drawRelationRatio(index, userCount) {
+        const groupRadial = radial.select(`.group_${index}`);
+        const communityIndex = community.filter(e => e.community === index);
+        const communityIndexDatas = datas.filter(e => communityIndex.some(e1 => e1.id === e.id));
+        console.log(communityIndexDatas);
+        const communityIndexArticles = computeNumOfArticlesOfEachCommunity();
+        communityIndexDatas.forEach((u) => {
+          u.repliedArticle.forEach((article) => {
+            const findArticle = articlesCommunity.find(a => a.id === article.article_id);
+            const existedComunity = communityIndexArticles.find(e => e.community === findArticle.community);
+            if (existedComunity) {
+              // same community
+              const existedArticle = existedComunity.articles.find(e => e.article_id === findArticle.id);
+              if (existedArticle) {
+                // same aritcle
+                existedArticle.count += 1 / communityIndexDatas.length;
+              } else {
+                // can't find article
+                existedComunity.articles.push({ article_id: findArticle.id, count: 1 / communityIndexDatas.length });
+              }
+            } else {
+              // can't find community
+              communityIndexArticles.push({
+                community: findArticle.community,
+                articles: [{
+                  article_id: findArticle.id,
+                  count: 1 / communityIndexDatas.length,
+                }],
+              });
+            }
+          });
+        });
+        console.log(communityIndexArticles);
+        const communityEachLevelCount = [];
+        communityIndexArticles.forEach((e) => {
+          const levelOne = e.articles.filter(a => a.count > 0);
+          const levelTwo = e.articles.filter(a => a.count >= 0.2);
+          const levelThree = e.articles.filter(a => a.count >= 0.4);
+          const levelFour = e.articles.filter(a => a.count >= 0.6);
+          const levelFive = e.articles.filter(a => a.count >= 0.8);
+          communityEachLevelCount.push({
+            community: e.community,
+            level: [levelOne, levelTwo, levelThree, levelFour, levelFive],
+          });
+        });
+        console.log(communityEachLevelCount);
+        for (let i = 0; i < communityEachLevelCount.length; i += 1) {
+          const radialColor = d3.scaleLinear().domain([-1, 4]).range(['white', color(index)]);
+          const tempCommunity = communityEachLevelCount[i].community;
+          groupRadial.append('g')
+            .selectAll('path')
+            .data(communityEachLevelCount[i].level)
+            .enter()
+            .append('rect')
+            .attr('x', articleGroupXScale[tempCommunity])
+            .attr('y', (d) => {
+              const offset = (userCount * gridSize - 2) * (1 - d.length / numOfArtOfEachComunity[tempCommunity].length);
+              return y(comunityIndexY[index]) + offset + 1;
+            })
+            .attr('width', articleGroupWidthScale(numOfArtOfEachComunity[tempCommunity].length))
+            .attr('height', (d) => {
+              return (userCount * gridSize - 2) * (d.length / numOfArtOfEachComunity[tempCommunity].length);
+            })
+            .attr('fill', (d, levelIndex) => radialColor(levelIndex))
+            .on('click', (d, levelIndex) => rectClick(d, levelIndex));
+        }
+        function computeNumOfArticlesOfEachCommunity() {
+          const arr = [];
+          communityIndexDatas.forEach((u) => {
+            u.repliedArticle.forEach((article) => {
+              const findArticle = articlesCommunity.find(a => a.id === article.article_id);
+              const existedComunity = arr.find(e => e.community === findArticle.community);
+              if (existedComunity) {
+                // same community
+                const existedArticle = existedComunity.articles.find(e => e.article_id === findArticle.id);
+                if (existedArticle) {
+                  // same aritcle
+                  existedArticle.count += 1 / communityIndexDatas.length;
+                } else {
+                  // can't find article
+                  existedComunity.articles.push({ article_id: findArticle.id, count: 1 / communityIndexDatas.length });
+                }
+              } else {
+                // can't find community
+                arr.push({
+                  community: findArticle.community,
+                  articles: [{
+                    article_id: findArticle.id,
+                    count: 1 / communityIndexDatas.length,
+                  }],
+                });
+              }
+            });
+          });
+          return arr;
         }
       }
     }
