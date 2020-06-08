@@ -205,8 +205,10 @@ export default function treemap(cellNodes, beforeThisDate,
     .attr('font-size', '12px')
     .attr('fill', d => color(d.data.name));
   let selectedUser = [];
-  function articleNodeClicked(d) {
-    console.log(d);
+  function articleNodeClicked(d, index, nodes) {
+    console.log(d, index, nodes);
+    d3.select(nodes[index])
+      .style('fill', 'black');
     // submit(d);
     // const adj = cellLinks.filter(e => e.target.index === d.index);
     // const index = selectedArticleNodes.findIndex(e => e === d.title);

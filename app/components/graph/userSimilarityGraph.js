@@ -103,10 +103,7 @@ export default function userSimilarityGraph(data, svg, user, articles) {
     // enlarge the difference between users
     for (let i = 0; i < users.length; i += 1) {
       matrix[i] = matrix[i].map(e => similarityScale(e));
-      // matrix[i] = matrix[i].map(e => (e >= 0.5 && e < 2 ? 1 : e));
-      // matrix[i] = matrix[i].map(e => e * 10);
     }
-    // console.log('matrix', matrix);
     const [
       permuted_mat,
       permuted_origMat,
@@ -145,8 +142,7 @@ export default function userSimilarityGraph(data, svg, user, articles) {
     const gridSize = 20;
     const x = d3.scaleBand()
       .range([0, axisDomain.length * gridSize])
-      .domain(axisDomain)
-      .padding(0.05);
+      .domain(axisDomain);
     d3.select('.position').attr('transform', `scale(1) translate(${w / 2 - x.range()[1] / 2},0)`);
     const leftSvg = group.append('g')
       .attr('class', 'leftSvg')
@@ -155,7 +151,7 @@ export default function userSimilarityGraph(data, svg, user, articles) {
     const y = d3.scaleBand()
       .range([0, axisDomain.length * gridSize])
       .domain(axisDomain);
-      // .padding(0.05);
+
     builduserGroupAxis(newUserAxisValues);
 
     // Build color scale
@@ -248,46 +244,7 @@ export default function userSimilarityGraph(data, svg, user, articles) {
         return -1;
       });
       console.log('sorted articles', articles);
-      // const bothRepliedAuthors = xUser.reply.filter(
-      //   e => yUser.reply.some(e2 => e2.author === e.author),
-      // );
-
-      // bothRepliedAuthors.forEach((e) => {
-      //   const existed = yUser.reply.find(e2 => e2.author === e.author);
-      //   e.count += existed.count;
-      // });
-
-      // authorArr.sort((a, b) => {
-      //   const speA = bothRepliedAuthors.find(e => e.author === a.id);
-      //   if (speA) {
-      //     const speB = bothRepliedAuthors.find(e => e.author === b.id);
-      //     if (speB) {
-      //       if (speA.count > speB.count) return -1;
-      //       return 1;
-      //     }
-      //     return -1;
-      //   }
-      //   return 1;
-      // });
-      // console.log('bothRepliedAuthors', bothRepliedAuthors);
-      // console.log('sorted authors', authorArr);
       updateArticleMatrix(articles, bothRepliedArticles, index, i);
-      // updateUserMatrix(bothRepliedArticles, index, i);
-      // d3.select('.authorAxisY').selectAll(`.tick.${yID}`)
-      //   .selectAll('text')
-      //   .transition()
-      //   .duration(1000)
-      //   .style('font-size', '25px')
-      //   .style('stroke', 'black');
-      // d3.select('.authorAxisY').selectAll(`.tick.${xID}`)
-      //   .selectAll('text')
-      //   .transition()
-      //   .duration(1000)
-      //   .style('font-size', '25px')
-      //   .style('stroke', 'black');
-      // drawUserRepliedArticleMatrix(articles);
-      // drawUserRepliedAuthorMatrix(authorArr);
-      // drawAuthorArticleMatrix(articles, authorArr);
     };
     let selectedUser = [];
     const tickClick = (d) => {
@@ -308,7 +265,6 @@ export default function userSimilarityGraph(data, svg, user, articles) {
     const pie = d3.pie()
       .value(d => d.value)
       .sort(null);
-    // const datas_ready = pie(d3.entries(data1));
     const [maxRepliedSameArticles, maxRepliedArticles] = computeScaleMaximum();
     const circleRadiusScaleForSameArticles = d3.scaleLinear()
       .domain([0, maxRepliedSameArticles]).range([0, 10]);
@@ -319,162 +275,116 @@ export default function userSimilarityGraph(data, svg, user, articles) {
         .data(secondOrdering_mat[i])
         .enter()
         .append('rect')
-        .attr('class', (d, index) => {
-          const xUserID = newUserAxisValues[index];
-          const yUserID = newUserAxisValues[i];
-          return `${xUserID} ${yUserID} y${i} x${index}`;
-        })
-        .attr('x', (d, index) => x(index))
-        .attr('y', y(i))
-        .attr('width', x.bandwidth())
-        .attr('height', y.bandwidth())
-        .style('fill', (d, index) => {
+        .each((d, index, nodes) => {
           const xUser = community.find(e => e.id === newUserAxisValues[index]);
           const yUser = community.find(e => e.id === newUserAxisValues[i]);
-          if (xUser.community === yUser.community) {
-            const communityColor = d3.scaleLinear()
-              .range(['white', color(xUser.community)])
-              .domain([0, 100]);
-            return communityColor(d);
+          if (i > index || xUser.community === yUser.community) {
+            if (i !== index) {
+              d3.select(nodes[index])
+                .attr('class', () => {
+                  const xUserID = newUserAxisValues[index];
+                  const yUserID = newUserAxisValues[i];
+                  return `${xUserID} ${yUserID} y${i} x${index}`;
+                })
+                .attr('x', () => x(index))
+                .attr('y', y(i))
+                .attr('width', x.bandwidth())
+                .attr('height', y.bandwidth())
+                .style('fill', () => {
+                  if (i < index) return color(xUser.community);
+                  if (xUser.community === yUser.community) {
+                    const communityColor = d3.scaleLinear()
+                      .range(['white', color(xUser.community)])
+                      .domain([0, 100]);
+                    return communityColor(d);
+                  }
+                  return leftMyColor(d);
+                })
+                .on('mouseover', () => mouseover(d, index, i))
+                .on('mouseout', mouseout)
+                .on('click', () => rectClick(d, index, i));
+            }
           }
-          return leftMyColor(d);
-        })
-        .attr('stroke', 'white')
-        .attr('visibility', (d, index) => {
-          if (i < index || i > index) return 'visible';
-          return 'hidden';
-        })
-        .on('mouseover', (d, index) => mouseover(d, index, i))
-        .on('mouseout', mouseout)
-        .on('click', (d, index) => rectClick(d, index, i));
+        });
 
       // circle heatMap
       leftSvg.append('g').selectAll()
         .data(secondOrdering_mat[i])
         .enter()
         .append('circle')
-        .attr('class', (d, index) => `x${index} y${i}`)
-        .attr('cx', (d, index) => x(index) + (x.bandwidth() / 2))
-        .attr('cy', y(i) + (y.bandwidth() / 2))
-        .attr('r', (d, index) => {
-          const xUser = datas.find(e => e.id === newUserAxisValues[index]);
-          const yUser = datas.find(e => e.id === newUserAxisValues[i]);
-          if (index === i) return circleRadiusScaleForRepliedArticles(xUser.repliedArticle.length);
-          const sameArticlesNum = xUser.repliedArticle.filter(
-            value1 => yUser.repliedArticle.some(value2 => value2.article_id === value1.article_id),
-          ).length;
-          return circleRadiusScaleForSameArticles(sameArticlesNum);
-        })
-        .style('fill', (d, index) => {
-          const xUser = community.find(e => e.id === newUserAxisValues[index]);
-          const yUser = community.find(e => e.id === newUserAxisValues[i]);
-          if (xUser.community === yUser.community) {
-            const communityColor = d3.scaleLinear()
-              .range(['white', color(xUser.community)])
-              .domain([0, 100]);
-            return communityColor(d);
-          }
-          return leftMyColor(d);
-        })
-        .attr('stroke', 'black')
-        .style('stroke-width', '0.1px')
-        .attr('visibility', (d, index) => {
-          if (i === index) return 'visible';
-          return 'hidden';
-        })
-        .on('mouseover', (d, index) => mouseover(d, index, i))
-        .on('mouseout', mouseout)
-        .on('click', (d, index) => rectClick(d, index, i));
+        .each((d, index, nodes) => {
+          d3.select(nodes[index])
+            .attr('class', `x${index} y${i}`)
+            .attr('cx', () => x(index) + (x.bandwidth() / 2))
+            .attr('cy', y(i) + (y.bandwidth() / 2))
+            .attr('r', () => {
+              const xUser = datas.find(e => e.id === newUserAxisValues[index]);
+              const yUser = datas.find(e => e.id === newUserAxisValues[i]);
+              if (index === i) return circleRadiusScaleForRepliedArticles(xUser.repliedArticle.length);
+              const sameArticlesNum = xUser.repliedArticle.filter(
+                value1 => yUser.repliedArticle.some(value2 => value2.article_id === value1.article_id),
+              ).length;
+              return circleRadiusScaleForSameArticles(sameArticlesNum);
+            })
+            .style('fill', () => {
+              const xUser = community.find(e => e.id === newUserAxisValues[index]);
+              const yUser = community.find(e => e.id === newUserAxisValues[i]);
+              if (xUser.community === yUser.community) {
+                const communityColor = d3.scaleLinear()
+                  .range(['white', color(xUser.community)])
+                  .domain([0, 100]);
+                return communityColor(d);
+              }
+              return leftMyColor(d);
+            })
+            .attr('stroke', 'black')
+            .style('stroke-width', '0.1px')
+            .attr('visibility', () => {
+              if (i === index) return 'visible';
+              return 'hidden';
+            })
+            .on('mouseover', () => mouseover(d, index, i))
+            .on('mouseout', mouseout)
+            .on('click', () => rectClick(d, index, i));
+        });
     }
 
-    // piechart in heatmap
-    // drawPieChartHeatmap();
-    // const rightSvg = group.append('g')
-    //   .attr('class', 'rightSvg')
-    //   .attr('transform', 'scale(1) translate(0, 100)');
-    // // rightSvg.append('g').attr('class', 'authorAxisX')
-    // //   .call(d3.axisTop(x).tickFormat((d, i) => newUserAxisValuesByAuthor[i]));
-    // // rightSvg.append('g').attr('class', 'authorAxisY')
-    // //   .call(d3.axisLeft(y).tickFormat((d, i) => newUserAxisValuesByAuthor[i]));
-    // // rightSvg.selectAll('.tick')
-    // //   .on('click', (d) => {
-    // //     tickClick(d);
-    // //   });
-
-    // for (let i = 0; i < permuted_mat.length; i += 1) {
-    //   rightSvg.append('g')
-    //     .selectAll()
-    //     .data(secondOrdering_matByAuthor[i])
-    //     .enter()
-    //     .append('rect')
-    //     .attr('class', (d, index) => {
-    //       const actualXUserIndex = newUserAxisValues.findIndex(
-    //         e => e === newUserAxisValuesByAuthor[index],
-    //       );
-    //       const actualYUserIndex = newUserAxisValues.findIndex(
-    //         e => e === newUserAxisValuesByAuthor[i],
-    //       );
-    //       const xUserID = newUserAxisValues[actualXUserIndex];
-    //       const yUserID = newUserAxisValues[actualYUserIndex];
-    //       return `${xUserID} ${yUserID} y${actualYUserIndex} x${actualXUserIndex}`;
-    //     })
-    //     .attr('x', (d, index) => {
-    //       const actualXUserIndex = newUserAxisValues.findIndex(
-    //         e => e === newUserAxisValuesByAuthor[index],
-    //       );
-    //       return x(actualXUserIndex);
-    //     })
-    //     .attr('y', () => {
-    //       const actualYUserIndex = newUserAxisValues.findIndex(
-    //         e => e === newUserAxisValuesByAuthor[i],
-    //       );
-    //       return y(actualYUserIndex);
-    //     })
-    //     .attr('width', x.bandwidth())
-    //     .attr('height', y.bandwidth())
-    //     .style('fill', (d, index) => {
-    //       const xUser = community.find(e => e.id === newUserAxisValuesByAuthor[index]);
-    //       const yUser = community.find(e => e.id === newUserAxisValuesByAuthor[i]);
-    //       if (xUser.community === yUser.community) {
-    //         const communityColor = d3.scaleLinear()
-    //           .range(['white', color(xUser.community)])
-    //           .domain([0, 100]);
-    //         return communityColor(d);
-    //       }
-    //       return leftMyColor(d);
-    //     })
-    //     .attr('stroke', 'white')
-    //     .attr('visibility', (d, index) => {
-    //       return 'hidden';
-    //       const actualXUserIndex = newUserAxisValues.findIndex(
-    //         e => e === newUserAxisValuesByAuthor[index],
-    //       );
-    //       const actualYUserIndex = newUserAxisValues.findIndex(
-    //         e => e === newUserAxisValuesByAuthor[i],
-    //       );
-    //       if (actualYUserIndex <= actualXUserIndex) return 'hidden';
-    //       return 'visible';
-    //     })
-    //     .on('mouseover', (d, index) => {
-    //       const actualXUserIndex = newUserAxisValues.findIndex(
-    //         e => e === newUserAxisValuesByAuthor[index],
-    //       );
-    //       const actualYUserIndex = newUserAxisValues.findIndex(
-    //         e => e === newUserAxisValuesByAuthor[i],
-    //       );
-    //       mouseover(d, actualXUserIndex, actualYUserIndex);
-    //     })
-    //     .on('mouseout', mouseout)
-    //     .on('click', (d, index) => {
-    //       const actualXUserIndex = newUserAxisValues.findIndex(
-    //         e => e === newUserAxisValuesByAuthor[index],
-    //       );
-    //       const actualYUserIndex = newUserAxisValues.findIndex(
-    //         e => e === newUserAxisValuesByAuthor[i],
-    //       );
-    //       rectClick(d, actualXUserIndex, actualYUserIndex);
-    //     });
-    // }
+    // find user group index
+    const groupIndex = [];
+    newUserAxisValues.forEach((e, index) => {
+      const tempCom = community.find(e1 => e1.id === e).community;
+      const existedCommunity = groupIndex.find(e1 => e1.community === tempCom);
+      if (existedCommunity) {
+        existedCommunity.num += 1;
+      } else {
+        groupIndex.push({ community: tempCom, num: 1, index });
+      }
+    });
+    console.log('groupIndex:', groupIndex);
+    // draw user group heatmap
+    for (let i = 0; i < groupIndex.length - 1; i += 1) {
+      const rectY = groupIndex[i].index;
+      for (let j = i + 1; j < groupIndex.length; j += 1) {
+        const rectX = groupIndex[j].index;
+        leftSvg.append('g')
+          .attr('class', `community${groupIndex[i].community}${groupIndex[j].community}`)
+          .append('rect')
+          .attr('x', x(rectX))
+          .attr('y', y(rectY))
+          .attr('width', groupIndex[j].num * gridSize)
+          .attr('height', groupIndex[i].num * gridSize)
+          .attr('fill', () => {
+            let totalSim = 0;
+            for (let k = rectY; k < rectY + groupIndex[i].num; k += 1) {
+              for (let l = rectX; l < rectX + groupIndex[j].num; l += 1) {
+                totalSim += secondOrdering_mat[k][l];
+              }
+            }
+            console.log(totalSim);
+            return leftMyColor(totalSim / (groupIndex[i].num * groupIndex[j].num));
+          });
+      }
+    }
     const artComWidth = 100 + Math.max(...articlesCommunity.map(e => e.community)) * 2;
     const articleGroup = group.append('g')
       .attr('class', 'articleGroup')
