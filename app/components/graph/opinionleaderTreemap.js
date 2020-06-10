@@ -206,7 +206,6 @@ export default function treemap(cellNodes, beforeThisDate,
     .attr('fill', d => color(d.data.name));
   let selectedUser = [];
   function articleNodeClicked(d, index, nodes) {
-    console.log(d, index, nodes);
     d3.select(nodes[index])
       .style('fill', 'black');
     // submit(d);
