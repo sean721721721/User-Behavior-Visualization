@@ -326,49 +326,12 @@ path:hover {
     grid-template-columns: [col1] 0.6fr [col2] 0.4fr [colend];
 }
 
-.userview {
-    overflow-y: auto;
-    grid-column: col2 / colend;
-}
-
-.grid2 {
-    background-color: lightgray;
-    margin: 0 0 0 0;
-    display: grid;
-    grid-gap: 1px;
-    grid-column: col1 / col2;
-    // grid-template-columns: [scol1] 0.333fr [scol2] 0.333fr [scol3] 0.333fr [scolend];
-    // grid-template-rows: [srow1] minmax(auto, 50vh) [srow2] minmax(30vh, 40vh) [srowend];
-}
-
-.overview {
-    overflow-y: scroll;
-    grid-column: scol1 / scol2;
-    grid-row: srow1 / srow2;
-}
-
-.postview {
-    grid-column: scol2 / scol3;
-    grid-row: srow1 / srow2;
-}
-
-.gateKeeperview {
-    grid-column: scol1 / scol3;
-    grid-row: srow1 / srow2;
-}
-
-.termview {
-    overflow-y: scroll;
-    grid-column: scol3 / scolend;
-    grid-row: srow1 / srow2;
-}
-
 .graph {
     grid-column: col1 / colend;
-    grid-row: grow2 / growend;
+    // grid-row: grow2 / growend;
     display: grid;
     grid-template-columns: [sscol1] 0.0fr [sscol2] 0.0fr [sscol3] 30.3fr [sscol4] 0.4fr [sscol5] 69.3fr [sscolend];
-    grid-template-rows: [ssrow1] auto [ssrow2] 10px [ssrow3] 0.2fr [ssrowend];
+    grid-template-rows: [ssrow1] auto [ssrow2] 0.2fr [ssrowend];
 }
 
 .barchart {
@@ -382,7 +345,7 @@ path:hover {
     border-radius: 5px;
     display: grid;
     grid-column: sscol3 / sscol4;
-    grid-row: ssrow1 / ssrow2;
+    grid-row: ssrow1 / ssrowend;
     grid-template-columns: [nwcol1] 8fr [nwcol2] 2fr [nwcolend];
     grid-template-rows: [nwrow1] 0px [nwrow2] 400px [nwrow3] 300px [nwrowend];
 }  
@@ -415,17 +378,28 @@ path:hover {
     border-radius: 5px;
     display: grid;
     grid-column: sscol5 / sscolend;
-    grid-row: ssrow1 / ssrow2;
-    grid-template-rows: [acrow1] 0.9fr [acrow2] 0.1fr [acrowend];
+    grid-row: ssrow1 / ssrowend;
+    grid-template-rows: [acrow1] 6fr [acrow2] 4fr [acrowend];
     grid-template-columns: [accol1] 4fr [accol2] 1fr [accol3] 5fr [accolend];
 }
 
 .heatMap {
     display: grid;
     grid-column: accol1 / accolend;
-    grid-row: acrow1 / acrowend;
+    grid-row: acrow1 / acrow2;
 }
 
+.contextDiv {
+    display: grid;
+    grid-column: accol1 / accol3;
+    grid-row: acrow2 / acrowend;
+}
+
+.focusDiv {
+    display: grid;
+    grid-column: accol3 / accolend;
+    grid-row: acrow2 / acrowend;
+}
 // .commentTimeline {
 //     display: grid;
 //     border-top: 2px solid gray;
