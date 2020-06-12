@@ -1885,9 +1885,10 @@ export default function userSimilarityGraph(data, svg, user, articles) {
     }
 
     function drawUserGroupBipartiteRelations() {
+      const radialGroupMargin = 50;
       const radial = leftSvg.append('g')
         .attr('class', 'radialGroup')
-        .attr('transform', `translate(${newUserAxisValues.length * gridSize}, 0)`);
+        .attr('transform', `translate(${newUserAxisValues.length * gridSize + radialGroupMargin}, 0)`);
       const numOfArtCom = Math.max(...articlesCommunity.map(e => e.community)) + 1;
       const numOfArtOfEachComunity = [];
       for (let i = 0; i < numOfArtCom; i += 1) {
