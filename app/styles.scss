@@ -393,6 +393,8 @@ path:hover {
     display: grid;
     grid-column: accol1 / accol3;
     grid-row: acrow2 / acrowend;
+    overflow-x: scroll;
+    overflow-y: scroll;
 }
 
 .focusDiv {
