@@ -401,6 +401,7 @@ path:hover {
     display: grid;
     grid-column: accol3 / accolend;
     grid-row: acrow2 / acrowend;
+    overflow-y: scroll;
 }
 // .commentTimeline {
 //     display: grid;
