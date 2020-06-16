@@ -724,7 +724,7 @@ export default function userSimilarityGraph(data, svg, user, articles) {
         .range([0, articleTreeId.length * 20])
         .domain(articleTreeId);
       const contextYScale = d3.scaleLinear()
-        .domain([0, 3])
+        .domain([5, 0])
         .range([0, 150]);
 
       const brush = d3.brush()
@@ -772,7 +772,7 @@ export default function userSimilarityGraph(data, svg, user, articles) {
       drawArticleTree(articleTree);
       // drawArticlesWithTypeComment();
 
-      contextXScale.domain(focusScaleX.domain());
+      // contextXScale.domain(focusScaleX.domain());
       // contextYScale.domain(yScale.domain());
 
       focus.append('g')
@@ -788,10 +788,10 @@ export default function userSimilarityGraph(data, svg, user, articles) {
       context.append('g')
         .attr('class', 'axis axis--x')
         .attr('transform', `translate(0,${contextYScale.range()[1]})`)
-        .call(d3.axisBottom(contextXScale).tickFormat((d, i) => highlightArticles[i].article_title));
+        .call(d3.axisBottom(contextXScale).tickFormat(d => highlightArticles.find(e => e.article_id === d).article_title));
       context.append('g')
         .attr('class', 'axis axis--y')
-        .call(d3.axisLeft(contextYScale.domain([3, 0])).ticks(3));
+        .call(d3.axisLeft(contextYScale.domain([5, 0])).ticks(5));
       context.select('.axis--x')
         .selectAll('text')
         .attr('dy', '.35em')
@@ -821,11 +821,8 @@ export default function userSimilarityGraph(data, svg, user, articles) {
       function brushed() {
         if (d3.event.sourceEvent && d3.event.sourceEvent.type === 'zoom') return; // ignore brush-by-zoom
         const s = d3.event.selection || contextXScale.range();
-        console.log(s);
-        console.log(contextXScale.bandwidth());
         const newDomainX = highlightArticle_id.slice(s[0][0] / contextXScale.bandwidth(), s[1][0] / contextXScale.bandwidth());
         focusScaleX.domain(newDomainX);
-        console.log(focusScaleX.domain());
         // const newDomainY = newUserAxisValues.slice(s[0][1] / contextYScale.bandwidth(), s[1][1] / contextYScale.bandwidth());
         // const newDomainY = newUserAxisValues.slice();
         const newDomainY = newUserAxisValues.filter(e => datas.find(e1 => e1.id === e).community === communityIndex);
@@ -1111,38 +1108,71 @@ export default function userSimilarityGraph(data, svg, user, articles) {
           .enter()
           .append('g')
           .attr('transform', (d) => {
+            console.log(d.article_title);
             return `translate(${contextXScale(d.article_id) + contextXScale.bandwidth() / 2}, 0)`;
           })
-          .selectAll('rect')
-          .data((d) => {
-            const art = articlesWithTypeComment.find(e => e.article_id === d.article_id);
-            const { push, boo, neutral } = art.commentType;
-            const arr = [push, boo, neutral];
-            return artComPie(arr);
-          })
-          .enter()
-          .append('path')
-          .attr('d', d3.arc()
-            .innerRadius(0)
-            .outerRadius(10))
-          .attr('fill', (d, index) => {
-            if (index === 0) return color(3); // push
-            if (index === 1) return color(1); // boo
-            return color(4); // neutral
-          })
-          .attr('stroke', 'black')
-          .style('stroke-width', '2px')
-          .style('opacity', 0.7);
+          .each((d, index, nodes) => {
+            let depth = 0;
+            const recursion = (_d, _index, _nodes) => {
+              console.log(_d);
+              if (!_d) return;
+              d3.select(_nodes[_index])
+                .selectAll('rect')
+                .data(() => {
+                  console.log(_d);
+                  const art = articlesWithTypeComment.find(e => e.article_id === _d.article_id);
+                  console.log(_d.article_id);
+                  console.log(art);
+                  const { push, boo, neutral } = art.commentType;
+                  const arr = [push, boo, neutral];
+                  return artComPie(arr);
+                })
+                .enter()
+                .append('g')
+                .attr('transform', (d) => {
+                  return `translate(0, ${contextYScale(depth)})`;
+                })
+                .append('path')
+                .attr('d', d3.arc()
+                  .innerRadius(0)
+                  .outerRadius(10))
+                .attr('fill', (_d2, _index2) => {
+                  if (_index2 === 0) return color(3); // push
+                  if (_index2 === 1) return color(1); // boo
+                  return color(4); // neutral
+                })
+                .attr('stroke', 'black')
+                .style('stroke-width', '2px')
+                .style('opacity', 0.7)
+                .append('title')
+                .text(_d.article_title);
 
-        context.append('g')
-          .selectAll('rect')
-          .data(tree)
-          .enter()
-          .append('circle')
-          .attr('cx', d => contextXScale(d.article_id) + contextXScale.bandwidth() / 2)
-          .attr('cy', 0)
-          .attr('r', 5)
-          .attr('fill', 'black');
+              d3.select(_nodes[_index])
+                .append('circle')
+                .attr('transform', `translate(0, ${contextYScale(depth)})`)
+                .attr('cx', 0)
+                .attr('cy', 0)
+                .attr('r', 5)
+                .attr('fill', 'white');
+
+              depth += 1;
+              console.log('depth', depth);
+              if (_d.children) recursion(_d.children[0], _index, _nodes);
+            };
+            recursion(d, index, nodes);
+            //   .append('path')
+          // .attr('d', d3.arc()
+          //   .innerRadius(0)
+          //   .outerRadius(10))
+          // .attr('fill', (d, index) => {
+          //   if (index === 0) return color(3); // push
+          //   if (index === 1) return color(1); // boo
+          //   return color(4); // neutral
+          // })
+          // .attr('stroke', 'black')
+          // .style('stroke-width', '2px')
+          // .style('opacity', 0.7)
+          });
       }
       // function zoomed() {
       //   if (d3.event.sourceEvent && d3.event.sourceEvent.type === 'brush')
