@@ -1101,7 +1101,7 @@ export default function userSimilarityGraph(data, svg, user, articles) {
 
       function drawArticleTree(tree) {
         const artComPie = d3.pie()
-          .value(d => d.length)
+          .value(d => d.length / communityUserCount)
           .sort(null);
         context.append('g')
           .selectAll('rect')
@@ -1114,15 +1114,27 @@ export default function userSimilarityGraph(data, svg, user, articles) {
           .each((d, index, nodes) => {
             let depth = 0;
             const recursion = (_d, _index, _nodes) => {
-              console.log(`aritcle_id: ${_d.article_id}, article_title: ${_d.article_title}`);
               if (!_d) return;
+              console.log(`aritcle_id: ${_d.article_id}, article_title: ${_d.article_title}`);
+
+              d3.select(_nodes[_index])
+                .append('path')
+                .attr('transform', `translate(0, ${contextYScale(depth)})`)
+                .attr('d', d3.arc()
+                  .startAngle(0)
+                  .endAngle(Math.PI * 2)
+                  .innerRadius(10)
+                  .outerRadius(12.5))
+                .attr('fill', 'lightgray');
+
+
               d3.select(_nodes[_index])
                 .selectAll('rect')
                 .data(() => {
                   const art = articlesWithTypeComment.find(e => e.article_id === _d.article_id);
                   const { push, boo, neutral } = art.commentType;
                   const arr = [push, boo, neutral];
-                  const MaxMinusTotalComment = 10 - (push.length + boo.length + neutral.length);
+                  const MaxMinusTotalComment = (3 * communityUserCount - (push.length + boo.length + neutral.length));
                   arr.push(Array(Math.max(0, MaxMinusTotalComment)));
                   return artComPie(arr);
                 })
@@ -1139,7 +1151,7 @@ export default function userSimilarityGraph(data, svg, user, articles) {
                   if (_index2 === 2) return color(4); // neutral
                   return 'white';
                 })
-                .style('opacity', 1)
+                .style('opacity', (_d2, _index2) => (_index2 === 3 ? 0 : 1))
                 .append('title')
                 .text(_d.article_title);
 
@@ -1374,12 +1386,11 @@ export default function userSimilarityGraph(data, svg, user, articles) {
         const tempCommunity = articlesCommunity.filter(e => e.community === i);
         numOfArtOfEachComunity.push(tempCommunity);
       }
-      console.log(numOfArtOfEachComunity);
+      console.log('numOfArtOfEachComunity', numOfArtOfEachComunity);
       const artComPie = d3.pie()
         .value(d => d.length)
         .sort(null);
       const dataReady = artComPie(numOfArtOfEachComunity);
-      console.log(dataReady);
       const numOfUserCom = Math.max(...community.map(e => e.community)) + 1;
       const comunityIndexY = [];
       const temp = [];
@@ -1392,7 +1403,6 @@ export default function userSimilarityGraph(data, svg, user, articles) {
         temp.push(community.find(e => e.id === newUserAxisValues[axisIndex]).community);
         comunityIndexY.push(axisIndex);
       }
-      console.log(comunityIndexY);
       const articleGroupWidthScale = d3.scaleLinear().domain([0, filteredArticles.length]).range([10, 100]);
       const articleGroupIndexArray = [];
       const articleGroupXScale = [0];
@@ -1436,7 +1446,7 @@ export default function userSimilarityGraph(data, svg, user, articles) {
         const communityIndexDatas = datas.filter(e => e.community === index);
         // console.log(communityIndexDatas);
         const communityIndexArticles = computeNumOfArticlesOfEachCommunity();
-        console.log(communityIndexArticles);
+        console.log('communityIndexArticles', communityIndexArticles);
         const communityEachLevelCount = [];
         communityIndexArticles.forEach((e) => {
           const levelOne = e.articles.filter(a => a.count > 0);
@@ -1449,7 +1459,7 @@ export default function userSimilarityGraph(data, svg, user, articles) {
             level: [levelOne, levelTwo, levelThree, levelFour, levelFive],
           });
         });
-        console.log(communityEachLevelCount);
+        console.log('communityEachLevelCount', communityEachLevelCount);
         for (let i = 0; i < communityEachLevelCount.length; i += 1) {
           const radialColor = d3.scaleLinear().domain([-1, 4]).range(['white', color(index)]);
           const tempCommunity = communityEachLevelCount[i].community;
