@@ -721,7 +721,7 @@ export default function userSimilarityGraph(data, svg, user, articles) {
       //   .range([0, highlightArticle_id.length * 10])
       //   .domain(highlightArticle_id);
       const contextXScale = d3.scaleBand()
-        .range([0, articleTreeId.length * 20])
+        .range([0, articleTreeId.length * 30])
         .domain(articleTreeId);
       const contextYScale = d3.scaleLinear()
         .domain([5, 0])
@@ -795,8 +795,16 @@ export default function userSimilarityGraph(data, svg, user, articles) {
       context.select('.axis--x')
         .selectAll('text')
         .attr('dy', '.35em')
+        .attr('y', '12')
+        .style('font-size', 'larger')
         .style('writing-mode', 'tb')
         .style('text-anchor', 'start');
+      context.select('.axis--x')
+        .selectAll('line')
+        .remove();
+      context.select('.axis--x')
+        .selectAll('path')
+        .remove();
       context.append('g')
         .attr('class', 'brush')
         // .attr('transform', () => {
@@ -1051,14 +1059,10 @@ export default function userSimilarityGraph(data, svg, user, articles) {
         articleArr.forEach((a) => {
           const existedArticle = arr.find(e => e.article_title === a.article_title.substring(5));
           const existedArticle2 = arr.find(e => e.article_title === a.article_title);
-          if (existedArticle) {
-            console.log(existedArticle);
-            existedArticle.children.push(a);
-          } else if (existedArticle2) {
-            console.log(existedArticle2);
-            existedArticle2.children.push(a);
-          } else {
-            const art = a;
+          if (existedArticle) existedArticle.children.push(a);
+          else if (existedArticle2) existedArticle2.children.push(a);
+          else {
+            const art = JSON.parse(JSON.stringify(a));
             art.children = [];
             arr.push(art);
           }
@@ -1099,51 +1103,43 @@ export default function userSimilarityGraph(data, svg, user, articles) {
         const artComPie = d3.pie()
           .value(d => d.length)
           .sort(null);
-        // const { push, boo, neutral } = articlesWithTypeComment[0].commentType;
-        // const arr = [push, boo, neutral];
-        // const dataReady = artComPie(arr);
         context.append('g')
           .selectAll('rect')
           .data(tree)
           .enter()
           .append('g')
           .attr('transform', (d) => {
-            console.log(d.article_title);
             return `translate(${contextXScale(d.article_id) + contextXScale.bandwidth() / 2}, 0)`;
           })
           .each((d, index, nodes) => {
             let depth = 0;
             const recursion = (_d, _index, _nodes) => {
-              console.log(_d);
+              console.log(`aritcle_id: ${_d.article_id}, article_title: ${_d.article_title}`);
               if (!_d) return;
               d3.select(_nodes[_index])
                 .selectAll('rect')
                 .data(() => {
-                  console.log(_d);
                   const art = articlesWithTypeComment.find(e => e.article_id === _d.article_id);
-                  console.log(_d.article_id);
-                  console.log(art);
                   const { push, boo, neutral } = art.commentType;
                   const arr = [push, boo, neutral];
+                  const MaxMinusTotalComment = 10 - (push.length + boo.length + neutral.length);
+                  arr.push(Array(Math.max(0, MaxMinusTotalComment)));
                   return artComPie(arr);
                 })
                 .enter()
                 .append('g')
-                .attr('transform', (d) => {
-                  return `translate(0, ${contextYScale(depth)})`;
-                })
+                .attr('transform', `translate(0, ${contextYScale(depth)})`)
                 .append('path')
                 .attr('d', d3.arc()
                   .innerRadius(0)
-                  .outerRadius(10))
+                  .outerRadius(15))
                 .attr('fill', (_d2, _index2) => {
                   if (_index2 === 0) return color(3); // push
                   if (_index2 === 1) return color(1); // boo
-                  return color(4); // neutral
+                  if (_index2 === 2) return color(4); // neutral
+                  return 'white';
                 })
-                .attr('stroke', 'black')
-                .style('stroke-width', '2px')
-                .style('opacity', 0.7)
+                .style('opacity', 1)
                 .append('title')
                 .text(_d.article_title);
 
@@ -1152,26 +1148,13 @@ export default function userSimilarityGraph(data, svg, user, articles) {
                 .attr('transform', `translate(0, ${contextYScale(depth)})`)
                 .attr('cx', 0)
                 .attr('cy', 0)
-                .attr('r', 5)
+                .attr('r', 7.5)
                 .attr('fill', 'white');
 
               depth += 1;
-              console.log('depth', depth);
-              if (_d.children) recursion(_d.children[0], _index, _nodes);
+              if (d.children) recursion(d.children[depth - 1], _index, _nodes);
             };
             recursion(d, index, nodes);
-            //   .append('path')
-          // .attr('d', d3.arc()
-          //   .innerRadius(0)
-          //   .outerRadius(10))
-          // .attr('fill', (d, index) => {
-          //   if (index === 0) return color(3); // push
-          //   if (index === 1) return color(1); // boo
-          //   return color(4); // neutral
-          // })
-          // .attr('stroke', 'black')
-          // .style('stroke-width', '2px')
-          // .style('opacity', 0.7)
           });
       }
       // function zoomed() {

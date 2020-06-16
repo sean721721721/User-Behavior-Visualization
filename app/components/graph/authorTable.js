@@ -241,6 +241,7 @@ export default function AuthorTable(nodes, div, $this, callback) {
 
   function authorIdPreprocessing(node_data) {
     node_data.forEach((n) => {
+      console.log(n);
       const new_id = n.id.split(' ');
       n.oldId = n.id;
       [n.id] = new_id;

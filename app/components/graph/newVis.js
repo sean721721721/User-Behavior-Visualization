@@ -7028,7 +7028,8 @@ class Graph extends Component {
     const { set: propsSet } = this.props;
     const set = JSON.parse(JSON.stringify(propsSet));
     const authorSet = removeTermLayer(set);
-    // console.log(authorSet);
+    authorSet.children = authorSet.children.filter(e => e.id);
+    console.log(authorSet);
     const authorTable = d3.select('#authorList');
     let link;
     let node;
