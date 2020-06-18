@@ -366,7 +366,6 @@ path:hover {
 }
 
 .authorList {
-    border-top: 2px solid gray;
     display: grid;
     grid-column: nwcol1 / nwcol2;
     grid-row: nwrow2 / nwrowend;
@@ -379,20 +378,20 @@ path:hover {
     display: grid;
     grid-column: sscol5 / sscolend;
     // grid-row: ssrow1 / ssrowend;
-    grid-template-rows: [acrow1] 6fr [acrow2] 4fr [acrowend];
+    grid-template-rows: [acrow1] 3fr [acrow2] 7fr [acrowend];
     grid-template-columns: [accol1] 4fr [accol2] 1fr [accol3] 5fr [accolend];
 }
 
 .heatMap {
     display: grid;
-    grid-column: accol1 / accolend;
-    grid-row: acrow1 / acrow2;
+    grid-column: accol1 / accol3;
+    grid-row: acrow1 / acrowend;
 }
 
 .contextDiv {
     display: grid;
-    grid-column: accol1 / accol3;
-    grid-row: acrow2 / acrowend;
+    grid-column: accol3 / accolend;
+    grid-row: acrow1 / acrow2;
     overflow-x: scroll;
     overflow-y: scroll;
 }
@@ -400,7 +399,7 @@ path:hover {
 .focusDiv {
     display: grid;
     grid-column: accol3 / accolend;
-    grid-row: acrow2 / acrowend;
+    grid-row: acrow2 / acrow3;
     overflow-y: scroll;
 }
 // .commentTimeline {
