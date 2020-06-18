@@ -14,9 +14,9 @@ import * as reorder from 'reorder.js/index';
 import * as math from 'mathjs';
 import netClustering from 'netclustering';
 import CheckboxGroup from 'antd/lib/checkbox/Group';
+import { cps } from 'redux-saga/effects';
 import jLouvain from './jLouvain';
 import { userActivityTimeline } from './userActivityTimeline';
-import { cps } from 'redux-saga/effects';
 
 export default function userSimilarityGraph(data, svg, user, articles) {
   // console.log(user);
@@ -690,10 +690,19 @@ export default function userSimilarityGraph(data, svg, user, articles) {
       const highlightArticle_id = highlightArticles.map(e => e.article_id);
       const focusScaleX = d3.scaleBand().range([0, focusDivW - 50])
         .domain(highlightArticle_id);
+      // const fillArrayFrom0To5 = () => {
+      //   const arr = [];
+      //   for (let i = 0; i <= 5; i += 1) {
+      //     arr.push(i);
+      //   }
+      //   return arr;
+      // };
+      // const depthIndex = fillArrayFrom0To5();
+      // const focusDepthScaleX = d3.scaleBand().range([0, focusDivW - 50])
+      //   .domain(depthIndex);
       const focusArticleScaleY = d3.scaleBand().domain(highlightArticle_id)
         .paddingInner(0.5)
         .range([0, focusDivH - 100]);
-      console.log(focusArticleScaleY.bandwidth());
       const focusUserScaleY = d3.scaleBand().domain(newUserAxisValues)
         .range([0, focusArticleScaleY.bandwidth()]);
       const yScale = d3.scaleBand().domain(newUserAxisValues)
@@ -838,6 +847,8 @@ export default function userSimilarityGraph(data, svg, user, articles) {
       function brushed() {
         if (d3.event.sourceEvent && d3.event.sourceEvent.type === 'zoom') return; // ignore brush-by-zoom
         const s = d3.event.selection || contextYScale.range();
+        const newDepthDomainX = focusDepthScaleX.domain().slice(s[0][0] / contextYScale.bandwidth(), s[1][0] / contextYScale.bandwidth());
+        console.log(newDepthDomainX);
         // const newDomainX = newUserAxisValues.filter(e => datas.find(e1 => e1.id === e).community === communityIndex);
         const newUserDomainY = newUserAxisValues.filter(e => datas.find(e1 => e1.id === e).community === communityIndex);
         // focusScaleX.domain(newDomainX);
@@ -858,26 +869,53 @@ export default function userSimilarityGraph(data, svg, user, articles) {
         const boxMargin = 50;
         focus.selectAll('.axis--y').remove();
         for (let i = 0; i < focusArticleScaleY.domain().length; i += 1) {
+          const lineGroupY = focusArticleScaleY(focusArticleScaleY.domain()[i]);
+          const boxGroup = focusLineGroup.append('g')
+            .attr('transform', `translate(0,${lineGroupY})`);
           focus.append('g')
             .attr('class', 'axis axis--y')
-            .attr('transform', `translate(0,${i * focusArticleScaleY.step()})`)
+            .attr('transform', `translate(0,${lineGroupY})`)
             .call(d3.axisLeft(focusUserScaleY));
           // box border
-          focusLineGroup.append('rect')
-            .attr('x', 0)
-            .attr('y', i * focusArticleScaleY.step())
-            .attr('height', focusArticleScaleY.bandwidth())
-            .attr('width', boxWidth)
-            .attr('fill', 'transparent')
-            .attr('stroke', 'black')
-            .attr('stokre-width', '0.5px');
+          // focusLineGroup.append('rect')
+          //   .attr('x', 0)
+          //   .attr('y', i * focusArticleScaleY.step())
+          //   .attr('height', focusArticleScaleY.bandwidth())
+          //   .attr('width', boxWidth)
+          //   .attr('fill', 'transparent')
+          //   .attr('stroke', 'black')
+          //   .attr('stokre-width', '0.5px');
+          // box border-top
+          boxGroup.append('line')
+            .attr('x1', 0)
+            .attr('y1', 0)
+            .attr('x2', boxWidth)
+            .attr('y2', 0)
+            .attr('stroke-width', '1px')
+            .attr('stroke', 'black');
+          // box border-bottom
+          boxGroup.append('line')
+            .attr('x1', 0)
+            .attr('y1', focusArticleScaleY.bandwidth())
+            .attr('x2', boxWidth)
+            .attr('y2', focusArticleScaleY.bandwidth())
+            .attr('stroke-width', '1px')
+            .attr('stroke', 'black');
+          // box border-right
+          boxGroup.append('line')
+            .attr('x1', boxWidth)
+            .attr('y1', 0)
+            .attr('x2', boxWidth)
+            .attr('y2', focusArticleScaleY.bandwidth())
+            .attr('stroke-width', '1px')
+            .attr('stroke', 'black');
           // box inner border
           for (let j = 0; j < focusUserScaleY.domain().length; j += 1) {
-            focusLineGroup.append('line')
+            boxGroup.append('line')
               .attr('x1', 0)
-              .attr('y1', i * focusArticleScaleY.step() + j * focusUserScaleY.bandwidth())
+              .attr('y1', j * focusUserScaleY.bandwidth())
               .attr('x2', boxWidth)
-              .attr('y2', i * focusArticleScaleY.step() + j * focusUserScaleY.bandwidth())
+              .attr('y2', j * focusUserScaleY.bandwidth())
               .attr('stroke-width', '0.5px')
               .attr('stroke', 'black');
           }
@@ -1288,9 +1326,7 @@ export default function userSimilarityGraph(data, svg, user, articles) {
           .data(tree)
           .enter()
           .append('g')
-          .attr('transform', (d) => {
-            return `translate(0,${contextYScale(d.article_id) + contextYScale.bandwidth() / 2})`;
-          })
+          .attr('transform', d => `translate(0,${contextYScale(d.article_id) + contextYScale.bandwidth() / 2})`)
           .each((d, index, nodes) => {
             let depth = 0;
             const recursion = (_d, _index, _nodes) => {
