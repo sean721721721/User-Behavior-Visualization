@@ -7453,11 +7453,11 @@ class Graph extends Component {
           <svg id="barChart" width="100%" height="100%" style={{ border: '2px solid gray' }} />
         </div> */}
         <div className="network">
-          <div
+          {/* <div
             className="filterBar"
             id="button"
             style={{ width: '100%', height: '25px', padding: '0px 10px' }}
-          />
+          /> */}
           <div className="termMap">
             <svg id="graph" width="100%" height="100%" style={{}} />
           </div>
@@ -7475,7 +7475,7 @@ class Graph extends Component {
           opState,
         }}
         />
-        <div id="googleChart" />
+        {/* <div id="googleChart" /> */}
         {/* <WordTree word={word} /> */}
         {/* <div className="heatMap" style={{ border: '2px solid gray', height: 'fit-content', overflowX: 'scroll' }}>
           <svg id="timeLine" width="100%" height="600px" />

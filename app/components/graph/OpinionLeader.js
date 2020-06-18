@@ -408,7 +408,7 @@ export default function OpinionLeader(cellNodes, cellLinks, beforeThisDate,
       .style('type', 'button')
       .attr('class', 'btn btn-primary')
       .attr('id', 'submitUsers')
-      .text('Submit!')
+      .text('Get Activity!')
       .on('click', (d) => {
         console.log(d);
         selectedUserClick(userArr);

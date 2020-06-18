@@ -1869,7 +1869,7 @@ class Graph extends Component {
           <div className="termMap">
             <svg id="graph" width="100%" height="100%" style={{}} />
           </div>
-          <div className="selectedUserTable d-flex flex-column" style={{ margin: '0px 0px 20px 0px', maxHeight: '700px', minHeight: '400px' }} />
+          <div className="selectedUserTable d-flex flex-column" style={{ margin: '0px 0px 20px 0px', minHeight: '400px' }} />
           <div className="authorList" id="authorList" style={{ height: '100%', overflowY: 'auto' }} />
         </div>
         <OpinionLeaderView data={{

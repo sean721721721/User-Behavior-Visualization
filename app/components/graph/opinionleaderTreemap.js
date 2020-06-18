@@ -255,9 +255,10 @@ export default function treemap(cellNodes, beforeThisDate,
       .attr('id', 'submitDiv');
     buttonDiv.append('button')
       .style('type', 'button')
+      .style('font-size', 'smaller')
       .attr('class', 'btn btn-primary')
       .attr('id', 'submitUsers')
-      .text('Submit!')
+      .text('Get Activity!')
       .on('click', (d) => {
         console.log(d);
         selectedUserClick(userArr);
@@ -267,7 +268,8 @@ export default function treemap(cellNodes, beforeThisDate,
       .style('border', 'gray 1px solid')
       .style('border-right', '0px')
       .style('border-bottom', '0px')
-      .style('max-height', 'fit-content')
+      .style('border-radius', '5px')
+      .style('max-height', '-webkit-fill-available')
       .style('overflow-y', 'scroll');
     const table = tableDiv.append('table');
     table.append('tr').append('td')

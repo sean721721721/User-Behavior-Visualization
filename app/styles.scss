@@ -331,13 +331,13 @@ path:hover {
     // grid-row: grow2 / growend;
     display: grid;
     grid-template-columns: [sscol1] 0.0fr [sscol2] 0.0fr [sscol3] 30.3fr [sscol4] 0.4fr [sscol5] 69.3fr [sscolend];
-    grid-template-rows: [ssrow1] auto [ssrow2] 0.2fr [ssrowend];
+    // grid-template-rows: [ssrow1] auto [ssrow2] 0.2fr [ssrowend];
 }
 
 .barchart {
     display: grid;
     grid-column: sscol1 / sscol2;
-    grid-row: ssrow1 / ssrow2;
+    // grid-row: ssrow1 / ssrow2;
 }
 
 .network {
@@ -345,9 +345,9 @@ path:hover {
     border-radius: 5px;
     display: grid;
     grid-column: sscol3 / sscol4;
-    grid-row: ssrow1 / ssrowend;
+    // grid-row: ssrow1 / ssrowend;
     grid-template-columns: [nwcol1] 8fr [nwcol2] 2fr [nwcolend];
-    grid-template-rows: [nwrow1] 0px [nwrow2] 400px [nwrow3] 300px [nwrowend];
+    grid-template-rows: [nwrow1] 6fr [nwrow2] 4fr [nwrowend];
 }  
 
 .filterBar {
@@ -361,15 +361,15 @@ path:hover {
     // border: 2px solid gray;
     display: grid;
     grid-column: nwcol1 / nwcol2;
-    grid-row: nwrow2 / nwrow3;
+    grid-row: nwrow1 / nwrow2;
     // grid-template-rows: [nwrow1] 0.1fr [nwrow2] 0.9fr [nwrowend];
 }
 
 .authorList {
     border-top: 2px solid gray;
     display: grid;
-    grid-column: nwcol1 / nwcolend;
-    grid-row: nwrow3 / nwrowend;
+    grid-column: nwcol1 / nwcol2;
+    grid-row: nwrow2 / nwrowend;
     // grid-template-rows: [nwrow1] 0.1fr [nwrow2] 0.9fr [nwrowend];
 }
 
@@ -378,7 +378,7 @@ path:hover {
     border-radius: 5px;
     display: grid;
     grid-column: sscol5 / sscolend;
-    grid-row: ssrow1 / ssrowend;
+    // grid-row: ssrow1 / ssrowend;
     grid-template-rows: [acrow1] 6fr [acrow2] 4fr [acrowend];
     grid-template-columns: [accol1] 4fr [accol2] 1fr [accol3] 5fr [accolend];
 }
@@ -414,7 +414,7 @@ path:hover {
     display: grid;
     // border-top: 2px solid gray;
     grid-column: nwcol2 / nwcolend;
-    grid-row: nwrow2 / nwrow3;
+    grid-row: nwrow1 / nwrowend;
 }
 
 // .wordTree {
