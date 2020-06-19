@@ -20,6 +20,10 @@ import * as jsnx from 'jsnetworkx';
 export default function AuthorTable(nodes, div, $this, callback) {
   console.log(nodes);
   div.selectAll('*').remove();
+  // console.log(parseFloat(d3.select('.network').style('height')));
+  // console.log(parseFloat(d3.select('.termMap').style('height')));
+  const h = parseFloat(d3.select('.network').style('height')) - parseFloat(d3.select('.termMap').style('height'));
+  d3.select('#authorList').style('max-height', `${h}px`);
   const authorList = JSON.parse(JSON.stringify(nodes));
   const deltaLengthList = [];
   const threshold = 100;

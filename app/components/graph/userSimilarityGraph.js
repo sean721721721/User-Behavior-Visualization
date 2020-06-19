@@ -1277,9 +1277,15 @@ export default function userSimilarityGraph(data, svg, user, articles) {
         // }
       }
       function buildArticleTree(articleArr) {
-        const arr = [];
-        articleArr.forEach((a) => {
-          const existedArticle = arr.find(e => e.article_title === a.article_title.substring(5));
+        const copyArtArr = JSON.parse(JSON.stringify(articleArr));
+        copyArtArr.sort((a, b) => ((new Date(a.date) - new Date(b.date)) > 0 ? 1 : -1));
+        const arr = copyArtArr.filter(e => e.article_title[0] !== 'R');
+        arr.forEach((e) => { e.children = []; });
+        console.log(arr);
+        copyArtArr.filter(e => e.article_title[0] === 'R').forEach((a) => {
+          console.log(a);
+          console.log(a.article_title.substring(4));
+          const existedArticle = arr.find(e => e.article_title === a.article_title.substring(4));
           const existedArticle2 = arr.find(e => e.article_title === a.article_title);
           if (existedArticle) existedArticle.children.push(a);
           else if (existedArticle2) existedArticle2.children.push(a);

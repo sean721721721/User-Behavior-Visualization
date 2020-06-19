@@ -27,8 +27,9 @@ export default function treemap(cellNodes, beforeThisDate,
   const margin = {
     top: 10, right: 10, bottom: 10, left: 10,
   };
-  const w = parseFloat(d3.select('#graph').style('width'));
-  const h = parseFloat(d3.select('#graph').style('height'));
+
+  const w = parseFloat(d3.select('.termMap').style('width'));
+  const h = parseFloat(d3.select('.termMap').style('height'));
   const width = w - margin.left - margin.right;
   const height = h - margin.top - margin.bottom;
   // append the svg object to the body of the page
@@ -121,6 +122,7 @@ export default function treemap(cellNodes, beforeThisDate,
   // Give the data to this cluster layout:
   const root = d3.hierarchy(data).sum(d => d.value); // Here the size of each leave is given in the 'value' field in input data
   // Then d3.treemap computes the position of each element of the hierarchy
+  console.log(width, height);
   d3.treemap()
     .size([width, height])
     .paddingTop(15)

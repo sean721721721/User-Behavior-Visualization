@@ -7074,6 +7074,10 @@ class Graph extends Component {
       .force('center', d3.forceCenter(0, 0))
       .alphaTarget(1);
     // cellForceSimulation.alphaTarget(0.3).restart();
+    // const h = parseFloat(d3.select('.termMap').style('height'));
+    // d3.select('.termMap').style('max-height', `${h}px`);
+    // const networkH = parseFloat(d3.select('.network').style('height'));
+    // d3.select('.network').style('max-height', `${networkH}px`);
     AuthorTable(authorSet, authorTable, this, (n, index) => {
       // const clickedNode = JSON.parse(JSON.stringify(n));
       // cellData.nodes = [];
@@ -7462,7 +7466,7 @@ class Graph extends Component {
             <svg id="graph" width="100%" height="100%" style={{}} />
           </div>
           <div className="selectedUserTable d-flex flex-column" style={{ margin: '0px 0px 20px 0px', maxHeight: '700px', minHeight: '400px' }} />
-          <div className="authorList" id="authorList" style={{ height: '100%', overflowY: 'auto' }} />
+          <div className="authorList" id="authorList" style={{ overflowY: 'scroll' }} />
         </div>
         <OpinionLeaderView data={{
           word,
