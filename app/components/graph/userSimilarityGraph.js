@@ -690,16 +690,6 @@ export default function userSimilarityGraph(data, svg, user, articles) {
       const highlightArticle_id = highlightArticles.map(e => e.article_id);
       const focusScaleX = d3.scaleBand().range([0, focusDivW - 50])
         .domain(highlightArticle_id);
-      // const fillArrayFrom0To5 = () => {
-      //   const arr = [];
-      //   for (let i = 0; i <= 5; i += 1) {
-      //     arr.push(i);
-      //   }
-      //   return arr;
-      // };
-      // const depthIndex = fillArrayFrom0To5();
-      // const focusDepthScaleX = d3.scaleBand().range([0, focusDivW - 50])
-      //   .domain(depthIndex);
       const focusArticleScaleY = d3.scaleBand().domain(highlightArticle_id)
         .paddingInner(0.5)
         .range([0, focusDivH - 100]);
@@ -737,9 +727,14 @@ export default function userSimilarityGraph(data, svg, user, articles) {
       const contextYScale = d3.scaleBand()
         .range([0, articleTreeId.length * 30])
         .domain(articleTreeId);
-      const contextXScale = d3.scaleLinear()
-        .domain([0, 5])
-        .range([0, 150]);
+      const fillArrayFrom0To5 = () => {
+        const arr = [];
+        for (let i = 1; i <= 10; i += 1) arr.push(i);
+        return arr;
+      };
+      const depthIndex = fillArrayFrom0To5();
+      const contextXScale = d3.scaleBand().range([0, 400])
+        .domain(depthIndex);
 
       const brush = d3.brush()
         .extent([[0, 0], [contextXScale.range()[1], contextYScale.range()[1]]])
@@ -806,7 +801,7 @@ export default function userSimilarityGraph(data, svg, user, articles) {
       context.append('g')
         .attr('class', 'axis axis--x')
         // .attr('transform', `translate(0,${contextYScale.range()[1]})`)
-        .call(d3.axisTop(contextXScale.domain([0, 5])).ticks(5));
+        .call(d3.axisTop(contextXScale).ticks(5));
       context.append('g')
         .attr('class', 'axis axis--y')
         .call(d3.axisLeft(contextYScale).tickFormat(d => highlightArticles.find(e => e.article_id === d).article_title));
@@ -847,14 +842,13 @@ export default function userSimilarityGraph(data, svg, user, articles) {
       function brushed() {
         if (d3.event.sourceEvent && d3.event.sourceEvent.type === 'zoom') return; // ignore brush-by-zoom
         const s = d3.event.selection || contextYScale.range();
-        const newDepthDomainX = focusDepthScaleX.domain().slice(s[0][0] / contextYScale.bandwidth(), s[1][0] / contextYScale.bandwidth());
-        console.log(newDepthDomainX);
+        const newDepthDomainX = contextXScale.domain().slice(s[0][0] / contextXScale.bandwidth(), s[1][0] / contextXScale.bandwidth());
         // const newDomainX = newUserAxisValues.filter(e => datas.find(e1 => e1.id === e).community === communityIndex);
         const newUserDomainY = newUserAxisValues.filter(e => datas.find(e1 => e1.id === e).community === communityIndex);
         // focusScaleX.domain(newDomainX);
         focusUserScaleY.domain(newUserDomainY);
         // const newDomainY = highlightArticle_id.slice(s[0][0] / contextXScale.bandwidth(), s[1][0] / contextXScale.bandwidth());
-        const newArticleDomainY = highlightArticle_id.slice(s[0][1] / contextYScale.bandwidth(), s[1][1] / contextYScale.bandwidth());
+        const newArticleDomainY = contextYScale.domain().slice(s[0][1] / contextYScale.bandwidth(), s[1][1] / contextYScale.bandwidth());
         // console.log(newDomainY);
         focusArticleScaleY.domain(newArticleDomainY);
         // yScale.domain(newDomainY);
@@ -866,58 +860,68 @@ export default function userSimilarityGraph(data, svg, user, articles) {
         // article box
         const boxHeight = 100;
         const boxWidth = 50;
-        const boxMargin = 50;
+        const boxMargin = 20;
         focus.selectAll('.axis--y').remove();
         for (let i = 0; i < focusArticleScaleY.domain().length; i += 1) {
           const lineGroupY = focusArticleScaleY(focusArticleScaleY.domain()[i]);
-          const boxGroup = focusLineGroup.append('g')
-            .attr('transform', `translate(0,${lineGroupY})`);
+          console.log(focusArticleScaleY.domain()[i]);
+          const art = articleTree.find(e => e.article_id === focusArticleScaleY.domain()[i]);
+          console.log(art);
+          const articleBoxNum = Math.min(art.children.length + 1, newDepthDomainX[newDepthDomainX.length - 1]);
           focus.append('g')
             .attr('class', 'axis axis--y')
             .attr('transform', `translate(0,${lineGroupY})`)
             .call(d3.axisLeft(focusUserScaleY));
-          // box border
-          // focusLineGroup.append('rect')
-          //   .attr('x', 0)
-          //   .attr('y', i * focusArticleScaleY.step())
-          //   .attr('height', focusArticleScaleY.bandwidth())
-          //   .attr('width', boxWidth)
-          //   .attr('fill', 'transparent')
-          //   .attr('stroke', 'black')
-          //   .attr('stokre-width', '0.5px');
-          // box border-top
-          boxGroup.append('line')
-            .attr('x1', 0)
-            .attr('y1', 0)
-            .attr('x2', boxWidth)
-            .attr('y2', 0)
-            .attr('stroke-width', '1px')
-            .attr('stroke', 'black');
-          // box border-bottom
-          boxGroup.append('line')
-            .attr('x1', 0)
-            .attr('y1', focusArticleScaleY.bandwidth())
-            .attr('x2', boxWidth)
-            .attr('y2', focusArticleScaleY.bandwidth())
-            .attr('stroke-width', '1px')
-            .attr('stroke', 'black');
-          // box border-right
-          boxGroup.append('line')
-            .attr('x1', boxWidth)
-            .attr('y1', 0)
-            .attr('x2', boxWidth)
-            .attr('y2', focusArticleScaleY.bandwidth())
-            .attr('stroke-width', '1px')
-            .attr('stroke', 'black');
-          // box inner border
-          for (let j = 0; j < focusUserScaleY.domain().length; j += 1) {
+          const articleBoxGroup = focusLineGroup.append('g')
+            .attr('transform', `translate(0,${lineGroupY})`);
+          articleBoxGroup.append('text')
+            .text(art.article_title)
+            .attr('y', -10);
+          for (let k = 0; k < articleBoxNum; k += 1) {
+            const boxGroup = articleBoxGroup.append('g')
+              .attr('transform', `translate(${k * (boxWidth + boxMargin)},0)`);
+            // box border-top
             boxGroup.append('line')
               .attr('x1', 0)
-              .attr('y1', j * focusUserScaleY.bandwidth())
+              .attr('y1', 0)
               .attr('x2', boxWidth)
-              .attr('y2', j * focusUserScaleY.bandwidth())
-              .attr('stroke-width', '0.5px')
+              .attr('y2', 0)
+              .attr('stroke-width', '1px')
               .attr('stroke', 'black');
+            // box border-bottom
+            boxGroup.append('line')
+              .attr('x1', 0)
+              .attr('y1', focusArticleScaleY.bandwidth())
+              .attr('x2', boxWidth)
+              .attr('y2', focusArticleScaleY.bandwidth())
+              .attr('stroke-width', '1px')
+              .attr('stroke', 'black');
+            // box border-left
+            boxGroup.append('line')
+              .attr('x1', 0)
+              .attr('y1', 0)
+              .attr('x2', 0)
+              .attr('y2', focusArticleScaleY.bandwidth())
+              .attr('stroke-width', '1px')
+              .attr('stroke', 'black');
+            // box border-right
+            boxGroup.append('line')
+              .attr('x1', boxWidth)
+              .attr('y1', 0)
+              .attr('x2', boxWidth)
+              .attr('y2', focusArticleScaleY.bandwidth())
+              .attr('stroke-width', '1px')
+              .attr('stroke', 'black');
+            // box inner border
+            for (let j = 0; j < focusUserScaleY.domain().length; j += 1) {
+              boxGroup.append('line')
+                .attr('x1', 0)
+                .attr('y1', j * focusUserScaleY.bandwidth())
+                .attr('x2', boxWidth)
+                .attr('y2', j * focusUserScaleY.bandwidth())
+                .attr('stroke-width', '0.5px')
+                .attr('stroke', 'black');
+            }
           }
         }
 
@@ -1328,14 +1332,14 @@ export default function userSimilarityGraph(data, svg, user, articles) {
           .append('g')
           .attr('transform', d => `translate(0,${contextYScale(d.article_id) + contextYScale.bandwidth() / 2})`)
           .each((d, index, nodes) => {
-            let depth = 0;
+            let depth = 1;
             const recursion = (_d, _index, _nodes) => {
               if (!_d) return;
               console.log(`aritcle_id: ${_d.article_id}, article_title: ${_d.article_title}`);
 
               d3.select(_nodes[_index])
                 .append('path')
-                .attr('transform', `translate(${contextXScale(depth)},0)`)
+                .attr('transform', `translate(${contextXScale(depth) + contextXScale.bandwidth() / 2},0)`)
                 .attr('d', d3.arc()
                   .startAngle(0)
                   .endAngle(Math.PI * 2)
@@ -1356,7 +1360,7 @@ export default function userSimilarityGraph(data, svg, user, articles) {
                 })
                 .enter()
                 .append('g')
-                .attr('transform', `translate(${contextXScale(depth)},0)`)
+                .attr('transform', `translate(${contextXScale(depth) + contextXScale.bandwidth() / 2},0)`)
                 .append('path')
                 .attr('d', d3.arc()
                   .innerRadius(0)
@@ -1373,14 +1377,14 @@ export default function userSimilarityGraph(data, svg, user, articles) {
 
               d3.select(_nodes[_index])
                 .append('circle')
-                .attr('transform', `translate(${contextXScale(depth)},0)`)
+                .attr('transform', `translate(${contextXScale(depth) + contextXScale.bandwidth() / 2},0)`)
                 .attr('cx', 0)
                 .attr('cy', 0)
                 .attr('r', 7.5)
                 .attr('fill', 'white');
 
               depth += 1;
-              if (d.children) recursion(d.children[depth - 1], _index, _nodes);
+              if (d.children) recursion(d.children[depth - 2], _index, _nodes);
             };
             recursion(d, index, nodes);
           });
