@@ -411,13 +411,13 @@ let callback = function callback(req, res) {
                   sg.buildUserList(userListArray, res.result, user1[i]);
                 }
                 console.log('buildUserList Done');
-                // const similarity = sg.computeUserSimilarityByArticles(userListArray)
+                const similarity = sg.computeUserSimilarityByArticles(userListArray)
                 console.log('compute Similarity Done');
                 // console.log(res.result);
                 return {
                   articles: res.result,
                   userListArray,
-                  // similarity,
+                  similarity,
                 };
               }
               let datalist = dl.bindpostlist(res.result, ptt);

@@ -18,7 +18,7 @@ import { cps } from 'redux-saga/effects';
 import jLouvain from './jLouvain';
 import { userActivityTimeline } from './userActivityTimeline';
 
-export default function userSimilarityGraph(data, svg, user, articles) {
+export default function userSimilarityGraph(data, svg, user, articles, similarity) {
   // console.log(user);
   const svgScale = d3.scaleLinear().domain([1, 100]).range([1, 0.1]);
   const commentTimelineSvg = d3.select('#commentTimeline');
@@ -43,7 +43,7 @@ export default function userSimilarityGraph(data, svg, user, articles) {
   const myGroups = getAllAuthorId(data); // author
   const myVars = user;
   const clickedUser = [];
-  const similarThresh = 0.1;
+  const similarThresh = 0;
   adjacencyMatrixNoAuthor(similarThresh);
   // heatMapWithAuthor();
 
@@ -63,7 +63,8 @@ export default function userSimilarityGraph(data, svg, user, articles) {
     }
     const color = d => d3.schemeTableau10[d + 1];
     // Article Similarity
-    const similarity = computeUserSimilarityByArticles(data, user);
+    // const similarity = computeUserSimilarityByArticles(data, user);
+    console.log(similarity);
     const [datas, users, similaritys] = filterAlwaysNonSimilarUser(data, user, similarity, thresh);
     console.log('datas:', datas, 'users:', users, 'similaritys:', similaritys);
     // similarity for articles grouping
@@ -864,9 +865,9 @@ export default function userSimilarityGraph(data, svg, user, articles) {
         focus.selectAll('.axis--y').remove();
         for (let i = 0; i < focusArticleScaleY.domain().length; i += 1) {
           const lineGroupY = focusArticleScaleY(focusArticleScaleY.domain()[i]);
-          console.log(focusArticleScaleY.domain()[i]);
+          // console.log(focusArticleScaleY.domain()[i]);
           const art = articleTree.find(e => e.article_id === focusArticleScaleY.domain()[i]);
-          console.log(art);
+          // console.log(art);
           const articleBoxNum = Math.min(art.children.length + 1, newDepthDomainX[newDepthDomainX.length - 1]);
           focus.append('g')
             .attr('class', 'axis axis--y')

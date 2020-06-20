@@ -159,7 +159,7 @@ class OpinionLeaderView extends React.Component {
               userSimilaritySvg,
               fixedUserArr[0],
               response.articles,
-              // response.similarity,
+              response.similarity,
             );
           }
           for (let i = 1; i < myRequest.length; i += 1) {
@@ -169,6 +169,7 @@ class OpinionLeaderView extends React.Component {
                 resArr.push(res);
                 loading(resArr.length, myRequest.length, userSimilaritySvg);
                 // console.log(res[0][0]);
+                console.log('build');
                 for (let j = 0; j < fixedUserArr[i].length; j += 1) {
                   buildUserList(userListArray, res, fixedUserArr[i][j]);
                 }
@@ -13323,7 +13324,7 @@ class OpinionLeaderView extends React.Component {
       }
     ];
     userSimilarityGraph(testSimilarUserList, userSimilaritySvg, testSimilarUser, articleArr, 
-      // similarity,
+      similarity,
     );
     // userDailyActivity(testData, testUser, commentTimelineSvg, beginDate, endDate);
 
