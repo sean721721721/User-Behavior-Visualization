@@ -1342,7 +1342,7 @@ export default function userSimilarityGraph(data, svg, user, articles, similarit
             let depth = 1;
             const recursion = (_d, _index, _nodes) => {
               if (!_d) return;
-              console.log(`aritcle_id: ${_d.article_id}, article_title: ${_d.article_title}`);
+              // console.log(`aritcle_id: ${_d.article_id}, article_title: ${_d.article_title}`);
 
               d3.select(_nodes[_index])
                 .append('path')

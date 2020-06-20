@@ -54,14 +54,15 @@ class Graph extends Component {
   }
 
   shouldComponentUpdate(nextProps, nextState) {
-    console.log(this.state, nextState);
+    console.log('tempState: ', this.state, 'nextState: ', nextState);
     const { opState: thisOpState, ...thisWithoutOpState } = this.props;
     const { opState: nextOpstate, ...nextWithoutOpState } = nextProps;
     const { hover, word } = this.state;
-    console.log(this.props, nextProps);
-    // console.log(thisWithoutOpState, nextWithoutOpState);
+    console.log('tempProps: ', this.props, 'nextProps: ', nextProps);
+    console.log(thisWithoutOpState, nextWithoutOpState);
     if (!hover) {
       if (JSON.stringify(thisWithoutOpState) === JSON.stringify(nextWithoutOpState)) {
+        console.log('shouldUpdate? No!!');
         if (JSON.stringify(word) === JSON.stringify(nextState.word)) {
           console.log('shouldUpdate? No!!');
           return false;
@@ -7301,7 +7302,7 @@ class Graph extends Component {
         cellForceSimulation,
         totalAuthorInfluence,
         // user: userState,
-        hover: 1,
+        // hover: 1,
         mouseOverUser: index,
       });
       console.log($this.state);
