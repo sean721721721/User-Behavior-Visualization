@@ -53,6 +53,15 @@ class Graph extends Component {
     // console.log('vis_DidMount');
   }
 
+  componentWillReceiveProps(nextProps) {
+    const { word } = this.props;
+    console.log(nextProps.word, word);
+    if (JSON.stringify(nextProps.word) !== JSON.stringify(word)) {
+      console.log('componentWillReceiveProps');
+      this.setState({ word: nextProps.word });
+    }
+  }
+
   shouldComponentUpdate(nextProps, nextState) {
     console.log('tempState: ', this.state, 'nextState: ', nextState);
     const { opState: thisOpState, ...thisWithoutOpState } = this.props;

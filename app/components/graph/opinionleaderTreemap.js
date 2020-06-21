@@ -39,7 +39,7 @@ export default function treemap(cellNodes, beforeThisDate,
       `translate(${margin.left},${margin.top})`);
   const selectedArticleNodes = [];
 
-
+  console.log(cellNodes);
   const data = { children: [] };
   const authorNodes = cellNodes.filter(e => e.responder);
   authorNodes.sort((a, b) => b.pageRank - a.pagrRank);
@@ -174,7 +174,17 @@ export default function treemap(cellNodes, beforeThisDate,
       // return name;
     })
     .attr('font-size', '11px')
-    .attr('fill', 'white');
+    .attr('fill', 'white')
+    .append('title')
+    .text((d) => {
+      const length = d.x1 - d.x0;
+      const title = d.data.name.replace('mister_', '');
+      if (title.length > 10) {
+        const shortTitle = title.slice(0, 10 + ((length - 150) / 20));
+        return shortTitle;
+      }
+      return title;
+    });
 
   // and to add the text labels
   articleTreemap
