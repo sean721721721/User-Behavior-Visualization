@@ -12,6 +12,7 @@
     "core-js": "^3.6.0",
     "cors": "^2.8.5",
     "d3": "^5.9.7",
+    "d3-simple-slider": "^1.7.0",
     "express-session": "^1.16.2",
     "helmet": "^3.22.0",
     "jieba": "^1.0.0",

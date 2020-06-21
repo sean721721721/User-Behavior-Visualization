@@ -159,7 +159,7 @@ class OpinionLeaderView extends React.Component {
               userSimilaritySvg,
               fixedUserArr[0],
               response.articles,
-              response.similarity,
+              // response.similarity,
             );
           }
           for (let i = 1; i < myRequest.length; i += 1) {
@@ -13324,7 +13324,7 @@ class OpinionLeaderView extends React.Component {
       }
     ];
     userSimilarityGraph(testSimilarUserList, userSimilaritySvg, testSimilarUser, articleArr, 
-      similarity,
+      // similarity,
     );
     // userDailyActivity(testData, testUser, commentTimelineSvg, beginDate, endDate);
 

@@ -12,15 +12,16 @@ import * as science from 'science';
 import * as Queue from 'tiny-queue';
 import * as reorder from 'reorder.js/index';
 import * as math from 'mathjs';
+import * as slider from 'd3-simple-slider';
 import netClustering from 'netclustering';
 import CheckboxGroup from 'antd/lib/checkbox/Group';
 import { cps } from 'redux-saga/effects';
 import jLouvain from './jLouvain';
 import { userActivityTimeline } from './userActivityTimeline';
 
-export default function userSimilarityGraph(data, svg, user, articles, similarity) {
+export default function userSimilarityGraph(data, svg, user, articles) {
   // console.log(user);
-  const svgScale = d3.scaleLinear().domain([1, 100]).range([1, 0.1]);
+  const svgScale = d3.scaleSqrt().domain([1, 100]).range([1, 0.01]);
   const commentTimelineSvg = d3.select('#commentTimeline');
   const w = parseFloat(d3.select('.heatMap').style('width'));
   const h = parseFloat(d3.select('.heatMap').style('height'));
@@ -34,7 +35,7 @@ export default function userSimilarityGraph(data, svg, user, articles, similarit
   console.log('author array', authorArr);
   // set the dimensions and margins of the graph
   const margin = {
-    top: 30, right: 30, bottom: 30, left: 30,
+    top: 60, right: 30, bottom: 60, left: 30,
   };
   const width = 1300 - margin.left - margin.right;
   const height = 450 - margin.top - margin.bottom;
@@ -43,27 +44,51 @@ export default function userSimilarityGraph(data, svg, user, articles, similarit
   const myGroups = getAllAuthorId(data); // author
   const myVars = user;
   const clickedUser = [];
-  const similarThresh = 0;
-  adjacencyMatrixNoAuthor(similarThresh);
+  drawSlider();
+  function drawSlider() {
+    const similarThresh = 0.1;
+
+    const similaritySlider = slider.sliderBottom()
+      .min(0)
+      .max(1)
+      .width(150)
+      .tickFormat(d3.format('.1'))
+      .ticks(5)
+      .default(similarThresh)
+      .on('onchange', (val) => { adjacencyMatrixNoAuthor(val); });
+
+    const gSlider = svg.append('g')
+      .attr('class', 'similaritySlider')
+      .attr('transform', `translate(${4 * margin.left},${margin.top / 2})`);
+    const sliderText = svg.append('g')
+      .attr('transform', `translate(${margin.left},${margin.top / 2})`)
+      .append('text')
+      .text('Similarity');
+    gSlider.call(similaritySlider);
+
+    adjacencyMatrixNoAuthor(similarThresh);
+  }
   // heatMapWithAuthor();
 
   function adjacencyMatrixNoAuthor(thresh) {
+    d3.select('.position').remove();
+    d3.select('.groupLegends').remove();
     // svg.attr('height', h);
     svg.attr('width', w);
     svg.call(d3.zoom()
       .extent([[0, 0], [width, height]])
       .scaleExtent([0.1, 8])
       .on('zoom', zoomed));
-    svg = svg.append('g')
+    const position = svg.append('g')
       .attr('class', 'position');
-    const group = svg.append('g')
+    const group = position.append('g')
       .attr('transform', 'translate(0,0)');
     function zoomed() {
       group.attr('transform', d3.event.transform);
     }
     const color = d => d3.schemeTableau10[d + 1];
     // Article Similarity
-    // const similarity = computeUserSimilarityByArticles(data, user);
+    const similarity = computeUserSimilarityByArticles(data, user);
     console.log(similarity);
     const [datas, users, similaritys] = filterAlwaysNonSimilarUser(data, user, similarity, thresh);
     console.log('datas:', datas, 'users:', users, 'similaritys:', similaritys);
@@ -79,10 +104,10 @@ export default function userSimilarityGraph(data, svg, user, articles, similarit
 
     // similarity for articles grouping
     const articleSimilarity = computeArticleSimilarity(filteredArticles, data);
-    console.log(articleSimilarity);
+    console.log('articleSimilarityCount: ', articleSimilarity.length);
     const articleIds = filteredArticles.map(e => e.article_id);
     const articlesCommunity = jLouvainClustering(articleIds, articleSimilarity);
-    console.log('articlesCommunity', articlesCommunity);
+    // console.log('articlesCommunity', articlesCommunity);
     // articlesOrderByCommunity = articlesOrdering(articles, articlesCommunity);
     // console.log('articlesOrderByCommunity', articlesOrderByCommunity);
     const articlesOrderByCommunity = filteredArticles;
@@ -137,10 +162,11 @@ export default function userSimilarityGraph(data, svg, user, articles, similarit
     const gridSize = 20;
     const x = d3.scaleBand().range([0, axisDomain.length * gridSize])
       .domain(axisDomain);
-    d3.select('.position').attr('transform', `scale(1) translate(${w / 2 - x.range()[1] / 2},${2 * margin.top})`);
+    // d3.select('.position').attr('transform', `scale(1) translate(${w / 2 - x.range()[1] / 2},${2 * margin.top})`);
+    d3.select('.position').attr('transform', `scale(1) translate(0,${2 * margin.top})`);
     const leftSvg = group.append('g')
       .attr('class', 'leftSvg')
-      .attr('transform', `scale(${svgScale(datas.length)}) translate(0,100)`);
+      .attr('transform', `scale(${svgScale(datas.length)}) translate(150,100)`);
 
     const y = d3.scaleBand().range([0, axisDomain.length * gridSize])
       .domain(axisDomain);
@@ -382,7 +408,7 @@ export default function userSimilarityGraph(data, svg, user, articles, similarit
     // draw userGroup legends
     const groupLegend = d3.select('#timeLine')
       .append('g').attr('class', 'groupLegends')
-      .attr('transform', `translate(${margin.left}, ${margin.top})`);
+      .attr('transform', `translate(${margin.left}, ${2 * margin.top})`);
     groupLegend.selectAll('rect')
       .data(groupIndex)
       .enter()
@@ -390,7 +416,7 @@ export default function userSimilarityGraph(data, svg, user, articles, similarit
       .attr('class', (d, index) => `group_${index}`)
       .attr('transform', (d, index) => `translate(${100 * (index % 4)}, ${20 * Math.floor(index / 4)})`)
       .each((d, index, nodes) => {
-        console.log(d);
+        // console.log(d);
         d3.select(nodes[index])
           .append('text')
           .text(`Group ${index}`)
@@ -523,7 +549,7 @@ export default function userSimilarityGraph(data, svg, user, articles, similarit
       const focus = d3.select('#focus').append('g')
         .attr('class', 'focus')
         .attr('transform', `translate(${100},${50})`);
-      const context = svg.append('g')
+      const context = position.append('g')
         .attr('class', 'context');
       for (let i = 0; i < datas.length; i += 1) {
         // articleGroup.append('g')
@@ -772,7 +798,7 @@ export default function userSimilarityGraph(data, svg, user, articles, similarit
       //   .extent([[0, 0], [width, height]])
       //   .on('zoom', zoomed);
 
-      svg.append('defs').append('clipPath')
+      position.append('defs').append('clipPath')
         .attr('id', 'clip')
         .append('rect')
         .attr('width', width)
@@ -1698,7 +1724,7 @@ export default function userSimilarityGraph(data, svg, user, articles, similarit
         const communityIndexDatas = datas.filter(e => e.community === index);
         // console.log(communityIndexDatas);
         const communityIndexArticles = computeNumOfArticlesOfEachCommunity();
-        console.log('communityIndexArticles', communityIndexArticles);
+        // console.log('communityIndexArticles', communityIndexArticles);
         const communityEachLevelCount = [];
         communityIndexArticles.forEach((e) => {
           const levelOne = e.articles.filter(a => a.count > 0);
@@ -1711,7 +1737,7 @@ export default function userSimilarityGraph(data, svg, user, articles, similarit
             level: [levelOne, levelTwo, levelThree, levelFour, levelFive],
           });
         });
-        console.log('communityEachLevelCount', communityEachLevelCount);
+        // console.log('communityEachLevelCount', communityEachLevelCount);
         for (let i = 0; i < communityEachLevelCount.length; i += 1) {
           const radialColor = d3.scaleLinear().domain([-1, 4]).range(['white', color(index)]);
           const tempCommunity = communityEachLevelCount[i].community;
@@ -2022,7 +2048,7 @@ export default function userSimilarityGraph(data, svg, user, articles, similarit
     copyUsers.forEach((e) => {
       const filteredSimilarity = similaritys.filter(e1 => e1.source === e || e1.target === e);
       if (filteredSimilarity.filter(e1 => e1.source !== e1.target).every(isBelowThreshold)) {
-        console.log(e);
+        // console.log(e);
         similaritys = similaritys.filter(e1 => !(e1.source === e || e1.target === e));
         datas = datas.filter(e1 => e1.id !== e);
         users = users.filter(e1 => e1 !== e);

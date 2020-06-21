@@ -18,7 +18,7 @@ import OpinionLeaderView from './OpinionLeaderView';
 import * as jsnx from 'jsnetworkx';
 
 export default function AuthorTable(nodes, div, $this, callback) {
-  console.log(nodes);
+  // console.log(nodes);
   div.selectAll('*').remove();
   // console.log(parseFloat(d3.select('.network').style('height')));
   // console.log(parseFloat(d3.select('.termMap').style('height')));
@@ -265,7 +265,7 @@ export default function AuthorTable(nodes, div, $this, callback) {
     console.log(minPageRank);
     selectedNode.children.forEach((e) => {
       const authorNode = node.find(e1 => e1.id === e.id);
-      console.log(authorNode);
+      // console.log(authorNode);
       e.pageRank = authorNode ? authorNode.pageRank + minPageRank + 1 : minPageRank + 1;
     });
     // console.log(node);

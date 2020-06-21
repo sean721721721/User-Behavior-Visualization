@@ -55,7 +55,7 @@ class Graph extends Component {
 
   componentWillReceiveProps(nextProps) {
     const { word } = this.props;
-    console.log(nextProps.word, word);
+    // console.log(nextProps.word, word);
     if (JSON.stringify(nextProps.word) !== JSON.stringify(word)) {
       console.log('componentWillReceiveProps');
       this.setState({ word: nextProps.word });
@@ -63,15 +63,21 @@ class Graph extends Component {
   }
 
   shouldComponentUpdate(nextProps, nextState) {
-    console.log('tempState: ', this.state, 'nextState: ', nextState);
+    // console.log('tempState: ', this.state, 'nextState: ', nextState);
     const { opState: thisOpState, ...thisWithoutOpState } = this.props;
     const { opState: nextOpstate, ...nextWithoutOpState } = nextProps;
-    const { hover, word } = this.state;
-    console.log('tempProps: ', this.props, 'nextProps: ', nextProps);
-    console.log(thisWithoutOpState, nextWithoutOpState);
+    const { hover, word, mouseOverUser } = this.state;
+    // console.log('tempProps: ', this.props, 'nextProps: ', nextProps);
+    // console.log(thisWithoutOpState, nextWithoutOpState);
+    if (JSON.stringify(mouseOverUser) !== JSON.stringify(nextState.mouseOverUser)) {
+      console.log('vis update !');
+      // this.props = nextProps;
+      // this.drawwithlabels();
+      return true;
+    }
     if (!hover) {
       if (JSON.stringify(thisWithoutOpState) === JSON.stringify(nextWithoutOpState)) {
-        console.log('shouldUpdate? No!!');
+        // console.log('shouldUpdate? No!!');
         if (JSON.stringify(word) === JSON.stringify(nextState.word)) {
           console.log('shouldUpdate? No!!');
           return false;
@@ -7450,7 +7456,7 @@ class Graph extends Component {
   }
 
   render() {
-    // console.log('render: ', this.state);
+    console.log('render: ', this.state);
     const {
       cellData,
       beforeThisDate,

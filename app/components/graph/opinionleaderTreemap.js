@@ -73,7 +73,7 @@ export default function treemap(cellNodes, beforeThisDate,
   // console.log(newAuthorNodes);
   // const data = { children: [{name: 'Authors', children: newAuthorNodes }] };
 
-  console.log(data);
+  // console.log(data);
   // read json data
   // const data = {
   //   children: [{
@@ -177,12 +177,7 @@ export default function treemap(cellNodes, beforeThisDate,
     .attr('fill', 'white')
     .append('title')
     .text((d) => {
-      const length = d.x1 - d.x0;
       const title = d.data.name.replace('mister_', '');
-      if (title.length > 10) {
-        const shortTitle = title.slice(0, 10 + ((length - 150) / 20));
-        return shortTitle;
-      }
       return title;
     });
 
