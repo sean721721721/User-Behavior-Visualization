@@ -45,7 +45,8 @@ export default function userSimilarityGraph(data, svg, user, articles) {
   const myVars = user;
   const clickedUser = [];
   drawSlider();
-  drawFilter();
+  drawFilterDiv();
+  drawSortOptionDiv();
   function drawSlider() {
     d3.select('.option').selectAll('*').remove();
     const sliderSvg = d3.select('.option').append('svg')
@@ -80,8 +81,8 @@ export default function userSimilarityGraph(data, svg, user, articles) {
     adjacencyMatrixNoAuthor(similarThresh);
   }
 
-  function drawFilter() {
-    const filterDiv = d3.select('.option').append('div')
+  function drawFilterDiv() {
+    const filterDiv = d3.select('.heatMap').select('.option').append('div')
       .attr('class', 'filterDiv')
       .style('margin-top', '10px');
     filterDiv.append('p')
@@ -118,9 +119,61 @@ export default function userSimilarityGraph(data, svg, user, articles) {
     // </div>
 
     // </div>
-
   }
   // heatMapWithAuthor();
+
+  function drawSortOptionDiv() {
+    d3.select('.contextDiv').select('.option').selectAll('*').remove();
+    const sortDiv = d3.select('.contextDiv').select('.option')
+      .append('div')
+      .attr('class', 'sort')
+      .style('margin-top', '10px');
+    const tagInput = sortDiv.append('div')
+      .style('margin-left', '10px');
+    tagInput.append('label')
+      .style('margin-bottom', '0px')
+      .text('SortBy:');
+    tagInput.append('input')
+      .attr('type', 'radio')
+      .attr('id', 'date')
+      .attr('name', 'sort')
+      .attr('value', 'date')
+      .property('checked', true);
+    tagInput.append('label')
+      .attr('for', 'date')
+      .style('margin-left', '10px')
+      .text('date');
+    tagInput.append('input')
+      .attr('type', 'radio')
+      .attr('id', 'push')
+      .attr('name', 'sort')
+      .attr('value', 'push')
+      .property('checked', null);
+    tagInput.append('label')
+      .attr('for', 'push')
+      .style('margin-left', '10px')
+      .text('push');
+    tagInput.append('input')
+      .attr('type', 'radio')
+      .attr('id', 'boo')
+      .attr('name', 'sort')
+      .attr('value', 'boo')
+      .property('checked', null);
+    tagInput.append('label')
+      .attr('for', 'boo')
+      .style('margin-left', '10px')
+      .text('boo');
+    tagInput.append('input')
+      .attr('type', 'radio')
+      .attr('id', 'comments')
+      .attr('name', 'sort')
+      .attr('value', 'comments')
+      .property('checked', null);
+    tagInput.append('label')
+      .attr('for', 'comments')
+      .style('margin-left', '10px')
+      .text('comments');
+  }
 
   function adjacencyMatrixNoAuthor(thresh) {
     d3.select('.position').remove();
@@ -806,6 +859,7 @@ export default function userSimilarityGraph(data, svg, user, articles) {
       // lineGroup.selectAll('line').remove();
     }
     function updateArticleMatrix(articleArray, highlightArticles, communityIndex) {
+      console.log(highlightArticles);
       const focusDivW = parseFloat(d3.select('#focus').style('width'));
       const focusDivH = parseFloat(d3.select('#focus').style('height'));
       articleGroup.selectAll('.articleXAxis').remove();
@@ -821,6 +875,7 @@ export default function userSimilarityGraph(data, svg, user, articles) {
       // .domain(highlightArticle_id);
       const focusWidth = w - 500;
       const highlightArticle_id = highlightArticles.map(e => e.article_id);
+      console.log(highlightArticle_id);
       const focusScaleX = d3.scaleBand().range([0, focusDivW - 50])
         .domain(highlightArticle_id);
       const focusArticleScaleY = d3.scaleBand().domain(highlightArticle_id)
@@ -853,13 +908,15 @@ export default function userSimilarityGraph(data, svg, user, articles) {
       });
       const articleTree = buildArticleTree(highlightArticles);
       console.log(articleTree);
-      const articleTreeId = articleTree.map(e => e.article_id);
+      const articleTreeId = sortedArticleId(articleTree, highlightArticles);
       // const contextXScale = d3.scaleBand()
       //   .range([0, highlightArticle_id.length * 10])
       //   .domain(highlightArticle_id);
       const contextYScale = d3.scaleBand()
         .range([0, articleTreeId.length * 30])
         .domain(articleTreeId);
+      
+      console.log(contextYScale.domain());
       const fillArrayFrom0To5 = () => {
         const arr = [];
         for (let i = 1; i <= 10; i += 1) arr.push(i);
@@ -901,7 +958,7 @@ export default function userSimilarityGraph(data, svg, user, articles) {
       context.attr('width', contextXScale.range()[1] + 100);
       context.selectAll('*').remove();
       context = context.append('g').attr('transform', 'translate(50, 100)');
-      const articlesWithTypeComment = highlightArticles.map(e => ({ article_id: e.article_id, article_title: e.article_title }));
+      const articlesWithTypeComment = highlightArticles.map(e => ({ article_id: e.article_id, article_title: e.article_title, date: e.date }));
       articlesWithTypeComment.forEach((e) => {
         const article = highlightArticles.find(e1 => e1.article_id === e.article_id);
         const messages = article.messages.filter((mes) => {
@@ -915,6 +972,15 @@ export default function userSimilarityGraph(data, svg, user, articles) {
         e.commentType = { push, boo, neutral };
       });
       console.log('articlesWithTypeComment:', articlesWithTypeComment);
+      d3.select('.sort')
+        .selectAll('input')
+        .on('change', (_d, _index, _nodes) => {
+          const sortType = d3.select(_nodes[_index]).attr('value');
+          // contextYScale.domain(articleSortBy(sortType, articlesWithTypeComment));
+          const arr = articleSortBy(sortType, articlesWithTypeComment, highlightArticles);
+          updateArticleMatrix(articleArray, arr, communityIndex);
+          // drawArticleTree(articleTree);
+        });
       drawArticleTree(articleTree);
       // drawArticlesWithTypeComment();
 
@@ -972,6 +1038,7 @@ export default function userSimilarityGraph(data, svg, user, articles) {
       //   .attr('height', height)
       //   .attr('transform', `translate(${margin.left},${margin.top})`)
       //   .call(zoom);
+      
       function brushed() {
         if (d3.event.sourceEvent && d3.event.sourceEvent.type === 'zoom') return; // ignore brush-by-zoom
         const s = d3.event.selection || contextYScale.range();
@@ -1411,7 +1478,7 @@ export default function userSimilarityGraph(data, svg, user, articles) {
       }
       function buildArticleTree(articleArr) {
         const copyArtArr = JSON.parse(JSON.stringify(articleArr));
-        copyArtArr.sort((a, b) => ((new Date(a.date) - new Date(b.date)) > 0 ? 1 : -1));
+        // copyArtArr.sort((a, b) => ((new Date(a.date) - new Date(b.date)) > 0 ? 1 : -1));
         const arr = copyArtArr.filter(e => e.article_title[0] !== 'R');
         arr.forEach((e) => { e.children = []; });
         console.log(arr);
@@ -1428,6 +1495,48 @@ export default function userSimilarityGraph(data, svg, user, articles) {
             arr.push(art);
           }
         });
+        return arr;
+      }
+
+      function sortedArticleId(treeArr, articleArr) {
+        const arr = [];
+        articleArr.forEach((e) => {
+          const existed = treeArr.find(e1 => e1.article_id === e.article_id);
+          if (existed) arr.push(existed.article_id);
+        });
+        return arr;
+      }
+
+      function articleSortBy(type, articleWithCommentTypeArr, articleArr) {
+        const arr = JSON.parse(JSON.stringify(articleArr));
+        if (type === 'date') {
+          console.log(type);
+          arr.sort((a, b) => ((new Date(a.date) - new Date(b.date)) < 0 ? 1 : -1));
+        } else if (type === 'comments') {
+          arr.sort((a, b) => {
+            const article_a = articleWithCommentTypeArr.find(e => e.article_id === a.article_id);
+            const article_b = articleWithCommentTypeArr.find(e => e.article_id === b.article_id);
+            const total_a = article_a.commentType.push.length + article_a.commentType.boo.length + article_a.commentType.neutral.length;
+            const total_b = article_b.commentType.push.length + article_b.commentType.boo.length + article_b.commentType.neutral.length;
+            return (total_a - total_b) > 0 ? -1 : 1;
+          });
+        } else if (type === 'push') {
+          arr.sort((a, b) => {
+            const article_a = articleWithCommentTypeArr.find(e => e.article_id === a.article_id);
+            const article_b = articleWithCommentTypeArr.find(e => e.article_id === b.article_id);
+            const total_a = article_a.commentType.push.length - article_a.commentType.boo.length;
+            const total_b = article_b.commentType.push.length - article_b.commentType.boo.length;
+            return (total_a - total_b) > 0 ? -1 : 1;
+          });
+        } else if (type === 'boo') {
+          arr.sort((a, b) => {
+            const article_a = articleWithCommentTypeArr.find(e => e.article_id === a.article_id);
+            const article_b = articleWithCommentTypeArr.find(e => e.article_id === b.article_id);
+            const total_a = article_a.commentType.boo.length - article_a.commentType.push.length;
+            const total_b = article_b.commentType.boo.length - article_b.commentType.push.length;
+            return (total_a - total_b) > 0 ? -1 : 1;
+          });
+        }
         return arr;
       }
       function drawArticlesWithTypeComment() {

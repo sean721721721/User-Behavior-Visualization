@@ -13348,6 +13348,7 @@ class OpinionLeaderView extends React.Component {
           <svg id="timeLine" width="100%" height="100%" />
         </div>
         <div className="contextDiv">
+          <div className="option" style={{width: '100%', height: '100px', display: 'flex' }}/>
           <svg id="context" width="100%" height="100%" />
         </div>
         <div className="focusDiv">
