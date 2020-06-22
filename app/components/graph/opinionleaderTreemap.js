@@ -32,6 +32,7 @@ export default function treemap(cellNodes, beforeThisDate,
   const h = parseFloat(d3.select('.termMap').style('height'));
   const width = w - margin.left - margin.right;
   const height = h - margin.top - margin.bottom;
+  const mostUserNum = 200;
   // append the svg object to the body of the page
   svg.selectAll('*').remove();
   const articleTreemap = svg.append('g')
@@ -57,7 +58,7 @@ export default function treemap(cellNodes, beforeThisDate,
         value: (a.message.length * n.pageRank) / totalComments,
         message_count: a.message_count,
         colname: 'level3',
-        messages: a.message.slice(0, 100),
+        messages: a.message.slice(0, mostUserNum),
         tag: 0,
       });
     });
@@ -237,6 +238,7 @@ export default function treemap(cellNodes, beforeThisDate,
     if (d.data.tag === 0) {
       if (selectedUser.length === 0) {
         console.log('push');
+        console.log(d.data.messages);
         d.data.messages.forEach((e) => {
           if (!selectedUser.some(id => id === e.push_userid)) {
             selectedUser.push(e.push_userid);

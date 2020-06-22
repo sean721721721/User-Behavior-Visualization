@@ -560,22 +560,28 @@ export default function userSimilarityGraph(data, svg, user, articles) {
     function articleGroupByTag(articleIdArr, articleArr) {
       const tagArr = [];
       const articleIdWithCommunity = [];
-      articleArr.forEach((art) => {
+      articleArr.forEach((art, index) => {
         const title = art.article_title;
         let tag = '';
-        if (title[0] === 'R') {
-          tag = title.substring(4).slice(1, 3);
-          console.log(tag);
-        } else {
-          tag = title.slice(1, 3);
-          console.log(tag);
-        }
-        const communityIndex = tagArr.findIndex(e => e === tag);
-        if (communityIndex !== -1) {
-          articleIdWithCommunity.push({ id: art.article_id, community: communityIndex });
-        } else {
-          articleIdWithCommunity.push({ id: art.article_id, community: tagArr.length });
-          tagArr.push(tag);
+        if (title) {
+          if (title[0] === 'R') {
+            tag = title.substring(4).slice(1, 3);
+          } else if (title[0] === 'F') {
+            tag = title.slice(0, 2);
+          } else if (title[0] !== '[') {
+            tag = 'no-tag';
+          } else {
+            tag = title.slice(1, 3);
+          }
+          if (tag === 'Go') tag = 'Gossiping';
+          if (tag === 'e:') tag = title.substring(7).slice(2, 4);
+          const communityIndex = tagArr.findIndex(e => e === tag);
+          if (communityIndex !== -1) {
+            articleIdWithCommunity.push({ id: art.article_id, community: communityIndex });
+          } else {
+            articleIdWithCommunity.push({ id: art.article_id, community: tagArr.length });
+            tagArr.push(tag);
+          }
         }
       });
       console.log(tagArr);
@@ -1596,14 +1602,15 @@ export default function userSimilarityGraph(data, svg, user, articles) {
         //       .attr('r', 5);
         //   });
         const contextLegend = context.append('g')
-          .attr('class', 'contextLegend');
+          .attr('class', 'contextLegend')
+          .attr('transform', `translate(0, ${-margin.top * 4 / 3})`);
         contextLegend.append('circle')
           .attr('cx', 0)
           .attr('cy', -5)
           .attr('fill', color(userGroupIndex))
           .attr('r', 5);
         contextLegend.append('text')
-          .text(`Group ${userGroupIndex}`)
+          .text(`Group ${userGroupIndex}'s activity`)
           .attr('x', 10);
 
         const artComPie = d3.pie()
@@ -1987,26 +1994,28 @@ export default function userSimilarityGraph(data, svg, user, articles) {
           communityIndexDatas.forEach((u) => {
             u.repliedArticle.forEach((article) => {
               const findArticle = articlesCommunity.find(a => a.id === article.article_id);
-              const existedComunity = arr.find(e => e.community === findArticle.community);
-              if (existedComunity) {
+              if (findArticle) {
+                const existedComunity = arr.find(e => e.community === findArticle.community);
+                if (existedComunity) {
                 // same community
-                const existedArticle = existedComunity.articles.find(e => e.article_id === findArticle.id);
-                if (existedArticle) {
+                  const existedArticle = existedComunity.articles.find(e => e.article_id === findArticle.id);
+                  if (existedArticle) {
                   // same aritcle
-                  existedArticle.count += 1 / communityIndexDatas.length;
-                } else {
+                    existedArticle.count += 1 / communityIndexDatas.length;
+                  } else {
                   // can't find article
-                  existedComunity.articles.push({ article_id: findArticle.id, count: 1 / communityIndexDatas.length });
-                }
-              } else {
+                    existedComunity.articles.push({ article_id: findArticle.id, count: 1 / communityIndexDatas.length });
+                  }
+                } else {
                 // can't find community
-                arr.push({
-                  community: findArticle.community,
-                  articles: [{
-                    article_id: findArticle.id,
-                    count: 1 / communityIndexDatas.length,
-                  }],
-                });
+                  arr.push({
+                    community: findArticle.community,
+                    articles: [{
+                      article_id: findArticle.id,
+                      count: 1 / communityIndexDatas.length,
+                    }],
+                  });
+                }
               }
             });
           });

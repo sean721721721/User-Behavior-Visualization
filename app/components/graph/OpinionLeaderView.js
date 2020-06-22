@@ -120,7 +120,8 @@ class OpinionLeaderView extends React.Component {
 
     function handleSubmit(e) {
       // e.preventDefault();
-      const userNumsPerRequest = 100;
+      console.log(e);
+      const userNumsPerRequest = 200;
       const { length } = e;
       const myRequest = [];
       const userListArray = [];
