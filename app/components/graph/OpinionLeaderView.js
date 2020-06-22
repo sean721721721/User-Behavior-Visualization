@@ -13168,13 +13168,13 @@ class OpinionLeaderView extends React.Component {
       {
         id: "sasintw",
         reply: [
-          {author: 'a', count: 2, articles: [{article_title: 'A',article_title: 'B'}]},
-          {author: 'b', count: 1, articles: [{article_title: 'C'}]}
+          {author: 'a', count: 2, articles: [{article_title: '[QE] A',article_title: '[QE] B'}]},
+          {author: 'b', count: 1, articles: [{article_title: '[QE] C'}]}
         ],
         totalReplyCount: 6,
         repliedArticle: [
           {
-            article_id: 'a', article_title: 'A', date: "2019-04-15T00:15:32.000Z", 
+            article_id: 'a', article_title: '[QE] A', date: "2019-04-15T00:15:32.000Z", 
             messages:[
               {push_userid: 'imsphzzz',push_tag: '推',push_ipdatetime: "04/15 09:51"},
               {push_userid: 'OutBai',push_tag: '→', push_ipdatetime: "04/15 19:22"},
@@ -13182,14 +13182,14 @@ class OpinionLeaderView extends React.Component {
             ]
           },
           {
-            article_id: 'b', article_title: 'B', date: "2019-04-15T00:36:32.000Z", 
+            article_id: 'b', article_title: '[QE] B', date: "2019-04-15T00:36:32.000Z", 
             messages:[
               {push_userid: 'sasintw',push_tag: '噓',push_ipdatetime: "04/15 09:51"},
               {push_userid: 'imsphzzz', push_tag: '→',push_ipdatetime: "04/15 19:22"}
             ],
           },
           {
-            article_id: 'c', article_title: 'C', date: "2019-04-15T00:42:00.000Z", 
+            article_id: 'c', article_title: '[QE] C', date: "2019-04-15T00:42:00.000Z", 
             messages:[
               {push_userid: 'sasintw',push_tag: '推',push_ipdatetime: "04/15 09:51"},
               {push_userid: 'OutBai',push_tag: '→', push_ipdatetime: "04/15 19:22"}
@@ -13202,40 +13202,40 @@ class OpinionLeaderView extends React.Component {
         reply: [{author: 'b', count: 2,articles: [{article_title: 'D',article_title: 'E'}]}, {author: 'c', count: 1,articles: [{article_title: 'F'}]}],
         totalReplyCount: 64,
         repliedArticle: [
-          {article_id: 'd', article_title: 'D', date: "2019-04-15T01:02:06.000Z", messages:[{push_userid: 'ahw12000',push_tag: '推',push_ipdatetime: "04/15 09:51"},{push_userid: 'OutBai',push_tag: '噓', push_ipdatetime: "04/15 19:22"}],},
-          {article_id: 'e', article_title: 'E', date: "2019-04-15T01:55:20.000Z", messages:[{push_userid: 'ggggg',push_tag: '噓',push_ipdatetime: "04/15 09:51"},{push_userid: 'ahw12000', push_tag: '→',push_ipdatetime: "04/15 19:22"}],},
-          {article_id: 'f', article_title: 'F', date: "2019-04-15T02:13:24.000Z", messages:[{push_userid: 'imsphzzz', push_tag: '噓', push_ipdatetime: "04/15 19:11"},{push_userid: 'ahw12000',push_tag: '推', push_ipdatetime: "04/15 19:22"}],}]},
+          {article_id: 'd', article_title: '[BO] D', date: "2019-04-15T01:02:06.000Z", messages:[{push_userid: 'ahw12000',push_tag: '推',push_ipdatetime: "04/15 09:51"},{push_userid: 'OutBai',push_tag: '噓', push_ipdatetime: "04/15 19:22"}],},
+          {article_id: 'e', article_title: '[BO] E', date: "2019-04-15T01:55:20.000Z", messages:[{push_userid: 'ggggg',push_tag: '噓',push_ipdatetime: "04/15 09:51"},{push_userid: 'ahw12000', push_tag: '→',push_ipdatetime: "04/15 19:22"}],},
+          {article_id: 'f', article_title: '[BO] F', date: "2019-04-15T02:13:24.000Z", messages:[{push_userid: 'imsphzzz', push_tag: '噓', push_ipdatetime: "04/15 19:11"},{push_userid: 'ahw12000',push_tag: '推', push_ipdatetime: "04/15 19:22"}],}]},
       {
         id: "OutBai",
         reply: [{author: 'a', count: 1,articles: [{article_title: 'A'}]}, {author: 'b', count: 2,articles: [{article_title: 'C',article_title: 'D'}]}],
         totalReplyCount: 24,
         repliedArticle: [
-          {article_id: 'a', article_title: 'A', date: "2019-04-15T00:15:32.000Z" , messages:[{push_userid: 'imsphzzz',push_tag: '推',push_ipdatetime: "04/15 09:51"},
+          {article_id: 'a', article_title: '[QE] A', date: "2019-04-15T00:15:32.000Z" , messages:[{push_userid: 'imsphzzz',push_tag: '推',push_ipdatetime: "04/15 09:51"},
           {push_userid: 'OutBai',push_tag: '→', push_ipdatetime: "04/15 19:22"},
           {push_userid: 'sasintw', push_tag: '推',push_ipdatetime: "04/15 20:22"}]},
-          {article_id: 'c', article_title: 'C', date: "2019-04-15T00:42:00.000Z", messages:[
+          {article_id: 'c', article_title: '[QE] C', date: "2019-04-15T00:42:00.000Z", messages:[
             {push_userid: 'sasintw',push_tag: '推',push_ipdatetime: "04/15 09:51"},
             {push_userid: 'OutBai',push_tag: '→', push_ipdatetime: "04/15 19:22"}
           ],},
-          {article_id: 'd', article_title: 'D', date: "2019-04-15T01:02:06.000Z", messages:[{push_userid: 'ahw12000',push_tag: '推',push_ipdatetime: "04/15 09:51"},{push_userid: 'OutBai',push_tag: '噓', push_ipdatetime: "04/15 19:22"}],}]},
+          {article_id: 'd', article_title: '[BO] D', date: "2019-04-15T01:02:06.000Z", messages:[{push_userid: 'ahw12000',push_tag: '推',push_ipdatetime: "04/15 09:51"},{push_userid: 'OutBai',push_tag: '噓', push_ipdatetime: "04/15 19:22"}],}]},
       {
         id: "imsphzzz",
         reply: [{author: 'a', count: 2,articles: [{article_title: 'A',article_title: 'B'}]}, {author: 'c', count: 1,articles: [{article_title: 'F'}]}],
         totalReplyCount: 88,
         repliedArticle: [
-          {article_id: 'a', article_title: 'A', date: "2019-04-15T00:15:32.000Z" , messages:[{push_userid: 'imsphzzz',push_tag: '推',push_ipdatetime: "04/15 09:51"},
+          {article_id: 'a', article_title: '[QE] A', date: "2019-04-15T00:15:32.000Z" , messages:[{push_userid: 'imsphzzz',push_tag: '推',push_ipdatetime: "04/15 09:51"},
           {push_userid: 'OutBai',push_tag: '→', push_ipdatetime: "04/15 19:22"},
           {push_userid: 'sasintw', push_tag: '推',push_ipdatetime: "04/15 20:22"}]},
-          {article_id: 'b', article_title: 'B', date: "2019-04-15T00:36:32.000Z" , messages:[
+          {article_id: 'b', article_title: '[QE] B', date: "2019-04-15T00:36:32.000Z" , messages:[
             {push_userid: 'sasintw',push_tag: '噓',push_ipdatetime: "04/15 09:51"},
             {push_userid: 'imsphzzz', push_tag: '→',push_ipdatetime: "04/15 19:22"}
           ],},
-          {article_id: 'f', article_title: 'F', date: "2019-04-15T02:13:24.000Z", messages:[{push_userid: 'imsphzzz', push_tag: '噓', push_ipdatetime: "04/15 19:11"},{push_userid: 'ahw12000',push_tag: '推', push_ipdatetime: "04/15 19:22"}],}]},
+          {article_id: 'f', article_title: '[BO] F', date: "2019-04-15T02:13:24.000Z", messages:[{push_userid: 'imsphzzz', push_tag: '噓', push_ipdatetime: "04/15 19:11"},{push_userid: 'ahw12000',push_tag: '推', push_ipdatetime: "04/15 19:22"}],}]},
     ]
     const articleArr = [
       {
         article_id: 'a',
-        article_title: 'A',
+        article_title: '[QE] A',
         date: "2019-04-15T00:15:32.000Z" ,
         messages:[
           {push_userid: 'imsphzzz',push_tag: '推',push_ipdatetime: "04/15 09:51"},
@@ -13246,7 +13246,7 @@ class OpinionLeaderView extends React.Component {
       },
       {
         article_id: 'b',
-        article_title: 'B',
+        article_title: '[QE] B',
         date: "2019-04-15T00:36:32.000Z" ,
         messages:[
           {push_userid: 'sasintw',push_tag: '噓',push_ipdatetime: "04/15 09:51"},
@@ -13256,7 +13256,7 @@ class OpinionLeaderView extends React.Component {
       },
       {
         article_id: 'c',
-        article_title: 'C',
+        article_title: '[QE] C',
         date: "2019-04-15T00:42:00.000Z",
         messages:[
           {push_userid: 'sasintw',push_tag: '推',push_ipdatetime: "04/15 09:51"},
@@ -13266,21 +13266,21 @@ class OpinionLeaderView extends React.Component {
       },
       {
         article_id: 'd',
-        article_title: 'D',
+        article_title: '[BO] D',
         date: "2019-04-15T01:02:06.000Z",
         messages:[{push_userid: 'ahw12000',push_tag: '推',push_ipdatetime: "04/15 09:51"},{push_userid: 'OutBai',push_tag: '噓', push_ipdatetime: "04/15 19:22"}],
         author:'b',
       },
       {
         article_id: 'e',
-        article_title: 'E',
+        article_title: '[BO] E',
         date: "2019-04-15T01:55:20.000Z",
         messages:[{push_userid: 'ggggg',push_tag: '噓',push_ipdatetime: "04/15 09:51"},{push_userid: 'ahw12000', push_tag: '→',push_ipdatetime: "04/15 19:22"}],
         author:'b'
       },
       {
         article_id: 'f',
-        article_title: 'F',
+        article_title: '[BO] F',
         date: "2019-04-15T02:13:24.000Z",
         messages:[{push_userid: 'imsphzzz', push_tag: '噓', push_ipdatetime: "04/15 19:11"},{push_userid: 'ahw12000',push_tag: '推', push_ipdatetime: "04/15 19:22"}],
         author:'c'},
@@ -13344,6 +13344,7 @@ class OpinionLeaderView extends React.Component {
           <svg id="articleCell" width="100%" height="94%" />
         </div> */}
         <div className="heatMap" style={{ borderRight: '2px solid gray', overflow: 'scroll', maxHeight: '800px', minHeight: '400px' }}>
+          <div className="option" style={{width: '100%', height: '100px', display: 'flex' }}/>
           <svg id="timeLine" width="100%" height="100%" />
         </div>
         <div className="contextDiv">

@@ -35,7 +35,7 @@ export default function userSimilarityGraph(data, svg, user, articles) {
   console.log('author array', authorArr);
   // set the dimensions and margins of the graph
   const margin = {
-    top: 60, right: 30, bottom: 60, left: 30,
+    top: 30, right: 30, bottom: 60, left: 30,
   };
   const width = 1300 - margin.left - margin.right;
   const height = 450 - margin.top - margin.bottom;
@@ -45,7 +45,12 @@ export default function userSimilarityGraph(data, svg, user, articles) {
   const myVars = user;
   const clickedUser = [];
   drawSlider();
+  drawFilter();
   function drawSlider() {
+    d3.select('.option').selectAll('*').remove();
+    const sliderSvg = d3.select('.option').append('svg')
+      .attr('class', 'sliderSvg')
+      .style('margin-top', '10px');
     const similarThresh = 0.1;
 
     const similaritySlider = slider.sliderBottom()
@@ -57,16 +62,63 @@ export default function userSimilarityGraph(data, svg, user, articles) {
       .default(similarThresh)
       .on('onchange', (val) => { adjacencyMatrixNoAuthor(val); });
 
-    const gSlider = svg.append('g')
+    const gSlider = sliderSvg.append('g')
       .attr('class', 'similaritySlider')
       .attr('transform', `translate(${4 * margin.left},${margin.top / 2})`);
-    const sliderText = svg.append('g')
+    const sliderText = sliderSvg.append('g')
       .attr('transform', `translate(${margin.left},${margin.top / 2})`)
       .append('text')
-      .text('Similarity');
+      .text('Similarity')
+      .attr('y', 5);
     gSlider.call(similaritySlider);
 
+    d3.select('.similaritySlider')
+      .selectAll('.tick')
+      .selectAll('text')
+      .attr('y', 10);
+
     adjacencyMatrixNoAuthor(similarThresh);
+  }
+
+  function drawFilter() {
+    const filterDiv = d3.select('.option').append('div')
+      .attr('class', 'filterDiv')
+      .style('margin-top', '10px');
+    filterDiv.append('p')
+      .style('margin-bottom', '0px')
+      .text('ArticleGroupBy:');
+    const tagInput = filterDiv.append('div')
+      .style('margin-left', '10px');
+    tagInput.append('input')
+      .attr('type', 'radio')
+      .attr('id', 'tag')
+      .attr('name', 'group')
+      .attr('value', 'tag')
+      .property('checked', true);
+    tagInput.append('label')
+      .attr('for', 'tag')
+      .style('margin-left', '10px')
+      .text('tag');
+    // <div>
+    // <p>Select a maintenance drone:</p>
+
+    // <div>
+    //   <input type="radio" id="huey" name="drone" value="huey" checked="">
+    //   <label for="huey">Huey</label>
+    // </div>
+
+    // <div>
+    //   <input type="radio" id="dewey" name="drone" value="dewey">
+    //   <label for="dewey">Dewey</label>
+    // </div>
+
+    // <div>
+    //   <input type="radio" id="louie" name="drone" value="louie">
+    //   <label for="louie">Louie</label>
+    // </div>
+
+    // </div>
+
   }
   // heatMapWithAuthor();
 
@@ -106,8 +158,11 @@ export default function userSimilarityGraph(data, svg, user, articles) {
     const articleSimilarity = computeArticleSimilarity(filteredArticles, data);
     console.log('articleSimilarityCount: ', articleSimilarity.length);
     const articleIds = filteredArticles.map(e => e.article_id);
-    const articlesCommunity = jLouvainClustering(articleIds, articleSimilarity);
-    // console.log('articlesCommunity', articlesCommunity);
+    // const articlesCommunity = jLouvainClustering(articleIds, articleSimilarity);
+    const articlesCommunity = articleGroupByTag(articleIds, filteredArticles);
+    console.log('articlesCommunity', articlesCommunity);
+
+    
     // articlesOrderByCommunity = articlesOrdering(articles, articlesCommunity);
     // console.log('articlesOrderByCommunity', articlesOrderByCommunity);
     const articlesOrderByCommunity = filteredArticles;
@@ -163,7 +218,7 @@ export default function userSimilarityGraph(data, svg, user, articles) {
     const x = d3.scaleBand().range([0, axisDomain.length * gridSize])
       .domain(axisDomain);
     // d3.select('.position').attr('transform', `scale(1) translate(${w / 2 - x.range()[1] / 2},${2 * margin.top})`);
-    d3.select('.position').attr('transform', `scale(1) translate(0,${2 * margin.top})`);
+    d3.select('.position').attr('transform', `scale(1) translate(${2 * margin.left},${4 * margin.top})`);
     const leftSvg = group.append('g')
       .attr('class', 'leftSvg')
       .attr('transform', `scale(${svgScale(datas.length)}) translate(150,100)`);
@@ -414,7 +469,8 @@ export default function userSimilarityGraph(data, svg, user, articles) {
       .enter()
       .append('g')
       .attr('class', (d, index) => `group_${index}`)
-      .attr('transform', (d, index) => `translate(${100 * (index % 4)}, ${20 * Math.floor(index / 4)})`)
+      // .attr('transform', (d, index) => `translate(${100 * (index % 4)}, ${20 * Math.floor(index / 4)})`)
+      .attr('transform', (d, index) => `translate(0 ${20 * index})`)
       .each((d, index, nodes) => {
         // console.log(d);
         d3.select(nodes[index])
@@ -446,6 +502,31 @@ export default function userSimilarityGraph(data, svg, user, articles) {
     drawUserGroupBipartiteRelations();
     // drawUserRepliedAuthorMatrix(authorArr);
     // drawAuthorArticleMatrix(articlesOrderByCommunity, authorArr);
+
+    function articleGroupByTag(articleIdArr, articleArr) {
+      const tagArr = [];
+      const articleIdWithCommunity = [];
+      articleArr.forEach((art) => {
+        const title = art.article_title;
+        let tag = '';
+        if (title[0] === 'R') {
+          tag = title.substring(4).slice(1, 3);
+          console.log(tag);
+        } else {
+          tag = title.slice(1, 3);
+          console.log(tag);
+        }
+        const communityIndex = tagArr.findIndex(e => e === tag);
+        if (communityIndex !== -1) {
+          articleIdWithCommunity.push({ id: art.article_id, community: communityIndex });
+        } else {
+          articleIdWithCommunity.push({ id: art.article_id, community: tagArr.length });
+          tagArr.push(tag);
+        }
+      });
+      console.log(tagArr);
+      return articleIdWithCommunity;
+    }
 
     function builduserGroupAxis(axisValue, axis_x, axis_y) {
       leftSvg.append('g')
@@ -882,7 +963,7 @@ export default function userSimilarityGraph(data, svg, user, articles) {
           [
             Math.min(contextXScale.range()[1], 50),
             // Math.min(yScale.range()[1], gridSize * 3),
-            contextYScale.range()[1],
+            Math.min(contextYScale.range()[1], 120),
           ]]);
 
       // svg.append('rect')
