@@ -21,7 +21,7 @@ import { userActivityTimeline } from './userActivityTimeline';
 
 export default function userSimilarityGraph(data, svg, user, articles) {
   // console.log(user);
-  const svgScale = d3.scaleSqrt().domain([1, 100]).range([1, 0.01]);
+  const svgScale = d3.scaleSqrt().domain([1, 100]).range([1.5, 0.01]);
   const commentTimelineSvg = d3.select('#commentTimeline');
   const w = parseFloat(d3.select('.heatMap').style('width'));
   const h = parseFloat(d3.select('.heatMap').style('height'));
@@ -187,7 +187,8 @@ export default function userSimilarityGraph(data, svg, user, articles) {
     const position = svg.append('g')
       .attr('class', 'position');
     const group = position.append('g')
-      .attr('transform', 'translate(0,0)');
+      .attr('class', 'group')
+      .attr('transform', 'translate(-30,-100)');
     function zoomed() {
       group.attr('transform', d3.event.transform);
     }
@@ -516,14 +517,14 @@ export default function userSimilarityGraph(data, svg, user, articles) {
     // draw userGroup legends
     const groupLegend = d3.select('#timeLine')
       .append('g').attr('class', 'groupLegends')
-      .attr('transform', `translate(${margin.left}, ${2 * margin.top})`);
+      .attr('transform', `translate(${margin.left}, ${margin.top})`);
     groupLegend.selectAll('rect')
       .data(groupIndex)
       .enter()
       .append('g')
       .attr('class', (d, index) => `group_${index}`)
-      // .attr('transform', (d, index) => `translate(${100 * (index % 4)}, ${20 * Math.floor(index / 4)})`)
-      .attr('transform', (d, index) => `translate(0 ${20 * index})`)
+      .attr('transform', (d, index) => `translate(${100 * (index % 4)}, ${20 * Math.floor(index / 4)})`)
+      // .attr('transform', (d, index) => `translate(0 ${20 * index})`)
       .each((d, index, nodes) => {
         // console.log(d);
         d3.select(nodes[index])
@@ -957,7 +958,7 @@ export default function userSimilarityGraph(data, svg, user, articles) {
       context.attr('height', contextYScale.range()[1] + 100);
       context.attr('width', contextXScale.range()[1] + 100);
       context.selectAll('*').remove();
-      context = context.append('g').attr('transform', 'translate(50, 100)');
+      context = context.append('g').attr('transform', 'translate(50, 60)');
       const articlesWithTypeComment = highlightArticles.map(e => ({ article_id: e.article_id, article_title: e.article_title, date: e.date }));
       articlesWithTypeComment.forEach((e) => {
         const article = highlightArticles.find(e1 => e1.article_id === e.article_id);
@@ -981,7 +982,7 @@ export default function userSimilarityGraph(data, svg, user, articles) {
           updateArticleMatrix(articleArray, arr, communityIndex);
           // drawArticleTree(articleTree);
         });
-      drawArticleTree(articleTree);
+      drawArticleTree(articleTree, communityIndex);
       // drawArticlesWithTypeComment();
 
       // contextXScale.domain(focusScaleX.domain());
@@ -1009,8 +1010,8 @@ export default function userSimilarityGraph(data, svg, user, articles) {
         .attr('dy', '.35em')
         .attr('y', '-20')
         .style('font-size', 'larger')
-        .style('writing-mode', 'tb')
-        .style('text-anchor', 'end');
+        // .style('writing-mode', 'tb')
+        .style('text-anchor', 'middle');
       // context.select('.axis--x')
       //   .selectAll('line')
       //   .remove();
@@ -1569,7 +1570,42 @@ export default function userSimilarityGraph(data, svg, user, articles) {
           });
       }
 
-      function drawArticleTree(tree) {
+      function drawArticleTree(tree, userGroupIndex) {
+        // const groupLegend = d3.select('#timeLine')
+        //   .append('g').attr('class', 'groupLegends')
+        //   .attr('transform', `translate(${margin.left}, ${margin.top})`);
+        // groupLegend.selectAll('rect')
+        //   .data(groupIndex)
+        //   .enter()
+        //   .append('g')
+        //   .attr('class', (d, index) => `group_${index}`)
+        //   .attr('transform', (d, index) => `translate(${100 * (index % 4)}, ${20 * Math.floor(index / 4)})`)
+        //   // .attr('transform', (d, index) => `translate(0 ${20 * index})`)
+        //   .each((d, index, nodes) => {
+        //     // console.log(d);
+        //     d3.select(nodes[index])
+        //       .append('text')
+        //       .text(`Group ${index}`)
+        //       .attr('x', 10);
+
+        //     d3.select(nodes[index])
+        //       .append('circle')
+        //       .attr('cx', 0)
+        //       .attr('cy', -5)
+        //       .attr('fill', color(index))
+        //       .attr('r', 5);
+        //   });
+        const contextLegend = context.append('g')
+          .attr('class', 'contextLegend');
+        contextLegend.append('circle')
+          .attr('cx', 0)
+          .attr('cy', -5)
+          .attr('fill', color(userGroupIndex))
+          .attr('r', 5);
+        contextLegend.append('text')
+          .text(`Group ${userGroupIndex}`)
+          .attr('x', 10);
+
         const artComPie = d3.pie()
           .value(d => d.length / communityUserCount)
           .sort(null);

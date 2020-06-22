@@ -267,7 +267,6 @@ export default function treemap(cellNodes, beforeThisDate,
       .attr('id', 'submitUsers')
       .text('Get Activity!')
       .on('click', (d) => {
-        console.log(d);
         selectedUserClick(userArr);
       });
 

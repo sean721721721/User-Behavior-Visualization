@@ -79,7 +79,7 @@ class OpinionLeaderView extends React.Component {
     }
 
     function buildUserList(userLists, articles, userId) {
-      // console.log(articles, userId);
+      console.log(articles, userId);
       const authorList = [];
       const articleList = [];
       let totalReplyCount = 0;
@@ -120,7 +120,7 @@ class OpinionLeaderView extends React.Component {
 
     function handleSubmit(e) {
       // e.preventDefault();
-      const userNumsPerRequest = 90;
+      const userNumsPerRequest = 100;
       const { length } = e;
       const myRequest = [];
       const userListArray = [];
@@ -13348,7 +13348,7 @@ class OpinionLeaderView extends React.Component {
           <svg id="timeLine" width="100%" height="100%" />
         </div>
         <div className="contextDiv">
-          <div className="option" style={{width: '100%', height: '100px', display: 'flex' }}/>
+          <div className="option" style={{width: '100%', height: '50px', display: 'flex' }}/>
           <svg id="context" width="100%" height="100%" />
         </div>
         <div className="focusDiv">
