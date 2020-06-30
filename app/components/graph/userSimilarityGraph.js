@@ -269,7 +269,7 @@ export default function userSimilarityGraph(data, svg, user, articles) {
       .domain([0, 1]);
     const leftMyColor = d3.scaleLinear()
       // .range([d3.interpolateYlOrRd(0), d3.interpolateYlOrRd(0.8)])
-      .range(['white', 'black'])
+      .range(['white', '#212529'])
       .domain([0, 100]);
     const scaleExponent = d3.scalePow().exponent(2);
     d3.select('.tooltip').remove();
@@ -422,7 +422,7 @@ export default function userSimilarityGraph(data, svg, user, articles) {
       const curLen = current.repliedArticle ? current.repliedArticle.length : current;
       return preLen + curLen;
     });
-    const bandWidthScale = d3.scaleLinear().domain([1, totalReplied])
+    const bandWidthScale = d3.scaleSqrt().domain([1, totalReplied])
       .range([5, 500]);
     const positionScale = computePosition(datas, bandWidthScale);
     drawNewHeatmap();
@@ -576,6 +576,7 @@ export default function userSimilarityGraph(data, svg, user, articles) {
             const xUser = community.find(e => e.id === newUserAxisValues[index]);
             const yUser = community.find(e => e.id === newUserAxisValues[i]);
             if (i < index || xUser.community === yUser.community) {
+            // if (i <= index) {
               d3.select(nodes[index])
                 .attr('class', () => {
                   const xUserID = newUserAxisValues[index];
@@ -593,7 +594,7 @@ export default function userSimilarityGraph(data, svg, user, articles) {
                   return bandWidthScale(size);
                 })
                 .style('fill', () => {
-                  if (i > index) return color(xUser.community);
+                  if (i > index) return leftMyColor(100);
                   if (xUser.community === yUser.community) {
                     const communityColor = d3.scaleLinear()
                       .range(['white', color(xUser.community)])
@@ -655,9 +656,13 @@ export default function userSimilarityGraph(data, svg, user, articles) {
           .append('g')
           .append('text')
           .text(d => d)
-          .attr('x', 0)
+          .attr('x', -10)
           .attr('y', (d, index) => {
             return (positionScale[index + 1] + positionScale[index]) / 2;
+          })
+          .attr('fill', (d) => {
+            const index = community.findIndex(e => e.id === d);
+            return color(community[index].community);
           })
           .style('text-anchor', 'end')
           .attr('dy', '0.2em')
@@ -1736,7 +1741,7 @@ export default function userSimilarityGraph(data, svg, user, articles) {
         temp.push(community.find(e => e.id === newUserAxisValues[axisIndex]).community);
         comunityIndexY.push(axisIndex);
       }
-      const articleGroupWidthScale = d3.scaleLinear().domain([0, filteredArticles.length]).range([10, 100]);
+      const articleGroupWidthScale = d3.scaleLinear().domain([1, filteredArticles.length]).range([10, 500]);
       const articleGroupIndexArray = [];
       const articleGroupYScale = [0];
       const padding = 2;
@@ -1814,7 +1819,7 @@ export default function userSimilarityGraph(data, svg, user, articles) {
             .attr('y', articleGroupYScale[tempCommunity])
             .attr('x', (d) => {
               const offset = (maxWidth) * (1 - d.length / numOfArtOfEachComunity[tempCommunity].length);
-              return positionScale[tem] + offset + 1;
+              return positionScale[tem] + offset;
             })
             .attr('height', articleGroupWidthScale(numOfArtOfEachComunity[tempCommunity].length))
             .attr('width', d => maxWidth * (d.length / numOfArtOfEachComunity[tempCommunity].length))
