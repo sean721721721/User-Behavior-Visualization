@@ -1,42 +1,48 @@
+/* eslint-disable max-len */
 module.exports = {
   buildUserList(userLists, articles, userId) {
   // console.log(articles, userId);
+    userId.forEach((e) => {
+      userLists.push({
+        id: e, totalReplyCount: 0, repliedArticle: [], reply: [],
+      });
+    });
     const authorList = [];
     const articleList = [];
     let totalReplyCount = 0;
     articles.forEach((article) => {
-      if (article.messages.some(e => e.push_userid === userId)) {
-        const existedAuthor = authorList.find(e => e.author === article.author);
-        const existedArticle = articleList.find(e => e.article_id === article.article_id);
-        totalReplyCount += 1;
-        const pushContent = article.messages.filter(e => e.push_userid === userId);
-        if (existedAuthor) {
-          existedAuthor.count += 1;
-          existedAuthor.articles.push({
-            article_title: article.article_title,
-            push_content: pushContent,
-          });
+      article.messages.forEach((mes) => {
+        const existedUser = userLists.find(e => e.id === mes.push_userid);
+        if (existedUser) {
+          const existedArticle = existedUser.repliedArticle.find(e => e.article_id === article.article_id);
+          existedUser.totalReplyCount += 1;
+          if (!existedArticle) {
+            existedUser.repliedArticle.push(article);
+          }
         } else {
-          authorList.push({
-            author: article.author,
-            count: 1,
-            articles: [{
-              article_title: article.article_title,
-              push_content: pushContent,
-            }],
-          });
+          userLists.push({ id: mes.push_userid, repliedArticle: [article], totalReplyCount: 1 });
         }
-        if (!existedArticle) {
-          articleList.push(article);
-        }
-      }
+      });
     });
-    userLists.push({
-      id: userId,
-      reply: authorList,
-      totalReplyCount,
-      repliedArticle: articleList,
-    });
+    // userLists.forEach((usr) => {
+    //   usr.repliedArticle.forEach((article) => {
+    //     const existedAuthor = usr.reply.find(e => e.author === article.author);
+    //     if (existedAuthor) {
+    //       existedAuthor.count += 1;
+    //       existedAuthor.articles.push({
+    //         article_title: article.article_title,
+    //       });
+    //     } else {
+    //       usr.reply.push({
+    //         author: article.author,
+    //         count: 1,
+    //         articles: [{
+    //           article_title: article.article_title,
+    //         }],
+    //       });
+    //     }
+    //   });
+    // });
   },
   computeUserSimilarityByArticles(userAuthorRelationShipArr) {
     const userListArray = [];

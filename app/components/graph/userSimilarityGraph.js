@@ -585,6 +585,16 @@ export default function userSimilarityGraph(data, svg, user, articles) {
                 })
                 .attr('x', () => positionScale[index])
                 .attr('y', positionScale[i])
+                .attr('rx', () => {
+                  if (i > index) return 0;
+                  const size = datas.find(e => e.id === xUser.id).repliedArticle.length;
+                  return Math.min(15, bandWidthScale(size) / 10);
+                })
+                .attr('stroke', 'white')
+                .attr('stroke-width', () => {
+                  if (i > index) return '0px';
+                  return '2px';
+                })
                 .attr('width', () => {
                   const size = datas.find(e => e.id === xUser.id).repliedArticle.length;
                   return bandWidthScale(size);
@@ -619,17 +629,24 @@ export default function userSimilarityGraph(data, svg, user, articles) {
             .append('rect')
             .attr('x', positionScale[rectX])
             .attr('y', positionScale[rectY])
-            .attr('height', () => {
+            .attr('rx', () => {
               const tem = groupIndex[j].index;
               let nex = positionScale.length - 1;
               if (groupIndex[j + 1]) nex = groupIndex[j + 1].index;
               console.log(positionScale[nex], positionScale[tem]);
+              return Math.min(15, (positionScale[nex] - positionScale[tem]) / 10);
+            })
+            .attr('stroke', 'white')
+            .attr('stroke-width', '2px')
+            .attr('height', () => {
+              const tem = groupIndex[j].index;
+              let nex = positionScale.length - 1;
+              if (groupIndex[j + 1]) nex = groupIndex[j + 1].index;
               return positionScale[nex] - positionScale[tem];
             })
             .attr('width', () => {
               const tem = groupIndex[i].index;
               const nex = tem + groupIndex[i].num;
-              console.log(positionScale[nex], positionScale[tem]);
               return positionScale[nex] - positionScale[tem];
             })
             .attr('fill', () => {
@@ -648,6 +665,7 @@ export default function userSimilarityGraph(data, svg, user, articles) {
       leftSvg.append('g').attr('class', 'radialGroup')
         .attr('transform', `translate(0,${positionScale[positionScale.length - 1] + 30})`);
       function drawUserAxis() {
+        // y-axis
         leftSvg.append('g')
           .attr('class', 'yAxis')
           .selectAll()
@@ -666,6 +684,28 @@ export default function userSimilarityGraph(data, svg, user, articles) {
           })
           .style('text-anchor', 'end')
           .attr('dy', '0.2em')
+          .style('font-size', (d, index) => (positionScale[index + 1] - positionScale[index]) / 2);
+
+        // x-axis
+        leftSvg.append('g')
+          .attr('class', 'xAxis')
+          .selectAll()
+          .data(newUserAxisValues)
+          .enter()
+          .append('g')
+          .append('text')
+          .text(d => d)
+          .attr('dy', '.2em')
+          .attr('transform', 'rotate(-90)')
+          .style('text-anchor', 'start')
+          .attr('x', 10)
+          .attr('y', (d, index) => {
+            return (positionScale[index + 1] + positionScale[index]) / 2;
+          })
+          .attr('fill', (d) => {
+            const index = community.findIndex(e => e.id === d);
+            return color(community[index].community);
+          })
           .style('font-size', (d, index) => (positionScale[index + 1] - positionScale[index]) / 2);
       }
     }
@@ -1766,7 +1806,6 @@ export default function userSimilarityGraph(data, svg, user, articles) {
               const tem = comunityIndexY[i];
               let nex = positionScale.length - 1;
               if (comunityIndexY[i + 1]) nex = comunityIndexY[i + 1];
-              console.log(positionScale[tem], positionScale[nex]);
               return positionScale[nex] - positionScale[tem];
             })
             .attr('fill', 'white')

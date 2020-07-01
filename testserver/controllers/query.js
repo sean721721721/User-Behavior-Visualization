@@ -401,16 +401,20 @@ let callback = function callback(req, res) {
               if (activity) {
                 res.result.forEach(function(result){
                   result.messages = result.messages.filter((mes, index) => {
-                    if (index === result.messages.length - 1) return true;
+                    // if (index === result.messages.length - 1) return true;
                     return user1.includes(mes.push_userid);
                   })
                 });
                 console.log('messages filter Done');
                 let userListArray = [];
-                for (let i = 0; i < user1.length; i += 1) {
-                  sg.buildUserList(userListArray, res.result, user1[i]);
-                }
+                let time1 = new Date();
+                // for (let i = 0; i < user1.length; i += 1) {
+                //   sg.buildUserList(userListArray, res.result, user1[i]);
+                // }
+                sg.buildUserList(userListArray, res.result, user1);
                 console.log('buildUserList Done');
+                let time2 = new Date();
+                console.log('total time: %d second', (time2 - time1) / 1000);
                 // const similarity = sg.computeUserSimilarityByArticles(userListArray)
                 console.log('compute Similarity Done');
                 // console.log(res.result);
