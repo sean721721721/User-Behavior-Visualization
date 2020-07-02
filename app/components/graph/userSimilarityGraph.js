@@ -633,10 +633,14 @@ export default function userSimilarityGraph(data, svg, user, articles) {
             .attr('x', positionScale[rectX])
             .attr('y', positionScale[rectY])
             .attr('rx', () => {
+              const tem = groupIndex[i].index;
+              const nex = tem + groupIndex[i].num;
+              return Math.min(15, (positionScale[nex] - positionScale[tem]) / 10);
+            })
+            .attr('ry', () => {
               const tem = groupIndex[j].index;
               let nex = positionScale.length - 1;
               if (groupIndex[j + 1]) nex = groupIndex[j + 1].index;
-              console.log(positionScale[nex], positionScale[tem]);
               return Math.min(15, (positionScale[nex] - positionScale[tem]) / 10);
             })
             .attr('stroke', 'white')
