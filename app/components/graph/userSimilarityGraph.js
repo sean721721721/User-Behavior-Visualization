@@ -215,13 +215,16 @@ export default function userSimilarityGraph(data, svg, user, articles) {
     // enlarge the difference between users
     for (let i = 0; i < users.length; i += 1) {
       matrix[i] = matrix[i].map(e => similarityScale(e));
+      // matrix[i] = matrix[i].map(e => e * 100);
     }
     const [permuted_mat, permuted_origMat] = matrixReordering(
       matrix, origMatrix, newUserAxisValues, users,
     );
+    console.log('permuted_mat, permuted_origMat: ', permuted_mat, permuted_origMat);
     const [secondOrdering_mat, secondOrdering_origMat] = matrixReorderingByCommunity(
       permuted_mat, permuted_origMat, community, newUserAxisValues, users,
     );
+    console.log('secondOrdering_mat, secondOrdering_origMat: ', secondOrdering_mat, secondOrdering_origMat);
     // const secondOrdering_mat = permuted_mat;
     // Author Similarity
     // const authorSimilarity = computeUserSimilarity(datas, users);
@@ -289,7 +292,7 @@ export default function userSimilarityGraph(data, svg, user, articles) {
       const yUser = newUserAxisValues[i];
       Tooltip
         .style('opacity', 1)
-        .html(`Similarity between ${xUser} and ${yUser} is ${Math.round(d) / 100}`)
+        .html(`Similarity between ${xUser} and ${yUser} is ${Math.round(d * 100) / 100}`)
         .style('left', `${d3.event.pageX + 25}px`)
         .style('top', `${d3.event.pageY}px`);
       d3.select(this)
@@ -480,7 +483,7 @@ export default function userSimilarityGraph(data, svg, user, articles) {
                     }
                     return leftMyColor(d);
                   })
-                  .on('mouseover', () => mouseover(d, index, i))
+                  .on('mouseover', () => mouseover(secondOrdering_origMat[i][index], index, i))
                   .on('mouseout', mouseout)
                   .on('click', () => rectClick(d, index, i));
               }
@@ -523,7 +526,7 @@ export default function userSimilarityGraph(data, svg, user, articles) {
                 if (i === index) return 'visible';
                 return 'hidden';
               })
-              .on('mouseover', () => mouseover(d, index, i))
+              .on('mouseover', () => mouseover(secondOrdering_origMat[i][index], index, i))
               .on('mouseout', mouseout)
               .on('click', () => rectClick(d, index, i));
           });
@@ -613,7 +616,7 @@ export default function userSimilarityGraph(data, svg, user, articles) {
                   }
                   return leftMyColor(d);
                 })
-                .on('mouseover', () => mouseover(d, index, i))
+                .on('mouseover', () => mouseover(secondOrdering_origMat[i][index], index, i))
                 .on('mouseout', mouseout)
                 .on('click', () => rectClick(d, index, i));
             }
@@ -2023,7 +2026,11 @@ export default function userSimilarityGraph(data, svg, user, articles) {
     permutedMat = reorder.transpose(permutedMat);
     permutedMat = reorder.permute(permutedMat, perm);
     permutedMat = reorder.transpose(permutedMat);
-    return [permutedMat, origMat];
+    let permutedOrigMat = reorder.permute(origMat, perm);
+    permutedOrigMat = reorder.transpose(permutedOrigMat);
+    permutedOrigMat = reorder.permute(permutedOrigMat, perm);
+    permutedOrigMat = reorder.transpose(permutedOrigMat);
+    return [permutedMat, permutedOrigMat];
     // return [mat, origMat];
   }
 
@@ -2160,6 +2167,7 @@ export default function userSimilarityGraph(data, svg, user, articles) {
       const filteredSimilarity = similaritys.filter(e1 => e1.source === e || e1.target === e);
       if (filteredSimilarity.filter(e1 => e1.source !== e1.target).every(isBelowThreshold)) {
         // console.log(e);
+        // console.log(filteredSimilarity);
         similaritys = similaritys.filter(e1 => !(e1.source === e || e1.target === e));
         datas = datas.filter(e1 => e1.id !== e);
         users = users.filter(e1 => e1 !== e);

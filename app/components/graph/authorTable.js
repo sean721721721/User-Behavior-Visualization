@@ -266,7 +266,7 @@ export default function AuthorTable(nodes, div, $this, callback) {
     selectedNode.children.forEach((e) => {
       const authorNode = node.find(e1 => e1.id === e.id);
       // console.log(authorNode);
-      e.pageRank = authorNode ? authorNode.pageRank + minPageRank + 1 : minPageRank + 1;
+      e.pageRank = authorNode ? authorNode.pageRank + Math.abs(minPageRank) + 1 : Math.abs(minPageRank) + 1;
     });
     // console.log(node);
     console.log(selectedNode.children);
