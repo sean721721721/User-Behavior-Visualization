@@ -1,4 +1,6 @@
 /* eslint-disable max-len */
+const jb = require('./text.js');
+
 module.exports = {
   buildUserList(userLists, articles, userId) {
   // console.log(articles, userId);
@@ -11,16 +13,18 @@ module.exports = {
     const articleList = [];
     let totalReplyCount = 0;
     articles.forEach((article) => {
+      const cuttedTitle = jb.simpleCut(article.article_title);
+      const a = { ...article._doc, cuttedTitle };
       article.messages.forEach((mes) => {
         const existedUser = userLists.find(e => e.id === mes.push_userid);
         if (existedUser) {
           const existedArticle = existedUser.repliedArticle.find(e => e.article_id === article.article_id);
           existedUser.totalReplyCount += 1;
           if (!existedArticle) {
-            existedUser.repliedArticle.push(article);
+            existedUser.repliedArticle.push(a);
           }
         } else {
-          userLists.push({ id: mes.push_userid, repliedArticle: [article], totalReplyCount: 1 });
+          userLists.push({ id: mes.push_userid, repliedArticle: [a], totalReplyCount: 1 });
         }
       });
     });

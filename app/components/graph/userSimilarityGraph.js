@@ -210,6 +210,7 @@ export default function userSimilarityGraph(data, svg, user, articles) {
     community.forEach((e) => {
       datas.find(e1 => e1.id === e.id).community = e.community;
     });
+    computeTitleWordScore();
     const [matrix, origMatrix] = relationToMatrix(similaritys, users);
     const similarityScale = d3.scalePow().exponent(0.5).range([0, 100]);
     // enlarge the difference between users

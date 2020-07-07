@@ -7,7 +7,8 @@ let dl = require('../models/datalist.js');
 let winston = require('winston');
 let db = require('../db');
 let ns= require('../models/nodeSet.js')
-let sg= require('../models/dataPreprocessForSimilarityGraph.js')
+let sg= require('../models/dataPreprocessForSimilarityGraph.js');
+let jb = require('../models/text.js');
 // import bar from '../models/nodeSet.js'
 // console.log(ns.setNodes());
 // Use native promises
@@ -399,13 +400,14 @@ let callback = function callback(req, res) {
                 // })
               })
               if (activity) {
-                res.result.forEach(function(result){
-                  result.messages = result.messages.filter((mes, index) => {
+                res.result.map(function(e, index){
+                  // e.cuttedTitle = jb.simpleCut(e.article_title);
+                  e.messages = e.messages.filter((mes, index) => {
                     // if (index === result.messages.length - 1) return true;
                     return user1.includes(mes.push_userid);
                   })
                 });
-                console.log('messages filter Done');
+                // console.log(newRes);
                 let userListArray = [];
                 let time1 = new Date();
                 // for (let i = 0; i < user1.length; i += 1) {

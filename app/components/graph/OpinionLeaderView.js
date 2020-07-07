@@ -13345,7 +13345,7 @@ class OpinionLeaderView extends React.Component {
           <svg id="articleCell" width="100%" height="94%" />
         </div> */}
         <div className="heatMap" style={{ borderRight: '2px solid gray', overflow: 'scroll', maxHeight: '800px', minHeight: '400px' }}>
-          <div className="option" style={{width: '100%', height: '100px', display: 'flex' }}/>
+          <div className="option" style={{width: '100%', height: '60px', display: 'flex' }}/>
           <svg id="timeLine" width="100%" height="100%" />
         </div>
         <div className="contextDiv">
