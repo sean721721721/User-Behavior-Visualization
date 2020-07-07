@@ -6,47 +6,38 @@ module.exports = {
   // console.log(articles, userId);
     userId.forEach((e) => {
       userLists.push({
-        id: e, totalReplyCount: 0, repliedArticle: [], reply: [],
+        id: e, totalReplyCount: 0, repliedArticle: [], reply: [], titleWordScore: [],
       });
     });
-    const authorList = [];
-    const articleList = [];
-    let totalReplyCount = 0;
+
     articles.forEach((article) => {
       const cuttedTitle = jb.simpleCut(article.article_title);
       const a = { ...article._doc, cuttedTitle };
       article.messages.forEach((mes) => {
         const existedUser = userLists.find(e => e.id === mes.push_userid);
         if (existedUser) {
+          const mesLen = article.messages.filter(e => e.push_userid === existedUser.id).length;
+          const pushTag = mes.push_tag;
+          let score = 1 / mesLen;
+          // calculate score push tag
+          // if (pushTag === '推') score = 1 / mesLen;
+          // else if (pushTag === '噓') score = -1 / mesLen;
+          // else score = 0;
+          
+          cuttedTitle.forEach((e) => {
+            const existedWord = existedUser.titleWordScore.find(w => w.word === e);
+            if (existedWord) existedWord.score += score;
+            else existedUser.titleWordScore.push({ word: e, score });
+          });
           const existedArticle = existedUser.repliedArticle.find(e => e.article_id === article.article_id);
           existedUser.totalReplyCount += 1;
-          if (!existedArticle) {
-            existedUser.repliedArticle.push(a);
-          }
-        } else {
-          userLists.push({ id: mes.push_userid, repliedArticle: [a], totalReplyCount: 1 });
-        }
+          if (!existedArticle) existedUser.repliedArticle.push(a);
+        } else userLists.push({ id: mes.push_userid, repliedArticle: [a], totalReplyCount: 1 });
       });
     });
-    // userLists.forEach((usr) => {
-    //   usr.repliedArticle.forEach((article) => {
-    //     const existedAuthor = usr.reply.find(e => e.author === article.author);
-    //     if (existedAuthor) {
-    //       existedAuthor.count += 1;
-    //       existedAuthor.articles.push({
-    //         article_title: article.article_title,
-    //       });
-    //     } else {
-    //       usr.reply.push({
-    //         author: article.author,
-    //         count: 1,
-    //         articles: [{
-    //           article_title: article.article_title,
-    //         }],
-    //       });
-    //     }
-    //   });
-    // });
+    userLists.forEach((usr) => {
+      usr.titleWordScore.sort((a, b) => (a.score > b.score ? -1 : 1));
+    });
   },
   computeUserSimilarityByArticles(userAuthorRelationShipArr) {
     const userListArray = [];
