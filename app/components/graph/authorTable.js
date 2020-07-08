@@ -26,7 +26,7 @@ export default function AuthorTable(nodes, div, $this, callback) {
   d3.select('#authorList').style('max-height', `${h}px`);
   const authorList = JSON.parse(JSON.stringify(nodes));
   const deltaLengthList = [];
-  const threshold = 100;
+  const threshold = 200;
   // computeDeltaLength(authorList, deltaLengthList);
   const noCuttedAuthorIdList = JSON.parse(JSON.stringify(nodes));
   authorIdPreprocessing(authorList.children);
@@ -114,110 +114,6 @@ export default function AuthorTable(nodes, div, $this, callback) {
     console.log(topicWithSelectedAuthor, pushAuthor);
     callback(topicWithSelectedAuthor, pushAuthor.id);
     authorIndex += 1;
-  }
-
-  function computeDeltaLength(termNode, list) {
-    let n = [];
-    let l = [];
-    termNode.children.forEach((e) => {
-      const commentNumOfArticlesArr = e.responder.map(a => a.message_count[0].count);
-      if (Math.max(...commentNumOfArticlesArr) >= threshold) {
-        e.responder.forEach((e1) => {
-          n.push({
-            id: e.id,
-            post: [{
-              article: e1.articleId,
-            }],
-            reply: [],
-          });
-          let count = 1;
-          if (e1.message_count[0].count >= threshold) {
-            e1.message.every((e2) => {
-              const existedNode = n.find(a => a.id === e2.push_userid);
-              if (!existedNode) {
-                n.push({
-                  id: e2.push_userid,
-                  reply: [{
-                    author: e.id,
-                    article: e1.articleId,
-                  }],
-                });
-              } else {
-                console.log(existedNode);
-                existedNode.reply.push({
-                  author: e.id,
-                  article: e1.articleId,
-                });
-              }
-              if (!l.find(a => a.source === e2.push_userid && a.target === e.id)) {
-                l.push({
-                  source: e2.push_userid,
-                  target: e.id,
-                  value: 1,
-                });
-              }
-              count += 1;
-              return count < 100;
-            });
-          }
-        });
-      }
-    });
-    [n, l] = mergeCellDataNodes(n, l);
-    console.log(n, l);
-    const graph = new jsnx.Graph();
-    buildGraph(graph, n, l, null);
-    console.log(new Date());
-    const length = jsnx.allPairsShortestPathLength(graph);
-    console.log(new Date());
-    const average_shortest_path_length = computeAverageShortestPathLength(length);
-    console.log(new Date());
-    console.log(`average_shortest_path_length: ${average_shortest_path_length}`);
-    termNode.children.forEach((e) => {
-      const commentNumOfArticlesArr = e.responder.map(a => a.message_count[0].count);
-      let deltaLen = 0;
-      if (Math.max(...commentNumOfArticlesArr) >= threshold) {
-        const g = new jsnx.Graph();
-        buildGraph(g, n, l, e);
-        const len = jsnx.allPairsShortestPathLength(g);
-        const avgLen = computeAverageShortestPathLength(len) || 0;
-        deltaLen = average_shortest_path_length - avgLen;
-        console.log(`removed_avgLen: ${avgLen} delta: ${deltaLen}`);
-      }
-      list.push({
-        id: e.id,
-        delta: Math.abs(deltaLen) || 0,
-      });
-    });
-  }
-
-  function buildGraph(G, userNodes, replyLinks, willBeRemovedNodes) {
-    let newLinks = JSON.parse(JSON.stringify(replyLinks));
-    let newNodes = JSON.parse(JSON.stringify(userNodes));
-    if (willBeRemovedNodes) {
-      console.log(`Removed Nodes: ${willBeRemovedNodes.id}`);
-      newLinks = newLinks.filter(l => l.target !== willBeRemovedNodes.id);
-      newNodes = newNodes.filter(n => n.id === willBeRemovedNodes.id);
-    }
-    console.log(`#Links after removed nodes: ${newLinks.length}`);
-    const node_data = newNodes.map(d => d.id);
-    const edge_data = newLinks.map(d => [d.source, d.target, d.value]);
-    G.addNodesFrom(node_data);
-    G.addEdgesFrom(edge_data);
-  }
-
-  function computeAverageShortestPathLength(path) {
-    let totalLength = 0;
-    let averageLength = 0;
-    const numOfNodes = Object.keys(path._stringValues).length;
-    Object.values(path._stringValues).forEach((p) => {
-      Object.values(p._stringValues).forEach((l) => {
-        totalLength += l;
-      });
-    });
-    console.log(`#total length: ${totalLength}`);
-    averageLength = totalLength / (numOfNodes * (numOfNodes - 1));
-    return averageLength;
   }
 
   function financial(x) {
