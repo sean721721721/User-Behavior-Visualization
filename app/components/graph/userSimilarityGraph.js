@@ -1267,7 +1267,7 @@ export default function userSimilarityGraph(data, svg, user, articles) {
         .domain(depthIndex);
 
       const brush = d3.brush()
-        .extent([[0, 0], [activityTranslateX, contextYScale.range()[1]]])
+        .extent([[0, 0], [activityTranslateX - 30, contextYScale.range()[1]]])
         .on('brush end', brushed);
 
       // const zoom = d3.zoom()
@@ -1295,7 +1295,7 @@ export default function userSimilarityGraph(data, svg, user, articles) {
         .style('max-width', `${contextDivW}px`);
       let context = d3.select('#context');
       context.attr('height', contextYScale.range()[1] + 1000);
-      context.attr('width', contextXScale.range()[1] + 100);
+      context.attr('width', contextXScale.range()[1] + 300);
       context.select('.context').remove();
       context = context.append('g')
         .attr('class', 'context')
@@ -1348,17 +1348,17 @@ export default function userSimilarityGraph(data, svg, user, articles) {
 
       context.append('g')
         .attr('class', 'brush')
-        .attr('transform', `translate(${-activityTranslateX}, 0)`)
+        .attr('transform', `translate(${-activityTranslateX + 30}, 0)`)
         .call(brush)
         .call(brush.move, [[0, 0],
           [
             // Math.min(contextXScale.range()[1], 50),
-            activityTranslateX,
+            activityTranslateX - 30,
             // Math.min(yScale.range()[1], gridSize * 3),
             Math.min(contextYScale.range()[1], 120),
           ]]);
       context.select('.overlay')
-        .attr('width', activityTranslateX)
+        .attr('width', activityTranslateX - 30)
         .attr('fill', 'lightgray');
       context.select('.selection')
         .attr('fill-opacity', 1)
@@ -1392,19 +1392,16 @@ export default function userSimilarityGraph(data, svg, user, articles) {
 
       function brushed() {
         if (d3.event.sourceEvent && d3.event.sourceEvent.type === 'zoom') return; // ignore brush-by-zoom
+
         const s = d3.event.selection || contextYScale.range();
-        focus.attr('transform', `translate(${activityTranslateX + 75}, ${s[0][1] + 90})`);
-        // const newDepthDomainX = contextXScale.domain().slice(s[0][0] / contextXScale.bandwidth(), s[1][0] / contextXScale.bandwidth());
+        if (s[1][1]) focus.attr('transform', `translate(${activityTranslateX + 75}, ${s[0][1] + 90})`);
+        else focus.attr('transform', `translate(${activityTranslateX + 75}, ${90})`);
+
         const newDepthDomainX = contextXScale.domain();
-        // const newDomainX = newUserAxisValues.filter(e => datas.find(e1 => e1.id === e).community === communityIndex);
         const newUserDomainY = newUserAxisValues.filter(e => datas.find(e1 => e1.id === e).community === communityIndex);
-        // focusScaleX.domain(newDomainX);
         focusUserScaleY.domain(newUserDomainY);
-        // const newDomainY = highlightArticle_id.slice(s[0][0] / contextXScale.bandwidth(), s[1][0] / contextXScale.bandwidth());
         const newArticleDomainY = contextYScale.domain().slice(s[0][1] / contextYScale.bandwidth(), s[1][1] / contextYScale.bandwidth());
-        // console.log(newDomainY);
         focusArticleScaleY.domain(newArticleDomainY);
-        // yScale.domain(newDomainY);
         focusUserScaleY.range([0, focusArticleScaleY.bandwidth()]);
         focusLineGroup.selectAll('*').remove();
         focusLineGroup.append('g');
@@ -1415,9 +1412,7 @@ export default function userSimilarityGraph(data, svg, user, articles) {
         focus.append('rect')
           .attr('class', 'unfocus')
           .attr('width', contextXScale.range()[1])
-          .attr('height', () => {
-            return s[0][1];
-          })
+          .attr('height', s[1][1] ? s[0][1] : 0)
           .attr('x', 0)
           .attr('y', -s[0][1] - 30)
           .attr('fill', 'lightgray');
@@ -1430,7 +1425,7 @@ export default function userSimilarityGraph(data, svg, user, articles) {
             return contextYScale.bandwidth() * contextYScale.domain().slice(s[1][1] / contextYScale.bandwidth()).length;
           })
           .attr('x', 0)
-          .attr('y', 400)
+          .attr('y', s[1][1] ? 400 : -30)
           .attr('fill', 'lightgray');
 
         // article box
@@ -1451,8 +1446,8 @@ export default function userSimilarityGraph(data, svg, user, articles) {
             .attr('transform', `translate(0,${lineGroupY})`);
           articleBoxGroup.append('text')
             .text(art.article_title)
-            .attr('x', -60)
-            .attr('y', -10);
+            .attr('y', -10)
+            .attr('font-size', '15px');
           for (let k = 0; k < articleBoxNum; k += 1) {
             const boxGroup = articleBoxGroup.append('g')
               .attr('transform', `translate(${k * (boxWidth + boxMargin)},0)`);
@@ -1500,12 +1495,11 @@ export default function userSimilarityGraph(data, svg, user, articles) {
             }
           }
         }
-
+        console.log(newArticleDomainY);
         // hide context articleTree
         let IndexAfterFocus = 0;
         context.select('.articleTree').selectAll('g')
           .attr('visibility', (d, index) => {
-            console.log(IndexAfterFocus, index, d.article_id);
             if (newArticleDomainY.some(e => e === d.article_id)) {
               IndexAfterFocus = index;
               return 'hidden';
@@ -1514,6 +1508,7 @@ export default function userSimilarityGraph(data, svg, user, articles) {
           })
           .attr('transform', (d) => {
             const translateY = contextYScale(d.article_id) + contextYScale.bandwidth() / 2;
+            if (!newArticleDomainY.length) return `translate(75, ${translateY})`;
             if (newArticleDomainY.some(e => e === d.article_id)) return `translate(75,${translateY})`;
             const articleIndex = contextYScale.domain().findIndex(e => e === d.article_id);
             const focusArticleIndex = contextYScale.domain().findIndex(e => e === focusArticleScaleY.domain()[0]);
