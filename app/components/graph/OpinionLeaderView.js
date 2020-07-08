@@ -13352,9 +13352,9 @@ class OpinionLeaderView extends React.Component {
           <div className="option" style={{width: '100%', height: '50px', display: 'flex' }}/>
           <svg id="context" width="100%" height="100%" />
         </div>
-        <div className="focusDiv">
+        {/* <div className="focusDiv">
           <svg id="focus" width="100%" height="100%" />
-        </div>
+        </div> */}
         {/* <div className="selectedUserTable d-flex flex-column" style={{ margin: '20px 0px', maxHeight: '700px', minHeight: '400px' }} /> */}
         {/* <div
           className="commentTimeline"
