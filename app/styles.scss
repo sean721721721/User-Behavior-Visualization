@@ -379,7 +379,7 @@ path:hover {
     grid-column: sscol5 / sscolend;
     // grid-row: ssrow1 / ssrowend;
     grid-template-rows: [acrow1] 3fr [acrow2] 7fr [acrowend];
-    grid-template-columns: [accol1] 3fr [accol2] 3fr [accol3] 1fr [accol4] 3fr [accolend];
+    grid-template-columns: [accol1] 3fr [accol2] 2.5fr [accol3] 1fr [accol4] 3.5fr [accolend];
 }
 
 .heatMap {
