@@ -31,8 +31,8 @@ export default function userSimilarityGraph(data, svg, user, articles) {
   // console.log(user);
   // console.log(articles);
   svg.selectAll('*').remove();
-  const authorArr = computeAuthorArray(articles);
-  console.log('author array', authorArr);
+  // const authorArr = computeAuthorArray(articles);
+  // console.log('author array', authorArr);
   // set the dimensions and margins of the graph
   const margin = {
     top: 30, right: 30, bottom: 60, left: 30,
@@ -41,7 +41,7 @@ export default function userSimilarityGraph(data, svg, user, articles) {
   const height = 450 - margin.top - margin.bottom;
 
   // Labels of row and columns
-  const myGroups = getAllAuthorId(data); // author
+  // const myGroups = getAllAuthorId(data); // author
   const clickedUser = [];
   drawSlider();
   drawFilterDiv();
@@ -1495,7 +1495,6 @@ export default function userSimilarityGraph(data, svg, user, articles) {
             }
           }
         }
-        console.log(newArticleDomainY);
         // hide context articleTree
         let IndexAfterFocus = 0;
         context.select('.articleTree').selectAll('g')
@@ -1508,12 +1507,13 @@ export default function userSimilarityGraph(data, svg, user, articles) {
           })
           .attr('transform', (d) => {
             const translateY = contextYScale(d.article_id) + contextYScale.bandwidth() / 2;
+            const offset = focusArticleScaleY.domain().length >= 1 ? (focusArticleScaleY.domain().length - 1) * 30 : 0;
             if (!newArticleDomainY.length) return `translate(75, ${translateY})`;
             if (newArticleDomainY.some(e => e === d.article_id)) return `translate(75,${translateY})`;
             const articleIndex = contextYScale.domain().findIndex(e => e === d.article_id);
             const focusArticleIndex = contextYScale.domain().findIndex(e => e === focusArticleScaleY.domain()[0]);
             if (articleIndex < focusArticleIndex) return `translate(75, ${translateY})`;
-            return `translate(75, ${translateY + focusH - 75})`;
+            return `translate(75, ${translateY + focusH - offset})`;
           });
         // context.select('.articleTree').selectAll('g')
         //   .attr('transform', (d, index, nodes) => {
@@ -1534,10 +1534,29 @@ export default function userSimilarityGraph(data, svg, user, articles) {
         for (let i = 0; i < datas.length; i += 1) {
           focus.select(`.${datas[i].id}`)
             .selectAll('g')
-            .attr('visibility', d => (focusUserScaleY(datas[i].id) !== undefined && focusArticleScaleY(d.article_id) !== undefined ? 'visible' : 'hidden'))
+            .attr('visibility', (d) => {
+              if (focusUserScaleY(datas[i].id) !== undefined) {
+                if (focusArticleScaleY(d.article_id) !== undefined) return 'visible';
+
+                let art = false;
+                focusArticleScaleY.domain().every((e, index) => {
+                  const parent = articleTree.find(e1 => e1.article_id === e);
+                  if (parent.children) {
+                    parent.children.every((e1) => {
+                      if (e1.article_id === d.article_id) art = true;
+                      return !art;
+                    });
+                  }
+                  return !art;
+                });
+                return art ? 'visible' : 'hidden';
+              }
+              return 'hidden';
+              // (focusUserScaleY(datas[i].id) !== undefined && focusArticleScaleY(d.article_id) !== undefined ? 'visible' : 'hidden')
+            })
             .each((d, index, nodes) => {
               const articleID = d3.select(nodes[index]).datum().article_id;
-              if (focusUserScaleY(datas[i].id) !== undefined && focusArticleScaleY(articleID) !== undefined) {
+              if (d3.select(nodes[index]).attr('visibility') === 'visible') {
                 d3.select(nodes[index])
                   .attr('transform', `translate(0, ${focusArticleScaleY(d.article_id)})`);
                 const postYear = new Date(d.date).getFullYear();
@@ -1826,7 +1845,7 @@ export default function userSimilarityGraph(data, svg, user, articles) {
             let depth = 1;
             const recursion = (_d, _index, _nodes) => {
               if (!_d) return;
-              // console.log(`aritcle_id: ${_d.article_id}, article_title: ${_d.article_title}`);
+              console.log(`aritcle_id: ${_d.article_id}, article_title: ${_d.article_title}`);
 
               d3.select(_nodes[_index])
                 .append('path')
@@ -1842,6 +1861,7 @@ export default function userSimilarityGraph(data, svg, user, articles) {
               d3.select(_nodes[_index])
                 .selectAll('rect')
                 .data(() => {
+                  console.log(_d, _index);
                   const art = articlesWithTypeComment.find(e => e.article_id === _d.article_id);
                   const { push, boo, neutral } = art.commentType;
                   const arr = [push, boo, neutral];

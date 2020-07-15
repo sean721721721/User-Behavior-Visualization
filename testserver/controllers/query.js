@@ -413,6 +413,7 @@ let callback = function callback(req, res) {
                 // for (let i = 0; i < user1.length; i += 1) {
                 //   sg.buildUserList(userListArray, res.result, user1[i]);
                 // }
+                console.log('building UserList ...');
                 sg.buildUserList(userListArray, res.result, user1);
                 console.log('buildUserList Done');
                 let time2 = new Date();
