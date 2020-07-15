@@ -1418,11 +1418,12 @@ export default function userSimilarityGraph(data, svg, user, articles) {
           .attr('fill', 'lightgray');
 
         // after focus area
+        const focusMargin = 30;
         focus.append('rect')
           .attr('class', 'unfocus')
           .attr('width', contextXScale.range()[1])
           .attr('height', () => {
-            return contextYScale.bandwidth() * contextYScale.domain().slice(s[1][1] / contextYScale.bandwidth()).length;
+            return focusMargin + contextYScale.bandwidth() * contextYScale.domain().slice(s[1][1] / contextYScale.bandwidth()).length;
           })
           .attr('x', 0)
           .attr('y', s[1][1] ? 400 : -30)
@@ -1495,6 +1496,7 @@ export default function userSimilarityGraph(data, svg, user, articles) {
             }
           }
         }
+
         // hide context articleTree
         let IndexAfterFocus = 0;
         context.select('.articleTree').selectAll('g')
@@ -1513,7 +1515,7 @@ export default function userSimilarityGraph(data, svg, user, articles) {
             const articleIndex = contextYScale.domain().findIndex(e => e === d.article_id);
             const focusArticleIndex = contextYScale.domain().findIndex(e => e === focusArticleScaleY.domain()[0]);
             if (articleIndex < focusArticleIndex) return `translate(75, ${translateY})`;
-            return `translate(75, ${translateY + focusH - offset})`;
+            return `translate(75, ${translateY + focusH + focusMargin - offset})`;
           });
         // context.select('.articleTree').selectAll('g')
         //   .attr('transform', (d, index, nodes) => {
@@ -1539,11 +1541,15 @@ export default function userSimilarityGraph(data, svg, user, articles) {
                 if (focusArticleScaleY(d.article_id) !== undefined) return 'visible';
 
                 let art = false;
-                focusArticleScaleY.domain().every((e, index) => {
+                focusArticleScaleY.domain().every((e) => {
                   const parent = articleTree.find(e1 => e1.article_id === e);
                   if (parent.children) {
-                    parent.children.every((e1) => {
-                      if (e1.article_id === d.article_id) art = true;
+                    parent.children.every((e1, index) => {
+                      if (e1.article_id === d.article_id) {
+                        d.parent = parent;
+                        d.depth = index + 1;
+                        art = true;
+                      }
                       return !art;
                     });
                   }
@@ -1558,7 +1564,10 @@ export default function userSimilarityGraph(data, svg, user, articles) {
               const articleID = d3.select(nodes[index]).datum().article_id;
               if (d3.select(nodes[index]).attr('visibility') === 'visible') {
                 d3.select(nodes[index])
-                  .attr('transform', `translate(0, ${focusArticleScaleY(d.article_id)})`);
+                  .attr('transform', () => {
+                    if (d.parent) return `translate(${d.depth * (boxWidth + boxMargin)}, ${focusArticleScaleY(d.parent.article_id)})`;
+                    return `translate(0, ${focusArticleScaleY(d.article_id)})`;
+                  });
                 const postYear = new Date(d.date).getFullYear();
                 d3.select(nodes[index]).selectAll('text').remove();
                 d3.select(nodes[index]).selectAll('rect')

@@ -11,9 +11,7 @@ module.exports = {
     });
 
     articles.forEach((article) => {
-      console.log(article.article_title);
       const cuttedTitle = article.article_title ? jb.simpleCut(article.article_title) : [];
-      console.log(cuttedTitle, article.article_title);
       const a = { ...article._doc, cuttedTitle };
       article.messages.forEach((mes) => {
         const existedUser = userLists.find(e => e.id === mes.push_userid);
@@ -36,9 +34,7 @@ module.exports = {
           if (!existedArticle) existedUser.repliedArticle.push(a);
         } else userLists.push({ id: mes.push_userid, repliedArticle: [a], totalReplyCount: 1 });
       });
-      console.log(article.article_id);
     });
-    console.log(userLists);
     userLists.forEach((usr) => {
       usr.titleWordScore.sort((a, b) => (a.score > b.score ? -1 : 1));
     });
