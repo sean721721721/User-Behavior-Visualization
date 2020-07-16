@@ -29,7 +29,7 @@ function querytoParams(req, prop) {
 
 // querytoparams and set hasquery prop
 function urlhandle(req, res, next) {
-  console.log('urlhandle ', req.query);
+  // console.log('urlhandle ', req.query);
   let hasquery = false;
   // var postid = req.params.postid;
   const props = Object.keys(req.query);

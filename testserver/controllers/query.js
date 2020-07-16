@@ -269,24 +269,10 @@ let queryobj = function queryobj(req, res, time1, time2, authorid, userid, tkeyw
       }
     }
   }
-  // console.log('queryobj= ', queryobj);
   return queryobj;
 };
 
-/**
- db.getCollection('gossipings').find({ 
-  article_title: { '$regex': '丁守中' },
-  '$and': [
-    {'$or': [ {date:{ '$gt': Date('2018-06-05 02:54:44.000Z')}}, {_id:{'$gt': ObjectId("5b3f1f6f6e37944c194de342")}} ],},
-    {'$or': [ {content:{'$regex': '柯文哲' }}, {'messages.push_content': {'$regex':'柯文哲'}} ]}
-    ]}).sort({
-      date: 1,
-      _id: 1,
-    })
- */
-
 let findquery = async function findquery(page, queryobj, ptt, limit, sort) {
-  //console.log(options)
   let pagepost;
   if (ptt) {
     if (!page) {
@@ -303,8 +289,6 @@ let findquery = async function findquery(page, queryobj, ptt, limit, sort) {
     db.db1.model(page, schema.postSchema);
     pagepost = db.db1.model(page);
   }
-  //return Query(queryobj, options, pagepost, page);
-  // console.log(page, pagepost);
   let query;
   console.log(queryobj);
   if (limit < 0) {
@@ -389,25 +373,16 @@ let callback = function callback(req, res) {
           resolve(
             findquery(page1, queryobj1, ptt, limit, sort).then(res => {
               console.log('q1 lenght: ' + res.result.length);
-              // const queryArticleFilter = activity ? 0 : 500;
-              // console.log('res.result', res.result);
-              // res.result = res.result.filter(post => post.message_count.all > queryArticleFilter);
               // Remove article content
               res.result.forEach(function(result){
                 result.content = ' ';
-                // result.messages.forEach(function(message){
-                // message.push_content = '';
-                // })
               })
               if (activity) {
                 res.result.map(function(e, index){
-                  // e.cuttedTitle = jb.simpleCut(e.article_title);
                   e.messages = e.messages.filter((mes, index) => {
-                    // if (index === result.messages.length - 1) return true;
                     return user1.includes(mes.push_userid);
                   })
                 });
-                // console.log(newRes);
                 let userListArray = [];
                 let time1 = new Date();
                 // for (let i = 0; i < user1.length; i += 1) {
@@ -420,7 +395,6 @@ let callback = function callback(req, res) {
                 console.log('total time: %d second', (time2 - time1) / 1000);
                 // const similarity = sg.computeUserSimilarityByArticles(userListArray)
                 console.log('compute Similarity Done');
-                // console.log(res.result);
                 return {
                   articles: res.result,
                   userListArray,
@@ -433,16 +407,9 @@ let callback = function callback(req, res) {
               let titleWordList = datalist[2];
               let titleCuttedWords = datalist[3];
               console.log('datalist.js done!');
-              
-              // console.log(titleWordList[0]);
               let [set,initLinks] = ns.setNodes(titleWordList[0], queryobj1.date, titleCuttedWords, res.result);
-              // res.result.forEach(a=>{
-              //   console.log(a.article_title);
-              // })
-              // console.log(titleCuttedWords.length, res.result.length);
               console.log('setNodes is done!');
               return { list: [queryobj1.date, [set, initLinks], titleCuttedWords, res.result], previous: [res.previous], next: [res.next] };
-              // return { list: [res.result, wordlist, titleWordList, queryobj1.date,titleCuttedWords, set], previous: [res.previous], next: [res.next] };
             }),
           );
         } else if (!isEmpty(queryobj2)) {
@@ -482,11 +449,6 @@ let callback = function callback(req, res) {
           logger.log('error', err);
         });
     }
-    /*mapreduce
-        mapreduce(queryobj1);
-        */
-    //res.send(files);
-    //console.log(files.length);
   }
 };
 
@@ -495,34 +457,15 @@ let mapreduce = function mapreduce(queryobj) {
   self = this;
 
   o.mapFunction = function() {
-    //var key = this.reactions;
     let key = this.likes;
     let value = {
       likes: this.likes,
-      /*like: this.like,
-            love: this.love,
-            haha: this.haha,
-            wow: this.wow,
-            angry: this.angry,
-            sad: this.sad*/
     };
     emit(key, value);
   };
-  /*
-    var emit = function(key, value) {
-        console.log("emit");
-        console.log("key: " + key + "  value: " + value);
-    }
-    */
   o.reduceFunction = function(key, values) {
     let reducedObject = {
       likes: 0,
-      /*like: 0,
-            love: 0,
-            haha: 0,
-            wow: 0,
-            angry: 0,
-            sad: 0*/
     };
 
     values.forEach(function(value) {
