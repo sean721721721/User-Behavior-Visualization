@@ -39,7 +39,7 @@ export default function userSimilarityGraph(data, svg, user, articles) {
   };
   const width = 1300 - margin.left - margin.right;
   const height = 450 - margin.top - margin.bottom;
-
+  const userSimilarity = computeUserSimilarityByArticles(data, user);
   // Labels of row and columns
   // const myGroups = getAllAuthorId(data); // author
   const clickedUser = [];
@@ -60,7 +60,7 @@ export default function userSimilarityGraph(data, svg, user, articles) {
       .tickFormat(d3.format('.1'))
       .ticks(5)
       .default(similarThresh)
-      .on('onchange', (val) => { adjacencyMatrixNoAuthor(val, articleThresh); });
+      .on('onchange', (val) => { adjacencyMatrixNoAuthor(userSimilarity, val, articleThresh); });
 
     const gSlider = sliderSvg.append('g')
       .attr('class', 'similaritySlider')
@@ -76,8 +76,7 @@ export default function userSimilarityGraph(data, svg, user, articles) {
       .selectAll('.tick')
       .selectAll('text')
       .attr('y', 10);
-
-    adjacencyMatrixNoAuthor(similarThresh, articleThresh);
+    adjacencyMatrixNoAuthor(userSimilarity, similarThresh, articleThresh);
   }
 
   function drawFilterDiv() {
@@ -155,7 +154,71 @@ export default function userSimilarityGraph(data, svg, user, articles) {
       .text('comments');
   }
 
-  function adjacencyMatrixNoAuthor(simThresh, artThresh) {
+  function computeUserSimilarityByArticles(userAuthorRelationShipArr) {
+    const similarityScale = d3.scaleLinear().domain([0, 2]).range([1, 0]);
+    if (userAuthorRelationShipArr[0].titleWordScore) {
+      const userListArray = [];
+      for (let i = 0; i < userAuthorRelationShipArr.length - 1; i += 1) {
+        const temp = userAuthorRelationShipArr[i].titleWordScore;
+        const tempTotal = temp.reduce((acc, obj) => acc + obj.score, 0);
+        for (let j = i + 1; j < userAuthorRelationShipArr.length; j += 1) {
+          const next = userAuthorRelationShipArr[j].titleWordScore;
+          const searchedWord = [];
+          let dis = 0;
+          const nextTotal = next.reduce((acc, obj) => acc + obj.score, 0);
+          temp.forEach((e, index) => {
+            if (!searchedWord.includes(e.word)) {
+              searchedWord.push(e.word);
+              const sameWord = next.find(e1 => e1.word === e.word);
+              const nextWordScore = sameWord ? sameWord.score : 0;
+              dis += Math.sqrt(Math.abs(((e.score / tempTotal) * (e.score / tempTotal)) - ((nextWordScore / nextTotal) * (nextWordScore / nextTotal))));
+            }
+          });
+          next.forEach((e, index) => {
+            if (!searchedWord.includes(e.word)) {
+              searchedWord.push(e.word);
+              const sameWord = temp.find(e1 => e1.word === e.word);
+              const tempWordScore = sameWord ? sameWord.score : 0;
+              dis += Math.sqrt(Math.abs(((e.score / nextTotal) * (e.score / nextTotal)) - ((tempWordScore / tempTotal) * (tempWordScore / tempTotal))));
+            }
+          });
+          // const sim = 1 / (1 + (dis));
+          console.log(`${userAuthorRelationShipArr[i].id} ${userAuthorRelationShipArr[j].id} dis: ${dis} sim: ${similarityScale(dis)}`);
+          userListArray.push({
+            source: userAuthorRelationShipArr[i].id,
+            target: userAuthorRelationShipArr[j].id,
+            value: similarityScale(dis),
+          });
+        }
+      }
+      return userListArray;
+    }
+
+    const userListArray = [];
+    for (let i = 0; i < userAuthorRelationShipArr.length - 1; i += 1) {
+      const temp = userAuthorRelationShipArr[i].repliedArticle;
+      for (let j = i + 1; j < userAuthorRelationShipArr.length; j += 1) {
+        const next = userAuthorRelationShipArr[j].repliedArticle;
+        const tempdiff = temp.filter(
+          o1 => next.filter(o2 => o2.article_id === o1.article_id).length === 0,
+        );
+        const nextdiff = next.filter(
+          o1 => temp.filter(o2 => o2.article_id === o1.article_id).length === 0,
+        );
+        const intersectArticles = temp.length - tempdiff.length;
+        const nextintersectArticles = next.length - nextdiff.length;
+        const sim = intersectArticles / (temp.length + next.length - intersectArticles);
+        userListArray.push({
+          source: userAuthorRelationShipArr[i].id,
+          target: userAuthorRelationShipArr[j].id,
+          value: sim,
+        });
+      }
+    }
+    return userListArray;
+  }
+
+  function adjacencyMatrixNoAuthor(similarity, simThresh, artThresh) {
     d3.select('.position').remove();
     d3.select('.groupLegends').remove();
     // svg.attr('height', h);
@@ -174,7 +237,7 @@ export default function userSimilarityGraph(data, svg, user, articles) {
     }
     const color = d => d3.schemeTableau10[d + 1];
     // Article Similarity
-    const similarity = computeUserSimilarityByArticles(data, user);
+    
     console.log(similarity);
     const [datas, users, similaritys] = filterAlwaysNonSimilarUser(data, user, similarity, simThresh, artThresh);
     console.log('datas:', datas, 'users:', users, 'similaritys:', similaritys);
@@ -183,14 +246,10 @@ export default function userSimilarityGraph(data, svg, user, articles) {
     filteredArticles = filteredArticles.filter(
       e => e.messages.some(mes => datas.some(usr => usr.id === mes.push_userid)),
     );
-    // if (articles.length > 100) {
-    //   filteredArticles = filteredArticles.filter(e => e.message_count.all > 100);
-    //   console.log(filteredArticles);
-    // }
 
     // similarity for articles grouping
-    const articleSimilarity = computeArticleSimilarity(filteredArticles, data);
-    console.log('articleSimilarityCount: ', articleSimilarity.length);
+    // const articleSimilarity = computeArticleSimilarity(filteredArticles, data);
+    // console.log('articleSimilarityCount: ', articleSimilarity.length);
     const articleIds = filteredArticles.map(e => e.article_id);
     // const articlesCommunity = jLouvainClustering(articleIds, articleSimilarity);
     const articlesCommunity = articleGroupByTag(articleIds, filteredArticles);
@@ -226,31 +285,6 @@ export default function userSimilarityGraph(data, svg, user, articles) {
       permuted_mat, permuted_origMat, community, newUserAxisValues, users,
     );
     console.log('secondOrdering_mat, secondOrdering_origMat: ', secondOrdering_mat, secondOrdering_origMat);
-    // const secondOrdering_mat = permuted_mat;
-    // Author Similarity
-    // const authorSimilarity = computeUserSimilarity(datas, users);
-    // console.log('authorSimilarity', authorSimilarity);
-    // const newUserAxisValuesByAuthor = [];
-    // const communityByAuthor = jLouvainClustering(users, authorSimilarity);
-    // const [matrixByAuthor, origMatrixByAuthor] = relationToMatrix(authorSimilarity, users);
-    // // enlarge the difference between users
-    // for (let i = 0; i < users.length; i += 1) {
-    //   matrixByAuthor[i] = matrixByAuthor[i].map(e => similarityScale(e));
-    //   // matrix[i] = matrix[i].map(e => (e >= 0.5 && e < 2 ? 1 : e));
-    //   // matrix[i] = matrix[i].map(e => e * 10);
-    // }
-    // console.log('matrixByAuthor', matrixByAuthor);
-    // const [
-    //   permuted_matByAuthor,
-    //   permuted_origMatByAuthor,
-    // ] = matrixReordering(matrixByAuthor, origMatrixByAuthor, newUserAxisValuesByAuthor, users);
-    // const [
-    //   secondOrdering_matByAuthor,
-    //   secondOrdering_origMatByAuthor,
-    // ] = matrixReorderingByCommunity(
-    //   permuted_matByAuthor, permuted_origMatByAuthor,
-    //   communityByAuthor, newUserAxisValuesByAuthor, users,
-    // );
 
     const gridSize = 20;
     const x = d3.scaleBand().range([0, axisDomain.length * gridSize])
@@ -368,10 +402,10 @@ export default function userSimilarityGraph(data, svg, user, articles) {
         selectedUser = selectedUser.filter(e => e !== newUserAxisValues[d]);
       }
       if (selectedUser.length >= 1) {
-        const filteredArticles = articles.filter(
+        const filtered_articles = articles.filter(
           art => art.messages.some(m => selectedUser.includes(m.push_userid)),
         );
-        userActivityTimeline(filteredArticles, commentTimelineSvg, selectedUser);
+        userActivityTimeline(filtered_articles, commentTimelineSvg, selectedUser);
       }
     };
 
@@ -784,24 +818,11 @@ export default function userSimilarityGraph(data, svg, user, articles) {
       const gra = reorder.mat2graph(mat);
       const perm = reorder.spectral_order(gra);
 
-      // console.log('length', gra.components().length);
-      // for (let j = 0; j < 2; j += 1) {
-      //   let lap = reorder.laplacian(gra, gra.components()[0]);
-      //   console.log('laplacian', lap);
-      //   let fie = reorder.fiedler_vector(lap);
-      //   console.log('fiedler', fie);
-      //   let p = reorder.sort_order(fie);
-      //   console.log('sort_order', p);
-      //   let order = [];
-      //   order = order.concat(reorder.permute(gra.components()[0], p));
-      //   console.log('order', order);
-      // }
       const orig_gra = reorder.mat2graph(origMat);
       const orig_perm = reorder.spectral_order(orig_gra);
-      // console.log('permutation', perm);
+
       let tempUser = [...us];
       for (let j = 0; j < us.length; j += 1) {
-        // console.log(tempUser, perm, j);
         userAxis[j] = tempUser[perm[j]];
       }
       tempUser = [...userAxis];
@@ -883,34 +904,6 @@ export default function userSimilarityGraph(data, svg, user, articles) {
       });
       return scaleArray;
     }
-
-    // function dragstarted(d) {
-    //   if (!d3.event.active) simulation.alphaTarget(0.3).restart();
-    //   d.fx = d.x;
-    //   d.fy = d.y;
-    // }
-
-    // function dragged(d) {
-    //   d.fx = d3.event.x;
-    //   d.fy = d3.event.y;
-    // }
-
-    // function dragended(d) {
-    //   if (!d3.event.active) simulation.alphaTarget(0);
-    //   d.fx = null;
-    //   d.fy = null;
-    // }
-
-    // function ticked() {
-    //   link
-    //     .attr('x1', d => d.source.x)
-    //     .attr('y1', d => d.source.y)
-    //     .attr('x2', d => d.target.x)
-    //     .attr('y2', d => d.target.y);
-
-    //   node
-    //     .attr('transform', d => `translate(${d.x},${d.y})`);
-    // }
 
     function computeArticleSimilarity(articleArray, userArray) {
       const array = [];
