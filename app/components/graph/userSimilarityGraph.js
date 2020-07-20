@@ -26,14 +26,7 @@ export default function userSimilarityGraph(data, svg, user, articles) {
   const w = parseFloat(d3.select('.heatMap').style('width'));
   const h = parseFloat(d3.select('.heatMap').style('height'));
   const focusHeight = 500;
-  // data = data.filter(e => e.repliedArticle.length > 1);
-  // console.log(data);
-  // console.log(user);
-  // console.log(articles);
   svg.selectAll('*').remove();
-  // const authorArr = computeAuthorArray(articles);
-  // console.log('author array', authorArr);
-  // set the dimensions and margins of the graph
   const margin = {
     top: 30, right: 30, bottom: 60, left: 30,
   };
@@ -61,7 +54,7 @@ export default function userSimilarityGraph(data, svg, user, articles) {
       .ticks(5)
       .default(similarThresh)
       .on('onchange', (val) => {
-        similarThresh = val
+        similarThresh = val;
         adjacencyMatrixNoAuthor(userSimilarity, similarThresh, articleThresh);
       });
 
