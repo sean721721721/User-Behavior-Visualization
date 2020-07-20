@@ -9,9 +9,12 @@ module.exports = {
         id: e, totalReplyCount: 0, repliedArticle: [], reply: [], titleWordScore: [],
       });
     });
-
+    const removeWords = ['新聞', '問卦', '爆卦', 'Re'];
     articles.forEach((article) => {
-      const cuttedTitle = article.article_title ? jb.simpleCut(article.article_title) : [];
+      let cuttedTitle = article.article_title ? jb.simpleCut(article.article_title) : [];
+      cuttedTitle = cuttedTitle.filter((e) => {
+        return !removeWords.includes(e.word);
+      });
       const a = { ...article._doc, cuttedTitle };
       article.messages.forEach((mes) => {
         const existedUser = userLists.find(e => e.id === mes.push_userid);
@@ -25,9 +28,10 @@ module.exports = {
           // else score = 0;
           
           cuttedTitle.forEach((e) => {
-            const existedWord = existedUser.titleWordScore.find(w => w.word === e);
+
+            const existedWord = existedUser.titleWordScore.find(w => w.word === e.word);
             if (existedWord) existedWord.score += score;
-            else existedUser.titleWordScore.push({ word: e, score });
+            else existedUser.titleWordScore.push({ word: e.word, score });
           });
           const existedArticle = existedUser.repliedArticle.find(e => e.article_id === article.article_id);
           existedUser.totalReplyCount += 1;

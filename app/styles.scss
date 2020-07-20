@@ -386,7 +386,18 @@ path:hover {
     display: grid;
     grid-column: accol1 / accol3;
     grid-row: acrow1 / acrowend;
+    grid-template-rows: [hmrow1] 1fr [hmrow2] 9fr [hmrowend];
 }
+
+// .option {
+//     display: grid;
+//     grid-row: hmrow1 / hmrow2;
+// }
+
+// .timeline {
+//     display: grid;
+//     grid-row: hmrow2 / hmrowend;
+// }
 
 .contextDiv {
     display: grid;

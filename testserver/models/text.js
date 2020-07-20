@@ -114,8 +114,8 @@ let simpleCut = function simpleCut(sentence) {
         wordStr += sentence.substr(j, 1).replace(pattern, "");
     }
     // wordExtract = nodejieba.extract(wordStr);
-    wordStr = nodejieba.cut(wordStr);
-    wordStr = wordStr.filter(w => !stopWordDict.includes(w));
+    wordStr = nodejieba.extract(wordStr, 10);
+    // wordStr = wordStr.filter(w => !stopWordDict.includes(w));
     // console.log(`wordStr: ${wordStr} wordExtract: ${wordExtract}`);
     // console.log(stopWordDict.includes('的'));
     // console.log('wordStrt: ', wordStr);

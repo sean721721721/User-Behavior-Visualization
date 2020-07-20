@@ -51,8 +51,8 @@ export default function userSimilarityGraph(data, svg, user, articles) {
     const sliderSvg = d3.select('.option').append('svg')
       .attr('class', 'sliderSvg')
       .style('margin-top', '10px');
-    const similarThresh = 0.1;
-    const articleThresh = 1;
+    let similarThresh = 0.1;
+    let articleThresh = 1;
     const similaritySlider = slider.sliderBottom()
       .min(0)
       .max(1)
@@ -60,19 +60,51 @@ export default function userSimilarityGraph(data, svg, user, articles) {
       .tickFormat(d3.format('.1'))
       .ticks(5)
       .default(similarThresh)
-      .on('onchange', (val) => { adjacencyMatrixNoAuthor(userSimilarity, val, articleThresh); });
+      .on('onchange', (val) => {
+        similarThresh = val
+        adjacencyMatrixNoAuthor(userSimilarity, similarThresh, articleThresh);
+      });
 
-    const gSlider = sliderSvg.append('g')
+    const gSlider1 = sliderSvg.append('g')
       .attr('class', 'similaritySlider')
       .attr('transform', `translate(${4 * margin.left},${margin.top / 2})`);
-    const sliderText = sliderSvg.append('g')
+    const sliderText1 = sliderSvg.append('g')
       .attr('transform', `translate(${margin.left},${margin.top / 2})`)
       .append('text')
       .text('Similarity')
       .attr('y', 5);
-    gSlider.call(similaritySlider);
+    gSlider1.call(similaritySlider);
 
     d3.select('.similaritySlider')
+      .selectAll('.tick')
+      .selectAll('text')
+      .attr('y', 10);
+    const repliedSliderSvg = d3.select('.option').append('svg')
+      .attr('class', 'repliedSliderSvg')
+      .style('margin-top', '10px');
+    const repliedSlider = slider.sliderBottom()
+      .min(0)
+      .max(100)
+      .width(150)
+      // .tickFormat(d3.format('.1'))
+      .ticks(10)
+      .default(articleThresh)
+      .on('onchange', (val) => {
+        articleThresh = val;
+        adjacencyMatrixNoAuthor(userSimilarity, similarThresh, articleThresh);
+      });
+
+    const gSlider2 = repliedSliderSvg.append('g')
+      .attr('class', 'repliedSlider')
+      .attr('transform', `translate(${3 * margin.left + 10},${margin.top / 2})`);
+    const sliderText2 = repliedSliderSvg.append('g')
+      .attr('transform', `translate(0,${margin.top / 2})`)
+      .append('text')
+      .text('ReplyCount')
+      .attr('y', 5);
+    gSlider2.call(repliedSlider);
+
+    d3.select('.repliedSlider')
       .selectAll('.tick')
       .selectAll('text')
       .attr('y', 10);
@@ -219,10 +251,12 @@ export default function userSimilarityGraph(data, svg, user, articles) {
   }
 
   function adjacencyMatrixNoAuthor(similarity, simThresh, artThresh) {
+    console.log(similarity, simThresh, artThresh);
     d3.select('.position').remove();
     d3.select('.groupLegends').remove();
     // svg.attr('height', h);
-    svg.attr('width', w);
+    // svg.attr('width', w);
+    // svg.attr('height', h);
     svg.call(d3.zoom()
       .extent([[0, 0], [width, height]])
       .scaleExtent([0.1, 8])
@@ -237,7 +271,7 @@ export default function userSimilarityGraph(data, svg, user, articles) {
     }
     const color = d => d3.schemeTableau10[d + 1];
     // Article Similarity
-    
+
     console.log(similarity);
     const [datas, users, similaritys] = filterAlwaysNonSimilarUser(data, user, similarity, simThresh, artThresh);
     console.log('datas:', datas, 'users:', users, 'similaritys:', similaritys);
@@ -270,6 +304,11 @@ export default function userSimilarityGraph(data, svg, user, articles) {
       datas.find(e1 => e1.id === e.id).community = e.community;
     });
     const communityWord = computeCommunityTitleWordScore(datas);
+    console.log(communityWord);
+    if (communityWord.length) {
+      const score = communityWord[0].wordList.reduce((acc, obj) => acc + obj.score, 0);
+      console.log(score);
+    }
     const [matrix, origMatrix] = relationToMatrix(similaritys, users);
     const similarityScale = d3.scalePow().exponent(0.5).range([0, 100]);
     // enlarge the difference between users
@@ -293,7 +332,7 @@ export default function userSimilarityGraph(data, svg, user, articles) {
     d3.select('.position').attr('transform', `scale(1) translate(${2 * margin.left},${4 * margin.top})`);
     const leftSvg = group.append('g')
       .attr('class', 'leftSvg')
-      .attr('transform', `scale(${svgScale(datas.length)}) translate(150,100)`);
+      .attr('transform', `scale(${svgScale(datas.length) > 0 ? svgScale(datas.length) : 0.4}) translate(150,100)`);
 
     const y = d3.scaleBand().range([0, axisDomain.length * gridSize])
       .domain(axisDomain);
@@ -778,15 +817,36 @@ export default function userSimilarityGraph(data, svg, user, articles) {
     }
 
     function computeCommunityTitleWordScore(userList) {
-      const wordArr = [];
-      const comNums = Math.max(...userList.map(e => e.community));
+      if (!userList[0].titleWordScore) return [];
+      const communityWordArr = [];
+      const comNums = Math.max(...userList.map(e => e.community)) + 1;
       for (let i = 0; i < comNums; i += 1) {
-        wordArr.push({ community: i, word: [] });
+        communityWordArr.push({ community: i, wordList: [] });
       }
-      userList.forEach((e) => {
-
+      userList.forEach((usr) => {
+        const usrCom = communityWordArr.find(e => e.community === usr.community);
+        const filteredTitleWord = usr.titleWordScore.filter((e, index) => index < 50);
+        const usrTotalWordCount = filteredTitleWord.reduce((acc, obj) => acc + obj.score, 0);
+        usr.titleWordScore.every((e, index) => {
+          const existedWord = usrCom.wordList.find(c => c.word === e.word);
+          if (existedWord) existedWord.score += (e.score / usrTotalWordCount);
+          else usrCom.wordList.push({ word: e.word, score: e.score / usrTotalWordCount });
+          return index < (50 - 1);
+        });
       });
-      return wordArr;
+
+      // each score divide by the number of the user of the community
+      communityWordArr.forEach((e) => {
+        const count = userList.filter(usr => usr.community === e.community).length;
+        e.wordList.forEach((list) => {
+          list.score /= count;
+        });
+      });
+      // sort
+      communityWordArr.forEach((e) => {
+        e.wordList.sort((a, b) => b.score - a.score);
+      });
+      return communityWordArr;
     }
     function relationToMatrix(sim, us) {
       const mat = [];
