@@ -302,6 +302,7 @@ export default function userSimilarityGraph(data, svg, user, articles) {
       const score = communityWord[0].wordList.reduce((acc, obj) => acc + obj.score, 0);
       console.log(score);
     }
+
     const [matrix, origMatrix] = relationToMatrix(similaritys, users);
     const similarityScale = d3.scalePow().exponent(0.5).range([0, 100]);
     // enlarge the difference between users
@@ -329,8 +330,6 @@ export default function userSimilarityGraph(data, svg, user, articles) {
 
     const y = d3.scaleBand().range([0, axisDomain.length * gridSize])
       .domain(axisDomain);
-
-    // builduserGroupAxis(newUserAxisValues);
 
     // Build color scale
     const userColor = userColorScaleArray(datas);
@@ -498,6 +497,7 @@ export default function userSimilarityGraph(data, svg, user, articles) {
 
     const activityTranslateX = 120;
     drawNewHeatmap();
+    drawCommunityWord();
     // d3.select('#timeLine').attr('height', newUserAxisValues.length * gridSize + 100 + focusHeight + 300);
     drawUserRepliedArticleMatrix(articlesOrderByCommunity);
     // drawUserGroupRadial();
@@ -841,6 +841,43 @@ export default function userSimilarityGraph(data, svg, user, articles) {
       });
       return communityWordArr;
     }
+    function drawCommunityWord() {
+      leftSvg.append('g')
+        .attr('class', 'wordGroup')
+        .style('pointer-events', 'auto')
+        .selectAll('text')
+        .data(communityWord)
+        .enter()
+        .append('g')
+        .attr('class', d => `group_${d.community}`)
+        .attr('transform', (d, index) => `translate(500, ${200 * index})`)
+        .each((d, index, nodes) => {
+          d3.select(nodes[index])
+            .selectAll('text')
+            .data(d.wordList.filter((e, _index) => _index < 10))
+            .enter()
+            .append('text')
+            .attr('y', (_d, _index) => _index * 15)
+            .text(_d => `${_d.word}: ${_d.score}`)
+            .on('click', (_d) => {
+              const articleArr = [];
+              const usrs = datas.filter(e => e.community === d.community);
+              usrs.forEach((usr) => {
+                usr.repliedArticle.forEach((art) => {
+                  if (art.cuttedTitle.some(wl => wl.word === _d.word)) {
+                    // article contained this word
+                    if (!articleArr.some(a => a.article_id === art.article_id)) {
+                      articleArr.push(art);
+                    }
+                  }
+                });
+              });
+              console.log(articleArr);
+              rectClick(articleArr, d.community);
+            });
+        });
+    }
+
     function relationToMatrix(sim, us) {
       const mat = [];
       const origMat = [];
@@ -1298,7 +1335,7 @@ export default function userSimilarityGraph(data, svg, user, articles) {
       const focusH = 400;
       articleGroup.selectAll('.articleXAxis').remove();
       articleGroup.select('.lineGroup').selectAll('line').remove();
-      const article_titles = articleArray.map(e => e.article_title);
+      // const article_titles = articleArray.map(e => e.article_title);
       const communityUserCount = datas.filter(e => e.community === communityIndex).length;
 
       const focusGridWidth = 25;
@@ -1971,7 +2008,7 @@ export default function userSimilarityGraph(data, svg, user, articles) {
             let depth = 1;
             const recursion = (_d, _index, _nodes) => {
               if (!_d) return;
-              console.log(`aritcle_id: ${_d.article_id}, article_title: ${_d.article_title}`);
+              // console.log(`aritcle_id: ${_d.article_id}, article_title: ${_d.article_title}`);
 
               d3.select(_nodes[_index])
                 .append('path')
@@ -1987,7 +2024,7 @@ export default function userSimilarityGraph(data, svg, user, articles) {
               d3.select(_nodes[_index])
                 .selectAll('rect')
                 .data(() => {
-                  console.log(_d, _index);
+                  // console.log(_d, _index);
                   const art = articlesWithTypeComment.find(e => e.article_id === _d.article_id);
                   const { push, boo, neutral } = art.commentType;
                   const arr = [push, boo, neutral];
