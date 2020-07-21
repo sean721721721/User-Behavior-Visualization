@@ -21,7 +21,7 @@ import { userActivityTimeline } from './userActivityTimeline';
 
 export default function userSimilarityGraph(data, svg, user, articles) {
   // console.log(user);
-  const svgScale = d3.scaleSqrt().domain([1, 100]).range([1.5, 0.01]);
+  const svgScale = d3.scaleSqrt().domain([1, 200]).range([0.5, 0.03]);
   const commentTimelineSvg = d3.select('#commentTimeline');
   const w = parseFloat(d3.select('.heatMap').style('width'));
   const h = parseFloat(d3.select('.heatMap').style('height'));
@@ -262,7 +262,7 @@ export default function userSimilarityGraph(data, svg, user, articles) {
     function zoomed() {
       group.attr('transform', d3.event.transform);
     }
-    const color = d => d3.schemeTableau10[d + 1];
+    const color = d => d3.schemeCategory10[d + 1];
     // Article Similarity
 
     console.log(similarity);
@@ -325,7 +325,7 @@ export default function userSimilarityGraph(data, svg, user, articles) {
     d3.select('.position').attr('transform', `scale(1) translate(${2 * margin.left},${4 * margin.top})`);
     const leftSvg = group.append('g')
       .attr('class', 'leftSvg')
-      .attr('transform', `scale(${svgScale(datas.length) > 0 ? svgScale(datas.length) : 0.4}) translate(150,100)`);
+      .attr('transform', `scale(${svgScale(datas.length) > 0 ? svgScale(datas.length) : 0.4}) translate(300,300)`);
 
     const y = d3.scaleBand().range([0, axisDomain.length * gridSize])
       .domain(axisDomain);
@@ -496,7 +496,7 @@ export default function userSimilarityGraph(data, svg, user, articles) {
       .range([5, 500]);
     const positionScale = computePosition(datas, bandWidthScale);
 
-    const activityTranslateX = 150;
+    const activityTranslateX = 120;
     drawNewHeatmap();
     // d3.select('#timeLine').attr('height', newUserAxisValues.length * gridSize + 100 + focusHeight + 300);
     drawUserRepliedArticleMatrix(articlesOrderByCommunity);
@@ -1248,13 +1248,13 @@ export default function userSimilarityGraph(data, svg, user, articles) {
               .attr('fill', (e) => {
                 switch (e.push_tag) {
                   case '推':
-                    return color(3);
+                    return 'green';
                   case '噓':
-                    return color(1);
+                    return 'red';
                   case '→':
-                    return color(4);
+                    return 'yellow';
                   default:
-                    return color(0);
+                    return 'yellow';
                 }
               })
               .on('mouseover', (e) => {
@@ -1263,15 +1263,16 @@ export default function userSimilarityGraph(data, svg, user, articles) {
                   d.messages.forEach((m) => {
                     if (m.push_userid === datas[i].id) {
                       if (m.push_content === e.push_content) {
-                        commentString += `<strong style='color: red'>${m.push_tag} ${m.push_content} ${dateFormat(m)} </strong> <br>`;
+                        commentString += `<strong style='color: red'>${m.push_tag} ${datas[i].id}: ${m.push_content} ${dateFormat(m)} </strong> <br>`;
                       } else {
                         commentString += `${m.push_tag} ${m.push_content} ${dateFormat(m)} <br>`;
                       }
                     }
                   });
                 }
-                const tooltipString = `Replyer: ${datas[i].id} <br> 
-                  Author: ${d.author} <br> Post: ${d.article_title} <br>
+                const tooltipString = `
+                  Author: ${d.author} <br> 
+                  Post: ${d.article_title} <br>
                   pushContent: <br> ${commentString}`;
                 authorGroupMouseover(tooltipString);
               })
@@ -1436,41 +1437,40 @@ export default function userSimilarityGraph(data, svg, user, articles) {
 
       context.append('g')
         .attr('class', 'brush')
-        .attr('transform', `translate(${-activityTranslateX + 30}, 0)`)
+        .attr('transform', `translate(${-activityTranslateX}, 0)`)
         .call(brush)
         .call(brush.move, [[0, 0],
           [
             // Math.min(contextXScale.range()[1], 50),
-            activityTranslateX - 30,
+            activityTranslateX,
             // Math.min(yScale.range()[1], gridSize * 3),
             Math.min(contextYScale.range()[1], 120),
           ]]);
       context.select('.overlay')
-        .attr('width', activityTranslateX - 30)
+        .attr('width', activityTranslateX)
         .attr('fill', 'lightgray');
       context.select('.selection')
         .attr('fill-opacity', 1)
         .attr('fill', 'white');
-      context.select('.handle.handle--n')
-        .attr('fill', 'darkseagreen');
-      context.select('.handle.handle--s')
-        .attr('fill', 'darkseagreen');
 
       context.append('g')
         .attr('class', 'axis axis--x')
-        .attr('transform', 'translate(75,0)')
-        .call(d3.axisTop(contextXScale).ticks(5));
+        .attr('transform', 'translate(75,-25)')
+        .call(d3.axisBottom(contextXScale).ticks(5));
       context.append('g')
         .attr('class', 'axis axis--y')
         .call(d3.axisLeft(contextYScale));
       // .call(d3.axisLeft(contextYScale).tickFormat(d => highlightArticles.find(e => e.article_id === d).article_title));
       context.select('.axis--x')
         .selectAll('text')
-        .attr('dy', '.35em')
-        .attr('y', '-20')
+        .attr('dy', '0em')
+        .attr('y', '20')
         .style('font-size', 'larger')
         // .style('writing-mode', 'tb')
         .style('text-anchor', 'middle');
+      context.select('.axis.axis--y')
+        .selectAll('line')
+        .remove();
       // svg.append('rect')
       //   .attr('class', 'zoom')
       //   .attr('width', width)
@@ -1479,6 +1479,14 @@ export default function userSimilarityGraph(data, svg, user, articles) {
       //   .call(zoom);
 
       function brushed() {
+        context.select('.handle.handle--n')
+          .attr('x', 0)
+          .attr('width', activityTranslateX)
+          .attr('fill', 'darkgray');
+        context.select('.handle.handle--s')
+          .attr('x', 0)
+          .attr('width', activityTranslateX)
+          .attr('fill', 'darkgray');
         if (d3.event.sourceEvent && d3.event.sourceEvent.type === 'zoom') return; // ignore brush-by-zoom
 
         const s = d3.event.selection || contextYScale.range();
@@ -1505,6 +1513,14 @@ export default function userSimilarityGraph(data, svg, user, articles) {
           .attr('y', -s[0][1] - 30)
           .attr('fill', 'lightgray');
 
+        focus.append('rect')
+          .attr('class', 'unfocus unfocusBottom')
+          .attr('width', contextXScale.range()[1])
+          .attr('height', 4)
+          .attr('x', 0)
+          .attr('y', s[1][1] ? s[0][1] - s[0][1] - 30 : -s[0][1] - 30)
+          .attr('fill', 'darkgray');
+
         // after focus area
         const focusMargin = 30;
         focus.append('rect')
@@ -1516,6 +1532,14 @@ export default function userSimilarityGraph(data, svg, user, articles) {
           .attr('x', 0)
           .attr('y', s[1][1] ? 400 : -30)
           .attr('fill', 'lightgray');
+
+        focus.append('rect')
+          .attr('class', 'unfocus unfocusTop')
+          .attr('width', contextXScale.range()[1])
+          .attr('height', 4)
+          .attr('x', 0)
+          .attr('y', s[1][1] ? 400 : -30)
+          .attr('fill', 'darkgray');
 
         // article box
         const boxHeight = 100;
@@ -1584,6 +1608,11 @@ export default function userSimilarityGraph(data, svg, user, articles) {
             }
           }
         }
+
+        // remove focus user axis's path
+        focus.selectAll('.axis.axis--y')
+          .selectAll('path')
+          .remove();
 
         // hide context articleTree
         let IndexAfterFocus = 0;
@@ -1881,9 +1910,9 @@ export default function userSimilarityGraph(data, svg, user, articles) {
               .attr('width', contextXScale.bandwidth())
               .attr('height', d2 => contextYScale(d2.length / communityUserCount))
               .attr('fill', (d2, index2) => {
-                if (index2 === 0) return color(3); // push
-                if (index2 === 1) return color(4); // neutral
-                return color(1); // boo
+                if (index2 === 0) return 'green'; // push
+                if (index2 === 1) return 'yellow'; // neutral
+                return 'red'; // boo
               })
               .append('title')
               .text(d2 => (d2.length / communityUserCount));
@@ -1917,7 +1946,7 @@ export default function userSimilarityGraph(data, svg, user, articles) {
         //   });
         const contextLegend = context.append('g')
           .attr('class', 'contextLegend')
-          .attr('transform', `translate(0, ${-margin.top * 4 / 3})`);
+          .attr('transform', `translate(-90, ${-margin.top * 4 / 3})`);
         contextLegend.append('circle')
           .attr('cx', 0)
           .attr('cy', -5)
@@ -1974,9 +2003,9 @@ export default function userSimilarityGraph(data, svg, user, articles) {
                   .innerRadius(0)
                   .outerRadius(15))
                 .attr('fill', (_d2, _index2) => {
-                  if (_index2 === 0) return color(3); // push
-                  if (_index2 === 1) return color(1); // boo
-                  if (_index2 === 2) return color(4); // neutral
+                  if (_index2 === 0) return 'green'; // push
+                  if (_index2 === 1) return 'red'; // boo
+                  if (_index2 === 2) return 'yellow'; // neutral
                   return 'white';
                 })
                 .style('opacity', (_d2, _index2) => (_index2 === 3 ? 0 : 1))

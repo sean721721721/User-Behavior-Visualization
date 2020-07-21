@@ -155,7 +155,12 @@ export default function treemap(cellNodes, beforeThisDate,
     .style('stroke', 'black')
     .style('fill', d => color(d.parent.data.name))
     .style('opacity', d => opacity(d.data.value))
-    .on('click', articleNodeClicked);
+    .on('click', articleNodeClicked)
+    .append('title')
+    .text((d) => {
+      const title = d.data.name.replace('mister_', '');
+      return title;
+    });
 
   // and to add the text labels
   articleTreemap

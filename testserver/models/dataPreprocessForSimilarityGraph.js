@@ -9,7 +9,7 @@ module.exports = {
         id: e, totalReplyCount: 0, repliedArticle: [], reply: [], titleWordScore: [],
       });
     });
-    const removeWords = ['新聞', '問卦', '爆卦', 'Re'];
+    const removeWords = ['新聞', '問卦', '爆卦', 'Re', '八卦'];
     articles.forEach((article) => {
       let cuttedTitle = article.article_title ? jb.simpleCut(article.article_title) : [];
       cuttedTitle = cuttedTitle.filter((e) => {
