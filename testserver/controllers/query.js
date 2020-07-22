@@ -113,36 +113,6 @@ let queryobj = function queryobj(req, res, time1, time2, authorid, userid, tkeyw
   if (req.params.fromname) {
     queryobj['from.name'] = req.params.fromname;
   }
-  if (req.params.minshare || req.params.maxshare) {
-    if (req.params.maxshare) {
-      if (!req.params.minshare) {
-        req.params.minshare = 0;
-      }
-      queryobj['shares'] = {
-        $gte: Number(req.params.minshare),
-        $lt: Number(req.params.maxshare),
-      };
-    } else {
-      queryobj['shares'] = {
-        $gte: Number(req.params.minshare),
-      };
-    }
-  }
-  if (req.params.minlike || req.params.maxlike) {
-    if (req.params.maxlike) {
-      if (!req.params.minlike) {
-        req.params.minlike = 0;
-      }
-      queryobj['reactions.like'] = {
-        $gte: Number(req.params.minlike),
-        $lt: Number(req.params.maxlike),
-      };
-    } else {
-      queryobj['reactions.like'] = {
-        $gte: Number(req.params.minlike),
-      };
-    }
-  }
   if (req.params.mincomment || req.params.mincomment) {
     if (req.params.maxcomment) {
       if (!req.params.mincomment) {
@@ -281,13 +251,6 @@ let findquery = async function findquery(page, queryobj, ptt, limit, sort) {
     let schema = require('../models/pttSchema.js');
     db.db2.model(page, schema.pttSchema);
     pagepost = db.db2.model(page);
-  } else {
-    if (!page) {
-      page = '客台';
-    }
-    let schema = require('../models/postSchema.js');
-    db.db1.model(page, schema.postSchema);
-    pagepost = db.db1.model(page);
   }
   let query;
   console.log(queryobj);
