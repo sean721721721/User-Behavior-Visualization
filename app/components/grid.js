@@ -7,17 +7,9 @@ import Lodash from 'lodash';
 import { Provider } from 'react-redux';
 import store from '../store/index';
 import Menu from './menu';
-import Termlist from './termlist';
-import PostPage from './postpage';
-import Post from './post';
-import Footer from './Footer';
-import AddCard from '../containers/AddCard';
-import AsyncApp from '../containers/AsyncApp';
-// import VisibleCardList from '../containers/VisibleCardList';
 import Loading from './loading';
 import './style/bbs.css';
 import Graph from './graph';
-import GateKeeper from './GateKeeper';
 
 class Grid extends React.Component {
   constructor(props) {

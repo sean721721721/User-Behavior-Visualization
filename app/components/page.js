@@ -6,7 +6,6 @@ import PropTypes from 'prop-types';
 import Button from 'react-bootstrap/Button';
 // import { Row } from 'antd';
 // import './style/input.css';
-import DataList from './datalist';
 
 class Page extends React.Component {
   constructor(props) {
@@ -90,7 +89,6 @@ class Page extends React.Component {
                 onChange={handlePT}
               />
             </label>
-            <DataList props={pagenamelist} />
             <label htmlFor="x">
                 Time:
               <input
