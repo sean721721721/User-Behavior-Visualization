@@ -7,10 +7,7 @@ const should = require('should'); /* eslint-disable-line no-unused-vars, bugged 
 const passport = require('passport');
 const LocalStrategy = require('passport-local').Strategy;
 const Account = require('../models/account');
-const Card = require('../models/card');
 const query = require('./query.js');
-const getcardlist = require('./getcardlist');
-const savecardlist = require('./savecardlist');
 
 // create application/json parser
 const jsonParser = bodyParser.json();
@@ -155,28 +152,6 @@ const main = function main(app) {
       // }
     } catch (err) {
       res.send(err);
-      console.log(err);
-    }
-  });
-
-  // fetch getting card data
-  app.get('/cardlist', urlencodedParser, async (req, res) => {
-    try {
-      console.log('get cardlist');
-      const result = await getcardlist.callback(req, res);
-      res.send(result);
-    } catch (err) {
-      console.log(err);
-    }
-  });
-
-  app.post('/savecard', jsonParser, async (req, res) => {
-    // console.log('savecard', req.body.cards);
-    try {
-      const result = await savecardlist.callback(req);
-      console.log(result);
-      res.send(result);
-    } catch (err) {
       console.log(err);
     }
   });
