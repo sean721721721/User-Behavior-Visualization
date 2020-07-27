@@ -12,23 +12,23 @@ module.exports = {
     const removeWords = ['新聞', '問卦', '爆卦', 'Re', '八卦'];
     articles.forEach((article) => {
       let cuttedTitle = article.article_title ? jb.simpleCut(article.article_title) : [];
-      cuttedTitle = cuttedTitle.filter((e) => {
-        return !removeWords.includes(e.word);
-      });
+      cuttedTitle = cuttedTitle.filter(e => !removeWords.includes(e.word));
       const a = { ...article._doc, cuttedTitle };
       article.messages.forEach((mes) => {
         const existedUser = userLists.find(e => e.id === mes.push_userid);
         if (existedUser) {
           const mesLen = article.messages.filter(e => e.push_userid === existedUser.id).length;
-          const pushTag = mes.push_tag;
-          let score = 1 / mesLen;
+          // const pushTag = mes.push_tag;
+          // const pushCount = mesLen.filter(e => e.push_tag === 'push').length;
+          // const booCount = mesLen.filter(e => e.push_tag === 'boo').length;
+          // const neutralCount = mesLen.filter(e => e.push_tag === '→').length;
+          const score = 1 / mesLen;
           // calculate score push tag
           // if (pushTag === '推') score = 1 / mesLen;
           // else if (pushTag === '噓') score = -1 / mesLen;
           // else score = 0;
-          
-          cuttedTitle.forEach((e) => {
 
+          cuttedTitle.forEach((e) => {
             const existedWord = existedUser.titleWordScore.find(w => w.word === e.word);
             if (existedWord) existedWord.score += score;
             else existedUser.titleWordScore.push({ word: e.word, score });

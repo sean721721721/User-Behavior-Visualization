@@ -1,3 +1,5 @@
+/* eslint-disable no-undef */
+/* eslint-disable max-len */
 /* eslint-disable no-underscore-dangle */
 /* eslint-disable no-console */
 /* eslint-disable linebreak-style */
@@ -19,14 +21,10 @@ import netClustering from 'netclustering';
 import * as science from 'science';
 import * as Queue from 'tiny-queue';
 import * as reorder from 'reorder.js/index';
-import sentiment from 'multilang-sentiment';
 import { string } from 'prop-types';
 import * as jsnx from 'jsnetworkx';
-import Louvain from './jLouvain';
-import table from './table';
 import { OpinionLeader } from './OpinionLeader';
 import { AuthorTable } from './authorTable';
-import WordTree from './wordTree';
 import OpinionLeaderView from './OpinionLeaderView';
 // import request from 'request';
 
@@ -120,7 +118,7 @@ class Graph extends Component {
   }
 
   drawwithlabels() {
-    let mat1 = [
+    const mat1 = [
       [
         1,
         0.0017271157167530224,
@@ -203,7 +201,7 @@ class Graph extends Component {
         0.012782694198623401,
         0.007159904534606206,
         0.005836575875486381,
-        0.008818342151675485
+        0.008818342151675485,
       ],
       [
         0.0017271157167530224,
@@ -287,7 +285,7 @@ class Graph extends Component {
         0.001697792869269949,
         0.0054446460980036296,
         0.008888888888888889,
-        0.010752688172043012
+        0.010752688172043012,
       ],
       [
         0.012738853503184714,
@@ -371,7 +369,7 @@ class Graph extends Component {
         0.008282716731087797,
         0.009933774834437087,
         0.010714285714285714,
-        0.002967359050445104
+        0.002967359050445104,
       ],
       [
         0.00211864406779661,
@@ -455,7 +453,7 @@ class Graph extends Component {
         0.003621001810500905,
         0.002242152466367713,
         0.008403361344537815,
-        0.011560693641618497
+        0.011560693641618497,
       ],
       [
         0.004329004329004329,
@@ -539,7 +537,7 @@ class Graph extends Component {
         0.0012106537530266344,
         0.0045871559633027525,
         0.01834862385321101,
-        0.006060606060606061
+        0.006060606060606061,
       ],
       [
         0.012970969734403953,
@@ -623,7 +621,7 @@ class Graph extends Component {
         0.037009893733968485,
         0.013182674199623353,
         0.007042253521126761,
-        0.004491017964071856
+        0.004491017964071856,
       ],
       [
         0.0018726591760299626,
@@ -707,7 +705,7 @@ class Graph extends Component {
         0.0029069767441860465,
         0.005928853754940711,
         0.0055248618784530384,
-        0.00851063829787234
+        0.00851063829787234,
       ],
       [
         0.001876172607879925,
@@ -791,7 +789,7 @@ class Graph extends Component {
         0.0017431725740848344,
         0.005940594059405941,
         0.005555555555555556,
-        0.00425531914893617
+        0.00425531914893617,
       ],
       [
         0.005964214711729622,
@@ -875,7 +873,7 @@ class Graph extends Component {
         0.0035502958579881655,
         0.0041841004184100415,
         0.006578947368421052,
-        0.004830917874396135
+        0.004830917874396135,
       ],
       [
         0.0021231422505307855,
@@ -959,7 +957,7 @@ class Graph extends Component {
         0.0024125452352231603,
         0.0022471910112359553,
         0.00847457627118644,
-        0.005780346820809248
+        0.005780346820809248,
       ],
       [
         0.006361323155216285,
@@ -1043,7 +1041,7 @@ class Graph extends Component {
         0.010714285714285714,
         0.009234828496042216,
         0.006896551724137931,
-        0.0020325203252032522
+        0.0020325203252032522,
       ],
       [
         0.008264462809917356,
@@ -1127,7 +1125,7 @@ class Graph extends Component {
         0.005995203836930456,
         0.008733624454148471,
         0.007462686567164179,
-        0.005291005291005291
+        0.005291005291005291,
       ],
       [
         0.01410105757931845,
@@ -1211,7 +1209,7 @@ class Graph extends Component {
         0.012826837691169216,
         0.0194884287454324,
         0.005917159763313609,
-        0.0071301247771836
+        0.0071301247771836,
       ],
       [
         0.002145922746781116,
@@ -1295,7 +1293,7 @@ class Graph extends Component {
         0.0006038647342995169,
         0.00684931506849315,
         0.008849557522123894,
-        0.005952380952380952
+        0.005952380952380952,
       ],
       [
         0.009918845807033363,
@@ -1379,7 +1377,7 @@ class Graph extends Component {
         0.023936170212765957,
         0.015784586815227482,
         0.003926701570680628,
-        0.006119951040391677
+        0.006119951040391677,
       ],
       [
         0.006085192697768763,
@@ -1463,7 +1461,7 @@ class Graph extends Component {
         0.0035714285714285713,
         0.010752688172043012,
         0.007042253521126761,
-        0.005076142131979695
+        0.005076142131979695,
       ],
       [
         0.009345794392523364,
@@ -1547,7 +1545,7 @@ class Graph extends Component {
         0.007675438596491228,
         0.00974025974025974,
         0.010273972602739725,
-        0.0028653295128939827
+        0.0028653295128939827,
       ],
       [
         0.002066115702479339,
@@ -1631,7 +1629,7 @@ class Graph extends Component {
         0.004196642685851319,
         0.00437636761487965,
         0.007633587786259542,
-        0.005376344086021506
+        0.005376344086021506,
       ],
       [
         0.017013232514177693,
@@ -1715,7 +1713,7 @@ class Graph extends Component {
         0.011155734047300312,
         0.019417475728155338,
         0.0027739251040221915,
-        0.003870967741935484
+        0.003870967741935484,
       ],
       [
         0.0021691973969631237,
@@ -1799,7 +1797,7 @@ class Graph extends Component {
         0.0012121212121212121,
         0.0022988505747126436,
         0.009259259259259259,
-        0.006134969325153374
+        0.006134969325153374,
       ],
       [
         0.0021929824561403508,
@@ -1883,7 +1881,7 @@ class Graph extends Component {
         0.0018248175182481751,
         0.002325581395348837,
         0.009708737864077669,
-        0.006329113924050633
+        0.006329113924050633,
       ],
       [
         0.004048582995951417,
@@ -1967,7 +1965,7 @@ class Graph extends Component {
         0.00297441998810232,
         0.010752688172043012,
         0.007042253521126761,
-        0.005076142131979695
+        0.005076142131979695,
       ],
       [
         0.001937984496124031,
@@ -2051,7 +2049,7 @@ class Graph extends Component {
         0.0058927519151443725,
         0.008213552361396304,
         0.006134969325153374,
-        0.0045871559633027525
+        0.0045871559633027525,
       ],
       [
         0.001937984496124031,
@@ -2135,7 +2133,7 @@ class Graph extends Component {
         0.003527336860670194,
         0.0102880658436214,
         0.006134969325153374,
-        0.0045871559633027525
+        0.0045871559633027525,
       ],
       [
         0.0021598272138228943,
@@ -2219,7 +2217,7 @@ class Graph extends Component {
         0.0018170805572380376,
         0.002288329519450801,
         0.00909090909090909,
-        0.006060606060606061
+        0.006060606060606061,
       ],
       [
         0.008680555555555556,
@@ -2303,7 +2301,7 @@ class Graph extends Component {
         0.006822057987492893,
         0.0018050541516245488,
         0.004405286343612335,
-        0.0071174377224199285
+        0.0071174377224199285,
       ],
       [
         0.009633911368015413,
@@ -2387,7 +2385,7 @@ class Graph extends Component {
         0.007642563198118754,
         0.008097165991902834,
         0.011834319526627219,
-        0.013452914798206279
+        0.013452914798206279,
       ],
       [
         0.01509433962264151,
@@ -2471,7 +2469,7 @@ class Graph extends Component {
         0.004651162790697674,
         0.005893909626719057,
         0.022099447513812154,
-        0.008403361344537815
+        0.008403361344537815,
       ],
       [
         0.0033222591362126247,
@@ -2555,7 +2553,7 @@ class Graph extends Component {
         0.007865168539325843,
         0.012259194395796848,
         0.004,
-        0.003278688524590164
+        0.003278688524590164,
       ],
       [
         0.0033112582781456954,
@@ -2639,7 +2637,7 @@ class Graph extends Component {
         0.007291082445316881,
         0.010452961672473868,
         0.003968253968253968,
-        0.006535947712418301
+        0.006535947712418301,
       ],
       [
         0.006134969325153374,
@@ -2723,7 +2721,7 @@ class Graph extends Component {
         0.011066398390342052,
         0.02056555269922879,
         0.004301075268817204,
-        0.0038461538461538464
+        0.0038461538461538464,
       ],
       [
         0.0016638935108153079,
@@ -2807,7 +2805,7 @@ class Graph extends Component {
         0.006741573033707865,
         0.010526315789473684,
         0.004032258064516129,
-        0.006622516556291391
+        0.006622516556291391,
       ],
       [
         0.0031446540880503146,
@@ -2891,7 +2889,7 @@ class Graph extends Component {
         0.009944751381215469,
         0.014925373134328358,
         0.0035211267605633804,
-        0.005917159763313609
+        0.005917159763313609,
       ],
       [
         0.003278688524590164,
@@ -2975,7 +2973,7 @@ class Graph extends Component {
         0.008393956351426972,
         0.008605851979345954,
         0.003875968992248062,
-        0.00641025641025641
+        0.00641025641025641,
       ],
       [
         0.0033500837520938024,
@@ -3059,7 +3057,7 @@ class Graph extends Component {
         0.008455467869222097,
         0.010582010582010581,
         0.004081632653061225,
-        0.0033333333333333335
+        0.0033333333333333335,
       ],
       [
         0.0015923566878980893,
@@ -3143,7 +3141,7 @@ class Graph extends Component {
         0.010555555555555556,
         0.016863406408094434,
         0.0036363636363636364,
-        0.0030303030303030303
+        0.0030303030303030303,
       ],
       [
         0.005145797598627788,
@@ -3227,7 +3225,7 @@ class Graph extends Component {
         0.008517887563884156,
         0.014492753623188406,
         0.004310344827586207,
-        0.003484320557491289
+        0.003484320557491289,
       ],
       [
         0.0017730496453900709,
@@ -3311,7 +3309,7 @@ class Graph extends Component {
         0.0068846815834767644,
         0.007476635514018692,
         0.004739336492890996,
-        0.0037593984962406013
+        0.0037593984962406013,
       ],
       [
         0.00375234521575985,
@@ -3395,7 +3393,7 @@ class Graph extends Component {
         0.005244755244755245,
         0.005928853754940711,
         0.0055248618784530384,
-        0.00423728813559322
+        0.00423728813559322,
       ],
       [
         0.0016181229773462784,
@@ -3479,7 +3477,7 @@ class Graph extends Component {
         0.012877939529675251,
         0.015410958904109588,
         0.0037735849056603774,
-        0.003125
+        0.003125,
       ],
       [
         0.0016835016835016834,
@@ -3563,7 +3561,7 @@ class Graph extends Component {
         0.009615384615384616,
         0.0142602495543672,
         0.004149377593360996,
-        0.0033783783783783786
+        0.0033783783783783786,
       ],
       [
         0.0018115942028985507,
@@ -3647,7 +3645,7 @@ class Graph extends Component {
         0.005190311418685121,
         0.0076481835564053535,
         0.005025125628140704,
-        0.003937007874015748
+        0.003937007874015748,
       ],
       [
         0.004373177842565598,
@@ -3731,7 +3729,7 @@ class Graph extends Component {
         0.01348435814455232,
         0.01687116564417178,
         0.0029850746268656717,
-        0.005141388174807198
+        0.005141388174807198,
       ],
       [
         0.0015527950310559005,
@@ -3815,7 +3813,7 @@ class Graph extends Component {
         0.011019283746556474,
         0.018092105263157895,
         0.003436426116838488,
-        0.005797101449275362
+        0.005797101449275362,
       ],
       [
         0.0016233766233766235,
@@ -3899,7 +3897,7 @@ class Graph extends Component {
         0.011758118701007838,
         0.015463917525773196,
         0.0038022813688212928,
-        0.0031446540880503146
+        0.0031446540880503146,
       ],
       [
         0.004672897196261682,
@@ -3983,7 +3981,7 @@ class Graph extends Component {
         0.011019283746556474,
         0.018092105263157895,
         0.003436426116838488,
-        0.005797101449275362
+        0.005797101449275362,
       ],
       [
         0.005136986301369863,
@@ -4067,7 +4065,7 @@ class Graph extends Component {
         0.00851305334846765,
         0.008992805755395683,
         0.004291845493562232,
-        0.006968641114982578
+        0.006968641114982578,
       ],
       [
         0.0030911901081916537,
@@ -4151,7 +4149,7 @@ class Graph extends Component {
         0.010995052226498075,
         0.017973856209150325,
         0.003389830508474576,
-        0.0057306590257879654
+        0.0057306590257879654,
       ],
       [
         0.0039447731755424065,
@@ -4235,7 +4233,7 @@ class Graph extends Component {
         0.0035440047253396337,
         0.004158004158004158,
         0.0064516129032258064,
-        0.009569377990430622
+        0.009569377990430622,
       ],
       [
         0.0016835016835016834,
@@ -4319,7 +4317,7 @@ class Graph extends Component {
         0.009044657998869417,
         0.010657193605683837,
         0.004149377593360996,
-        0.006779661016949152
+        0.006779661016949152,
       ],
       [
         0.0034662045060658577,
@@ -4403,7 +4401,7 @@ class Graph extends Component {
         0.009703196347031963,
         0.005454545454545455,
         0.0044444444444444444,
-        0.007168458781362007
+        0.007168458781362007,
       ],
       [
         0.00902061855670103,
@@ -4487,7 +4485,7 @@ class Graph extends Component {
         0.009207161125319692,
         0.018842530282637954,
         0.004672897196261682,
-        0.008316008316008316
+        0.008316008316008316,
       ],
       [
         0.005791505791505791,
@@ -4571,7 +4569,7 @@ class Graph extends Component {
         0.0029308323563892145,
         0.012269938650306749,
         0.005988023952095809,
-        0.0045045045045045045
+        0.0045045045045045045,
       ],
       [
         0.010146561443066516,
@@ -4655,7 +4653,7 @@ class Graph extends Component {
         0.0185546875,
         0.005780346820809248,
         0.005555555555555556,
-        0.003355704697986577
+        0.003355704697986577,
       ],
       [
         0.0036101083032490976,
@@ -4739,7 +4737,7 @@ class Graph extends Component {
         0.0034482758620689655,
         0.0076045627376425855,
         0.009950248756218905,
-        0.0038910505836575876
+        0.0038910505836575876,
       ],
       [
         0.008443908323281062,
@@ -4823,7 +4821,7 @@ class Graph extends Component {
         0.014014014014014014,
         0.0125,
         0.004158004158004158,
-        0.0037313432835820895
+        0.0037313432835820895,
       ],
       [
         0.00964630225080386,
@@ -4907,7 +4905,7 @@ class Graph extends Component {
         0.0055309734513274336,
         0.01517706576728499,
         0.007326007326007326,
-        0.006097560975609756
+        0.006097560975609756,
       ],
       [
         0.006791171477079796,
@@ -4991,7 +4989,7 @@ class Graph extends Component {
         0.009626274065685165,
         0.008896797153024912,
         0.008403361344537815,
-        0.006825938566552901
+        0.006825938566552901,
       ],
       [
         0.015895953757225433,
@@ -5075,7 +5073,7 @@ class Graph extends Component {
         0.013926084627745045,
         0.01804511278195489,
         0.014492753623188406,
-        0.007462686567164179
+        0.007462686567164179,
       ],
       [
         0.0060882800608828,
@@ -5159,7 +5157,7 @@ class Graph extends Component {
         0.007621121393576484,
         0.016,
         0.003257328990228013,
-        0.00554016620498615
+        0.00554016620498615,
       ],
       [
         0.007662835249042145,
@@ -5243,7 +5241,7 @@ class Graph extends Component {
         0.010209290454313425,
         0.013280212483399735,
         0.004608294930875576,
-        0.012371134020618556
+        0.012371134020618556,
       ],
       [
         0.011157601115760111,
@@ -5327,7 +5325,7 @@ class Graph extends Component {
         0.012156448202959831,
         0.01451378809869376,
         0.013623978201634877,
-        0.011848341232227487
+        0.011848341232227487,
       ],
       [
         0.00473186119873817,
@@ -5411,7 +5409,7 @@ class Graph extends Component {
         0.009950248756218905,
         0.006589785831960461,
         0.010676156583629894,
-        0.008928571428571428
+        0.008928571428571428,
       ],
       [
         0.0030864197530864196,
@@ -5495,7 +5493,7 @@ class Graph extends Component {
         0.008771929824561403,
         0.009708737864077669,
         0.0033783783783783786,
-        0.01440922190201729
+        0.01440922190201729,
       ],
       [
         0.01011804384485666,
@@ -5579,7 +5577,7 @@ class Graph extends Component {
         0.009593679458239277,
         0.010582010582010581,
         0.00819672131147541,
-        0.006688963210702341
+        0.006688963210702341,
       ],
       [
         0.007032348804500703,
@@ -5663,7 +5661,7 @@ class Graph extends Component {
         0.006867406233491812,
         0.02373887240356083,
         0.00554016620498615,
-        0.007228915662650603
+        0.007228915662650603,
       ],
       [
         0.005253940455341506,
@@ -5747,7 +5745,7 @@ class Graph extends Component {
         0.004555808656036446,
         0.003663003663003663,
         0.004545454545454545,
-        0.0036363636363636364
+        0.0036363636363636364,
       ],
       [
         0.006896551724137931,
@@ -5831,7 +5829,7 @@ class Graph extends Component {
         0.008403361344537815,
         0.012949640287769784,
         0.008021390374331552,
-        0.006993006993006993
+        0.006993006993006993,
       ],
       [
         0.011876484560570071,
@@ -5915,7 +5913,7 @@ class Graph extends Component {
         0.025768911055694097,
         0.01788617886178862,
         0.008724100327153763,
-        0.012396694214876033
+        0.012396694214876033,
       ],
       [
         0.016423357664233577,
@@ -5999,7 +5997,7 @@ class Graph extends Component {
         0.005178365937859608,
         0.003780718336483932,
         0.009900990099009901,
-        0.003875968992248062
+        0.003875968992248062,
       ],
       [
         0.0071301247771836,
@@ -6083,7 +6081,7 @@ class Graph extends Component {
         0.006307339449541285,
         0.005597014925373134,
         0.004739336492890996,
-        0.0037593984962406013
+        0.0037593984962406013,
       ],
       [
         0.0036363636363636364,
@@ -6167,7 +6165,7 @@ class Graph extends Component {
         0.0034562211981566822,
         0.01348747591522158,
         0.031088082901554404,
-        0.024193548387096774
+        0.024193548387096774,
       ],
       [
         0.002178649237472767,
@@ -6251,7 +6249,7 @@ class Graph extends Component {
         0.0018214936247723133,
         0.0069605568445475635,
         0.009433962264150943,
-        0.006211180124223602
+        0.006211180124223602,
       ],
       [
         0.00686106346483705,
@@ -6335,7 +6333,7 @@ class Graph extends Component {
         0.009085746734809767,
         0.005376344086021506,
         0.008620689655172414,
-        0.014035087719298246
+        0.014035087719298246,
       ],
       [
         0.002188183807439825,
@@ -6419,7 +6417,7 @@ class Graph extends Component {
         0.001215066828675577,
         0.004651162790697674,
         0.009615384615384616,
-        0.006289308176100629
+        0.006289308176100629,
       ],
       [
         0.011876484560570071,
@@ -6503,7 +6501,7 @@ class Graph extends Component {
         0.018962075848303395,
         0.009779951100244499,
         0.00808080808080808,
-        0.0018083182640144665
+        0.0018083182640144665,
       ],
       [
         0.013114754098360656,
@@ -6587,7 +6585,7 @@ class Graph extends Component {
         0.008928571428571428,
         0.0136986301369863,
         0.003787878787878788,
-        0.012658227848101266
+        0.012658227848101266,
       ],
       [
         0.011556764106050306,
@@ -6671,7 +6669,7 @@ class Graph extends Component {
         0.03238242097147263,
         0.009668508287292817,
         0.004424778761061947,
-        0.004219409282700422
+        0.004219409282700422,
       ],
       [
         0.012782694198623401,
@@ -6755,7 +6753,7 @@ class Graph extends Component {
         1,
         0.017,
         0.004708652148322542,
-        0.006857142857142857
+        0.006857142857142857,
       ],
       [
         0.007159904534606206,
@@ -6839,7 +6837,7 @@ class Graph extends Component {
         0.017,
         1,
         0.008213552361396304,
-        0.012987012987012988
+        0.012987012987012988,
       ],
       [
         0.005836575875486381,
@@ -6923,7 +6921,7 @@ class Graph extends Component {
         0.004708652148322542,
         0.008213552361396304,
         1,
-        0.0045871559633027525
+        0.0045871559633027525,
       ],
       [
         0.008818342151675485,
@@ -7007,8 +7005,8 @@ class Graph extends Component {
         0.006857142857142857,
         0.012987012987012988,
         0.0045871559633027525,
-        1
-      ]
+        1,
+      ],
     ];
     let mat = [
       [1, 1, 1, 0, 0, 0],
@@ -7022,8 +7020,8 @@ class Graph extends Component {
     mat = reorder.transpose(mat);
     mat = reorder.permute(mat, [5, 1, 2, 3, 4, 0]);
     // console.log(mat);
-    let gra = reorder.mat2graph(mat);
-    let perm = reorder.spectral_order(gra);
+    const gra = reorder.mat2graph(mat);
+    const perm = reorder.spectral_order(gra);
     // console.log(perm);
     // console.log(userAxis);
     let permutedMat = reorder.permute(mat, perm);
@@ -7035,50 +7033,14 @@ class Graph extends Component {
     console.log(this.props);
     const $this = this;
     const { date } = this.props;
-    const { word: titleTermArr } = this.props;
     const startDate = new Date(date.$gte);
-    const endDate = new Date(date.$lt);
-    const timePeriod = endDate - startDate;
     const beforeThisDate = startDate;
-    const timeScale = d3.scaleTime().domain([startDate, endDate]).range([0, 100]);
     const { set: propsSet } = this.props;
     const set = JSON.parse(JSON.stringify(propsSet));
     const authorSet = removeTermLayer(set);
     authorSet.children = authorSet.children.filter(e => e.id);
-    console.log(authorSet);
     const authorTable = d3.select('#authorList');
-    let link;
-    let node;
-    let links;
-    let nodes;
-    const userList = [{ id: '', count: 0, term: [] }];
-    const propsUserList = [{ id: '', count: 0, term: [] }];
-    const { initLinks } = this.props;
-
-    const removeWords = ['新聞', '八卦', '幹嘛', '問卦', '爆卦'];
-    const groupedWords = [];
-
-    const someData = [];
-    const pi = Math.PI;
-    const LinkThreshold = 0.1;
-    const pie = d3.pie()
-      .value(d => d.count)
-      .sort(null);
-    const pieColor = d3.schemeTableau10;
-    const keyPlayerThreshold = 0;
-    const G = new jsnx.Graph();
-    const termColor = d3.interpolateBlues;
-    const selectedCluster = -1;
-    const fontSizeThreshhold = 0;
-    const sliderHasBeenLoaded = 0;
-    const NodeHiding = 1;
-    const cellData = { nodes: [], links: [] };
-    let totalAuthorInfluence = 0;
-    const svgwidth = parseFloat(d3.select('#graph').style('width'));
-    const svgHeight = parseFloat(d3.select('#graph').style('height'));
-    const authorInfluenceThreshold = 100;
-    const articleInfluenceThreshold = 1;
-    const topAuthorThreshold = 8;
+    const totalAuthorInfluence = 0;
     const cellForceSimulation = d3.forceSimulation()
       .force('link', d3.forceLink().id((d) => {
         if (d.group === 1) return d.titleTerm;
@@ -7095,220 +7057,6 @@ class Graph extends Component {
     // const networkH = parseFloat(d3.select('.network').style('height'));
     // d3.select('.network').style('max-height', `${networkH}px`);
     AuthorTable(authorSet, authorTable, this, (n, index) => {
-      // const clickedNode = JSON.parse(JSON.stringify(n));
-      // cellData.nodes = [];
-      // cellData.links = [];
-      // clickedNode.fx = 0;
-      // clickedNode.fy = 0;
-      // cellData.nodes.push(clickedNode);
-      // totalAuthorInfluence = 0;
-
-      // // compute author's influence
-      // clickedNode.children.forEach((author) => {
-      //   let influence = 0;
-      //   author.responder.forEach((article) => {
-      //     if (article.message.length >= articleInfluenceThreshold) {
-      //       influence += article.message.length;
-      //     }
-      //   });
-      //   author.influence = influence;
-      // });
-      // clickedNode.children.sort((a, b) => ((a.influence < b.influence) ? 1 : -1));
-      // // compute cellnodes and celllinks
-      // let topInfluenceAuthor = 1;
-      // const topNumOfPushes = 100;
-
-      // // testing data structure
-      // let authorGroup = index;
-      // clickedNode.children.every((author) => {
-      //   let size = 0;
-      //   let countedArticle = 0;
-      //   if (topInfluenceAuthor <= topAuthorThreshold) {
-      //     author.responder.forEach((article) => {
-      //       let replyCount = 0;
-      //       if (article.message.length >= articleInfluenceThreshold) {
-      //         cellData.nodes.push(article);
-      //         cellData.links.push({
-      //           source: article.articleId,
-      //           target: author.id,
-      //           tag: 0,
-      //           value: 1,
-      //         });
-      //         // console.log(cellData);
-      //         article.message.every((mes) => {
-      //           let cuttedPushContent = '';
-      //           mes.cutted_push_content.forEach((w) => {
-      //             cuttedPushContent = cuttedPushContent.concat(' ', w);
-      //           });
-      //           if (replyCount < topNumOfPushes) {
-      //             // if (mes.push_tag === '推') {
-      //             if (mes.push_tag) {
-      //               if (cellData.nodes.some(data => data.id === mes.push_userid)) {
-      //                 // already has same replyer
-      //                 const replyer = cellData.nodes.find(data => data.id === mes.push_userid);
-      //                 // console.log(mes.push_userid, replyer);
-      //                 replyer.push_content.push({ id: mes.push_userid, content: mes.push_content });
-      //                 // console.log(replyer);
-      //                 replyer.adj[mes.push_userid] += 1;
-      //                 if (!replyer.push_detail) {
-      //                   replyer.push_detail = [];
-      //                 }
-      //                 replyer.push_detail.push({
-      //                   author,
-      //                   article: [{
-      //                     title: article,
-      //                     messageCount: {
-      //                       push: mes.push_tag === '推' ? 1 : 0, boo: mes.push_tag === '噓' ? 1 : 0,
-      //                     },
-      //                     messageContent: mes.push_content,
-      //                     pushDate: mes.push_ipdatetime,
-      //                   }],
-      //                 });
-      //                 // console.log(replyer);
-      //                 if (replyer.cutted_push_content) replyer.cutted_push_content.push([cuttedPushContent]);
-      //                 else replyer.cutted_push_content = [cuttedPushContent];
-      //                 replyer.authorGroup = replyer.authorGroup ? replyer.authorGroup : [];
-      //                 if (!replyer.authorGroup.some(e => e === author.id)) replyer.authorGroup.push(author.id);
-      //                 replyer.reply = replyer.reply ? replyer.reply : [];
-      //                 if (replyer.reply.some(e => e.author.id === author.id)) {
-      //                   // reply same author
-      //                   // console.log(replyer, author);
-      //                   const repliedAuthor = replyer.reply.find(e => e.author === author);
-      //                   const repliedArticle = repliedAuthor.article.find(e => e.title === article);
-      //                   if (repliedArticle) {
-      //                     // reply same article
-      //                     // cellData.links.find(e => e.target === article.articleId
-      //                     // && e.source === mes.push_userid).value += 1;
-      //                     const type = (mes.push_tag === '推') ? 'push' : 'boo';
-      //                     repliedArticle.messageCount[type] += 1;
-      //                   } else {
-      //                     // reply different article
-      //                     replyer.pushCount += 1;
-      //                     repliedAuthor.article.push({
-      //                       title: article,
-      //                       messageCount: {
-      //                         push: mes.push_tag === '推' ? 1 : 0, boo: mes.push_tag === '噓' ? 1 : 0,
-      //                       },
-      //                     });
-      //                     // cellData.links.push({
-      //                     //   source: mes.push_userid,
-      //                     //   target: article.articleId, color: '#ffbb78', tag: 1, value: 1,
-      //                     // });
-      //                   }
-      //                 } else {
-      //                   replyer.reply.push({
-      //                     author,
-      //                     article: [{
-      //                       title: article,
-      //                       messageCount: {
-      //                         push: mes.push_tag === '推' ? 1 : 0, boo: mes.push_tag === '噓' ? 1 : 0,
-      //                       },
-      //                       push_content: mes.push_content,
-      //                     }],
-      //                   });
-      //                   // replyer.push_detail.push({
-      //                   //   author,
-      //                   //   article: [{
-      //                   //     title: article,
-      //                   //     messageCount: {
-      //                   //       push: mes.push_tag === '推' ? 1 : 0,
-      //                   //       boo: mes.push_tag === '噓' ? 1 : 0,
-      //                   //     },
-      //                   //     messageContent: mes.push_content,
-      //                   //     pushDate: mes.push_ipdatetime,
-      //                   //   }],
-      //                   // });
-      //                   // cellData.links.push({
-      //                   //   source: mes.push_userid,
-      //                   //   target: article.articleId,
-      //                   //   color: '#ffbb78',
-      //                   //   tag: 1,
-      //                   //   value: 1,
-      //                   // });
-      //                 }
-      //               } else {
-      //                 cellData.nodes.push({
-      //                   id: mes.push_userid,
-      //                   containUsers: [mes.push_userid],
-      //                   pushCount: 1,
-      //                   push_content: [{ id: mes.push_userid, content: mes.push_content }],
-      //                   push_ipdatetime: mes.push_ipdatetime,
-      //                   authorGroup: [author.id],
-      //                   adj: {
-      //                     [mes.push_userid]: 1,
-      //                   },
-      //                   reply: [{
-      //                     author,
-      //                     article: [{
-      //                       title: article,
-      //                       messageCount: {
-      //                         push: mes.push_tag === '推' ? 1 : 0, boo: mes.push_tag === '噓' ? 1 : 0,
-      //                       },
-      //                     }],
-      //                   }],
-      //                   push_detail: [{
-      //                     author,
-      //                     article: [{
-      //                       title: article,
-      //                       messageCount: {
-      //                         push: mes.push_tag === '推' ? 1 : 0, boo: mes.push_tag === '噓' ? 1 : 0,
-      //                       },
-      //                       messageContent: mes.push_content,
-      //                       pushDate: mes.push_ipdatetime,
-      //                     }],
-      //                   }],
-      //                   cutted_push_content: [[cuttedPushContent]],
-      //                 });
-
-      //                 // cellData.links.push({
-      //                 //   source: mes.push_userid,
-      //                 //   target: article.articleId,
-      //                 //   color: '#ffbb78',
-      //                 //   tag: 1,
-      //                 //   value: 1,
-      //                 // });
-      //               }
-      //               replyCount += 1;
-      //             }
-      //             return true;
-      //           }
-      //           return false;
-      //         });
-      //         size += article.message.length;
-      //         countedArticle += 1;
-      //       }
-      //     });
-      //     author.size = size;
-      //     totalAuthorInfluence += size;
-      //     // console.log(author);
-      //     if (size >= authorInfluenceThreshold) {
-      //       author.countedArticle = countedArticle;
-      //       author.adj = {};
-      //       author.adj[author.id] = -1;
-      //       cellData.nodes.push(author);
-      //     }
-      //     topInfluenceAuthor += 1;
-      //     return true;
-      //   }
-      //   authorGroup += 1;
-      //   return false;
-      // });
-
-      // // node links other nodes which comments the same article
-      // // nodeLinksOtherNodesWithSameArticle(clickedNode, topInfluenceAuthor, topNumOfPushes);
-
-      // // node links the author
-      // // nodeLinksToAuthor(clickedNode, topInfluenceAuthor, topNumOfPushes);
-      // nodeLinksToArticle(clickedNode, topInfluenceAuthor, topNumOfPushes);
-      // mergeCellDataNodes(cellData);
-
-      // cellData.nodes.sort((a, b) => ((a.size < b.size) ? 1 : -1));
-      // const userState = $this.state.user;
-      // if (!$this.state.user.includes(index)) {
-      //   userState.push(index);
-      // }
-      // const setStateWord = cellData.nodes.find(e => e.id === index).titleTermArr;
-      // // console.log(userState);
       $this.setState({
         word: ['a'],
         draw: 0,
@@ -7322,130 +7070,12 @@ class Graph extends Component {
       });
       console.log($this.state);
     });
-    function mergeCellDataNodes(data) {
-      data.links = data.links.filter(e => e.source !== e.target);
-      for (let i = 0; i < data.links.length; i += 1) {
-        const t = data.links[i].target; // target id
-        const s = data.links[i].source; // source id
-        const target_node = data.nodes.find(e => e.id === t); // find target node
-        const source_node = data.nodes.find(e => e.id === s); // find source node
-
-        // adjacency matrix
-        // target_node.adj[s] = target_node.adj[s]
-        //   ? target_node.adj[s] + data.links[i].value : data.links[i].value;
-        // source_node.adj[t] = source_node.adj[t]
-        //   ? source_node.adj[t] + data.links[i].value : data.links[i].value;
-      }
-
-      // merge nodes by author & article
-      for (let i = 0; i < data.nodes.length - 1; i += 1) {
-        for (let j = i + 1; j < data.nodes.length; j += 1) {
-          if (!data.nodes[i].responder && data.nodes[i].id) {
-            if (_.isEqual(data.nodes[i].reply, data.nodes[j].reply)) {
-              const temp_id = data.nodes[i].id;
-              const next_id = data.nodes[j].id;
-              data.nodes[i].containUsers.push(data.nodes[j].id);
-              data.nodes[j].cutted_push_content.forEach((c) => {
-                data.nodes[i].cutted_push_content.push(c);
-              });
-              data.nodes[j].push_detail.forEach((c) => {
-                data.nodes[i].push_detail.push(c);
-              });
-              data.nodes[j].push_content.forEach((c) => {
-                data.nodes[i].push_content.push(c);
-              });
-              data.nodes[i].id = data.nodes[i].id.concat(' ', data.nodes[j].id);
-
-              data.links.forEach((l) => {
-                if (l.source === temp_id) l.source = data.nodes[i].id;
-                if (l.source === next_id) l.source = data.nodes[i].id;
-                if (l.target === temp_id) l.target = data.nodes[i].id;
-                if (l.target === next_id) l.target = data.nodes[i].id;
-              });
-              data.links = data.links.filter(e => e.source !== e.target);
-              data.nodes = data.nodes.filter(e => e.id !== data.nodes[j].id);
-              j -= 1;
-            }
-          }
-        }
-      }
-
-
-      // // merge links
-      for (let i = 0; i < data.links.length - 1; i += 1) {
-        const l = data.links[i];
-        for (let j = i + 1; j < data.links.length; j += 1) {
-          const temp = data.links[j];
-          if ((temp.source === l.source && temp.target === l.target)
-            || (temp.source === l.target && temp.target === l.source)) {
-            // l.value += data.links[j].value;
-            data.links.splice(j, 1);
-            j -= 1;
-          }
-        }
-        // data.links = data.links.filter((e) => {
-        //   if (e.value > 1) return true;
-        //   return e.source !== l.source && e.target !== l.target;
-        // });
-      }
-      const count = 0;
-      for (let i = 0; i < data.links.length - 1; i += 1) {
-        if (data.links[i].source === data.links[i].target) console.log(data.links[i]);
-      }
-      // console.log(count);
-      // console.log(data);
-    }
-    function nodeLinksToArticle(termNode, thresholdOfInfluence, topNumOfComments) {
-      termNode.children.every((author) => {
-        if (thresholdOfInfluence <= topAuthorThreshold) {
-          author.responder.forEach((article) => {
-            // const filteredMessages = article.message.filter(e => e.push_tag === '推');
-            const filteredMessages = article.message.filter(e => e.push_tag);
-            // console.log(filteredMessages);
-            const maximumLength = Math.min(topNumOfComments, filteredMessages.length);
-            if (article.message.length >= articleInfluenceThreshold) {
-              for (let i = 0; i < maximumLength; i += 1) {
-                // console.log(filteredMessages[i]);
-                const existedLink = cellData.links.find((l) => {
-                  const user_id = filteredMessages[i].push_userid;
-                  const author_id = author.id;
-                  return l.source === user_id && l.target === author.id;
-                });
-                if (existedLink) {
-                  existedLink.value += 1;
-                } else {
-                  // cellData.links.push({
-                  //   source: filteredMessages[i].push_userid,
-                  //   target: author.id,
-                  //   color: '#ffbb78',
-                  //   tag: 0,
-                  //   value: 1,
-                  // });
-                  cellData.links.push({
-                    source: filteredMessages[i].push_userid,
-                    target: article.articleId,
-                    color: '#ffbb78',
-                    tag: 1,
-                    value: 1,
-                  });
-                }
-              }
-            }
-          });
-          thresholdOfInfluence += 1;
-          return true;
-        }
-        return false;
-      });
-    }
     function removeTermLayer(data) {
       if (!data) return [];
       const { nodes: termNodes } = data;
       const authorNodes = [];
       termNodes.forEach((termnode) => {
         termnode.children.forEach((user) => {
-          // console.log(authorNodes);
-          // console.log(authorNodes.some(e => e.id === user.id), user.id);
           if (!authorNodes.some(e => e.id === user.id)) {
             authorNodes.push(user);
           }
@@ -7469,15 +7099,7 @@ class Graph extends Component {
     const $this = this;
     return (
       <div className="graph" ref={this.myRef}>
-        {/* <div className="barchart">
-          <svg id="barChart" width="100%" height="100%" style={{ border: '2px solid gray' }} />
-        </div> */}
         <div className="network">
-          {/* <div
-            className="filterBar"
-            id="button"
-            style={{ width: '100%', height: '25px', padding: '0px 10px' }}
-          /> */}
           <div className="termMap">
             <svg id="graph" width="100%" height="100%" style={{}} />
           </div>
@@ -7495,15 +7117,6 @@ class Graph extends Component {
           opState,
         }}
         />
-        {/* <div id="googleChart" /> */}
-        {/* <WordTree word={word} /> */}
-        {/* <div className="heatMap" style={{ border: '2px solid gray', height: 'fit-content', overflowX: 'scroll' }}>
-          <svg id="timeLine" width="100%" height="600px" />
-        </div> */}
-        {/* </div> */}
-        {/* <div className="userDailyActivity" style={{ border: '2px solid gray', height: 'fit-content', overflowX: 'scroll' }}>
-          <svg id="userDailyActivity" width="100%" height="100%" style={{}} />
-        </div> */}
       </div>
     );
   }

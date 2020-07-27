@@ -23,7 +23,6 @@ export default function userSimilarityGraph(data, svg, user, articles) {
   // console.log(user);
   const svgScale = d3.scaleSqrt().domain([1, 200]).range([0.5, 0.03]);
   const commentTimelineSvg = d3.select('#commentTimeline');
-  const w = parseFloat(d3.select('.heatMap').style('width'));
   const h = parseFloat(d3.select('.heatMap').style('height'));
   const focusHeight = 500;
   svg.selectAll('*').remove();
@@ -33,7 +32,6 @@ export default function userSimilarityGraph(data, svg, user, articles) {
   const width = 1300 - margin.left - margin.right;
   const height = 450 - margin.top - margin.bottom;
   const userSimilarity = computeUserSimilarityByArticles(data, user);
-  // Labels of row and columns
   // const myGroups = getAllAuthorId(data); // author
   const clickedUser = [];
   drawSlider();
@@ -817,13 +815,36 @@ export default function userSimilarityGraph(data, svg, user, articles) {
         communityWordArr.push({ community: i, wordList: [] });
       }
       userList.forEach((usr) => {
+        // user's communty
         const usrCom = communityWordArr.find(e => e.community === usr.community);
+        // user's top-50 words
         const filteredTitleWord = usr.titleWordScore.filter((e, index) => index < 50);
+        // total number of words which user has used
         const usrTotalWordCount = filteredTitleWord.reduce((acc, obj) => acc + obj.score, 0);
+        // user's replied articles
+        const repliedArticles = usr.repliedArticle;
         usr.titleWordScore.every((e, index) => {
+          let push = 0;
+          let boo = 0;
+          let neutral = 0;
+          repliedArticles.forEach((art) => {
+            if (art.cuttedTitle.some(w => w.word === e.word)) {
+              const mes = art.messages.filter(m => m.push_userid === usr.id);
+              push += mes.filter(m => m.push_tag === '推').length;
+              boo += mes.filter(m => m.push_tag === '噓').length;
+              neutral += mes.filter(m => m.push_tag === '→').length;
+            }
+          });
           const existedWord = usrCom.wordList.find(c => c.word === e.word);
-          if (existedWord) existedWord.score += (e.score / usrTotalWordCount);
-          else usrCom.wordList.push({ word: e.word, score: e.score / usrTotalWordCount });
+          if (existedWord) {
+            existedWord.score += (e.score / usrTotalWordCount);
+            existedWord.push += push;
+            existedWord.boo += boo;
+            existedWord.neutral += neutral;
+          }
+          else {
+            usrCom.wordList.push({ word: e.word, score: e.score / usrTotalWordCount, push, boo, neutral });
+          }
           return index < (50 - 1);
         });
       });
@@ -832,7 +853,10 @@ export default function userSimilarityGraph(data, svg, user, articles) {
       communityWordArr.forEach((e) => {
         const count = userList.filter(usr => usr.community === e.community).length;
         e.wordList.forEach((list) => {
-          list.score /= count;
+          list.score = Math.round(list.score / count * 100) / 100;
+          list.push = Math.round(list.push / count * 100) / 100;
+          list.boo = Math.round(list.boo / count * 100) / 100;
+          list.neutral = Math.round(list.neutral / count * 100) / 100;
         });
       });
       // sort
@@ -1039,69 +1063,6 @@ export default function userSimilarityGraph(data, svg, user, articles) {
       }
       return array;
     }
-    function computeUserSimilarityByArticles(userAuthorRelationShipArr) {
-      const similarityScale = d3.scaleLinear().domain([0, 2]).range([1, 0]);
-      if (userAuthorRelationShipArr[0].titleWordScore) {
-        const userListArray = [];
-        for (let i = 0; i < userAuthorRelationShipArr.length - 1; i += 1) {
-          const temp = userAuthorRelationShipArr[i].titleWordScore;
-          const tempTotal = temp.reduce((acc, obj) => acc + obj.score, 0);
-          for (let j = i + 1; j < userAuthorRelationShipArr.length; j += 1) {
-            const next = userAuthorRelationShipArr[j].titleWordScore;
-            const searchedWord = [];
-            let dis = 0;
-            const nextTotal = next.reduce((acc, obj) => acc + obj.score, 0);
-            temp.forEach((e, index) => {
-              if (!searchedWord.includes(e.word)) {
-                searchedWord.push(e.word);
-                const sameWord = next.find(e1 => e1.word === e.word);
-                const nextWordScore = sameWord ? sameWord.score : 0;
-                dis += Math.sqrt(Math.abs(((e.score / tempTotal) * (e.score / tempTotal)) - ((nextWordScore / nextTotal) * (nextWordScore / nextTotal))));
-              }
-            });
-            next.forEach((e, index) => {
-              if (!searchedWord.includes(e.word)) {
-                searchedWord.push(e.word);
-                const sameWord = temp.find(e1 => e1.word === e.word);
-                const tempWordScore = sameWord ? sameWord.score : 0;
-                dis += Math.sqrt(Math.abs(((e.score / nextTotal) * (e.score / nextTotal)) - ((tempWordScore / tempTotal) * (tempWordScore / tempTotal))));
-              }
-            });
-            // const sim = 1 / (1 + (dis));
-            console.log(`${userAuthorRelationShipArr[i].id} ${userAuthorRelationShipArr[j].id} dis: ${dis} sim: ${similarityScale(dis)}`);
-            userListArray.push({
-              source: userAuthorRelationShipArr[i].id,
-              target: userAuthorRelationShipArr[j].id,
-              value: similarityScale(dis),
-            });
-          }
-        }
-        return userListArray;
-      }
-
-      const userListArray = [];
-      for (let i = 0; i < userAuthorRelationShipArr.length - 1; i += 1) {
-        const temp = userAuthorRelationShipArr[i].repliedArticle;
-        for (let j = i + 1; j < userAuthorRelationShipArr.length; j += 1) {
-          const next = userAuthorRelationShipArr[j].repliedArticle;
-          const tempdiff = temp.filter(
-            o1 => next.filter(o2 => o2.article_id === o1.article_id).length === 0,
-          );
-          const nextdiff = next.filter(
-            o1 => temp.filter(o2 => o2.article_id === o1.article_id).length === 0,
-          );
-          const intersectArticles = temp.length - tempdiff.length;
-          const nextintersectArticles = next.length - nextdiff.length;
-          const sim = intersectArticles / (temp.length + next.length - intersectArticles);
-          userListArray.push({
-            source: userAuthorRelationShipArr[i].id,
-            target: userAuthorRelationShipArr[j].id,
-            value: sim,
-          });
-        }
-      }
-      return userListArray;
-    }
     function filterAlwaysNonSimilarUser(ds, us, sims, simTh, artTh) {
       const copyUsers = us.slice();
       const isBelowThreshold = currentValue => currentValue.value < simTh;
@@ -1241,7 +1202,7 @@ export default function userSimilarityGraph(data, svg, user, articles) {
 
       const yScale = d3.scaleBand().domain(newUserAxisValues)
         .range([0, newUserAxisValues.length * gridSize]);
-
+      const w = parseFloat(d3.select('.heatMap').style('width'));
       const focusOffSetX = -w / 2 + (newUserAxisValues.length * gridSize) / 2 + 400;
       const focusOffsetY = svgScale(datas.length) * (newUserAxisValues.length * gridSize + 120);
       d3.select('#focus').selectAll('*').remove();
