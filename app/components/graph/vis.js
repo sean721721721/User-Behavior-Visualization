@@ -1,3 +1,4 @@
+/* eslint-disable max-len */
 /* eslint-disable no-underscore-dangle */
 /* eslint-disable no-console */
 /* eslint-disable linebreak-style */
@@ -15,6 +16,7 @@ import * as d3 from 'd3';
 // import { max } from 'moment';
 // import { Row, Form } from 'antd';
 import Chart from 'react-google-charts';
+// eslint-disable-next-line import/no-unresolved
 import netClustering from 'netclustering';
 import * as science from 'science';
 import * as Queue from 'tiny-queue';
@@ -22,6 +24,7 @@ import * as reorder from 'reorder.js/index';
 import sentiment from 'multilang-sentiment';
 import { string } from 'prop-types';
 import * as jsnx from 'jsnetworkx';
+import _ from 'lodash';
 import Louvain from './jLouvain';
 import { OpinionLeader } from './OpinionLeader';
 import { AuthorTable } from './authorTable';
@@ -58,9 +61,10 @@ class Graph extends Component {
     const { opState: nextOpstate, ...nextWithoutOpState } = nextProps;
     // console.log(this.props, nextProps);
     // console.log(thisWithoutOpState, nextWithoutOpState);
-    if (!this.state.hover) {
+    const thisState = this.state;
+    if (!thisState.hover) {
       if (JSON.stringify(thisWithoutOpState) === JSON.stringify(nextWithoutOpState)) {
-        if (JSON.stringify(this.state.word) === JSON.stringify(nextState.word)) {
+        if (JSON.stringify(thisState.word) === JSON.stringify(nextState.word)) {
           console.log('shouldUpdate? No!!');
           return false;
         }
@@ -365,7 +369,7 @@ class Graph extends Component {
         clickedNode.fy = 0;
         cellData.nodes.push(clickedNode);
         totalAuthorInfluence = 0;
-  
+
         // compute author's influence
         clickedNode.children.forEach((author) => {
           let influence = 0;
@@ -380,7 +384,7 @@ class Graph extends Component {
         // compute cellnodes and celllinks
         let topInfluenceAuthor = 1;
         const topNumOfPushes = 100;
-  
+
         // testing data structure
         let authorGroup = index;
         clickedNode.children.every((author) => {
@@ -522,7 +526,7 @@ class Graph extends Component {
                           }],
                           cutted_push_content: [[cuttedPushContent]],
                         });
-  
+
                         // cellData.links.push({
                         //   source: mes.push_userid,
                         //   target: article.articleId,
@@ -556,15 +560,15 @@ class Graph extends Component {
           authorGroup += 1;
           return false;
         });
-  
+
         // node links other nodes which comments the same article
         // nodeLinksOtherNodesWithSameArticle(clickedNode, topInfluenceAuthor, topNumOfPushes);
-  
+
         // node links the author
         // nodeLinksToAuthor(clickedNode, topInfluenceAuthor, topNumOfPushes);
         nodeLinksToArticle(clickedNode, topInfluenceAuthor, topNumOfPushes);
         mergeCellDataNodes(cellData);
-  
+
         cellData.nodes.sort((a, b) => ((a.size < b.size) ? 1 : -1));
         const userState = $this.state.user;
         if (!$this.state.user.includes(index)) {
@@ -592,14 +596,14 @@ class Graph extends Component {
           const s = data.links[i].source; // source id
           const target_node = data.nodes.find(e => e.id === t); // find target node
           const source_node = data.nodes.find(e => e.id === s); // find source node
-  
+
           // adjacency matrix
           // target_node.adj[s] = target_node.adj[s]
           //   ? target_node.adj[s] + data.links[i].value : data.links[i].value;
           // source_node.adj[t] = source_node.adj[t]
           //   ? source_node.adj[t] + data.links[i].value : data.links[i].value;
         }
-  
+
         // merge nodes by author & article
         for (let i = 0; i < data.nodes.length - 1; i += 1) {
           for (let j = i + 1; j < data.nodes.length; j += 1) {
@@ -618,7 +622,7 @@ class Graph extends Component {
                   data.nodes[i].push_content.push(c);
                 });
                 data.nodes[i].id = data.nodes[i].id.concat(' ', data.nodes[j].id);
-  
+
                 data.links.forEach((l) => {
                   if (l.source === temp_id) l.source = data.nodes[i].id;
                   if (l.source === next_id) l.source = data.nodes[i].id;
@@ -632,8 +636,8 @@ class Graph extends Component {
             }
           }
         }
-  
-  
+
+
         // // merge links
         for (let i = 0; i < data.links.length - 1; i += 1) {
           const l = data.links[i];
@@ -843,7 +847,7 @@ class Graph extends Component {
               .endAngle(((latestTime - startDate) / timePeriod) * 360 * (pi / 180));
             return arc();
           }
-          // return 'M0';
+          return 'M0';
         })
         .attr('fill', 'darkgray');
 
@@ -1809,10 +1813,11 @@ class Graph extends Component {
     function communityDetecting() {
       const l = JSON.parse(JSON.stringify(set.links));
       // console.log(links);
+      const origLinks = set.links;
       for (let i = 0; i < l.length; i += 1) {
         // console.log(links[i]);
-        l[i].source = set.nodes.findIndex(ele => ele.titleTerm === set.links[i].source);
-        l[i].target = set.nodes.findIndex(ele => ele.titleTerm === set.links[i].target);
+        l[i].source = set.nodes.findIndex(ele => ele.titleTerm === origLinks[i].source);
+        l[i].target = set.nodes.findIndex(ele => ele.titleTerm === origLinks[i].target);
       }
       // console.log(set.nodes, set.links, l);
       netClustering.cluster(set.nodes, l);

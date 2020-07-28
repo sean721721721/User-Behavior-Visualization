@@ -17,6 +17,7 @@ import * as d3 from 'd3';
 // import { max } from 'moment';
 // import { Row, Form } from 'antd';
 import Chart from 'react-google-charts';
+// eslint-disable-next-line import/no-unresolved
 import netClustering from 'netclustering';
 import * as science from 'science';
 import * as Queue from 'tiny-queue';

@@ -13,6 +13,7 @@ import * as Queue from 'tiny-queue';
 import * as reorder from 'reorder.js/index';
 import * as math from 'mathjs';
 import * as slider from 'd3-simple-slider';
+// eslint-disable-next-line import/no-unresolved
 import netClustering from 'netclustering';
 import CheckboxGroup from 'antd/lib/checkbox/Group';
 import { cps } from 'redux-saga/effects';
@@ -841,9 +842,10 @@ export default function userSimilarityGraph(data, svg, user, articles) {
             existedWord.push += push;
             existedWord.boo += boo;
             existedWord.neutral += neutral;
-          }
-          else {
-            usrCom.wordList.push({ word: e.word, score: e.score / usrTotalWordCount, push, boo, neutral });
+          } else {
+            usrCom.wordList.push({
+              word: e.word, score: e.score / usrTotalWordCount, push, boo, neutral,
+            });
           }
           return index < (50 - 1);
         });
@@ -1524,9 +1526,7 @@ export default function userSimilarityGraph(data, svg, user, articles) {
         focus.append('rect')
           .attr('class', 'unfocus')
           .attr('width', contextXScale.range()[1])
-          .attr('height', () => {
-            return focusMargin + contextYScale.bandwidth() * contextYScale.domain().slice(s[1][1] / contextYScale.bandwidth()).length;
-          })
+          .attr('height', () => focusMargin + contextYScale.bandwidth() * contextYScale.domain().slice(s[1][1] / contextYScale.bandwidth()).length)
           .attr('x', 0)
           .attr('y', s[1][1] ? 400 : -30)
           .attr('fill', 'lightgray');
