@@ -22,8 +22,7 @@ export default function AuthorTable(nodes, div, $this, callback) {
   div.selectAll('*').remove();
   // console.log(parseFloat(d3.select('.network').style('height')));
   // console.log(parseFloat(d3.select('.termMap').style('height')));
-  const h = parseFloat(d3.select('.network').style('height')) - parseFloat(d3.select('.termMap').style('height'));
-  d3.select('#authorList').style('max-height', `${h}px`);
+  const h = parseFloat(d3.select('.authorList').style('height'));
   const authorList = JSON.parse(JSON.stringify(nodes));
   const deltaLengthList = [];
   const threshold = 200;
@@ -49,6 +48,8 @@ export default function AuthorTable(nodes, div, $this, callback) {
   callback({ children: authorList.children }, 'test');
   // console.log(authorList.children);
   // console.log(div);
+  div = div.append('div')
+    .style('max-height', `${h}px`);
   const authorTable = div.append('table');
   // console.log(authorTable);
   const th = authorTable.append('tr');

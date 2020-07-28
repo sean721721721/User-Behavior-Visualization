@@ -279,12 +279,14 @@ export default function treemap(cellNodes, beforeThisDate,
         selectedUserClick(userArr);
       });
 
+    let network_h = parseFloat(d3.select('.selectedUserTable.d-flex.flex-column').style('height'));
+    network_h -= parseFloat(d3.select('#submitDiv').style('height'));
     const tableDiv = selectedUserDiv.append('div')
       .style('border', 'gray 1px solid')
       .style('border-right', '0px')
       .style('border-bottom', '0px')
       .style('border-radius', '5px')
-      .style('max-height', '-webkit-fill-available')
+      .style('max-height', `${parseInt(network_h, 10)}px`)
       .style('overflow-y', 'scroll');
     const table = tableDiv.append('table');
     table.append('tr').append('td')
