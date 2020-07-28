@@ -11,11 +11,12 @@ import React, { Component, PureComponent } from 'react';
 // import { connect } from 'react-redux';
 // import { push } from 'react-router-redux';
 import * as d3 from 'd3';
-import OpinionLeaderView from './OpinionLeaderView';
+import _ from 'lodash';
 // import * as sententree from 'sententree';
 // import { max } from 'moment';
 // import { Row, Form } from 'antd';
 import * as jsnx from 'jsnetworkx';
+import OpinionLeaderView from './OpinionLeaderView';
 
 export default function AuthorTable(nodes, div, $this, callback) {
   // console.log(nodes);
@@ -84,18 +85,11 @@ export default function AuthorTable(nodes, div, $this, callback) {
     .attr('class', 'datarow')
     .on('click', clicked);
 
-  tr.append('td')
-    .text(d => d.id);
+  tr.append('td').text(d => d.id);
 
-  tr.append('td')
-    .text((d) => {
-      return financial(d.pageRank);
-      // const { delta } = deltaLengthList.find(e => e.id === d.id);
-      // return financial(delta);
-    });
+  tr.append('td').text(d => financial(d.pageRank));
 
-  tr.append('td')
-    .text(d => d.responder.length);
+  tr.append('td').text(d => d.responder.length);
 
   tr.append('td')
     .text((d) => {
@@ -104,11 +98,9 @@ export default function AuthorTable(nodes, div, $this, callback) {
     });
   d3.selectAll('.datarow').filter(':nth-child(even)')
     .style('background', 'whitesmoke');
-  // .style('border', d => (d.tag === 1 ? '2px black solid' : 'none'))
 
   function clicked(d) {
     console.log('table clicked');
-    // console.log(d);
     const pushAuthor = JSON.parse(JSON.stringify(d));
     pushAuthor.id = pushAuthor.oldId;
     topicWithSelectedAuthor.children.push(pushAuthor);
@@ -142,7 +134,6 @@ export default function AuthorTable(nodes, div, $this, callback) {
 
   function authorIdPreprocessing(node_data) {
     node_data.forEach((n) => {
-      // console.log(n);
       const new_id = n.id.split(' ');
       n.oldId = n.id;
       [n.id] = new_id;
@@ -157,13 +148,13 @@ export default function AuthorTable(nodes, div, $this, callback) {
     computeSentimentMatrix(selectedNode, node, link);
     computeTotalWeightOfEachNode(node, link);
     pageRank(node, link, alpha);
-    console.log(node, link);
+    // console.log(node, link);
     const minPageRank = findMinimumPagerank(node);
-    console.log(minPageRank);
     selectedNode.children.forEach((e) => {
       const authorNode = node.find(e1 => e1.id === e.id);
       // console.log(authorNode);
-      e.pageRank = authorNode ? authorNode.pageRank + Math.abs(minPageRank) + 1 : Math.abs(minPageRank) + 1;
+      e.pageRank = authorNode
+        ? authorNode.pageRank + Math.abs(minPageRank) + 1 : Math.abs(minPageRank) + 1;
     });
     // console.log(node);
     console.log(selectedNode.children);
@@ -253,7 +244,8 @@ export default function AuthorTable(nodes, div, $this, callback) {
               // console.log(adjencentNode);
               let sumOfEdgeWeightFromAdjNode = 0;
               if (adjNode.weight !== 0) {
-                sumOfEdgeWeightFromAdjNode = adjNode.pageRank * ((temp_link.value / temp_link.num) / adjNode.weight);
+                sumOfEdgeWeightFromAdjNode = adjNode.pageRank
+                  * ((temp_link.value / temp_link.num) / adjNode.weight);
               }
               total_rightFormula += sumOfEdgeWeightFromAdjNode;
             }
@@ -267,7 +259,6 @@ export default function AuthorTable(nodes, div, $this, callback) {
 
         for (let m = 0; m < total_num; m += 1) {
           node_data[m].pageRank = newPageRank[m];
-          // if (node_data[m].post && node_data[m].weight > 0) console.log(node_data[m], node_data[m].pageRank);
         }
         console.log(`leaderPageRank: ${err}, total_num * tolerance: ${total_num * tolerance}`);
         if (err < total_num * tolerance) break;
