@@ -2089,12 +2089,10 @@ export default function userSimilarityGraph(data, svg, user, articles) {
             for (let i = 0; i < _index; i += 1) {
               pos += articleGroupScale(communityEachLevelCount[i].level[0].length);
             }
-            return pos + positionScale[groupIndex[index].index];
+            return pos + positionScale[tem];
           })
           .attr('x', 0)
-          .attr('height', (d) => {
-            return articleGroupScale(d.level[0].length);
-          })
+          .attr('height', d => articleGroupScale(d.level[0].length))
           .attr('width', 10)
           .attr('fill', 'blue');
 
