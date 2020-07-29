@@ -58,13 +58,13 @@ export default function AuthorTable(nodes, div, $this, callback) {
     .attr('width', '25%')
     .text('AuthorID');
   th.append('th').attr('class', 'tableHeader deltaLength')
-    .attr('width', '25%')
+    .attr('width', '20%')
     .text('LPR');
   th.append('th').attr('class', 'tableHeader articleCount')
     .attr('width', '25%')
     .text('# Of Articles');
   th.append('th').attr('class', 'tableHeader messageCount')
-    .attr('width', '25%')
+    .attr('width', '30%')
     .text('Total Comments');
   // th.append('th').attr('class', 'tableHeader articles')
   //   .attr('width', '25%')
