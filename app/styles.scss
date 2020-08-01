@@ -300,7 +300,7 @@ path:hover {
     height: 95vh;
     display: grid;
     grid-gap: 1px;
-    grid-template-rows: [grow1] 90px [grow2] minmax(1px, 90vh) [growend];
+    grid-template-rows: [grow1] 0px [grow2] minmax(1px, 90vh) [growend];
 }
 
 .box {
@@ -326,12 +326,34 @@ path:hover {
     grid-template-columns: [col1] 0.6fr [col2] 0.4fr [colend];
 }
 
-.graph {
-    grid-column: col1 / colend;
-    // grid-row: grow2 / growend;
-    display: grid;
-    grid-template-columns: [sscol1] 0.0fr [sscol2] 0.0fr [sscol3] 30.3fr [sscol4] 0.4fr [sscol5] 69.3fr [sscolend];
-    // grid-template-rows: [ssrow1] auto [ssrow2] 0.2fr [ssrowend];
+@media (min-width: 300px) {
+    .graph {
+        grid-column: col1 / colend;
+        // grid-row: grow2 / growend;
+        display: grid;
+        grid-template-columns: [sscol1] 100fr [sscolend];
+        // grid-template-rows: [ssrow1] 100fr [ssrowend];
+    }   
+}
+
+@media (min-width: 600px) {
+    .graph {
+        grid-column: col1 / colend;
+        // grid-row: grow2 / growend;
+        display: grid;
+        grid-template-columns: [sscol1] 100fr [sscolend];
+        // grid-template-rows: [ssrow1] 100fr [ssrowend];
+    }   
+}
+
+@media (min-width: 900px) {
+    .graph {
+        grid-column: col1 / colend;
+        // grid-row: grow2 / growend;
+        display: grid;
+        grid-template-columns: [sscol1] 0.0fr [sscol2] 0.0fr [sscol3] 30.3fr [sscol4] 0.4fr [sscol5] 69.3fr [sscolend];
+        // grid-template-rows: [ssrow1] auto [ssrow2] 0.2fr [ssrowend];
+    }   
 }
 
 .barchart {
@@ -340,15 +362,44 @@ path:hover {
     // grid-row: ssrow1 / ssrow2;
 }
 
-.network {
-    border: 2px solid gray;
-    border-radius: 5px;
-    display: grid;
-    grid-column: sscol3 / sscol4;
-    // grid-row: ssrow1 / ssrowend;
-    grid-template-columns: [nwcol1] 8fr [nwcol2] 2fr [nwcolend];
-    grid-template-rows: [nwrow1] 6fr [nwrow2] 4fr [nwrowend];
-}  
+@media (min-width: 300px) {
+    .network {
+        height: 100vh;
+        border: 2px solid gray;
+        border-radius: 5px;
+        display: grid;
+        grid-column: sscol1 / sscolend;
+        // grid-row: ssrow1 / ssrowend;
+        grid-template-columns: [nwcol1] 8fr [nwcol2] 2fr [nwcolend];
+        grid-template-rows: [nwrow1] 6fr [nwrow2] 4fr [nwrowend];
+    }  
+}
+
+@media (min-width: 600px) {
+    .network {
+        height: 100vh;
+        border: 2px solid gray;
+        border-radius: 5px;
+        display: grid;
+        grid-column: sscol1 / sscolend;
+        // grid-row: ssrow1 / ssrowend;
+        grid-template-columns: [nwcol1] 8fr [nwcol2] 2fr [nwcolend];
+        grid-template-rows: [nwrow1] 6fr [nwrow2] 4fr [nwrowend];
+    }  
+}
+
+@media (min-width: 900px) {
+    .network {
+        height: 90vh;
+        border: 2px solid gray;
+        border-radius: 5px;
+        display: grid;
+        grid-column: sscol3 / sscol4;
+        // grid-row: ssrow1 / ssrowend;
+        grid-template-columns: [nwcol1] 8fr [nwcol2] 2fr [nwcolend];
+        grid-template-rows: [nwrow1] 6fr [nwrow2] 4fr [nwrowend];
+    } 
+}
 
 .filterBar {
     // border: 2px solid gray;
@@ -372,21 +423,68 @@ path:hover {
     // grid-template-rows: [nwrow1] 0.1fr [nwrow2] 0.9fr [nwrowend];
 }
 
-.opinionLeaderView {
-    border: 2px solid gray;
-    border-radius: 5px;
-    display: grid;
-    grid-column: sscol5 / sscolend;
-    // grid-row: ssrow1 / ssrowend;
-    grid-template-rows: [acrow1] 3fr [acrow2] 7fr [acrowend];
-    grid-template-columns: [accol1] 3fr [accol2] 2.5fr [accol3] 1fr [accol4] 3.5fr [accolend];
+@media (min-width: 375px) {
+    .opinionLeaderView {
+        height: 200vh;
+        border: 2px solid gray;
+        border-radius: 5px;
+        // display: grid;
+        grid-column: sscol1 / sscolend;
+        // grid-row: ssrow1 / ssrowend;
+        grid-template-rows: [acrow1] 3fr [acrow2] 7fr [acrowend];
+        grid-template-columns: [accol1] 3fr [accol2] 2.5fr [accol3] 1fr [accol4] 3.5fr [accolend];
+    }
 }
 
-.heatMap {
-    display: grid;
-    grid-column: accol1 / accol3;
-    grid-row: acrow1 / acrowend;
-    grid-template-rows: [hmrow1] 1fr [hmrow2] 9fr [hmrowend];
+@media (min-width: 600px) {
+    .opinionLeaderView {
+        height: 90vh;
+        border: 2px solid gray;
+        border-radius: 5px;
+        display: grid;
+        grid-column: sscol1 / sscolend;
+        // grid-row: ssrow1 / ssrowend;
+        grid-template-rows: [acrow1] 3fr [acrow2] 7fr [acrowend];
+        grid-template-columns: [accol1] 3fr [accol2] 2.5fr [accol3] 1fr [accol4] 3.5fr [accolend];
+    }
+}
+
+@media (min-width: 900px) {
+    .opinionLeaderView {
+        border: 2px solid gray;
+        border-radius: 5px;
+        display: grid;
+        grid-column: sscol5 / sscolend;
+        // grid-row: ssrow1 / ssrowend;
+        grid-template-rows: [acrow1] 3fr [acrow2] 7fr [acrowend];
+        grid-template-columns: [accol1] 3fr [accol2] 2.5fr [accol3] 1fr [accol4] 3.5fr [accolend];
+    }
+}
+
+@media (min-width: 300px) {
+    .heatMap {
+        // display: inline;
+        height: 100vh;
+        grid-column: accol1 / accol3;
+        border: 2px solid gray;
+        // grid-row: acrow1 / acrowend;
+        grid-template-rows: [hmrow1] 1fr [hmrow2] 9fr [hmrowend];
+    }
+}
+
+@media (min-width: 600px) {
+    .heatMap {
+        height: 90vh;
+        display: grid;
+        border-left: 0px solid gray;
+        border-top: 0px solid gray;
+        // border-bottom: 0px solid gray;
+        max-height: '800px';
+        min-height: '400px';
+        grid-column: accol1 / accol3;
+        grid-row: acrow1 / acrowend;
+        grid-template-rows: [hmrow1] 1fr [hmrow2] 9fr [hmrowend];
+    }
 }
 
 // .option {
@@ -398,13 +496,27 @@ path:hover {
 //     display: grid;
 //     grid-row: hmrow2 / hmrowend;
 // }
+@media (min-width: 300px) {
+    .contextDiv {
+        height: 100vh;
+        // display: inline;
+        grid-column: accol3 / accolend;
+        // grid-row: acrow1 / acrowend;
+        overflow-x: scroll;
+        overflow-y: scroll;
+    }
+}
 
-.contextDiv {
-    display: grid;
-    grid-column: accol3 / accolend;
-    grid-row: acrow1 / acrowend;
-    overflow-x: scroll;
-    overflow-y: scroll;
+@media (min-width: 600px) {
+    .contextDiv {
+        border-bottom: 2px solid gray;
+        height: 90vh;
+        display: grid;
+        grid-column: accol3 / accolend;
+        grid-row: acrow1 / acrowend;
+        overflow-x: scroll;
+        overflow-y: scroll;
+    }
 }
 
 // .focusDiv {

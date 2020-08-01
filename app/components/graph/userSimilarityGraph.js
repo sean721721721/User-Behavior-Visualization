@@ -40,9 +40,15 @@ export default function userSimilarityGraph(data, svg, user, articles) {
   drawSortOptionDiv();
   function drawSlider() {
     d3.select('.option').selectAll('*').remove();
-    const sliderSvg = d3.select('.option').append('svg')
+    const sliderSvg = d3.select('.option').append('div')
+      .style('display', 'inline')
+      .append('svg')
       .attr('class', 'sliderSvg')
-      .style('margin-top', '10px');
+      .attr('width', '220px')
+      .attr('height', '50px')
+      .style('margin', '10px')
+      .append('g')
+      .attr('transform', 'scale(0.8)');
     let similarThresh = 0.1;
     let articleThresh = 1;
     const similaritySlider = slider.sliderBottom()
@@ -59,9 +65,9 @@ export default function userSimilarityGraph(data, svg, user, articles) {
 
     const gSlider1 = sliderSvg.append('g')
       .attr('class', 'similaritySlider')
-      .attr('transform', `translate(${4 * margin.left},${margin.top / 2})`);
+      .attr('transform', `translate(${3 * margin.left},${margin.top / 2})`);
     const sliderText1 = sliderSvg.append('g')
-      .attr('transform', `translate(${margin.left},${margin.top / 2})`)
+      .attr('transform', `translate(0,${margin.top / 2})`)
       .append('text')
       .text('Similarity')
       .attr('y', 5);
@@ -71,9 +77,15 @@ export default function userSimilarityGraph(data, svg, user, articles) {
       .selectAll('.tick')
       .selectAll('text')
       .attr('y', 10);
-    const repliedSliderSvg = d3.select('.option').append('svg')
+    const repliedSliderSvg = d3.select('.option').append('div')
+      .style('display', 'inline')
+      .append('svg')
       .attr('class', 'repliedSliderSvg')
-      .style('margin-top', '10px');
+      .attr('height', '50px')
+      .attr('width', '220px')
+      .style('margin', '10px')
+      .append('g')
+      .attr('transform', 'scale(0.8)');
     const repliedSlider = slider.sliderBottom()
       .min(0)
       .max(100)
@@ -104,11 +116,13 @@ export default function userSimilarityGraph(data, svg, user, articles) {
   }
 
   function drawFilterDiv() {
-    const filterDiv = d3.select('.heatMap').select('.option').append('div')
+    let filterDiv = d3.select('.heatMap').select('.option').append('div')
+      .style('display', 'inline-block')
       .attr('class', 'filterDiv')
       .style('margin-top', '10px');
-    filterDiv.append('p')
+    filterDiv = filterDiv.append('div')
       .style('margin-bottom', '0px')
+      .style('transform', 'scale(0.8)')
       .text('ArticleGroupBy:');
     const tagInput = filterDiv.append('div')
       .style('margin-left', '10px');
@@ -529,7 +543,8 @@ export default function userSimilarityGraph(data, svg, user, articles) {
       });
 
       for (let i = 0; i < permuted_mat.length; i += 1) {
-        leftSvg.append('g').selectAll()
+        const leftSvgGroup = leftSvg.append('g')
+        leftSvgGroup.selectAll()
           .data(secondOrdering_mat[i])
           .enter()
           .append('rect')
@@ -574,56 +589,66 @@ export default function userSimilarityGraph(data, svg, user, articles) {
                   }
                   return leftMyColor(d);
                 })
+                .attr('visibility', i >= index ? 'hidden' : 'visible')
                 .on('mouseover', () => mouseover(secondOrdering_origMat[i][index], index, i))
                 .on('mouseout', mouseout)
                 .on('click', () => rectClick(d, index, i));
             }
           });
+        const tempUser = community.find(e => e.id === newUserAxisValues[i]);
+        leftSvgGroup.append('path')
+          .attr('d', () => {
+            const start = positionScale[i];
+            const size = datas.find(e => e.id === tempUser.id).repliedArticle.length;
+            const end = positionScale[i] + bandWidthScale(size);
+            return `M ${start} ${start} L ${end} ${start} L ${end} ${end}`
+          })
+          .attr('fill', color(tempUser.community));
       }
       // draw user group heatmap
-      for (let i = 0; i < groupIndex.length - 1; i += 1) {
-        const rectX = groupIndex[i].index;
-        for (let j = i + 1; j < groupIndex.length; j += 1) {
-          const rectY = groupIndex[j].index;
-          leftSvg.append('g')
-            .attr('class', `community${groupIndex[i].community}${groupIndex[j].community}`)
-            .append('rect')
-            .attr('x', positionScale[rectX])
-            .attr('y', positionScale[rectY])
-            .attr('rx', () => {
-              const tem = groupIndex[i].index;
-              const nex = tem + groupIndex[i].num;
-              return Math.min(15, (positionScale[nex] - positionScale[tem]) / 10);
-            })
-            .attr('ry', () => {
-              const tem = groupIndex[j].index;
-              const nex = groupIndex[j + 1] ? groupIndex[j + 1].index : positionScale.length - 1;
-              return Math.min(15, (positionScale[nex] - positionScale[tem]) / 10);
-            })
-            .attr('stroke', 'white')
-            .attr('stroke-width', '2px')
-            .attr('height', () => {
-              const tem = groupIndex[j].index;
-              const nex = groupIndex[j + 1] ? groupIndex[j + 1].index : positionScale.length - 1;
-              return positionScale[nex] - positionScale[tem];
-            })
-            .attr('width', () => {
-              const tem = groupIndex[i].index;
-              const nex = tem + groupIndex[i].num;
-              return positionScale[nex] - positionScale[tem];
-            })
-            .attr('fill', () => {
-              let totalSim = 0;
-              for (let k = rectX; k < rectX + groupIndex[i].num; k += 1) {
-                for (let l = rectY; l < rectY + groupIndex[j].num; l += 1) {
-                  totalSim += secondOrdering_mat[k][l];
-                }
-              }
-              // console.log(totalSim);
-              return leftMyColor(totalSim / (groupIndex[i].num * groupIndex[j].num));
-            });
-        }
-      }
+      // for (let i = 0; i < groupIndex.length - 1; i += 1) {
+      //   const rectX = groupIndex[i].index;
+      //   for (let j = i + 1; j < groupIndex.length; j += 1) {
+      //     const rectY = groupIndex[j].index;
+      //     leftSvg.append('g')
+      //       .attr('class', `community${groupIndex[i].community}${groupIndex[j].community}`)
+      //       .append('rect')
+      //       .attr('x', positionScale[rectX])
+      //       .attr('y', positionScale[rectY])
+      //       .attr('rx', () => {
+      //         const tem = groupIndex[i].index;
+      //         const nex = tem + groupIndex[i].num;
+      //         return Math.min(15, (positionScale[nex] - positionScale[tem]) / 10);
+      //       })
+      //       .attr('ry', () => {
+      //         const tem = groupIndex[j].index;
+      //         const nex = groupIndex[j + 1] ? groupIndex[j + 1].index : positionScale.length - 1;
+      //         return Math.min(15, (positionScale[nex] - positionScale[tem]) / 10);
+      //       })
+      //       .attr('stroke', 'white')
+      //       .attr('stroke-width', '2px')
+      //       .attr('height', () => {
+      //         const tem = groupIndex[j].index;
+      //         const nex = groupIndex[j + 1] ? groupIndex[j + 1].index : positionScale.length - 1;
+      //         return positionScale[nex] - positionScale[tem];
+      //       })
+      //       .attr('width', () => {
+      //         const tem = groupIndex[i].index;
+      //         const nex = tem + groupIndex[i].num;
+      //         return positionScale[nex] - positionScale[tem];
+      //       })
+      //       .attr('fill', () => {
+      //         let totalSim = 0;
+      //         for (let k = rectX; k < rectX + groupIndex[i].num; k += 1) {
+      //           for (let l = rectY; l < rectY + groupIndex[j].num; l += 1) {
+      //             totalSim += secondOrdering_mat[k][l];
+      //           }
+      //         }
+      //         // console.log(totalSim);
+      //         return leftMyColor(totalSim / (groupIndex[i].num * groupIndex[j].num));
+      //       });
+      //   }
+      // }
       drawUserAxis();
       leftSvg.append('g').attr('class', 'radialGroup')
         .attr('transform', `translate(0,${positionScale[positionScale.length - 1] + 30})`);
@@ -2127,6 +2152,22 @@ export default function userSimilarityGraph(data, svg, user, articles) {
             .selectAll('path')
             .data(arr[i])
             .enter()
+            .append('path')
+            .attr('d', (d, index) => {
+              let numOfArticles = 0;
+              for (let k = 0; k < index; k += 1) {
+                numOfArticles += xScale(arr[i][k].level[0].length);
+              }
+              const startPoint = numOfArticles + positionScale[tem];
+              const endPoint = startPoint + xScale(d.level[0].length);
+              return `M ${startPoint} ${startPoint} L ${startPoint} ${endPoint} L ${endPoint} ${endPoint}`
+            })
+            .attr('fill', (d, index) => d3.schemeTableau10[index]);
+
+          articleGroupHeatmap.append('g')
+            .selectAll('path')
+            .data(arr[i])
+            .enter()
             .append('g')
             .attr('class', `communit_${i}`)
             .each((d, index, nodes) => {
@@ -2143,7 +2184,6 @@ export default function userSimilarityGraph(data, svg, user, articles) {
                   .append('rect')
                   .attr('y', (_d, _index) => {
                     console.log(d, _d);
-                    // num of same articles
                     let numOfArticles = 0;
                     for (let k = 0; k < _index; k += 1) {
                       numOfArticles += yScale(arr[j][k].level[0].length);
@@ -2161,8 +2201,11 @@ export default function userSimilarityGraph(data, svg, user, articles) {
                   })
                   .attr('height', _d => yScale(_d.level[0].length))
                   .attr('width', _d => xScale(d.level[0].length))
-                  .attr('fill', (d, _index) => (index === _index ? color(_index) : leftMyColor(55)))
-                  .attr('visibility', (d, _index) => (index <= _index ? 'visible' : 'hidden'));
+                  .attr('fill', (_d, _index) => (index === _index ? d3.schemeTableau10[_index] : leftMyColor(55)))
+                  .attr('visibility', (_d, _index) => {
+                    if (i === j) return 'hidden';
+                    return index === _index ? 'visible' : 'hidden';
+                  });
               }
             });
           // .attr('y', (d, _index) => {

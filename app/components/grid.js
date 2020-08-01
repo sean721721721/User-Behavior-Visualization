@@ -521,7 +521,7 @@ class Grid extends React.Component {
     // console.log(this.state);
     return (
       <div className="container-fluid">
-        <div className="navbar fixed-top">
+        <div className="navbar">
           <Menu
             menuprops={menuprops}
             onSubmit={this.handleSubmit}

@@ -13344,15 +13344,15 @@ class OpinionLeaderView extends React.Component {
           />
           <svg id="articleCell" width="100%" height="94%" />
         </div> */}
-        <div className="heatMap" style={{ borderRight: '2px solid gray', maxHeight: '800px', minHeight: '400px' }}>
-          <div className="option" style={{width: '100%', height: '60px', display: 'flex' }}/>
+        <div className="heatMap">
+          <div className="option" style={{width: '100%', display: 'inline' }}/>
           {/* <div className="option"/> */}
           <div className="timeline">
             <svg id="timeLine" width="100%" height="100%" />
           </div>
         </div>
         <div className="contextDiv">
-          <div className="option" style={{width: '100%', height: '50px', display: 'flex' }}/>
+          <div className="option" style={{width: '100%', height: '50px', display: 'inline' }}/>
           <svg id="context" width="100%" height="100%" />
         </div>
         {/* <div className="focusDiv">
