@@ -339,7 +339,7 @@ export default function userSimilarityGraph(data, svg, user, articles) {
     d3.select('.position').attr('transform', `scale(1) translate(${2 * margin.left},${4 * margin.top})`);
     const leftSvg = group.append('g')
       .attr('class', 'leftSvg')
-      .attr('transform', `scale(${svgScale(datas.length) > 0 ? svgScale(datas.length) : 0.4}) translate(300,300)`);
+      .attr('transform', `rotate(-45) scale(${svgScale(datas.length) > 0 ? svgScale(datas.length) : 0.4}) translate(0,0)`);
 
     const y = d3.scaleBand().range([0, axisDomain.length * gridSize])
       .domain(axisDomain);
@@ -662,13 +662,12 @@ export default function userSimilarityGraph(data, svg, user, articles) {
           .append('g')
           .append('text')
           .text(d => d)
-          .attr('x', -10)
+          .attr('x', positionScale[positionScale.length - 1] + 30)
           .attr('y', (d, index) => (positionScale[index + 1] + positionScale[index]) / 2)
           .attr('fill', (d) => {
             const index = community.findIndex(e => e.id === d);
             return color(community[index].community);
           })
-          .style('text-anchor', 'end')
           .attr('dy', '0.2em')
           .style('font-size', (d, index) => (positionScale[index + 1] - positionScale[index]) / 2);
 
@@ -1986,7 +1985,9 @@ export default function userSimilarityGraph(data, svg, user, articles) {
 
     function drawUserGroupBipartiteRelations() {
       const radialGroupMargin = 50;
-      const radial = leftSvg.select('.radialGroup');
+      const radial = group.append('g')
+        .attr('class', 'radialGroup')
+        .attr('transform', `translate(0, 10) scale(${svgScale(datas.length) > 0 ? svgScale(datas.length) : 0.4})`);
       const articleGroupHeatmap = leftSvg.append('g').attr('class', 'articleGroupHeatmap');
       const numOfArtCom = Math.max(...articlesCommunity.map(e => e.community)) + 1;
       const numOfArtOfEachComunity = [];
@@ -2034,23 +2035,24 @@ export default function userSimilarityGraph(data, svg, user, articles) {
         for (let j = 0; j < numOfArtCom; j += 1) {
           groupRadial.append('rect')
             .attr('y', articleGroupYScale[j])
-            .attr('x', positionScale[comunityIndexY[i]])
+            .attr('x', positionScale[comunityIndexY[i]] * Math.sqrt(2))
             .attr('height', articleGroupWidthScale(numOfArtOfEachComunity[j].length))
             .attr('width', () => {
               const tem = comunityIndexY[i];
               let nex = positionScale.length - 1;
               if (comunityIndexY[i + 1]) nex = comunityIndexY[i + 1];
-              return positionScale[nex] - positionScale[tem];
+              return (positionScale[nex] - positionScale[tem]) * Math.sqrt(2);
             })
             .attr('fill', 'white')
             .attr('stroke', color(i))
             .attr('stroke-width', '0.5px');
         }
+        // draw bipartite graph visualization
         const arr = drawRelationRatio(i, numOfUser);
         articleGroupOfUserCommunity.push(arr);
       }
-
-      drawArticleGroupOfUserCommunity(articleGroupOfUserCommunity);
+      // draw article heatmap on the left side of the main heatMap
+      // drawArticleGroupOfUserCommunity(articleGroupOfUserCommunity);
 
       function drawRelationRatio(index, userCount) {
         const communityIndexDatas = datas.filter(e => e.community === index);
@@ -2073,7 +2075,9 @@ export default function userSimilarityGraph(data, svg, user, articles) {
         const tem = comunityIndexY[index];
         let nex = positionScale.length - 1;
         if (comunityIndexY[index + 1]) nex = comunityIndexY[index + 1];
-        const maxWidth = positionScale[nex] - positionScale[tem];
+        // width of user group
+        const maxWidth = (positionScale[nex] - positionScale[tem]) * Math.sqrt(2);
+        console.log(maxWidth);
         const groupRadial = radial.select(`.group_${index}`);
         for (let i = 0; i < communityEachLevelCount.length; i += 1) {
           const radialColor = d3.scaleLinear().domain([-1, 4]).range(['white', color(index)]);
@@ -2086,7 +2090,7 @@ export default function userSimilarityGraph(data, svg, user, articles) {
             .attr('y', articleGroupYScale[tempCommunity])
             .attr('x', (d) => {
               const offset = (maxWidth) * (1 - d.length / numOfArtOfEachComunity[tempCommunity].length);
-              return positionScale[tem] + offset;
+              return (positionScale[tem] * Math.sqrt(2)) + offset;
             })
             .attr('height', articleGroupWidthScale(numOfArtOfEachComunity[tempCommunity].length))
             .attr('width', d => maxWidth * (d.length / numOfArtOfEachComunity[tempCommunity].length))
