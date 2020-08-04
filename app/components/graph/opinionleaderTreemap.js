@@ -32,7 +32,7 @@ export default function treemap(cellNodes, beforeThisDate,
   const h = parseFloat(d3.select('.termMap').style('height'));
   const width = w - margin.left - margin.right;
   const height = h - margin.top - margin.bottom;
-  const mostUserNum = 200;
+  const mostUserNum = 1000;
   // append the svg object to the body of the page
   svg.selectAll('*').remove();
   const articleTreemap = svg.append('g')

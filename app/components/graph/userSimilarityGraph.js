@@ -221,7 +221,7 @@ export default function userSimilarityGraph(data, svg, user, articles) {
             }
           });
           // const sim = 1 / (1 + (dis));
-          console.log(`${userAuthorRelationShipArr[i].id} ${userAuthorRelationShipArr[j].id} dis: ${dis} sim: ${similarityScale(dis)}`);
+          // console.log(`${userAuthorRelationShipArr[i].id} ${userAuthorRelationShipArr[j].id} dis: ${dis} sim: ${similarityScale(dis)}`);
           userListArray.push({
             source: userAuthorRelationShipArr[i].id,
             target: userAuthorRelationShipArr[j].id,
@@ -768,10 +768,10 @@ export default function userSimilarityGraph(data, svg, user, articles) {
       communityWordArr.forEach((e) => {
         const count = userList.filter(usr => usr.community === e.community).length;
         e.wordList.forEach((list) => {
-          list.score = Math.round(list.score / count * 100) / 100;
-          list.push = Math.round(list.push / count * 100) / 100;
-          list.boo = Math.round(list.boo / count * 100) / 100;
-          list.neutral = Math.round(list.neutral / count * 100) / 100;
+          list.score = Math.round(list.score / count * 1000) / 1000;
+          list.push = Math.round(list.push / count * 1000) / 1000;
+          list.boo = Math.round(list.boo / count * 1000) / 1000;
+          list.neutral = Math.round(list.neutral / count * 1000) / 1000;
         });
       });
       // sort
@@ -2183,7 +2183,7 @@ export default function userSimilarityGraph(data, svg, user, articles) {
                   .enter()
                   .append('rect')
                   .attr('y', (_d, _index) => {
-                    console.log(d, _d);
+                    // console.log(d, _d);
                     let numOfArticles = 0;
                     for (let k = 0; k < _index; k += 1) {
                       numOfArticles += yScale(arr[j][k].level[0].length);

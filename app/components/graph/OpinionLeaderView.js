@@ -121,7 +121,7 @@ class OpinionLeaderView extends React.Component {
     function handleSubmit(e) {
       // e.preventDefault();
       console.log(e);
-      const userNumsPerRequest = 200;
+      const userNumsPerRequest = 50;
       const { length } = e;
       const myRequest = [];
       const userListArray = [];
@@ -142,13 +142,15 @@ class OpinionLeaderView extends React.Component {
       // console.log(url);
       // console.log(myRequest);
       loading(0, myRequest.length, userSimilaritySvg);
-      const resArr = [];
+      const resArr = { articles: [], userListArray: [] };
       fetch(myRequest[0])
         .then(response => response.json())
         .then((response) => {
           console.log(response);
-          resArr.push(response);
-          loading(resArr.length, myRequest.length, userSimilaritySvg);
+          resArr.articles = response.articles;
+          resArr.userListArray = response.userListArray;
+          console.log(resArr);
+          loading(((resArr.userListArray.length / userNumsPerRequest) + 1), myRequest.length, userSimilaritySvg);
           // for (let j = 0; j < fixedUserArr[0].length; j += 1) {
           //   buildUserList(userListArray, response, fixedUserArr[0][j]);
           // }
@@ -167,19 +169,26 @@ class OpinionLeaderView extends React.Component {
             fetch(myRequest[i])
               .then(res => res.json())
               .then((res) => {
-                resArr.push(res);
-                loading(resArr.length, myRequest.length, userSimilaritySvg);
+                // resArr.push(res);
+                resArr.userListArray = resArr.userListArray.concat(res.userListArray);
+                res.articles.forEach((a) => {
+                  if (!resArr.articles.includes(a2 => a2.article_id === a.article_id)) {
+                    resArr.articles.push(a);
+                  }
+                });
+                console.log(resArr);
+                loading(((resArr.userListArray.length / userNumsPerRequest) + 1), myRequest.length, userSimilaritySvg);
                 // console.log(res[0][0]);
-                console.log('build');
-                for (let j = 0; j < fixedUserArr[i].length; j += 1) {
-                  buildUserList(userListArray, res, fixedUserArr[i][j]);
-                }
-                return res;
+                // console.log('build');
+                // for (let j = 0; j < fixedUserArr[i].length; j += 1) {
+                //   buildUserList(userListArray, res, fixedUserArr[i][j]);
+                // }
+                // return res;
               })
               .then(() => {
-                console.log(`recieveDataCount: ${resArr.length}, total: ${myRequest.length}`);
-                if (resArr.length === myRequest.length) {
-                  const articlesArr = resArrayToArticlesArray(resArr);
+                console.log(`recieveDataCount: ${resArr.userListArray.length / userNumsPerRequest + 1}, total: ${myRequest.length}`);
+                if (((resArr.userListArray.length / userNumsPerRequest) + 1) >= myRequest.length) {
+                  // const articlesArr = resArrayToArticlesArray(resArr);
                   // console.log(articlesArr);
                   let usrArr = [];
                   for (let j = 0; j < fixedUserArr.length; j += 1) {
@@ -187,7 +196,7 @@ class OpinionLeaderView extends React.Component {
                   }
                   // userActivityTimeline(articlesArr, commentTimelineSvg, usrArr);
                   // userDailyActivity(articlesArr, usrArr, commentTimelineSvg, beginDate, endDate);
-                  userSimilarityGraph(userListArray, userSimilaritySvg, usrArr, articlesArr);
+                  userSimilarityGraph(resArr.userListArray, userSimilaritySvg, usrArr, resArr.articles);
                 }
               });
           }
