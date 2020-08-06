@@ -30,7 +30,7 @@ export default function userActivityTimeline(data, svg, user) {
     .append('div')
     .style('opacity', 0)
     .attr('class', 'tooltip')
-    .style('background-color', 'white')
+    .style('background-color', 'black')
     .style('border', 'solid')
     .style('border-width', '2px')
     .style('border-radius', '5px')

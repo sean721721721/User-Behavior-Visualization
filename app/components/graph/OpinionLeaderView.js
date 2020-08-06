@@ -13184,7 +13184,7 @@ class OpinionLeaderView extends React.Component {
         totalReplyCount: 6,
         repliedArticle: [
           {
-            article_id: 'a', article_title: '[QE] A', date: "2019-04-15T00:15:32.000Z", 
+            article_id: 'a', article_title: '[QE] A', cuttedTitle:[{word: 'a'},{word: 'b'}], date: "2019-04-15T00:15:32.000Z", 
             messages:[
               {push_userid: 'imsphzzz',push_tag: '推',push_ipdatetime: "04/15 09:51"},
               {push_userid: 'OutBai',push_tag: '→', push_ipdatetime: "04/15 19:22"},
@@ -13192,14 +13192,14 @@ class OpinionLeaderView extends React.Component {
             ]
           },
           {
-            article_id: 'b', article_title: '[QE] B', date: "2019-04-15T00:36:32.000Z", 
+            article_id: 'b', article_title: '[QE] B', cuttedTitle:[{word: 'a'},{word: 'b'}], date: "2019-04-15T00:36:32.000Z", 
             messages:[
               {push_userid: 'sasintw',push_tag: '噓',push_ipdatetime: "04/15 09:51"},
               {push_userid: 'imsphzzz', push_tag: '→',push_ipdatetime: "04/15 19:22"}
             ],
           },
           {
-            article_id: 'c', article_title: '[QE] C', date: "2019-04-15T00:42:00.000Z", 
+            article_id: 'c', article_title: '[QE] C', cuttedTitle:[{word: 'a'},{word: 'b'}], date: "2019-04-15T00:42:00.000Z", 
             messages:[
               {push_userid: 'sasintw',push_tag: '推',push_ipdatetime: "04/15 09:51"},
               {push_userid: 'OutBai',push_tag: '→', push_ipdatetime: "04/15 19:22"}
@@ -13212,35 +13212,35 @@ class OpinionLeaderView extends React.Component {
         reply: [{author: 'b', count: 2,articles: [{article_title: 'D',article_title: 'E'}]}, {author: 'c', count: 1,articles: [{article_title: 'F'}]}],
         totalReplyCount: 64,
         repliedArticle: [
-          {article_id: 'd', article_title: '[BO] D', date: "2019-04-15T01:02:06.000Z", messages:[{push_userid: 'ahw12000',push_tag: '推',push_ipdatetime: "04/15 09:51"},{push_userid: 'OutBai',push_tag: '噓', push_ipdatetime: "04/15 19:22"}],},
-          {article_id: 'e', article_title: '[BO] E', date: "2019-04-15T01:55:20.000Z", messages:[{push_userid: 'ggggg',push_tag: '噓',push_ipdatetime: "04/15 09:51"},{push_userid: 'ahw12000', push_tag: '→',push_ipdatetime: "04/15 19:22"}],},
-          {article_id: 'f', article_title: '[BO] F', date: "2019-04-15T02:13:24.000Z", messages:[{push_userid: 'imsphzzz', push_tag: '噓', push_ipdatetime: "04/15 19:11"},{push_userid: 'ahw12000',push_tag: '推', push_ipdatetime: "04/15 19:22"}],}]},
+          {article_id: 'd', article_title: '[BO] D', cuttedTitle:[{word: 'c'},{word: 'd'}], date: "2019-04-15T01:02:06.000Z", messages:[{push_userid: 'ahw12000',push_tag: '推',push_ipdatetime: "04/15 09:51"},{push_userid: 'OutBai',push_tag: '噓', push_ipdatetime: "04/15 19:22"}],},
+          {article_id: 'e', article_title: '[BO] E', cuttedTitle:[{word: 'c'},{word: 'd'}], date: "2019-04-15T01:55:20.000Z", messages:[{push_userid: 'ggggg',push_tag: '噓',push_ipdatetime: "04/15 09:51"},{push_userid: 'ahw12000', push_tag: '→',push_ipdatetime: "04/15 19:22"}],},
+          {article_id: 'f', article_title: '[BO] F', cuttedTitle:[{word: 'c'},{word: 'd'}], date: "2019-04-15T02:13:24.000Z", messages:[{push_userid: 'imsphzzz', push_tag: '噓', push_ipdatetime: "04/15 19:11"},{push_userid: 'ahw12000',push_tag: '推', push_ipdatetime: "04/15 19:22"}],}]},
       {
         id: "OutBai",
         reply: [{author: 'a', count: 1,articles: [{article_title: 'A'}]}, {author: 'b', count: 2,articles: [{article_title: 'C',article_title: 'D'}]}],
         totalReplyCount: 24,
         repliedArticle: [
-          {article_id: 'a', article_title: '[QE] A', date: "2019-04-15T00:15:32.000Z" , messages:[{push_userid: 'imsphzzz',push_tag: '推',push_ipdatetime: "04/15 09:51"},
+          {article_id: 'a', article_title: '[QE] A', cuttedTitle:[{word: 'a'},{word: 'b'}], date: "2019-04-15T00:15:32.000Z" , messages:[{push_userid: 'imsphzzz',push_tag: '推',push_ipdatetime: "04/15 09:51"},
           {push_userid: 'OutBai',push_tag: '→', push_ipdatetime: "04/15 19:22"},
           {push_userid: 'sasintw', push_tag: '推',push_ipdatetime: "04/15 20:22"}]},
-          {article_id: 'c', article_title: '[QE] C', date: "2019-04-15T00:42:00.000Z", messages:[
+          {article_id: 'c', article_title: '[QE] C', cuttedTitle:[{word: 'a'},{word: 'b'}], date: "2019-04-15T00:42:00.000Z", messages:[
             {push_userid: 'sasintw',push_tag: '推',push_ipdatetime: "04/15 09:51"},
             {push_userid: 'OutBai',push_tag: '→', push_ipdatetime: "04/15 19:22"}
           ],},
-          {article_id: 'd', article_title: '[BO] D', date: "2019-04-15T01:02:06.000Z", messages:[{push_userid: 'ahw12000',push_tag: '推',push_ipdatetime: "04/15 09:51"},{push_userid: 'OutBai',push_tag: '噓', push_ipdatetime: "04/15 19:22"}],}]},
+          {article_id: 'd', article_title: '[BO] D', cuttedTitle:[{word: 'c'},{word: 'd'}],date: "2019-04-15T01:02:06.000Z", messages:[{push_userid: 'ahw12000',push_tag: '推',push_ipdatetime: "04/15 09:51"},{push_userid: 'OutBai',push_tag: '噓', push_ipdatetime: "04/15 19:22"}],}]},
       {
         id: "imsphzzz",
         reply: [{author: 'a', count: 2,articles: [{article_title: 'A',article_title: 'B'}]}, {author: 'c', count: 1,articles: [{article_title: 'F'}]}],
         totalReplyCount: 88,
         repliedArticle: [
-          {article_id: 'a', article_title: '[QE] A', date: "2019-04-15T00:15:32.000Z" , messages:[{push_userid: 'imsphzzz',push_tag: '推',push_ipdatetime: "04/15 09:51"},
+          {article_id: 'a', article_title: '[QE] A', cuttedTitle:[{word: 'a'},{word: 'b'}], date: "2019-04-15T00:15:32.000Z" , messages:[{push_userid: 'imsphzzz',push_tag: '推',push_ipdatetime: "04/15 09:51"},
           {push_userid: 'OutBai',push_tag: '→', push_ipdatetime: "04/15 19:22"},
           {push_userid: 'sasintw', push_tag: '推',push_ipdatetime: "04/15 20:22"}]},
-          {article_id: 'b', article_title: '[QE] B', date: "2019-04-15T00:36:32.000Z" , messages:[
+          {article_id: 'b', article_title: '[QE] B', cuttedTitle:[{word: 'a'},{word: 'b'}], date: "2019-04-15T00:36:32.000Z" , messages:[
             {push_userid: 'sasintw',push_tag: '噓',push_ipdatetime: "04/15 09:51"},
             {push_userid: 'imsphzzz', push_tag: '→',push_ipdatetime: "04/15 19:22"}
           ],},
-          {article_id: 'f', article_title: '[BO] F', date: "2019-04-15T02:13:24.000Z", messages:[{push_userid: 'imsphzzz', push_tag: '噓', push_ipdatetime: "04/15 19:11"},{push_userid: 'ahw12000',push_tag: '推', push_ipdatetime: "04/15 19:22"}],}]},
+          {article_id: 'f', article_title: '[BO] F', cuttedTitle:[{word: 'c'},{word: 'd'}], date: "2019-04-15T02:13:24.000Z", messages:[{push_userid: 'imsphzzz', push_tag: '噓', push_ipdatetime: "04/15 19:11"},{push_userid: 'ahw12000',push_tag: '推', push_ipdatetime: "04/15 19:22"}],}]},
     ]
     const articleArr = [
       {

@@ -303,7 +303,6 @@ export default function treemap(cellNodes, beforeThisDate,
       .text(d => d)
       .on('click', (d) => {
         clickUserTable(d, userArr);
-        console.log(userArr);
       });
 
     d3.selectAll('.userDataRow').filter(':nth-child(even)')
