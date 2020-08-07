@@ -399,7 +399,7 @@ export default function userSimilarityGraph(data, svg, user, articles) {
     };
 
     const rectClick = (d, index, i) => {
-      console.log(d);
+      console.log(index);
       let bothRepliedArticles = [];
       if (i) {
         const xID = newUserAxisValues[index];
@@ -418,13 +418,16 @@ export default function userSimilarityGraph(data, svg, user, articles) {
         );
       } else {
         const articleIdArr = d.map(e => e.article_id);
-        bothRepliedArticles = articles.filter(e => articleIdArr.some(e1 => e1 === e.article_id));
+        articleIdArr.forEach((e) => {
+          bothRepliedArticles.push(articles.find(e1 => e1.article_id === e));
+        });
       }
       articles.sort((a, b) => {
         if (bothRepliedArticles.find(e => e.article_title === b.article_title)) return 1;
         return -1;
       });
       console.log('sorted articles', articles);
+      console.log(bothRepliedArticles);
       updateArticleMatrix(articles, bothRepliedArticles, index);
       // updateArticleMatrixv2(bothRepliedArticles, index);
     };
@@ -529,7 +532,7 @@ export default function userSimilarityGraph(data, svg, user, articles) {
       });
 
       for (let i = 0; i < permuted_mat.length; i += 1) {
-        const leftSvgGroup = leftSvg.append('g')
+        const leftSvgGroup = leftSvg.append('g');
         leftSvgGroup.selectAll()
           .data(secondOrdering_mat[i])
           .enter()
@@ -587,7 +590,7 @@ export default function userSimilarityGraph(data, svg, user, articles) {
             const start = positionScale[i];
             const size = datas.find(e => e.id === tempUser.id).repliedArticle.length;
             const end = positionScale[i] + bandWidthScale(size);
-            return `M ${start} ${start} L ${end} ${start} L ${end} ${end}`
+            return `M ${start} ${start} L ${end} ${start} L ${end} ${end}`;
           })
           .attr('fill', color(tempUser.community));
       }
@@ -904,7 +907,7 @@ export default function userSimilarityGraph(data, svg, user, articles) {
             articleArray.push(a);
           }
         });
-      })
+      });
       // console.log(articleArray);
       const array = [];
       for (let i = 0; i < articleArray.length; i += 1) {
@@ -1427,7 +1430,7 @@ export default function userSimilarityGraph(data, svg, user, articles) {
                     }
                   })
                   .append('title')
-                  .text(`${mes.push_userid}: ${mes.push_content}`)
+                  .text(`${mes.push_userid}: ${mes.push_content}`);
               }
             });
           }
@@ -1435,6 +1438,7 @@ export default function userSimilarityGraph(data, svg, user, articles) {
       }
 
       function buildArticleTree(articleArr) {
+        console.log(articleArr);
         const copyArtArr = JSON.parse(JSON.stringify(articleArr));
         // copyArtArr.sort((a, b) => ((new Date(a.date) - new Date(b.date)) > 0 ? 1 : -1));
         const arr = copyArtArr.filter(e => e.article_title[0] !== 'R');
@@ -1594,7 +1598,8 @@ export default function userSimilarityGraph(data, svg, user, articles) {
       const radial = group.append('g')
         .attr('class', 'radialGroup')
         .attr('transform', `translate(0, 10) scale(${svgScale(datas.length) > 0 ? svgScale(datas.length) : 0.4})`)
-        .attr('stroke', 'black');
+        .attr('stroke', 'black')
+        .attr('stroke-width', '0.5px');
       const articleGroupHeatmap = leftSvg.append('g').attr('class', 'articleGroupHeatmap');
       const numOfArtCom = Math.max(...articlesCommunity.map(e => e.community)) + 1;
       const numOfArtOfEachComunity = [];
@@ -1666,6 +1671,7 @@ export default function userSimilarityGraph(data, svg, user, articles) {
 
       function drawRelationRatio(index, userCount) {
         const communityIndexDatas = datas.filter(e => e.community === index);
+        console.log(index, communityIndexDatas);
         // console.log(communityIndexDatas);
         const communityIndexArticles = computeNumOfArticlesOfEachCommunity();
         // console.log('communityIndexArticles', communityIndexArticles);
@@ -1743,7 +1749,7 @@ export default function userSimilarityGraph(data, svg, user, articles) {
           const scale = d3.scaleLinear().domain([0, numOfArticles]).range([0, maxWidth_tem]);
           // article community position
           for (let j = 0; j < arr[i].length; j += 1) {
-            arr[i][j].position = (j === 0) ? 0 : arr[i][j - 1].position + scale(arr[i][j - 1].level[0].length); 
+            arr[i][j].position = (j === 0) ? 0 : arr[i][j - 1].position + scale(arr[i][j - 1].level[0].length);
           }
         }
 
@@ -1761,19 +1767,35 @@ export default function userSimilarityGraph(data, svg, user, articles) {
               .selectAll('path')
               .data(arr[i])
               .enter()
-              .append('rect')
-              .attr('y', boxHeight * k)
-              .attr('x', (d, index) => positionScale[tem] * Math.sqrt(2) + d.position)
-              .attr('height', boxHeight)
-              .attr('width', (d) => {
-                const sameArticles = d.level[0].filter(e => d.level[0].some(e1 => e1.article_id === e.article_id));
-                return scale(sameArticles.length);
-              })
-              .attr('fill', (d, levelIndex) => {
-                const c = d3.hsl(radialColor(5));
-                return c;
-              })
-              .on('click', (d, levelIndex) => rectClick(d.level[0], i));
+              .append('g')
+              .each((d, index, nodes) => {
+                d3.select(nodes[index]).selectAll('path')
+                  .data(d.level)
+                  .enter()
+                  .append('rect')
+                  .attr('y', (_d) => {
+                    const heightScale = d3.scaleLinear().domain([0, d.level[0].length]).range([0, boxHeight]);
+                    const sameArticles = d.level[0].filter(e => _d.some(e1 => e1.article_id === e.article_id));
+                    return boxHeight * (k + 1) - heightScale(sameArticles.length);
+                    // return boxHeight * k;
+                  })
+                  .attr('x', (_d, _index) => positionScale[tem] * Math.sqrt(2) + d.position)
+                  .attr('height', (_d) => {
+                    const heightScale = d3.scaleLinear().domain([0, d.level[0].length]).range([0, boxHeight]);
+                    const sameArticles = d.level[0].filter(e => _d.some(e1 => e1.article_id === e.article_id));
+                    return heightScale(sameArticles.length);
+                  })
+                  .attr('width', (_d) => {
+                    const sameArticles = d.level[0].filter(e => d.level[0].some(e1 => e1.article_id === e.article_id));
+                    return scale(sameArticles.length);
+                  })
+                  .attr('fill', (_d, _index) => {
+                    const c = d3.hsl(radialColor(_index));
+                    return c;
+                  })
+                  // .attr('stroke', (_d, _index) => (_index === 0 ? 'black' : 'none'))
+                  .on('click', _d => rectClick(_d, i));
+              });
           }
         }
         for (let i = 0; i < arr.length; i += 1) {
@@ -1796,58 +1818,66 @@ export default function userSimilarityGraph(data, svg, user, articles) {
                 .selectAll('path')
                 .data(arr[i])
                 .enter()
-                .append('rect')
-                .attr('y', (d) => {
-                  const temCommunity = d.community;
-                  const nextArticleCommunity = arr[j].find(e => e.community === temCommunity);
-                  if (!nextArticleCommunity) return 0;
-                  const heightScale = d3.scaleLinear().domain([0, nextArticleCommunity.level[0].length]).range([0, boxHeight]);
-                  const sameArticles = nextArticleCommunity.level[0].filter(e => d.level[0].some(e1 => e1.article_id === e.article_id));
-                  return boxHeight * (i + 1) - heightScale(sameArticles.length);
+                .append('g')
+                .each((d, index, nodes) => {
+                  d3.select(nodes[index]).selectAll('path')
+                    .data(d.level)
+                    .enter()
+                    .append('rect')
+                    .attr('y', (_d) => {
+                      const temCommunity = d.community;
+                      const nextArticleCommunity = arr[j].find(e => e.community === temCommunity);
+                      if (!nextArticleCommunity) return 0;
+                      const heightScale = d3.scaleLinear().domain([0, nextArticleCommunity.level[0].length]).range([0, boxHeight]);
+                      const sameArticles = nextArticleCommunity.level[0].filter(e => _d.some(e1 => e1.article_id === e.article_id));
+                      return boxHeight * (i + 1) - heightScale(sameArticles.length);
+                    })
+                    .attr('x', (_d, _index) => {
+                      const temCommunity = d.community;
+                      const nexCommunity = arr[j].find(e => e.community === temCommunity);
+                      if (nexCommunity) {
+                        return positionScale[nex] * Math.sqrt(2) + nexCommunity.position;
+                      }
+                      return positionScale[nex] * Math.sqrt(2);
+                    })
+                  // .attr('height', boxHeight)
+                  // .attr('width', (d) => {
+                  //   const temCommunity = d.community;
+                  //   console.log(temCommunity, arr[j]);
+                  //   const nextArticleCommunity = arr[j].find(e => e.community === temCommunity);
+                  //   if (!nextArticleCommunity) return 0;
+                  //   const sameArticles = nextArticleCommunity.level[0].filter(e => d.level[0].some(e1 => e1.article_id === e.article_id));
+                  //   return widthScale(sameArticles.length);
+                  // })
+                    .attr('width', (_d) => {
+                      const temCommunity = d.community;
+                      const nextArticleCommunity = arr[j].find(e => e.community === temCommunity);
+                      if (!nextArticleCommunity) return 0;
+                      return widthScale(nextArticleCommunity.level[0].length);
+                    })
+                    .attr('height', (_d) => {
+                      const temCommunity = d.community;
+                      const nextArticleCommunity = arr[j].find(e => e.community === temCommunity);
+                      if (!nextArticleCommunity) return 0;
+                      const heightScale = d3.scaleLinear().domain([0, nextArticleCommunity.level[0].length]).range([0, boxHeight]);
+                      const sameArticles = nextArticleCommunity.level[0].filter(e => _d.some(e1 => e1.article_id === e.article_id));
+                      return heightScale(sameArticles.length);
+                    })
+                    .attr('fill', (_d, _index) => {
+                      const c = d3.hsl(radialColor(_index));
+                      return c;
+                    })
+                    // .attr('stroke', (_d, _index) => (_index === 0 ? 'black' : 'none'))
+                    .on('click', (_d, levelIndex) => {
+                      const temCommunity = d.community;
+                      const nextArticleCommunity = arr[j].find(e => e.community === temCommunity);
+                      if (!nextArticleCommunity) return 0;
+                      const sameArticles = nextArticleCommunity.level[0].filter(e => _d.some(e1 => e1.article_id === e.article_id));
+                      console.log(sameArticles);
+                      rectClick(sameArticles, i);
+                      return 0;
+                    });
                 })
-                .attr('x', (d, index) => {
-                  const temCommunity = d.community;
-                  const nexCommunity = arr[j].find(e => e.community === temCommunity);
-                  if (nexCommunity) {
-                    return positionScale[nex] * Math.sqrt(2) + nexCommunity.position;
-                  }
-                  return positionScale[nex] * Math.sqrt(2);
-                })
-                // .attr('height', boxHeight)
-                // .attr('width', (d) => {
-                //   const temCommunity = d.community;
-                //   console.log(temCommunity, arr[j]);
-                //   const nextArticleCommunity = arr[j].find(e => e.community === temCommunity);
-                //   if (!nextArticleCommunity) return 0;
-                //   const sameArticles = nextArticleCommunity.level[0].filter(e => d.level[0].some(e1 => e1.article_id === e.article_id));
-                //   return widthScale(sameArticles.length);
-                // })
-                .attr('width', (d) => {
-                  const temCommunity = d.community;
-                  const nextArticleCommunity = arr[j].find(e => e.community === temCommunity);
-                  if (!nextArticleCommunity) return 0;
-                  return widthScale(nextArticleCommunity.level[0].length);
-                })
-                .attr('height', (d) => {
-                  const temCommunity = d.community;
-                  const nextArticleCommunity = arr[j].find(e => e.community === temCommunity);
-                  if (!nextArticleCommunity) return 0;
-                  const heightScale = d3.scaleLinear().domain([0, nextArticleCommunity.level[0].length]).range([0, boxHeight]);
-                  const sameArticles = nextArticleCommunity.level[0].filter(e => d.level[0].some(e1 => e1.article_id === e.article_id));
-                  return heightScale(sameArticles.length);
-                })
-                .attr('fill', (d, levelIndex) => {
-                  const c = d3.hsl(radialColor(5));
-                  return c;
-                })
-                .on('click', (d, levelIndex) => {
-                  const temCommunity = d.community;
-                  const nextArticleCommunity = arr[j].find(e => e.community === temCommunity);
-                  if (!nextArticleCommunity) return 0;
-                  const sameArticles = nextArticleCommunity.level[0].filter(e => d.level[0].some(e1 => e1.article_id === e.article_id));
-                  rectClick(sameArticles, i);
-                  return 0;
-                });
             }
           }
         }
@@ -1877,7 +1907,7 @@ export default function userSimilarityGraph(data, svg, user, articles) {
               }
               const startPoint = numOfArticles + positionScale[tem];
               const endPoint = startPoint + xScale(d.level[0].length);
-              return `M ${startPoint} ${startPoint} L ${startPoint} ${endPoint} L ${endPoint} ${endPoint}`
+              return `M ${startPoint} ${startPoint} L ${startPoint} ${endPoint} L ${endPoint} ${endPoint}`;
             })
             .attr('fill', (d, index) => d3.schemeTableau10[index]);
 
@@ -1942,7 +1972,6 @@ export default function userSimilarityGraph(data, svg, user, articles) {
           // .attr('height', d => articleGroupScale(d.level[0].length))
           // .attr('width', d => articleGroupScale(d.level[0].length))
           // .attr('fill', (d, _index) => color(_index));
-          
         }
       }
     }

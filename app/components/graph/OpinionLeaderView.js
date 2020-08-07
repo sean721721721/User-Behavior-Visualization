@@ -172,7 +172,7 @@ class OpinionLeaderView extends React.Component {
                 // resArr.push(res);
                 resArr.userListArray = resArr.userListArray.concat(res.userListArray);
                 res.articles.forEach((a) => {
-                  if (!resArr.articles.includes(a2 => a2.article_id === a.article_id)) {
+                  if (!resArr.articles.some(a2 => a2.article_id === a.article_id)) {
                     resArr.articles.push(a);
                   }
                 });
