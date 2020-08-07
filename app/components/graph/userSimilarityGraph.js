@@ -282,13 +282,13 @@ export default function userSimilarityGraph(data, svg, user, articles) {
     const [datas, users, similaritys] = filterAlwaysNonSimilarUser(data, user, similarity, simThresh, artThresh);
     console.log('datas:', datas, 'users:', users, 'similaritys:', similaritys);
     // similarity for articles grouping
-    let filteredArticles = articles;
-    filteredArticles = filteredArticles.filter(
-      e => e.messages.some(mes => datas.some(usr => usr.id === mes.push_userid)),
-    );
+    // let filteredArticles = articles;
+    // filteredArticles = filteredArticles.filter(
+    //   e => e.messages.some(mes => datas.some(usr => usr.id === mes.push_userid)),
+    // );
 
     // similarity for articles grouping
-    const articleSimilarity = computeArticleSimilarity(datas);
+    const [filteredArticles, articleSimilarity] = computeArticleSimilarity(datas);
     console.log('articleSimilarity: ', articleSimilarity);
     const articleIds = filteredArticles.map(e => e.article_id);
     const articlesCommunity = jLouvainClustering(articleIds, articleSimilarity);
@@ -926,7 +926,7 @@ export default function userSimilarityGraph(data, svg, user, articles) {
           }
         }
       }
-      return array;
+      return [articleArray, array];
     }
     function filterAlwaysNonSimilarUser(ds, us, sims, simTh, artTh) {
       const copyUsers = us.slice();
@@ -952,8 +952,8 @@ export default function userSimilarityGraph(data, svg, user, articles) {
         return e;
       });
 
-      // console.log('Input Node Data2', nodes);
-      // console.log('Input Edge Data2', edge_data);
+      console.log('Input Node Data2', nodes);
+      console.log('Input Edge Data2', edge_data);
 
       const node_data3 = [];
       for (let i = 0; i < nodes.length; i += 1) {
@@ -966,8 +966,8 @@ export default function userSimilarityGraph(data, svg, user, articles) {
         return { source: s, target: t, weight: e.weight };
       });
 
-      // console.log('Input Node Data3', node_data3);
-      // console.log('Input Edge Data3', edge_data3);
+      console.log('Input Node Data3', node_data3);
+      console.log('Input Edge Data3', edge_data3);
 
       const community3 = jLouvain().nodes(node_data3).edges(edge_data3);
       // console.log(community3());
