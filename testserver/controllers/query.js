@@ -341,18 +341,21 @@ let callback = function callback(req, res) {
                 result.content = ' ';
               })
               if (activity) {
-                res.result.map(function(e, index){
+                const copyResult = JSON.parse(JSON.stringify(res.result));
+                copyResult.map(function(e, index){
                   e.messages = e.messages.filter((mes, index) => {
                     return user1.includes(mes.push_userid);
                   })
                 });
+                // res.result.map(function(e, index){
+                //   e.messages = e.messages.filter((mes, index) => {
+                //     return user1.includes(mes.push_userid);
+                //   })
+                // });
                 let userListArray = [];
                 let time1 = new Date();
-                // for (let i = 0; i < user1.length; i += 1) {
-                //   sg.buildUserList(userListArray, res.result, user1[i]);
-                // }
                 console.log('building UserList ...');
-                sg.buildUserList(userListArray, res.result, user1);
+                sg.buildUserList(userListArray, copyResult, user1);
                 console.log('buildUserList Done');
                 let time2 = new Date();
                 console.log('total time: %d second', (time2 - time1) / 1000);

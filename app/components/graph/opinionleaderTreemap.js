@@ -276,7 +276,12 @@ export default function treemap(cellNodes, beforeThisDate,
       .attr('id', 'submitUsers')
       .text('Get Activity!')
       .on('click', (d) => {
-        selectedUserClick(userArr);
+        const test = [];
+        d3.selectAll('.userDataRow')
+          .each((_d, _index, _nodes) => {
+            test.push(d3.select(_nodes[_index]).select('td').text());
+          });
+        selectedUserClick(test);
       });
 
     let network_h = parseFloat(d3.select('.selectedUserTable.d-flex.flex-column').style('height'));

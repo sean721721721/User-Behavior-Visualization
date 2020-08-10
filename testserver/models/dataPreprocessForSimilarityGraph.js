@@ -15,7 +15,7 @@ module.exports = {
     articles.forEach((article) => {
       let cuttedTitle = article.article_title ? jb.simpleCut(article.article_title) : [];
       cuttedTitle = cuttedTitle.filter(e => !removeWords.includes(e.word));
-      const a = { ...article._doc, cuttedTitle };
+      const a = { ...article, cuttedTitle };
       article.messages.forEach((mes) => {
         const existedUser = userLists.find(e => e.id === mes.push_userid);
         if (existedUser) {

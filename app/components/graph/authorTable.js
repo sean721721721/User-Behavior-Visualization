@@ -42,7 +42,7 @@ export default function AuthorTable(nodes, div, $this, callback) {
     });
     author.influence = influence;
   });
-  authorList.children = authorList.children.filter(author => author.influence >= 100);
+  // authorList.children = authorList.children.filter(author => author.influence >= 100);
   authorList.children.sort((a, b) => d3.descending(a.pageRank, b.pageRank));
   const topicWithSelectedAuthor = JSON.parse(JSON.stringify(noCuttedAuthorIdList));
   topicWithSelectedAuthor.children = [];

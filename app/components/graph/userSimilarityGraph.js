@@ -222,6 +222,7 @@ export default function userSimilarityGraph(data, svg, user, articles) {
           });
           // const sim = 1 / (1 + (dis));
           // console.log(`${userAuthorRelationShipArr[i].id} ${userAuthorRelationShipArr[j].id} dis: ${dis} sim: ${similarityScale(dis)}`);
+          console.log(userAuthorRelationShipArr[i].id, userAuthorRelationShipArr[j].id, dis);
           userListArray.push({
             source: userAuthorRelationShipArr[i].id,
             target: userAuthorRelationShipArr[j].id,
@@ -371,7 +372,7 @@ export default function userSimilarityGraph(data, svg, user, articles) {
       const yUser = newUserAxisValues[i];
       Tooltip
         .style('opacity', 1)
-        .html(`Similarity between ${xUser} and ${yUser} is ${Math.round(d * 100) / 100}`)
+        .html(`<p style="color: white;">Similarity between ${xUser} and ${yUser} is ${Math.round(d * 100) / 100}</p>`)
         .style('left', `${d3.event.pageX + 25}px`)
         .style('top', `${d3.event.pageY}px`);
       d3.select(this)
@@ -1243,10 +1244,19 @@ export default function userSimilarityGraph(data, svg, user, articles) {
           const lineGroupY = focusArticleScaleY(focusArticleScaleY.domain()[i]);
           const art = articleTree.find(e => e.article_id === focusArticleScaleY.domain()[i]);
           const articleBoxNum = Math.min(art.children.length + 1, newDepthDomainX[newDepthDomainX.length - 1]);
+          const usersOfCommunityOfThisArticle = focusUserScaleY.domain().filter((e) => {
+            if (art.messages.some(e1 => e1.push_userid === e)) return true;
+            for (let j = 0; j < art.children.length; j += 1) {
+              if (art.children[j].messages.some(e1 => e1.push_userid === e)) return true;
+            }
+            return false;
+          });
+          const thisArticleUserScale = d3.scaleBand().domain(usersOfCommunityOfThisArticle)
+            .range([0, focusArticleScaleY.bandwidth()]);
           focus.append('g')
             .attr('class', 'axis axis--y')
             .attr('transform', `translate(0,${lineGroupY})`)
-            .call(d3.axisLeft(focusUserScaleY));
+            .call(d3.axisLeft(thisArticleUserScale));
           const articleBoxGroup = focusLineGroup.append('g')
             .attr('transform', `translate(0,${lineGroupY})`);
           articleBoxGroup.append('text')
@@ -1289,12 +1299,12 @@ export default function userSimilarityGraph(data, svg, user, articles) {
               .attr('stroke-width', '1px')
               .attr('stroke', 'black');
             // box inner border
-            for (let j = 0; j < focusUserScaleY.domain().length; j += 1) {
+            for (let j = 0; j < thisArticleUserScale.domain().length; j += 1) {
               boxGroup.append('line')
                 .attr('x1', 0)
-                .attr('y1', j * focusUserScaleY.bandwidth())
+                .attr('y1', j * thisArticleUserScale.bandwidth())
                 .attr('x2', boxWidth)
-                .attr('y2', j * focusUserScaleY.bandwidth())
+                .attr('y2', j * thisArticleUserScale.bandwidth())
                 .attr('stroke-width', '0.5px')
                 .attr('stroke', 'black');
             }
@@ -1329,23 +1339,34 @@ export default function userSimilarityGraph(data, svg, user, articles) {
 
         // focusUserScaleY.domain(newUserDomainY);
         // focusArticleScaleY.domain(newArticleDomainY);
-        focus.selectAll('rect').remove();
+        focus.select('.userGroup').remove();
+        const focusUserGroup = focus.append('g')
+          .attr('class', 'userGroup');
         focusArticleScaleY.domain().forEach((a_id) => {
           const aTree = articleTree.find(e => e.article_id === a_id);
+          const usersOfCommunityOfThisArticle = focusUserScaleY.domain().filter((e) => {
+            if (aTree.messages.some(e1 => e1.push_userid === e)) return true;
+            for (let j = 0; j < aTree.children.length; j += 1) {
+              if (aTree.children[j].messages.some(e1 => e1.push_userid === e)) return true;
+            }
+            return false;
+          });
+          const thisArticleUserScale = d3.scaleBand().domain(usersOfCommunityOfThisArticle)
+            .range([0, focusArticleScaleY.bandwidth()]);
           for (let i = 0; i < aTree.children.length + 1; i += 1) {
             let a;
             if (i === 0) a = aTree;
             else a = aTree.children[i - 1];
             const userArr = [];
             a.messages.forEach((mes) => {
-              if (focusUserScaleY.domain().includes(mes.push_userid)) {
+              if (thisArticleUserScale.domain().includes(mes.push_userid)) {
                 if (!userArr.includes(mes.push_userid)) {
                   userArr.push(mes.push_userid);
-                  focus.append('rect')
+                  focusUserGroup.append('rect')
                     .attr('x', 0 + i * (boxWidth + boxMargin))
-                    .attr('y', focusUserScaleY(mes.push_userid) + focusArticleScaleY(a_id))
+                    .attr('y', thisArticleUserScale(mes.push_userid) + focusArticleScaleY(a_id))
                     .attr('width', boxWidth)
-                    .attr('height', focusUserScaleY.bandwidth())
+                    .attr('height', thisArticleUserScale.bandwidth())
                     .attr('fill', 'white')
                     .attr('opacity', 0)
                     .on('mouseover', () => {
@@ -1354,11 +1375,11 @@ export default function userSimilarityGraph(data, svg, user, articles) {
                       const clr = (tag) => {
                         switch (tag) {
                           case '推':
-                            return 'green';
+                            return d3.schemeTableau10[4];
                           case '噓':
-                            return 'red';
+                            return d3.schemeTableau10[2];
                           case '→':
-                            return 'yellow';
+                            return d3.schemeTableau10[5];
                           default:
                             break;
                         }
@@ -1377,7 +1398,7 @@ export default function userSimilarityGraph(data, svg, user, articles) {
                     })
                     .on('mouseout', mouseout);
                 }
-                focus.append('g')
+                focusUserGroup.append('g')
                   .attr('class', `.${mes.push_userid}`)
                   .append('rect')
                   .attr('x', () => {
@@ -1414,17 +1435,17 @@ export default function userSimilarityGraph(data, svg, user, articles) {
                       .domain([start, end]).range([0, boxWidth / 5]);
                     return nonLinearTimeScale(timeGroup) + timeOffSet + i * (boxWidth + boxMargin);
                   })
-                  .attr('y', focusUserScaleY(mes.push_userid) + focusArticleScaleY(a_id))
+                  .attr('y', thisArticleUserScale(mes.push_userid) + focusArticleScaleY(a_id))
                   .attr('width', 1)
-                  .attr('height', focusUserScaleY.bandwidth())
+                  .attr('height', thisArticleUserScale.bandwidth())
                   .attr('fill', () => {
                     switch (mes.push_tag) {
                       case '推':
-                        return 'green';
+                        return d3.schemeTableau10[4];
                       case '噓':
-                        return 'red';
+                        return d3.schemeTableau10[2];
                       case '→':
-                        return 'yellow';
+                        return d3.schemeTableau10[5];
                       default:
                         return 'yellow';
                     }

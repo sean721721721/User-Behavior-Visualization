@@ -149,6 +149,9 @@ class OpinionLeaderView extends React.Component {
           console.log(response);
           resArr.articles = response.articles;
           resArr.userListArray = response.userListArray;
+          resArr.articles.forEach((a) => {
+            a.messages = a.messages.filter(mes => e.includes(mes.push_userid));
+          });
           console.log(resArr);
           loading(((resArr.userListArray.length / userNumsPerRequest) + 1), myRequest.length, userSimilaritySvg);
           // for (let j = 0; j < fixedUserArr[0].length; j += 1) {
