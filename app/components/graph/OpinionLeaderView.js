@@ -1,3 +1,4 @@
+/* eslint-disable max-len */
 /* eslint-disable no-console */
 /* eslint-disable prefer-const */
 /* eslint-disable react/prop-types */
@@ -121,16 +122,16 @@ class OpinionLeaderView extends React.Component {
     function handleSubmit(e) {
       // e.preventDefault();
       console.log(e);
-      const userNumsPerRequest = 50;
+      const userNumsPerRequest = 100;
       const { length } = e;
       const myRequest = [];
       const userListArray = [];
       const min = Math.min(e.length, userNumsPerRequest);
-      const fixedUserArr = [e.slice(0, min)];
+      const fixedUserArr = [e.slice(0, min).map(usr => usr.id)];
       // console.log(fixedUserArr);
       const url = [encodeURI(getReqstr(fixedUserArr[0]))];
       for (let i = 1; i < length / userNumsPerRequest; i += 1) {
-        fixedUserArr.push(e.slice(i * userNumsPerRequest, (i + 1) * userNumsPerRequest));
+        fixedUserArr.push(e.slice(i * userNumsPerRequest, (i + 1) * userNumsPerRequest).map(usr => usr.id));
         // console.log(fixedUserArr);
         url.push(encodeURI(getReqstr(fixedUserArr[i])));
       }
@@ -143,6 +144,41 @@ class OpinionLeaderView extends React.Component {
       // console.log(myRequest);
       loading(0, myRequest.length, userSimilaritySvg);
       const resArr = { articles: [], userListArray: [] };
+      function recursiveFetch(req, index) {
+        fetch(req[index])
+          .then(response => response.json())
+          .then((response) => {
+            console.log(response);
+            resArr.userListArray = resArr.userListArray.concat(response.userListArray);
+            response.articles.forEach((a) => {
+              if (!resArr.articles.some(_a => _a.article_id === a.article_id)) {
+                resArr.articles.push(a);
+              }
+            });
+            resArr.articles.forEach((a) => {
+              a.messages = a.messages.filter(mes => e.some(usr => usr.id === mes.push_userid));
+            });
+            console.log(resArr);
+            loading(((resArr.userListArray.length / userNumsPerRequest) + 1), myRequest.length, userSimilaritySvg);
+            if (myRequest.length === index + 1) {
+              response.userListArray.forEach((usr) => {
+                usr.orig_group = e.find(u => u.id === usr.id).group;
+              });
+              const userIdArr = e.map(usr => usr.id);
+              userSimilarityGraph(
+                resArr.userListArray,
+                userSimilaritySvg,
+                userIdArr,
+                resArr.articles,
+              );
+            }
+            return response;
+          })
+          .then(() => {
+            recursiveFetch(req, index + 1);
+          });
+      }
+      const i = 0;
       fetch(myRequest[0])
         .then(response => response.json())
         .then((response) => {
@@ -150,16 +186,14 @@ class OpinionLeaderView extends React.Component {
           resArr.articles = response.articles;
           resArr.userListArray = response.userListArray;
           resArr.articles.forEach((a) => {
-            a.messages = a.messages.filter(mes => e.includes(mes.push_userid));
+            a.messages = a.messages.filter(mes => e.some(usr => usr.id === mes.push_userid));
           });
           console.log(resArr);
           loading(((resArr.userListArray.length / userNumsPerRequest) + 1), myRequest.length, userSimilaritySvg);
-          // for (let j = 0; j < fixedUserArr[0].length; j += 1) {
-          //   buildUserList(userListArray, response, fixedUserArr[0][j]);
-          // }
-          if (myRequest.length === 1) {
-            // userActivityTimeline(response[0][0], commentTimelineSvg, fixedUserArr[0]);
-            // userDailyActivity(response[0][0], fixedUserArr[0], commentTimelineSvg, beginDate, endDate);
+          if (myRequest.length === i + 1) {
+            response.userListArray.forEach((usr) => {
+              usr.orig_group = e.find(u => u.id === usr.id).group;
+            });
             userSimilarityGraph(
               response.userListArray,
               userSimilaritySvg,
@@ -168,48 +202,142 @@ class OpinionLeaderView extends React.Component {
               // response.similarity,
             );
           }
-          for (let i = 1; i < myRequest.length; i += 1) {
-            fetch(myRequest[i])
-              .then(res => res.json())
-              .then((res) => {
-                // resArr.push(res);
-                resArr.userListArray = resArr.userListArray.concat(res.userListArray);
-                res.articles.forEach((a) => {
-                  if (!resArr.articles.some(a2 => a2.article_id === a.article_id)) {
-                    resArr.articles.push(a);
-                  }
-                });
-                console.log(resArr);
-                loading(((resArr.userListArray.length / userNumsPerRequest) + 1), myRequest.length, userSimilaritySvg);
-                // console.log(res[0][0]);
-                // console.log('build');
-                // for (let j = 0; j < fixedUserArr[i].length; j += 1) {
-                //   buildUserList(userListArray, res, fixedUserArr[i][j]);
-                // }
-                // return res;
-              })
-              .then(() => {
-                console.log(`recieveDataCount: ${resArr.userListArray.length / userNumsPerRequest + 1}, total: ${myRequest.length}`);
-                if (((resArr.userListArray.length / userNumsPerRequest) + 1) >= myRequest.length) {
-                  // const articlesArr = resArrayToArticlesArray(resArr);
-                  // console.log(articlesArr);
-                  let usrArr = [];
-                  for (let j = 0; j < fixedUserArr.length; j += 1) {
-                    usrArr = usrArr.concat(fixedUserArr[j]);
-                  }
-                  // userActivityTimeline(articlesArr, commentTimelineSvg, usrArr);
-                  // userDailyActivity(articlesArr, usrArr, commentTimelineSvg, beginDate, endDate);
-                  userSimilarityGraph(resArr.userListArray, userSimilaritySvg, usrArr, resArr.articles);
-                }
-              });
-          }
-          // const articlesArr = resArr[0];
-          // userActivityTimeline(articlesArr, commentTimelineSvg, fixedUserArr);
-          // userSimilarityGraph(userListArray, userSimilaritySvg, fixedUserArr);
+          return response;
         })
-        .catch((error) => {
-          console.log(error);
+        .then(() => {
+          recursiveFetch(myRequest, i + 1);
         });
+
+      // const fetches = [];
+      // function fetchPromise(request) {
+      //   return fetch(request)
+      //     .then(response => response.json())
+      //     .then((response) => {
+      //       console.log(response);
+      //       resArr.userListArray = resArr.userListArray.concat(response.userListArray);
+      //       response.articles.forEach((a) => {
+      //         if (!resArr.articles.some(_a => _a.article_id === a.article_id)) {
+      //           resArr.articles.push(a);
+      //         }
+      //       });
+      //       resArr.userListArray.forEach((usr) => {
+      //         usr.orig_group = e.find(u => u.id === usr.id).group;
+      //       });
+      //       return 'success';
+      //     });
+      // }
+      // myRequest.forEach((request) => {
+      //   fetches.push(fetchPromise(request));
+      // });
+      // Promise.all(fetches)
+      //   .then(() => {
+      //     const userIdArr = e.map(usr => usr.id);
+      //     userSimilarityGraph(
+      //       resArr.userListArray,
+      //       userSimilaritySvg,
+      //       userIdArr,
+      //       resArr.articles,
+      //     );
+      //   });
+      // myRequest.forEach((request) => {
+      //   Promise.all(fetch(request)
+      //     .then(response => response.json())
+      //     .then((response) => {
+      //       console.log(response);
+      //       return response;
+      //     }))
+      //     .then((responses) => {
+      //       console.log(responses);
+      //     });
+      // });
+
+      // const fetches = [];
+      // myRequest.forEach(request => fetches.push(fetch(request)));
+      // const start = new Date();
+      // Promise.all(fetches)
+      //   .then((responses) => {
+      //     console.log(responses);
+      //     return Promise.all(responses.map(response => response.json()));
+      //   })
+      //   .then((res) => {
+      //     console.log((new Date() - start) / 1000);
+      //     res.forEach((d) => {
+      //       resArr.userListArray = resArr.userListArray.concat(d.userListArray);
+      //       d.articles.forEach((a) => {
+      //         if (!resArr.articles.some(_a => _a.article_id === a.article_id)) {
+      //           resArr.articles.push(a);
+      //         }
+      //       });
+      //     });
+      //     resArr.userListArray.forEach((usr) => {
+      //       usr.orig_group = e.find(u => u.id === usr.id).group;
+      //     });
+      //     const userIdArr = e.map(usr => usr.id);
+      //     userSimilarityGraph(
+      //       resArr.userListArray,
+      //       userSimilaritySvg,
+      //       userIdArr,
+      //       resArr.articles,
+      //     );
+      //   });
+
+      // fetch(myRequest[0])
+      //   .then(response => response.json())
+      //   .then((response) => {
+      //     console.log(response);
+      //     resArr.articles = response.articles;
+      //     resArr.userListArray = response.userListArray;
+      //     resArr.articles.forEach((a) => {
+      //       a.messages = a.messages.filter(mes => e.some(usr => usr.id === mes.push_userid));
+      //     });
+      //     console.log(resArr);
+      //     loading(((resArr.userListArray.length / userNumsPerRequest) + 1), myRequest.length, userSimilaritySvg);
+      //     if (myRequest.length === 1) {
+      //       response.userListArray.forEach((usr) => {
+      //         usr.orig_group = e.find(u => u.id === usr.id).group;
+      //       });
+      //       userSimilarityGraph(
+      //         response.userListArray,
+      //         userSimilaritySvg,
+      //         fixedUserArr[0],
+      //         response.articles,
+      //         // response.similarity,
+      //       );
+      //     }
+      //     for (let i = 1; i < myRequest.length; i += 1) {
+      //       fetch(myRequest[i])
+      //         .then(res => res.json())
+      //         .then((res) => {
+      //           resArr.userListArray = resArr.userListArray.concat(res.userListArray);
+      //           res.articles.forEach((a) => {
+      //             if (!resArr.articles.some(a2 => a2.article_id === a.article_id)) {
+      //               resArr.articles.push(a);
+      //             }
+      //           });
+      //           console.log(resArr);
+      //           loading(((resArr.userListArray.length / userNumsPerRequest) + 1), myRequest.length, userSimilaritySvg);
+      //         })
+      //         .then(() => {
+      //           console.log(`recieveDataCount: ${resArr.userListArray.length / userNumsPerRequest + 1}, total: ${myRequest.length}`);
+      //           if (((resArr.userListArray.length / userNumsPerRequest) + 1) >= myRequest.length) {
+      //             let usrArr = [];
+      //             for (let j = 0; j < fixedUserArr.length; j += 1) {
+      //               usrArr = usrArr.concat(fixedUserArr[j]);
+      //             }
+      //             resArr.userListArray.forEach((usr) => {
+      //               usr.orig_group = e.find(u => u.id === usr.id).group;
+      //             });
+      //             userSimilarityGraph(resArr.userListArray, userSimilaritySvg, usrArr, resArr.articles);
+      //           }
+      //         });
+      //     }
+      //     // const articlesArr = resArr[0];
+      //     // userActivityTimeline(articlesArr, commentTimelineSvg, fixedUserArr);
+      //     // userSimilarityGraph(userListArray, userSimilaritySvg, fixedUserArr);
+      //   })
+      //   .catch((error) => {
+      //     console.log(error);
+      //   });
     }
 
     if (cellData.children) {
@@ -13224,8 +13352,8 @@ class OpinionLeaderView extends React.Component {
         totalReplyCount: 24,
         repliedArticle: [
           {article_id: 'a', article_title: '[QE] A', cuttedTitle:[{word: 'a'},{word: 'b'}], date: "2019-04-15T00:15:32.000Z" , messages:[{push_userid: 'imsphzzz',push_tag: '推',push_ipdatetime: "04/15 09:51"},
-          {push_userid: 'OutBai',push_tag: '→', push_ipdatetime: "04/15 19:22"},
-          {push_userid: 'sasintw', push_tag: '推',push_ipdatetime: "04/15 20:22"}]},
+            {push_userid: 'OutBai',push_tag: '→', push_ipdatetime: "04/15 19:22"},
+            {push_userid: 'sasintw', push_tag: '推',push_ipdatetime: "04/15 20:22"}]},
           {article_id: 'c', article_title: '[QE] C', cuttedTitle:[{word: 'a'},{word: 'b'}], date: "2019-04-15T00:42:00.000Z", messages:[
             {push_userid: 'sasintw',push_tag: '推',push_ipdatetime: "04/15 09:51"},
             {push_userid: 'OutBai',push_tag: '→', push_ipdatetime: "04/15 19:22"}
@@ -13237,8 +13365,8 @@ class OpinionLeaderView extends React.Component {
         totalReplyCount: 88,
         repliedArticle: [
           {article_id: 'a', article_title: '[QE] A', cuttedTitle:[{word: 'a'},{word: 'b'}], date: "2019-04-15T00:15:32.000Z" , messages:[{push_userid: 'imsphzzz',push_tag: '推',push_ipdatetime: "04/15 09:51"},
-          {push_userid: 'OutBai',push_tag: '→', push_ipdatetime: "04/15 19:22"},
-          {push_userid: 'sasintw', push_tag: '推',push_ipdatetime: "04/15 20:22"}]},
+            {push_userid: 'OutBai',push_tag: '→', push_ipdatetime: "04/15 19:22"},
+            {push_userid: 'sasintw', push_tag: '推',push_ipdatetime: "04/15 20:22"}]},
           {article_id: 'b', article_title: '[QE] B', cuttedTitle:[{word: 'a'},{word: 'b'}], date: "2019-04-15T00:36:32.000Z" , messages:[
             {push_userid: 'sasintw',push_tag: '噓',push_ipdatetime: "04/15 09:51"},
             {push_userid: 'imsphzzz', push_tag: '→',push_ipdatetime: "04/15 19:22"}

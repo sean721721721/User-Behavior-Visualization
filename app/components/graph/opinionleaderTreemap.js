@@ -39,7 +39,6 @@ export default function treemap(cellNodes, beforeThisDate,
     .attr('transform',
       `translate(${margin.left},${margin.top})`);
   const selectedArticleNodes = [];
-
   console.log(cellNodes);
   const data = { children: [] };
   const authorNodes = cellNodes.filter(e => e.responder);
@@ -54,6 +53,7 @@ export default function treemap(cellNodes, beforeThisDate,
     n.responder.forEach((a) => {
       articles.push({
         name: a.title,
+        id: a.articleId,
         group: 'A',
         value: (a.message.length * n.pageRank) / totalComments,
         message_count: a.message_count,
@@ -155,7 +155,7 @@ export default function treemap(cellNodes, beforeThisDate,
     .style('stroke', 'black')
     .style('fill', d => color(d.parent.data.name))
     .style('opacity', d => opacity(d.data.value))
-    .on('click', articleNodeClicked)
+    .on('click', (d, index, nodes) => articleNodeClicked(d, d.data.id, index, nodes))
     .append('title')
     .text((d) => {
       const title = d.data.name.replace('mister_', '');
@@ -220,7 +220,8 @@ export default function treemap(cellNodes, beforeThisDate,
     .attr('font-size', '12px')
     .attr('fill', d => color(d.data.name));
   let selectedUser = [];
-  function articleNodeClicked(d, index, nodes) {
+
+  function articleNodeClicked(d, article_id, index, nodes) {
     d3.select(nodes[index])
       .style('fill', 'black');
     // submit(d);
@@ -240,22 +241,31 @@ export default function treemap(cellNodes, beforeThisDate,
     //     .style('stroke-opacity', 0.6);
     // });
 
-    // // push userid to selectedUser
-    // const data = svg.selectAll('circle.nodes').data();
+    // // push userid to selectedUser (intersection)
+    // if (d.data.tag === 0) {
+    //   if (selectedUser.length === 0) {
+    //     console.log('push');
+    //     console.log(d.data.messages);
+    //     d.data.messages.forEach((e) => {
+    //       if (!selectedUser.some(id => id === e.push_userid)) {
+    //         selectedUser.push(e.push_userid);
+    //       }
+    //     });
+    //   } else {
+    //     selectedUser = selectedUser.filter(e => d.data.messages.some(m => e === m.push_userid));
+    //   }
+    // }
+
+    // // push userid to selectedUser (union)
     if (d.data.tag === 0) {
-      if (selectedUser.length === 0) {
-        console.log('push');
-        console.log(d.data.messages);
-        d.data.messages.forEach((e) => {
-          if (!selectedUser.some(id => id === e.push_userid)) {
-            selectedUser.push(e.push_userid);
-          }
-        });
-      } else {
-        selectedUser = selectedUser.filter(e => d.data.messages.some(m => e === m.push_userid));
-        // const test = selectedUser.filter(e => d.data.messages.some(m => e === m.push_userid));
-        // console.log(selectedUser, test);
-      }
+      console.log('push');
+      console.log(d);
+      selectedArticleNodes.push(article_id);
+      d.data.messages.forEach((e) => {
+        if (!selectedUser.some(u => u.id === e.push_userid)) {
+          selectedUser.push({ id: e.push_userid, group: selectedArticleNodes.length });
+        }
+      });
     }
     // console.log(cellNodes);
     drawSelectedUserTable(selectedUser);
@@ -279,7 +289,7 @@ export default function treemap(cellNodes, beforeThisDate,
         const test = [];
         d3.selectAll('.userDataRow')
           .each((_d, _index, _nodes) => {
-            test.push(d3.select(_nodes[_index]).select('td').text());
+            test.push(d3.select(_nodes[_index]).selectAll('td').data()[0]);
           });
         selectedUserClick(test);
       });
@@ -295,7 +305,7 @@ export default function treemap(cellNodes, beforeThisDate,
       .style('overflow-y', 'scroll');
     const table = tableDiv.append('table');
     table.append('tr').append('td')
-      .text('ID')
+      .text(`ID (${userArr.length})`)
       .style('background', d3.schemeTableau10[0])
       .style('color', 'white');
     const tr = table.selectAll('tr.user')
@@ -305,7 +315,7 @@ export default function treemap(cellNodes, beforeThisDate,
       .attr('class', 'userDataRow')
       .style('padding', '0px')
       .append('td')
-      .text(d => d)
+      .text(d => d.id)
       .on('click', (d) => {
         clickUserTable(d, userArr);
       });
@@ -315,7 +325,7 @@ export default function treemap(cellNodes, beforeThisDate,
   }
 
   function clickUserTable(d, arr) {
-    const index = arr.findIndex(e => e === d);
+    const index = arr.findIndex(e => e.id === d.id);
     arr.splice(index, 1);
     drawSelectedUserTable(arr);
   }
