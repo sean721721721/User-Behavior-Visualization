@@ -8,23 +8,24 @@
 /* eslint-disable no-param-reassign */
 import * as d3 from 'd3';
 
-export default function commentTimeline(nodes, svg, $this) {
+export default function commentTimeline(data, svg, $this) {
   svg.selectAll('*').remove();
   // svg.attr('viewBox', '0 0 960 500');
-  const h = parseFloat(d3.select('.commentTimeline').style('height'));
-  const w = parseFloat(d3.select('.commentTimeline').style('width'));
+  console.log(data, svg, $this);
+  const h = parseFloat(d3.select('#articleStatus').style('height'));
+  const w = parseFloat(d3.select('#articleStatus').style('width'));
   const xScaleWidth = w - 110;
   const timePeriod = 3;
-  const opinionLeader = nodes.find(e => e.id === $this.state.mouseOverUser);
+  // const opinionLeader = nodes.find(e => e.id === $this.state.mouseOverUser);
   const timeScaleObjArr = [];
-  timeScale(opinionLeader, timeScaleObjArr);
+  timeScale(data, timeScaleObjArr);
 
   const numOfArticleScale = d3.scaleLinear()
-    .domain([0, opinionLeader.responder.length])
+    .domain([0, 1])
     .range([0, h]);
   let articleIndex = -1; // control each article lines position
   const articleTime = svg.selectAll('g')
-    .data(opinionLeader.responder)
+    .data([data])
     .enter()
     .append('g')
     .attr('class', 'articles')
@@ -62,7 +63,7 @@ export default function commentTimeline(nodes, svg, $this) {
         .attr('fill', 'black')
         .attr('font-size', 12)
         .attr('text-anchor', 'middle')
-        .attr('transform', `translate(40, 50) rotate(-90)`)
+        .attr('transform', 'translate(40, 50) rotate(-90)')
         .text('comments per 10 mins');
       axis.append('g')
         .attr('transform', 'translate(0, 20)')
@@ -178,16 +179,14 @@ export default function commentTimeline(nodes, svg, $this) {
     return mes.push_ipdatetime;
   }
 
-  function timeScale(node, arr) {
-    node.responder.forEach((a) => {
-      const begin = new Date(a.date);
-      const afterThreeDays = new Date(a.date);
-      afterThreeDays.setHours(begin.getHours() + timePeriod);
+  function timeScale(d, arr) {
+    const begin = new Date(d.date);
+    const afterThreeDays = new Date(d.date);
+    afterThreeDays.setHours(begin.getHours() + timePeriod);
 
-      const scaleX = d3.scaleTime().domain([begin, afterThreeDays]).range([10, w - 100]);
-      const scaleY = d3.scaleLinear().domain([-100, 100]).range([100, 0]);
-      arr.push({ articleId: a.articleId, scaleX, scaleY });
-    });
+    const scaleX = d3.scaleTime().domain([begin, afterThreeDays]).range([10, w - 100]);
+    const scaleY = d3.scaleLinear().domain([-100, 100]).range([100, 0]);
+    arr.push({ articleId: d.articleId, scaleX, scaleY });
   }
 
   function xScale(id, date) {
@@ -209,7 +208,7 @@ export default function commentTimeline(nodes, svg, $this) {
     const afterArticlePostTimeFormat = (date) => {
       const dateMinusPostTime = d3.timeMinute.count(articleDate, new Date(date));
       return `${Math.floor(dateMinusPostTime / 60)}h${dateMinusPostTime % 60}m`;
-    }
+    };
     return d3.axisBottom(commentTimeScale)
       .ticks(3).tickFormat(date => afterArticlePostTimeFormat(date));
   }
@@ -227,11 +226,12 @@ export default function commentTimeline(nodes, svg, $this) {
     return null;
   }
 
-  function makeDataFitLineChart(data) {
-    const newData = JSON.parse(JSON.stringify(data));
+  function makeDataFitLineChart(d) {
+    console.log(d);
+    const newData = JSON.parse(JSON.stringify(d));
     newData.message.forEach((mes) => {
-      mes.articleId = data.articleId;
-      mes.articleDate = data.date;
+      mes.articleId = d.articleId;
+      mes.articleDate = d.date;
       mes.value = 1;
     });
     // date type need to preprocess ip format
@@ -257,11 +257,11 @@ export default function commentTimeline(nodes, svg, $this) {
     return message;
   }
 
-  function commentTimeData(data) {
-    const newData = JSON.parse(JSON.stringify(data));
+  function commentTimeData(d) {
+    const newData = JSON.parse(JSON.stringify(d));
     newData.message.forEach((mes) => {
-      mes.articleId = data.articleId;
-      mes.articleDate = data.date;
+      mes.articleId = d.articleId;
+      mes.articleDate = d.date;
       switch (mes.push_tag) {
         case '推':
           mes.value = 1;

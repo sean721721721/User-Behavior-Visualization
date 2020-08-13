@@ -7107,6 +7107,9 @@ class Graph extends Component {
           <div className="selectedUserTable d-flex flex-column" style={{ minHeight: '400px' }} />
           <div className="authorList" id="authorList" style={{ overflowY: 'scroll' }} />
         </div>
+        <div className="articleStatus">
+          <svg id="articleStatus" width="100%" height="100%" />
+        </div>
         <OpinionLeaderView data={{
           word,
           cellData,
