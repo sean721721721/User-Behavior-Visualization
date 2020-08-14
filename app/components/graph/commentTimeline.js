@@ -227,7 +227,6 @@ export default function commentTimeline(data, svg, $this) {
   }
 
   function makeDataFitLineChart(d) {
-    console.log(d);
     const newData = JSON.parse(JSON.stringify(d));
     newData.message.forEach((mes) => {
       mes.articleId = d.articleId;

@@ -44,6 +44,16 @@ export default function treemap(cellNodes, beforeThisDate,
   const data = { children: [] };
   const authorNodes = cellNodes.filter(e => e.responder);
   authorNodes.sort((a, b) => b.pageRank - a.pagrRank);
+  const articleNodes = [];
+  authorNodes.forEach((u) => {
+    u.responder.forEach((a) => {
+      if (!articleNodes.some(_a => _a.article_id === a.articleId)) {
+        articleNodes.push({
+          article_id: a.articleId, ...a,
+        });
+      }
+    });
+  });
   const top20Authors = authorNodes.filter((d, index) => index < 20);
   top20Authors.forEach((n) => {
     const articles = [];
@@ -169,7 +179,9 @@ export default function treemap(cellNodes, beforeThisDate,
 
   function articleNodeClicked(d, article_id, index, nodes) {
     const commentTimelineSvg = d3.select('#articleStatus');
-    commentTimeline(d, commentTimelineSvg, data.$this);
+    console.log(articleNodes);
+    const article = articleNodes.find(e => e.article_id === article_id);
+    commentTimeline(article, commentTimelineSvg, data.$this);
     d3.select(nodes[index])
       .style('fill', 'black');
     // submit(d);
@@ -207,7 +219,6 @@ export default function treemap(cellNodes, beforeThisDate,
     // // push userid to selectedUser (union)
     if (d.data.tag === 0) {
       console.log('push');
-      console.log(d);
       selectedArticleNodes.push(article_id);
       d.data.messages.forEach((e) => {
         if (!selectedUser.some(u => u.id === e.push_userid)) {

@@ -283,44 +283,44 @@ export default function userSimilarityGraph(data, svg, user, articles) {
 
   function computeUserSimilarityByArticles(userAuthorRelationShipArr) {
     const similarityScale = d3.scaleLinear().domain([0, 2]).range([1, 0]);
-    if (userAuthorRelationShipArr[0].titleWordScore) {
-      const userListArray = [];
-      for (let i = 0; i < userAuthorRelationShipArr.length - 1; i += 1) {
-        const temp = userAuthorRelationShipArr[i].titleWordScore;
-        const tempTotal = temp.reduce((acc, obj) => acc + obj.score, 0);
-        for (let j = i + 1; j < userAuthorRelationShipArr.length; j += 1) {
-          const next = userAuthorRelationShipArr[j].titleWordScore;
-          const searchedWord = [];
-          let dis = 0;
-          const nextTotal = next.reduce((acc, obj) => acc + obj.score, 0);
-          temp.forEach((e, index) => {
-            if (!searchedWord.includes(e.word)) {
-              searchedWord.push(e.word);
-              const sameWord = next.find(e1 => e1.word === e.word);
-              const nextWordScore = sameWord ? sameWord.score : 0;
-              dis += Math.sqrt(Math.abs(((e.score / tempTotal) * (e.score / tempTotal)) - ((nextWordScore / nextTotal) * (nextWordScore / nextTotal))));
-            }
-          });
-          next.forEach((e, index) => {
-            if (!searchedWord.includes(e.word)) {
-              searchedWord.push(e.word);
-              const sameWord = temp.find(e1 => e1.word === e.word);
-              const tempWordScore = sameWord ? sameWord.score : 0;
-              dis += Math.sqrt(Math.abs(((e.score / nextTotal) * (e.score / nextTotal)) - ((tempWordScore / tempTotal) * (tempWordScore / tempTotal))));
-            }
-          });
-          // const sim = 1 / (1 + (dis));
-          // console.log(`${userAuthorRelationShipArr[i].id} ${userAuthorRelationShipArr[j].id} dis: ${dis} sim: ${similarityScale(dis)}`);
-          // console.log(userAuthorRelationShipArr[i].id, userAuthorRelationShipArr[j].id, dis);
-          userListArray.push({
-            source: userAuthorRelationShipArr[i].id,
-            target: userAuthorRelationShipArr[j].id,
-            value: similarityScale(dis),
-          });
-        }
-      }
-      return userListArray;
-    }
+    // if (userAuthorRelationShipArr[0].titleWordScore) {
+    //   const userListArray = [];
+    //   for (let i = 0; i < userAuthorRelationShipArr.length - 1; i += 1) {
+    //     const temp = userAuthorRelationShipArr[i].titleWordScore;
+    //     const tempTotal = temp.reduce((acc, obj) => acc + obj.score, 0);
+    //     for (let j = i + 1; j < userAuthorRelationShipArr.length; j += 1) {
+    //       const next = userAuthorRelationShipArr[j].titleWordScore;
+    //       const searchedWord = [];
+    //       let dis = 0;
+    //       const nextTotal = next.reduce((acc, obj) => acc + obj.score, 0);
+    //       temp.forEach((e, index) => {
+    //         if (!searchedWord.includes(e.word)) {
+    //           searchedWord.push(e.word);
+    //           const sameWord = next.find(e1 => e1.word === e.word);
+    //           const nextWordScore = sameWord ? sameWord.score : 0;
+    //           dis += Math.sqrt(Math.abs(((e.score / tempTotal) * (e.score / tempTotal)) - ((nextWordScore / nextTotal) * (nextWordScore / nextTotal))));
+    //         }
+    //       });
+    //       next.forEach((e, index) => {
+    //         if (!searchedWord.includes(e.word)) {
+    //           searchedWord.push(e.word);
+    //           const sameWord = temp.find(e1 => e1.word === e.word);
+    //           const tempWordScore = sameWord ? sameWord.score : 0;
+    //           dis += Math.sqrt(Math.abs(((e.score / nextTotal) * (e.score / nextTotal)) - ((tempWordScore / tempTotal) * (tempWordScore / tempTotal))));
+    //         }
+    //       });
+    //       // const sim = 1 / (1 + (dis));
+    //       // console.log(`${userAuthorRelationShipArr[i].id} ${userAuthorRelationShipArr[j].id} dis: ${dis} sim: ${similarityScale(dis)}`);
+    //       // console.log(userAuthorRelationShipArr[i].id, userAuthorRelationShipArr[j].id, dis);
+    //       userListArray.push({
+    //         source: userAuthorRelationShipArr[i].id,
+    //         target: userAuthorRelationShipArr[j].id,
+    //         value: similarityScale(dis),
+    //       });
+    //     }
+    //   }
+    //   return userListArray;
+    // }
 
     const userListArray = [];
     for (let i = 0; i < userAuthorRelationShipArr.length - 1; i += 1) {
