@@ -19,10 +19,11 @@ import CheckboxGroup from 'antd/lib/checkbox/Group';
 import { cps } from 'redux-saga/effects';
 import jLouvain from './jLouvain';
 import { userActivityTimeline } from './userActivityTimeline';
+import { userDailyActivity } from './userDailyActivity';
 
 export default function userSimilarityGraph(data, svg, user, articles) {
   // console.log(user);
-  const svgScale = d3.scaleSqrt().domain([1, 200]).range([0.5, 0.03]);
+  const svgScale = d3.scaleSqrt().domain([1, 200]).range([0.5, 0.1]);
   const commentTimelineSvg = d3.select('#commentTimeline');
   const h = parseFloat(d3.select('.heatMap').style('height'));
   const focusHeight = 500;
@@ -417,7 +418,7 @@ export default function userSimilarityGraph(data, svg, user, articles) {
       matrix, origMatrix, newUserAxisValues, users,
     );
     console.log('permuted_mat, permuted_origMat: ', permuted_mat, permuted_origMat);
-    const [secondOrdering_mat, secondOrdering_origMat] = matrixReorderingByCommunity(
+    let [secondOrdering_mat, secondOrdering_origMat] = matrixReorderingByCommunity(
       permuted_mat, permuted_origMat, community, newUserAxisValues, users,
     );
     // const [secondOrdering_mat, secondOrdering_origMat] = [permuted_mat, permuted_origMat];
@@ -458,6 +459,11 @@ export default function userSimilarityGraph(data, svg, user, articles) {
 
     // Three function that change the tooltip when user hover / move / leave a cell
     const mouseover = (d, index, i) => {
+      if (typeof d === 'string') {
+        // user axis
+        d3.selectAll(`circle.${d}`)
+          .attr('r', 10);
+      }
       const xUser = newUserAxisValues[index];
       const yUser = newUserAxisValues[i];
       Tooltip
@@ -480,6 +486,11 @@ export default function userSimilarityGraph(data, svg, user, articles) {
         .style('opacity', 1);
     };
     const mouseout = (d) => {
+      if (typeof d === 'string') {
+        // user axis
+        d3.selectAll(`circle.${d}`)
+          .attr('r', 3);
+      }
       Tooltip
         .style('opacity', 0)
         .style('left', '0px')
@@ -524,18 +535,25 @@ export default function userSimilarityGraph(data, svg, user, articles) {
     };
     let selectedUser = [];
     const tickClick = (d) => {
-      console.log(d);
-      if (!selectedUser.includes(newUserAxisValues[d])) {
-        selectedUser.push(newUserAxisValues[d]);
-      } else {
-        selectedUser = selectedUser.filter(e => e !== newUserAxisValues[d]);
-      }
-      if (selectedUser.length >= 1) {
-        const filtered_articles = articles.filter(
-          art => art.messages.some(m => selectedUser.includes(m.push_userid)),
-        );
-        userActivityTimeline(filtered_articles, commentTimelineSvg, selectedUser);
-      }
+      const beginDate = d3.select('#date1').attr('value');
+      const endDate = d3.select('#date2').attr('value');
+      const { community: thisCom } = datas.find(e => e.id === d);
+      console.log(thisCom);
+      const us = datas.filter(_d => _d.community === thisCom).map(e => e.id);
+      console.log(us);
+      userDailyActivity(articles, us, commentTimelineSvg, beginDate, endDate);
+      // console.log(d);
+      // if (!selectedUser.includes(newUserAxisValues[d])) {
+      //   selectedUser.push(newUserAxisValues[d]);
+      // } else {
+      //   selectedUser = selectedUser.filter(e => e !== newUserAxisValues[d]);
+      // }
+      // if (selectedUser.length >= 1) {
+      //   const filtered_articles = articles.filter(
+      //     art => art.messages.some(m => selectedUser.includes(m.push_userid)),
+      //   );
+      //   userActivityTimeline(filtered_articles, commentTimelineSvg, selectedUser);
+      // }
     };
 
     // find user group index
@@ -547,6 +565,10 @@ export default function userSimilarityGraph(data, svg, user, articles) {
       else groupIndex.push({ community: tempCom, num: 1, index });
     });
     console.log('groupIndex:', groupIndex);
+
+    // reorder community inner matrix
+    // [secondOrdering_mat, secondOrdering_origMat] = communityInnerMatrixReordering(secondOrdering_mat, secondOrdering_origMat, newUserAxisValues, users, groupIndex);
+    // console.log(secondOrdering_mat, secondOrdering_origMat);
 
     // draw userGroup legends
     const groupLegend = d3.select('#timeLine')
@@ -593,7 +615,7 @@ export default function userSimilarityGraph(data, svg, user, articles) {
 
     const activityTranslateX = 120;
     drawNewHeatmap();
-    drawCommunityWord();
+    // drawCommunityWord();
     drawUserRepliedArticleMatrix(articlesOrderByCommunity);
     drawUserGroupBipartiteRelations();
 
@@ -646,11 +668,11 @@ export default function userSimilarityGraph(data, svg, user, articles) {
                   const size = datas.find(e => e.id === xUser.id).repliedArticle.length;
                   return Math.min(15, bandWidthScale(size) / 10);
                 })
-                .attr('stroke', 'white')
-                .attr('stroke-width', () => {
-                  if (i > index) return '0px';
-                  return '2px';
-                })
+                // .attr('stroke', 'white')
+                // .attr('stroke-width', () => {
+                //   if (i > index) return '0px';
+                //   return '2px';
+                // })
                 .attr('width', () => {
                   const size = datas.find(e => e.id === xUser.id).repliedArticle.length;
                   return bandWidthScale(size);
@@ -749,7 +771,10 @@ export default function userSimilarityGraph(data, svg, user, articles) {
             return color(community[index].community);
           })
           .attr('dy', '0.2em')
-          .style('font-size', (d, index) => (positionScale[index + 1] - positionScale[index]) / 2);
+          .style('font-size', (d, index) => (positionScale[index + 1] - positionScale[index]) / 2)
+          .on('mouseover', mouseover)
+          .on('mouseout', mouseout)
+          .on('click', tickClick);
 
         // x-axis
         leftSvg.append('g')
@@ -775,7 +800,10 @@ export default function userSimilarityGraph(data, svg, user, articles) {
             const index = community.findIndex(e => e.id === d);
             return color(community[index].community);
           })
-          .style('font-size', (d, index) => (positionScale[index + 1] - positionScale[index]) / 2);
+          .style('font-size', (d, index) => (positionScale[index + 1] - positionScale[index]) / 2)
+          .on('mouseover', mouseover)
+          .on('mouseout', mouseout)
+          .on('click', tickClick);
         // leftSvg.select('.xAxis')
         //   .attr('transform', `translate(${positionScale[positionScale.length - 1]},-30)`);
       }
@@ -982,6 +1010,46 @@ export default function userSimilarityGraph(data, svg, user, articles) {
       permutedOrigMat = reorder.transpose(permutedOrigMat);
       return [permutedMat, permutedOrigMat];
       // return [mat, origMat];
+    }
+
+    function communityInnerMatrixReordering(mat, origMat, userAxis, us, communityData) {
+      let copyMat = mat.slice();
+      let copyOriginalMat = origMat.slice();
+      communityData.forEach((com) => {
+        const onlyCommunity = [];
+        for (let i = 0; i < mat.length; i += 1) {
+          onlyCommunity.push(mat[i].slice(com.index, com.index + com.num));
+        }
+        const gra = reorder.mat2graph(onlyCommunity);
+        const prePerm = reorder.spectral_order(gra);
+        // const orig_gra = reorder.mat2graph(origMat);
+        // const orig_perm = reorder.spectral_order(orig_gra);
+        const perm = [];
+        for (let i = 0; i < mat.length; i += 1) {
+          if (i < com.index || i >= com.index + com.num) {
+            perm.push(i);
+          } else {
+            perm.push(prePerm[i - com.index] + com.index);
+          }
+        }
+        const tempUser = userAxis.slice();
+        for (let j = 0; j < us.length; j += 1) {
+          userAxis[j] = tempUser[perm[j]];
+        }
+        console.log(userAxis);
+        let permutedMat = reorder.permute(mat, perm);
+        permutedMat = reorder.transpose(permutedMat);
+        permutedMat = reorder.permute(permutedMat, perm);
+        permutedMat = reorder.transpose(permutedMat);
+        copyMat = permutedMat;
+        let originalMat = reorder.permute(origMat, perm);
+        originalMat = reorder.transpose(originalMat);
+        originalMat = reorder.permute(originalMat, perm);
+        originalMat = reorder.transpose(originalMat);
+        copyOriginalMat = originalMat;
+      });
+
+      return [copyMat, copyOriginalMat];
     }
 
     function userColorScaleArray(d) {

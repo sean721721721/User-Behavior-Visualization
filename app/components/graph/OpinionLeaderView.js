@@ -122,7 +122,7 @@ class OpinionLeaderView extends React.Component {
     function handleSubmit(e) {
       // e.preventDefault();
       console.log(e);
-      const userNumsPerRequest = 100;
+      const userNumsPerRequest = 50;
       const { length } = e;
       const myRequest = [];
       const userListArray = [];
@@ -161,7 +161,7 @@ class OpinionLeaderView extends React.Component {
             console.log(resArr);
             loading(((resArr.userListArray.length / userNumsPerRequest) + 1), myRequest.length, userSimilaritySvg);
             if (myRequest.length === index + 1) {
-              response.userListArray.forEach((usr) => {
+              resArr.userListArray.forEach((usr) => {
                 usr.orig_group = e.find(u => u.id === usr.id).group;
               });
               const userIdArr = e.map(usr => usr.id);
@@ -194,6 +194,7 @@ class OpinionLeaderView extends React.Component {
             response.userListArray.forEach((usr) => {
               usr.orig_group = e.find(u => u.id === usr.id).group;
             });
+            console.log(response);
             userSimilarityGraph(
               response.userListArray,
               userSimilaritySvg,
@@ -13485,9 +13486,11 @@ class OpinionLeaderView extends React.Component {
           <svg id="articleCell" width="100%" height="94%" />
         </div> */}
         <div className="heatMap">
-          <div className="option" style={{width: '100%', display: 'inline' }}/>
+          <div className="optionDiv" style={{width: '100%', display: 'grid' }}>
+            <div className="option" style={{width: '100%', display: 'inline' }} />
+          </div>
           {/* <div className="option"/> */}
-          <div className="timeline">
+          <div className="timeline" style={{width: '100%', display: 'grid' }}>
             <svg id="timeLine" width="100%" height="100%" />
           </div>
         </div>
@@ -13495,29 +13498,18 @@ class OpinionLeaderView extends React.Component {
           <div className="option" style={{width: '100%', height: '50px', display: 'inline' }}/>
           <svg id="context" width="100%" height="100%" />
         </div>
+        <div className="commentTimeline" style={{overflowY: 'scroll'}}>
+        <div class="row align-items-center p-1">
+          <div class="col-sm-2"><p id="value-range"></p></div>
+          <div class="col-sm"><div id="slider-range"></div></div>
+        </div>
+          <svg id="commentTimeline" width="100%" height="auto" />
+        </div>
         {/* <div className="focusDiv">
           <svg id="focus" width="100%" height="100%" />
         </div> */}
         {/* <div className="selectedUserTable d-flex flex-column" style={{ margin: '20px 0px', maxHeight: '700px', minHeight: '400px' }} /> */}
-        {/* <div
-          className="commentTimeline"
-          style={{
-            // position: 'absolute',
-            // top: '15px',
-            // left: '15px',
-            overflowY: 'scroll',
-            minHeight: '0px',
-            maxHeight: '400px',
-            // width: '280px',
-            // height: '400px',
-            // backgroundColor: '#e8e8e8',
-            // border: '1px solid #AAAAAA',
-            // borderRadius: '4px',
-            // boxShadow: 'inset 1px 1px 6px 2px rgba(0,0,0, .25)',
-          }}
-        >
-          <svg id="commentTimeline" width="100%" height="auto" />
-        </div> */}
+        
         {/* <WordTree word={word} optionsWord={optionsWord} /> */}
       </div>
     );
