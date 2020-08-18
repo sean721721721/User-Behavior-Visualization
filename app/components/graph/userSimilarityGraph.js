@@ -131,12 +131,11 @@ export default function userSimilarityGraph(data, svg, user, articles) {
   function drawSlider() {
     d3.select('.option').selectAll('*').remove();
     const sliderSvg = d3.select('.option').append('div')
-      .style('display', 'inline')
+      .style('display', 'inline-block')
       .append('svg')
       .attr('class', 'sliderSvg')
       .attr('width', '220px')
       .attr('height', '50px')
-      .style('margin', '10px')
       .append('g')
       .attr('transform', 'scale(0.8)');
     let similarThresh = 0.2;
@@ -168,12 +167,11 @@ export default function userSimilarityGraph(data, svg, user, articles) {
       .selectAll('text')
       .attr('y', 10);
     const repliedSliderSvg = d3.select('.option').append('div')
-      .style('display', 'inline')
+      .style('display', 'inline-block')
       .append('svg')
       .attr('class', 'repliedSliderSvg')
       .attr('height', '50px')
       .attr('width', '220px')
-      .style('margin', '10px')
       .append('g')
       .attr('transform', 'scale(0.8)');
     const repliedSlider = slider.sliderBottom()
@@ -208,8 +206,7 @@ export default function userSimilarityGraph(data, svg, user, articles) {
   function drawFilterDiv() {
     let filterDiv = d3.select('.heatMap').select('.option').append('div')
       .style('display', 'inline-block')
-      .attr('class', 'filterDiv')
-      .style('margin-top', '10px');
+      .attr('class', 'filterDiv');
     filterDiv = filterDiv.append('div')
       .style('margin-bottom', '0px')
       .style('transform', 'scale(0.8)')
@@ -401,10 +398,9 @@ export default function userSimilarityGraph(data, svg, user, articles) {
       datas.find(e1 => e1.id === e.id).community = e.community;
     });
     const communityWord = computeCommunityTitleWordScore(datas);
-    console.log(communityWord);
+    console.log('communityWord: ', communityWord);
     if (communityWord.length) {
       const score = communityWord[0].wordList.reduce((acc, obj) => acc + obj.score, 0);
-      console.log(score);
     }
 
     const [matrix, origMatrix] = relationToMatrix(similaritys, users);
@@ -540,7 +536,6 @@ export default function userSimilarityGraph(data, svg, user, articles) {
       const { community: thisCom } = datas.find(e => e.id === d);
       console.log(thisCom);
       const us = datas.filter(_d => _d.community === thisCom).map(e => e.id);
-      console.log(us);
       userDailyActivity(articles, us, commentTimelineSvg, beginDate, endDate);
       // console.log(d);
       // if (!selectedUser.includes(newUserAxisValues[d])) {
@@ -1713,7 +1708,7 @@ export default function userSimilarityGraph(data, svg, user, articles) {
         const tempCommunity = articlesCommunity.filter(e => e.community === i);
         numOfArtOfEachComunity.push(tempCommunity);
       }
-      console.log('numOfArtOfEachComunity', numOfArtOfEachComunity);
+      // console.log('numOfArtOfEachComunity', numOfArtOfEachComunity);
       const artComPie = d3.pie()
         .value(d => d.length)
         .sort(null);
@@ -1769,7 +1764,7 @@ export default function userSimilarityGraph(data, svg, user, articles) {
         const arr = drawRelationRatio(i, numOfUser);
         articleGroupOfUserCommunity.push(arr);
       }
-      console.log(articleGroupOfUserCommunity);
+      console.log('articleGroupOfUserCommunity: ', articleGroupOfUserCommunity);
       // draw bipartite co-cluster graph
       drawCoClusterGraph(articleGroupOfUserCommunity);
       // draw article heatmap on the left side of the main heatMap
@@ -1800,7 +1795,6 @@ export default function userSimilarityGraph(data, svg, user, articles) {
         if (comunityIndexY[index + 1]) nex = comunityIndexY[index + 1];
         // width of user group
         const maxWidth = (positionScale[nex] - positionScale[tem]) * Math.sqrt(2);
-        console.log(maxWidth);
         const groupRadial = radial.select(`.group_${index}`);
         // article group heatmap
         const t = groupIndex[index].index;
@@ -2007,15 +2001,12 @@ export default function userSimilarityGraph(data, svg, user, articles) {
             }
           }
         }
-        console.log(arr);
 
         function coClusterMouseover(arts, communityIndex) {
           const usrs = datas.filter(e => e.community === communityIndex);
           usrs.forEach((u) => {
             u.haveReplied = u.repliedArticle.filter(a => arts.some(_a => _a.article_id === a.article_id));
           });
-          console.log(usrs);
-          
         }
       }
 

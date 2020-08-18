@@ -43,7 +43,9 @@ class OpinionLeaderView extends React.Component {
       return articlesArray;
     }
 
-    function getReqstr(id) {
+    function getReqstr(id, begin, end) {
+      const searchBegin = begin || beginDate;
+      const searchEnd = end || endDate;
       const {
         menuprops: {
           initParameter: {
@@ -66,8 +68,8 @@ class OpinionLeaderView extends React.Component {
       const strmaxvar1 = `max${varname1}=${maxvar1}` || '';
       const strposttype = `posttype=${posttype}` || '';
       const strpage1 = `page1=${boardname}` || '';
-      const strtime1 = `time1=${beginDate}` || '';
-      const strtime2 = `time2=${endDate}` || '';
+      const strtime1 = `time1=${searchBegin}` || '';
+      const strtime2 = `time2=${searchEnd}` || '';
       const struser1 = `user1=${id}` || '';
       const strauthor1 = `author1=${''}` || '';
       const strkeyword1 = `keyword1=${''}` || '';
@@ -127,13 +129,24 @@ class OpinionLeaderView extends React.Component {
       const myRequest = [];
       const userListArray = [];
       const min = Math.min(e.length, userNumsPerRequest);
-      const fixedUserArr = [e.slice(0, min).map(usr => usr.id)];
-      // console.log(fixedUserArr);
-      const url = [encodeURI(getReqstr(fixedUserArr[0]))];
-      for (let i = 1; i < length / userNumsPerRequest; i += 1) {
-        fixedUserArr.push(e.slice(i * userNumsPerRequest, (i + 1) * userNumsPerRequest).map(usr => usr.id));
-        // console.log(fixedUserArr);
-        url.push(encodeURI(getReqstr(fixedUserArr[i])));
+      // split users into many pieces
+      // const fixedUserArr = [e.slice(0, min).map(usr => usr.id)];
+      // const url = [encodeURI(getReqstr(fixedUserArr[0]))];
+      // for (let i = 1; i < length / userNumsPerRequest; i += 1) {
+      //   fixedUserArr.push(e.slice(i * userNumsPerRequest, (i + 1) * userNumsPerRequest).map(usr => usr.id));
+      //   url.push(encodeURI(getReqstr(fixedUserArr[i])));
+      // }
+      // split date into many pieces by one day
+      const fixedUserArr = e.map(usr => usr.id);
+      const url = [];
+      const betweenDate = (new Date(endDate) - new Date(beginDate)) / (1000 * 3600 * 24);
+      for (let i = 0; i < betweenDate; i += 2) {
+        const newBeginDate = new Date(beginDate);
+        const newEndDate = new Date(beginDate);
+        newBeginDate.setDate(newBeginDate.getDate() + i);
+        newEndDate.setDate(newEndDate.getDate() + (i + 2));
+        if (new Date(newEndDate) > new Date(endDate)) url.push(encodeURI(getReqstr(fixedUserArr, newBeginDate, new Date(endDate))));
+        else url.push(encodeURI(getReqstr(fixedUserArr, newBeginDate, newEndDate)));
       }
       url.forEach((u) => {
         myRequest.push(new Request(u, {
@@ -149,17 +162,36 @@ class OpinionLeaderView extends React.Component {
           .then(response => response.json())
           .then((response) => {
             console.log(response);
-            resArr.userListArray = resArr.userListArray.concat(response.userListArray);
+            // concat userlist because spliting user
+            // resArr.userListArray = resArr.userListArray.concat(response.userListArray);
+            
+            // concat user repliedArticle because spliting date
+            for (let i = 0; i < resArr.userListArray.length; i += 1) {
+              const existedUser = resArr.userListArray[i];
+              const responseUser = response.userListArray[i];
+              existedUser.totalReplyCount += responseUser.totalReplyCount;
+              existedUser.repliedArticle = existedUser.repliedArticle.concat(responseUser.repliedArticle);
+              responseUser.titleWordScore.forEach((wordList) => {
+                const wordScore = existedUser.titleWordScore.find(wl => wl.word === wordList.word);
+                if (wordScore) {
+                  wordScore.score += wordList.score;
+                } else {
+                  existedUser.titleWordScore.push(wordList);
+                }
+              });
+            }
+            // remove duplicated articles
             response.articles.forEach((a) => {
               if (!resArr.articles.some(_a => _a.article_id === a.article_id)) {
                 resArr.articles.push(a);
               }
             });
+            // remove messages which pushUserid is not included in request users
             resArr.articles.forEach((a) => {
               a.messages = a.messages.filter(mes => e.some(usr => usr.id === mes.push_userid));
             });
             console.log(resArr);
-            loading(((resArr.userListArray.length / userNumsPerRequest) + 1), myRequest.length, userSimilaritySvg);
+            loading((index + 1), myRequest.length, userSimilaritySvg);
             if (myRequest.length === index + 1) {
               resArr.userListArray.forEach((usr) => {
                 usr.orig_group = e.find(u => u.id === usr.id).group;
@@ -189,7 +221,7 @@ class OpinionLeaderView extends React.Component {
             a.messages = a.messages.filter(mes => e.some(usr => usr.id === mes.push_userid));
           });
           console.log(resArr);
-          loading(((resArr.userListArray.length / userNumsPerRequest) + 1), myRequest.length, userSimilaritySvg);
+          loading((i + 1), myRequest.length, userSimilaritySvg);
           if (myRequest.length === i + 1) {
             response.userListArray.forEach((usr) => {
               usr.orig_group = e.find(u => u.id === usr.id).group;
@@ -198,7 +230,7 @@ class OpinionLeaderView extends React.Component {
             userSimilarityGraph(
               response.userListArray,
               userSimilaritySvg,
-              fixedUserArr[0],
+              fixedUserArr,
               response.articles,
               // response.similarity,
             );

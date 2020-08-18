@@ -476,7 +476,7 @@ path:hover {
         grid-column: accol1 / accol3;
         border: 2px solid gray;
         grid-row: acrow1 / acrow2;
-        grid-template-rows: [hmrow1] 2fr [hmrow2] 8fr [hmrowend];
+        grid-template-rows: [hmrow1] 1fr [hmrow2] 9fr [hmrowend];
     }
 }
 
@@ -491,7 +491,7 @@ path:hover {
         min-height: '400px';
         grid-column: accol1 / accol3;
         grid-row: acrow1 / acrow2;
-        grid-template-rows: [hmrow1] 2fr [hmrow2] 8fr [hmrowend];
+        grid-template-rows: [hmrow1] 1fr [hmrow2] 9fr [hmrowend];
     }
 }
 
