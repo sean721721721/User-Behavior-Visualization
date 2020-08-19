@@ -37,12 +37,18 @@ export default function userDailyActivity(data, user, svg, begin, end) {
     .select('div#slider-range')
     .append('svg')
     .attr('width', 500)
-    .attr('height', 50)
+    .attr('height', 30)
     .append('g')
-    .attr('transform', 'translate(20,10)');
+    .attr('transform', 'scale(0.8) translate(20,10)');
 
   gRange.call(sliderRange);
-
+  gRange.select('.axis')
+    .attr('transform', 'transform(0, 0)')
+    .selectAll('text')
+    .attr('y', 10);
+  gRange.selectAll('.parameter-value')
+    .selectAll('text')
+    .attr('y', 15);
   d3.select('p#value-range').text('Time Range')
     .style('text-align', 'right');
 
@@ -56,7 +62,8 @@ export default function userDailyActivity(data, user, svg, begin, end) {
     .domain([0, 10]);
   const xScale = getXScale(new Date(begin), new Date(end));
   const timeScale = d3.scaleTime().domain([new Date(begin), new Date(end)]).range([0, 500]);
-  const userScale = d3.scaleBand().domain(user).range([0, 100]);
+  const userScaleRange = user.length * 10;
+  const userScale = d3.scaleBand().domain(user).range([0, userScaleRange]);
   const yDomain = getYDomain(new Date(begin), new Date(end));
   // console.log(yDomain);
   const xDomain = oneToNArray(24);
@@ -142,7 +149,7 @@ export default function userDailyActivity(data, user, svg, begin, end) {
     const filteredMessages = data[i].messages.filter(e => user.includes(e.push_userid));
     svg.append('g')
       .attr('class', `article ${data[i].article_id}`)
-      .attr('transform', 'translate(100, 50)')
+      .attr('transform', 'translate(100, 20)')
       .selectAll()
       .data(filteredMessages)
       .enter()
@@ -150,8 +157,12 @@ export default function userDailyActivity(data, user, svg, begin, end) {
       .attr('x', (d, index) => {
         const date = dateFormat(d);
         const commentTime = new Date(new Date(date).setFullYear(postYear));
-        // const timeDiff = commentTime - new Date(a.date);
         return timeScale(commentTime);
+      })
+      .attr('opacity', (d, index) => {
+        const date = dateFormat(d);
+        const commentTime = new Date(new Date(date).setFullYear(postYear));
+        return timeScale(commentTime) < 500 ? 1 : 0;
       })
       .attr('y', d => userScale(d.push_userid) + userScale.bandwidth() / 2)
       .attr('width', 2)
@@ -164,12 +175,12 @@ export default function userDailyActivity(data, user, svg, begin, end) {
 
   svg.append('g')
     .attr('class', 'yAxis')
-    .attr('transform', 'translate(100, 50)')
+    .attr('transform', 'translate(100, 20)')
     .call(d3.axisLeft(userScale));
 
   svg.append('g')
     .attr('class', 'xAxis')
-    .attr('transform', 'translate(100, 50)')
+    .attr('transform', 'translate(100, 20)')
     .call(d3.axisTop(timeScale));
 
   // svg.append('g')
@@ -300,14 +311,16 @@ export default function userDailyActivity(data, user, svg, begin, end) {
   }
   function update(date1, date2) {
     const updateXScale = d3.scaleTime().domain([new Date(date1), new Date(date2)]).range([0, 500]);
-    const updateYScale = d3.scaleBand().domain(user).range([0, 100]);
+    const updateYScale = d3.scaleBand().domain(user).range([0, userScaleRange]);
 
     svg.selectAll('.article')
       .each((d, index, nodes) => {
         const article_id = d3.select(nodes[index]).attr('class').slice(8);
         const article = data.find(e => e.article_id === article_id);
         const postYear = new Date(article.date).getFullYear();
-        if (new Date(article.date) < new Date(date2)) {
+        const beginDateMinusTwo = new Date(date1);
+        beginDateMinusTwo.setDate(beginDateMinusTwo.getDate() - 2);
+        if (new Date(article.date) > beginDateMinusTwo && new Date(article.date) < new Date(date2)) {
           d3.select(nodes[index])
             .attr('visibility', 'visible')
             .selectAll('rect')
@@ -315,6 +328,11 @@ export default function userDailyActivity(data, user, svg, begin, end) {
               const date = dateFormat(_d);
               const commentTime = new Date(new Date(date).setFullYear(postYear));
               return updateXScale(commentTime);
+            })
+            .attr('opacity', (_d, _index) => {
+              const date = dateFormat(_d);
+              const commentTime = new Date(new Date(date).setFullYear(postYear));
+              return updateXScale(commentTime) < 500 && updateXScale(commentTime) > 0 ? 1 : 0;
             })
             .attr('y', _d => updateYScale(_d.push_userid) + userScale.bandwidth() / 2)
             .attr('width', 2)
@@ -325,6 +343,11 @@ export default function userDailyActivity(data, user, svg, begin, end) {
             .attr('visibility', 'hidden');
         }
       });
+    svg.select('.yAxis')
+      .call(d3.axisLeft(updateYScale));
+
+    svg.select('.xAxis')
+      .call(d3.axisTop(updateXScale));
   }
 }
 

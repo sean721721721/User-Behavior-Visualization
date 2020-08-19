@@ -439,7 +439,7 @@ path:hover {
         // display: grid;
         grid-column: sscol1 / sscolend;
         // grid-row: ssrow1 / ssrowend;
-        grid-template-rows: [acrow1] 7.5fr [acrow2] 2.5fr [acrowend];
+        grid-template-rows: [acrow1] 7fr [acrow2] 3fr [acrowend];
         grid-template-columns: [accol1] 3fr [accol2] 2.5fr [accol3] 1fr [accol4] 3.5fr [accolend];
     }
 }
@@ -452,7 +452,7 @@ path:hover {
         display: grid;
         grid-column: sscol1 / sscolend;
         // grid-row: ssrow1 / ssrowend;
-        grid-template-rows: [acrow1] 7.5fr [acrow2] 2.5fr [acrowend];
+        grid-template-rows: [acrow1] 7fr [acrow2] 3fr [acrowend];
         grid-template-columns: [accol1] 3fr [accol2] 2.5fr [accol3] 1fr [accol4] 3.5fr [accolend];
     }
 }
@@ -464,7 +464,7 @@ path:hover {
         display: grid;
         grid-column: sscol5 / sscolend;
         // grid-row: ssrow1 / ssrowend;
-        grid-template-rows: [acrow1] 7.5fr [acrow2] 2.5fr [acrowend];
+        grid-template-rows: [acrow1] 7fr [acrow2] 3fr [acrowend];
         grid-template-columns: [accol1] 3fr [accol2] 2.5fr [accol3] 1fr [accol4] 3.5fr [accolend];
     }
 }

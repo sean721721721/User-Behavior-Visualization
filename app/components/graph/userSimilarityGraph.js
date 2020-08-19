@@ -209,6 +209,7 @@ export default function userSimilarityGraph(data, svg, user, articles) {
       .attr('class', 'filterDiv');
     filterDiv = filterDiv.append('div')
       .style('margin-bottom', '0px')
+      .style('display', 'flex')
       .style('transform', 'scale(0.8)')
       .text('ArticleGroupBy:');
     const tagInput = filterDiv.append('div')
