@@ -13530,10 +13530,10 @@ class OpinionLeaderView extends React.Component {
           <div className="option" style={{width: '100%', height: '50px', display: 'inline' }}/>
           <svg id="context" width="100%" height="100%" />
         </div>
-        <div className="commentTimeline" style={{overflowY: 'scroll'}}>
-        <div class="row align-items-center p-1">
-          <div class="col-sm-2"><p id="value-range"></p></div>
-          <div class="col-sm"><div id="slider-range"></div></div>
+        <div className="commentTimeline" style={{overflowY: 'scroll', overflowX: 'hidden'}}>
+        <div className="row align-items-center p-0" style={{borderBottom: '2px solid gray'}}>
+          <div className="col-sm-2"><p id="value-range"></p></div>
+          <div className="col-sm"><div id="slider-range"></div></div>
         </div>
           <svg id="commentTimeline" width="100%" height="auto" />
         </div>

@@ -137,7 +137,7 @@ export default function userSimilarityGraph(data, svg, user, articles) {
       .attr('width', '220px')
       .attr('height', '50px')
       .append('g')
-      .attr('transform', 'scale(0.8)');
+      .attr('transform', 'scale(0.8) translate(10, 0)');
     let similarThresh = 0.2;
     let articleThresh = 1;
     const similaritySlider = slider.sliderBottom()
@@ -156,7 +156,7 @@ export default function userSimilarityGraph(data, svg, user, articles) {
       .attr('class', 'similaritySlider')
       .attr('transform', `translate(${3 * margin.left},${margin.top / 2})`);
     const sliderText1 = sliderSvg.append('g')
-      .attr('transform', `translate(0,${margin.top / 2})`)
+      .attr('transform', `translate(0,${margin.top})`)
       .append('text')
       .text('Similarity')
       .attr('y', 5);
@@ -190,7 +190,7 @@ export default function userSimilarityGraph(data, svg, user, articles) {
       .attr('class', 'repliedSlider')
       .attr('transform', `translate(${3 * margin.left + 10},${margin.top / 2})`);
     const sliderText2 = repliedSliderSvg.append('g')
-      .attr('transform', `translate(0,${margin.top / 2})`)
+      .attr('transform', `translate(0,${margin.top})`)
       .append('text')
       .text('ReplyCount')
       .attr('y', 5);
@@ -498,9 +498,9 @@ export default function userSimilarityGraph(data, svg, user, articles) {
     };
 
     const rectClick = (d, index, i) => {
-      console.log(index);
+      console.log(d, index, i);
       let bothRepliedArticles = [];
-      if (i) {
+      if (typeof i === 'number') {
         const xID = newUserAxisValues[index];
         const yID = newUserAxisValues[i];
         const xUser = datas.find(e => e.id === xID);
@@ -527,7 +527,7 @@ export default function userSimilarityGraph(data, svg, user, articles) {
       });
       console.log('sorted articles', articles);
       console.log(bothRepliedArticles);
-      updateArticleMatrix(articles, bothRepliedArticles, index);
+      updateArticleMatrix(bothRepliedArticles, index, i);
       // updateArticleMatrixv2(bothRepliedArticles, index);
     };
     let selectedUser = [];
@@ -701,7 +701,8 @@ export default function userSimilarityGraph(data, svg, user, articles) {
             const end = positionScale[i] + bandWidthScale(size);
             return `M ${start} ${start} L ${end} ${start} L ${end} ${end}`;
           })
-          .attr('fill', color(tempUser.community));
+          .attr('fill', color(tempUser.community))
+          .on('click', () => rectClick('', i, i));
       }
       // draw user group heatmap
       // for (let i = 0; i < groupIndex.length - 1; i += 1) {
@@ -1108,12 +1109,12 @@ export default function userSimilarityGraph(data, svg, user, articles) {
         .remove();
       // lineGroup.selectAll('line').remove();
     }
-    function updateArticleMatrix(articleArray, highlightArticles, communityIndex) {
+    function updateArticleMatrix(highlightArticles, communityIndex, communityI) {
       // console.log(highlightArticles);
       const focusH = 400;
       articleGroup.selectAll('.articleXAxis').remove();
       articleGroup.select('.lineGroup').selectAll('line').remove();
-      const communityUserCount = datas.filter(e => e.community === communityIndex).length;
+      const communityUserCount = communityI ? 2 : datas.filter(e => e.community === communityIndex).length;
       const focusGridWidth = 25;
       const highlightArticle_id = highlightArticles.map(e => e.article_id);
       // console.log(highlightArticle_id);
@@ -1194,6 +1195,10 @@ export default function userSimilarityGraph(data, svg, user, articles) {
         const messages = article.messages.filter((mes) => {
           const u = datas.find(e1 => e1.id === mes.push_userid);
           if (!u) return false;
+          if (communityI) {
+          // click heatmap rect
+            return u.id === newUserAxisValues[communityIndex] || u.id === newUserAxisValues[communityI];
+          }
           return u.community === communityIndex;
         });
         const push = messages.filter(mes => mes.push_tag === '推');
@@ -1208,7 +1213,7 @@ export default function userSimilarityGraph(data, svg, user, articles) {
           const sortType = d3.select(_nodes[_index]).attr('value');
           // contextYScale.domain(articleSortBy(sortType, articlesWithTypeComment));
           const arr = articleSortBy(sortType, articlesWithTypeComment, highlightArticles);
-          updateArticleMatrix(articleArray, arr, communityIndex);
+          updateArticleMatrix(arr, communityIndex, communityI);
           // drawArticleTree(articleTree);
         });
       drawArticleTree(articleTree, communityIndex);
@@ -1270,8 +1275,12 @@ export default function userSimilarityGraph(data, svg, user, articles) {
         else focus.attr('transform', `translate(${activityTranslateX + 75}, ${90})`);
 
         const newDepthDomainX = contextXScale.domain();
-        const newUserDomainY = newUserAxisValues.filter(e => datas.find(e1 => e1.id === e).community === communityIndex);
-        focusUserScaleY.domain(newUserDomainY);
+        if (communityI) {
+          focusUserScaleY.domain([newUserAxisValues[communityIndex], newUserAxisValues[communityI]]);
+        } else {
+          const newUserDomainY = newUserAxisValues.filter(e => datas.find(e1 => e1.id === e).community === communityIndex);
+          focusUserScaleY.domain(newUserDomainY);
+        }
         const newArticleDomainY = contextYScale.domain().slice(s[0][1] / contextYScale.bandwidth(), s[1][1] / contextYScale.bandwidth());
         focusArticleScaleY.domain(newArticleDomainY);
         focusUserScaleY.range([0, focusArticleScaleY.bandwidth()]);
