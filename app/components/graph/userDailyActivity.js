@@ -164,9 +164,9 @@ export default function userDailyActivity(data, user, svg, begin, end) {
         const commentTime = new Date(new Date(date).setFullYear(postYear));
         return timeScale(commentTime) < 500 ? 1 : 0;
       })
-      .attr('y', d => userScale(d.push_userid) + userScale.bandwidth() / 2)
+      .attr('y', d => userScale(d.push_userid))
       .attr('width', 2)
-      .attr('height', 2)
+      .attr('height', userScale.bandwidth())
       .style('fill', d => commentTypeColor(d.push_tag))
       .attr('border', '0.5px solid black')
       .on('mouseover', d => mouseover(data[i], d))
@@ -176,12 +176,15 @@ export default function userDailyActivity(data, user, svg, begin, end) {
   svg.append('g')
     .attr('class', 'yAxis')
     .attr('transform', 'translate(100, 20)')
-    .call(d3.axisLeft(userScale));
+    .call(d3.axisLeft(userScale).tickSize(-500))
+    .attr('stroke-width', '0.5px');
 
   svg.append('g')
     .attr('class', 'xAxis')
     .attr('transform', 'translate(100, 20)')
-    .call(d3.axisTop(timeScale));
+    .call(d3.axisTop(timeScale)
+      .ticks(d3.timeDay.every(1))
+      .tickFormat(d3.timeFormat('%m/%d')));
 
   // svg.append('g')
   //   .attr('transform', () => {
@@ -333,21 +336,26 @@ export default function userDailyActivity(data, user, svg, begin, end) {
               const date = dateFormat(_d);
               const commentTime = new Date(new Date(date).setFullYear(postYear));
               return updateXScale(commentTime) < 500 && updateXScale(commentTime) > 0 ? 1 : 0;
-            })
-            .attr('y', _d => updateYScale(_d.push_userid) + userScale.bandwidth() / 2)
-            .attr('width', 2)
-            .attr('height', 2)
-            .style('fill', _d => commentTypeColor(_d.push_tag));
+            });
         } else {
           d3.select(nodes[index])
             .attr('visibility', 'hidden');
         }
       });
     svg.select('.yAxis')
-      .call(d3.axisLeft(updateYScale));
-
-    svg.select('.xAxis')
-      .call(d3.axisTop(updateXScale));
+      .call(d3.axisLeft(updateYScale).tickSize(-500))
+      .attr('stroke-width', '0.5px');
+    console.log((date2 - date1) / (60 * 60 * 24 * 1000));
+    if ((date2 - date1) / (60 * 60 * 24 * 1000) <= 1) {
+      svg.select('.xAxis')
+        .call(d3.axisTop(updateXScale).tickFormat(d3.timeFormat('%H:%M')));
+    } else if ((date2 - date1) / (60 * 60 * 24 * 1000) < 5) {
+      svg.select('.xAxis')
+        .call(d3.axisTop(updateXScale).ticks(d3.timeDay.every(1)).tickFormat(d3.timeFormat('%m/%d %H:%M')));
+    } else {
+      svg.select('.xAxis')
+        .call(d3.axisTop(updateXScale).ticks(d3.timeDay.every(1)).tickFormat(d3.timeFormat('%m/%d')));
+    }
   }
 }
 
