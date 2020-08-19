@@ -18,7 +18,6 @@ export default function userDailyActivity(data, user, svg, begin, end) {
   const h = parseFloat(d3.select('.commentTimeline').style('height'));
   const w = parseFloat(d3.select('.commentTimeline').style('width'));
 
-
   // Range
   d3.select('div#slider-range').select('svg').remove();
   const sliderRange = slider.sliderBottom()
@@ -52,6 +51,8 @@ export default function userDailyActivity(data, user, svg, begin, end) {
   d3.select('p#value-range').text('Time Range')
     .style('text-align', 'right');
 
+  //----------------
+
   svg.selectAll('*').remove();
   const gridSize = 12;
   const userListByReplyCountPerHours = computeUserListByReplyCountPerHours(data, user);
@@ -77,16 +78,27 @@ export default function userDailyActivity(data, user, svg, begin, end) {
     .padding(0.05);
   const Tooltip = d3.select('.tooltip');
   const mouseover = (d, e) => {
-    Tooltip
-      .style('opacity', 1)
-      .html(`<p style="color: white;">${d.article_title} <br> ${e.push_tag} ${e.push_userid}: ${e.push_content}</p>`)
-      .style('left', `${d3.event.pageX + 25}px`)
-      .style('top', `${d3.event.pageY}px`);
-    d3.select(this)
-      .style('stroke', 'black')
-      .style('opacity', 1);
+    if (e) {
+      Tooltip
+        .style('opacity', 1)
+        .html(`<p style="color: white;">${d.article_title} <br> ${e.push_tag} ${e.push_userid}: ${e.push_content}</p>`)
+        .style('left', `${d3.event.pageX + 25}px`)
+        .style('top', `${d3.event.pageY}px`);
+      d3.select(this)
+        .style('stroke', 'black')
+        .style('opacity', 1);
+    } else {
+      svg.selectAll('.article')
+        .attr('opacity', '0');
+      const articleId = d.article_id.replace(/\./gi, '');
+      svg.selectAll(`.${articleId}`)
+        .attr('opacity', '1');
+    }
   };
   const mouseout = (d) => {
+    svg.selectAll('.article')
+      .attr('opacity', 1);
+
     Tooltip
       .style('opacity', 0);
     d3.select(this)
@@ -143,34 +155,56 @@ export default function userDailyActivity(data, user, svg, begin, end) {
   //   .on('mouseout', mouseout);
 
   for (let i = 0; i < data.length; i += 1) {
-    const postYear = new Date(data[i].date).getFullYear();
-    // const commentTime = new Date(new Date(date).setFullYear(postYear));
-    // const timeDiff = commentTime - new Date(a.date);
-    const filteredMessages = data[i].messages.filter(e => user.includes(e.push_userid));
-    svg.append('g')
-      .attr('class', `article ${data[i].article_id}`)
-      .attr('transform', 'translate(100, 20)')
-      .selectAll()
-      .data(filteredMessages)
-      .enter()
-      .append('rect')
-      .attr('x', (d, index) => {
-        const date = dateFormat(d);
-        const commentTime = new Date(new Date(date).setFullYear(postYear));
-        return timeScale(commentTime);
-      })
-      .attr('opacity', (d, index) => {
-        const date = dateFormat(d);
-        const commentTime = new Date(new Date(date).setFullYear(postYear));
-        return timeScale(commentTime) < 500 ? 1 : 0;
-      })
-      .attr('y', d => userScale(d.push_userid))
-      .attr('width', 2)
-      .attr('height', userScale.bandwidth())
-      .style('fill', d => commentTypeColor(d.push_tag))
-      .attr('border', '0.5px solid black')
-      .on('mouseover', d => mouseover(data[i], d))
-      .on('mouseout', mouseout);
+    if (data[i].messages.some(mes => user.includes(mes.push_userid))) {
+      const articleId = data[i].article_id.replace(/\./gi, '');
+      svg.append('g')
+        .attr('class', `pointer ${articleId}`)
+        .attr('transform', 'translate(100, 10)')
+        .selectAll()
+        .data([data[i]])
+        .enter()
+        .append('rect')
+        .attr('x', (d, index) => {
+          const postTime = new Date(d.date);
+          return timeScale(postTime);
+        })
+        .attr('opacity', (d, index) => {
+          const postTime = new Date(d.date);
+          return timeScale(postTime) < 500 ? 1 : 0;
+        })
+        .attr('y', 0)
+        .attr('width', 2)
+        .attr('height', 10)
+        .style('fill', 'blue')
+        .on('mouseover', d => mouseover(d))
+        .on('mouseout', mouseout);
+
+      const postYear = new Date(data[i].date).getFullYear();
+      const filteredMessages = data[i].messages.filter(e => user.includes(e.push_userid));
+      svg.append('g')
+        .attr('class', `article ${articleId}`)
+        .attr('transform', 'translate(100, 20)')
+        .selectAll()
+        .data(filteredMessages)
+        .enter()
+        .append('rect')
+        .attr('x', (d, index) => {
+          const date = dateFormat(d);
+          const commentTime = new Date(new Date(date).setFullYear(postYear));
+          return timeScale(commentTime);
+        })
+        .attr('opacity', (d, index) => {
+          const date = dateFormat(d);
+          const commentTime = new Date(new Date(date).setFullYear(postYear));
+          return timeScale(commentTime) < 500 ? 1 : 0;
+        })
+        .attr('y', d => userScale(d.push_userid))
+        .attr('width', 2)
+        .attr('height', userScale.bandwidth())
+        .style('fill', d => commentTypeColor(d.push_tag))
+        .on('mouseover', d => mouseover(data[i], d))
+        .on('mouseout', mouseout);
+    }
   }
 
   svg.append('g')
@@ -316,10 +350,27 @@ export default function userDailyActivity(data, user, svg, begin, end) {
     const updateXScale = d3.scaleTime().domain([new Date(date1), new Date(date2)]).range([0, 500]);
     const updateYScale = d3.scaleBand().domain(user).range([0, userScaleRange]);
 
+
+    svg.selectAll('.pointer')
+      .each((d, index, nodes) => {
+        const article_id = d3.select(nodes[index]).attr('class').slice(8);
+        const article = data.find(e => e.article_id.replace(/\./gi, '') === article_id);
+        if (new Date(article.date) > new Date(date1) && new Date(article.date) < new Date(date2)) {
+          d3.select(nodes[index])
+            .attr('visibility', 'visible')
+            .selectAll('rect')
+            .attr('x', _d => updateXScale(new Date(_d.date)))
+            .attr('opacity', _d => (updateXScale(new Date(_d.date)) < 500 && updateXScale(new Date(_d.date)) > 0 ? 1 : 0));
+        } else {
+          d3.select(nodes[index])
+            .attr('visibility', 'hidden');
+        }
+      });
+
     svg.selectAll('.article')
       .each((d, index, nodes) => {
         const article_id = d3.select(nodes[index]).attr('class').slice(8);
-        const article = data.find(e => e.article_id === article_id);
+        const article = data.find(e => e.article_id.replace(/\./gi, '') === article_id);
         const postYear = new Date(article.date).getFullYear();
         const beginDateMinusTwo = new Date(date1);
         beginDateMinusTwo.setDate(beginDateMinusTwo.getDate() - 2);
@@ -345,7 +396,6 @@ export default function userDailyActivity(data, user, svg, begin, end) {
     svg.select('.yAxis')
       .call(d3.axisLeft(updateYScale).tickSize(-500))
       .attr('stroke-width', '0.5px');
-    console.log((date2 - date1) / (60 * 60 * 24 * 1000));
     if ((date2 - date1) / (60 * 60 * 24 * 1000) <= 1) {
       svg.select('.xAxis')
         .call(d3.axisTop(updateXScale).tickFormat(d3.timeFormat('%H:%M')));

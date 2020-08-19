@@ -38,11 +38,11 @@ export default function userSimilarityGraph(data, svg, user, articles) {
   const clickedUser = [];
 
   const [filteredArticles, articleSimilarity] = computeArticleSimilarity(data);
-  console.log('articleSimilarity: ', articleSimilarity);
+  console.log('articleSimilarity: ', articleSimilarity.length);
   const articleIds = filteredArticles.map(e => e.article_id);
   const articlesCommunity = jLouvainClustering(articleIds, articleSimilarity);
   // const articlesCommunity = articleGroupByTag(articleIds, filteredArticles);
-  console.log('articlesCommunity', articlesCommunity);
+  // console.log('articlesCommunity', articlesCommunity);
 
   drawSlider();
   drawFilterDiv();
