@@ -1,3 +1,4 @@
+/* eslint-disable max-len */
 /* eslint-disable no-loop-func */
 /* eslint-disable no-underscore-dangle */
 /* eslint-disable no-console */
@@ -17,7 +18,9 @@ export default function userDailyActivity(data, user, svg, begin, end) {
   svg.selectAll('*').remove();
   const h = parseFloat(d3.select('.commentTimeline').style('height'));
   const w = parseFloat(d3.select('.commentTimeline').style('width'));
-
+  let original_date1 = new Date(begin);
+  let original_date2 = new Date(end);
+  let filteredArticles = [];
   // Range
   d3.select('div#slider-range').select('svg').remove();
   const sliderRange = slider.sliderBottom()
@@ -30,6 +33,8 @@ export default function userDailyActivity(data, user, svg, begin, end) {
     .fill('#2196f3')
     .on('onchange', (val) => {
       update(new Date(val[0]), new Date(val[1]));
+      original_date1 = new Date(val[0]);
+      original_date2 = new Date(val[1]);
     });
 
   const gRange = d3
@@ -349,8 +354,105 @@ export default function userDailyActivity(data, user, svg, begin, end) {
   function update(date1, date2) {
     const updateXScale = d3.scaleTime().domain([new Date(date1), new Date(date2)]).range([0, 500]);
     const updateYScale = d3.scaleBand().domain(user).range([0, userScaleRange]);
+    // if (original_date1 < new Date(date1) || original_date2 > new Date(date2)) {
+    //   filteredArticles.forEach((art) => {
+    //     const article_id = art.article_id.replace(/\./gi, '');
+    //     console.log(svg.selectAll(`.${article_id}`));
+    //     svg.selectAll(`.${article_id}`)
+    //       .each((d, index, nodes) => {
+    //         // article pointers
+    //         console.log(d3.select(nodes[index]).selectAll('.pointer'));
+    //         d3.select(nodes[index]).selectAll('.pointer')
+    //           .each((_d, _index, _nodes) => {
+    //             if (new Date(art.date) > new Date(date1) && new Date(art.date) < new Date(date2)) {
+    //               console.log('inside');
+    //               d3.select(_nodes[_index])
+    //                 .attr('visibility', 'visible')
+    //                 .selectAll('rect')
+    //                 .attr('x', e => updateXScale(new Date(e.date)))
+    //                 .attr('opacity', e => (updateXScale(new Date(e.date)) < 500 && updateXScale(new Date(e.date)) > 0 ? 1 : 0));
+    //             } else {
+    //               console.log('outside');
+    //               d3.select(_nodes[_index])
+    //                 .attr('visibility', 'hidden');
+    //             }
+    //           });
+    //         // user activities
+    //         d3.select(nodes[index]).select('.article')
+    //           .each((_d, _index, _nodes) => {
+    //             const postYear = new Date(art.date).getFullYear();
+    //             const beginDateMinusTwo = new Date(date1);
+    //             beginDateMinusTwo.setDate(beginDateMinusTwo.getDate() - 2);
+    //             if (new Date(art.date) > beginDateMinusTwo && new Date(art.date) < new Date(date2)) {
+    //               d3.select(nodes[index])
+    //                 .attr('visibility', 'visible')
+    //                 .selectAll('rect')
+    //                 .attr('x', (e, i) => {
+    //                   const date = dateFormat(e);
+    //                   const commentTime = new Date(new Date(date).setFullYear(postYear));
+    //                   return updateXScale(commentTime);
+    //                 })
+    //                 .attr('opacity', (e, i) => {
+    //                   const date = dateFormat(e);
+    //                   const commentTime = new Date(new Date(date).setFullYear(postYear));
+    //                   return updateXScale(commentTime) < 500 && updateXScale(commentTime) > 0 ? 1 : 0;
+    //                 });
+    //             } else {
+    //               d3.select(_nodes[_index])
+    //                 .attr('visibility', 'hidden');
+    //             }
+    //           });
+    //       });
+    //   });
+    // }
 
+    // else {
+    //   // article pointers
+    //   svg.selectAll('.pointer')
+    //     .each((d, index, nodes) => {
+    //       const article_id = d3.select(nodes[index]).attr('class').slice(8);
+    //       const article = data.find(e => e.article_id.replace(/\./gi, '') === article_id);
+    //       if (new Date(article.date) > new Date(date1) && new Date(article.date) < new Date(date2)) {
+    //         d3.select(nodes[index])
+    //           .attr('visibility', 'visible')
+    //           .selectAll('rect')
+    //           .attr('x', _d => updateXScale(new Date(_d.date)))
+    //           .attr('opacity', _d => (updateXScale(new Date(_d.date)) < 500 && updateXScale(new Date(_d.date)) > 0 ? 1 : 0));
+    //       } else {
+    //         d3.select(nodes[index])
+    //           .attr('visibility', 'hidden');
+    //       }
+    //     });
+    //   // user activities
+    //   svg.selectAll('.article')
+    //     .each((d, index, nodes) => {
+    //       const article_id = d3.select(nodes[index]).attr('class').slice(8);
+    //       const article = data.find(e => e.article_id.replace(/\./gi, '') === article_id);
+    //       const postYear = new Date(article.date).getFullYear();
+    //       const beginDateMinusTwo = new Date(date1);
+    //       beginDateMinusTwo.setDate(beginDateMinusTwo.getDate() - 2);
+    //       if (new Date(article.date) > beginDateMinusTwo && new Date(article.date) < new Date(date2)) {
+    //         d3.select(nodes[index])
+    //           .attr('visibility', 'visible')
+    //           .selectAll('rect')
+    //           .attr('x', (_d, _index) => {
+    //             const date = dateFormat(_d);
+    //             const commentTime = new Date(new Date(date).setFullYear(postYear));
+    //             return updateXScale(commentTime);
+    //           })
+    //           .attr('opacity', (_d, _index) => {
+    //             const date = dateFormat(_d);
+    //             const commentTime = new Date(new Date(date).setFullYear(postYear));
+    //             return updateXScale(commentTime) < 500 && updateXScale(commentTime) > 0 ? 1 : 0;
+    //           });
+    //       } else {
+    //         d3.select(nodes[index])
+    //           .attr('visibility', 'hidden');
+    //       }
+    //     });
+    // }
 
+    // article pointers
     svg.selectAll('.pointer')
       .each((d, index, nodes) => {
         const article_id = d3.select(nodes[index]).attr('class').slice(8);
@@ -366,7 +468,7 @@ export default function userDailyActivity(data, user, svg, begin, end) {
             .attr('visibility', 'hidden');
         }
       });
-
+    // user activities
     svg.selectAll('.article')
       .each((d, index, nodes) => {
         const article_id = d3.select(nodes[index]).attr('class').slice(8);
@@ -393,6 +495,10 @@ export default function userDailyActivity(data, user, svg, begin, end) {
             .attr('visibility', 'hidden');
         }
       });
+
+
+    filteredArticles = data.filter(e => new Date(date1) < new Date(e.date) && new Date(date2) > new Date(e.date));
+
     svg.select('.yAxis')
       .call(d3.axisLeft(updateYScale).tickSize(-500))
       .attr('stroke-width', '0.5px');
