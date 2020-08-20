@@ -536,8 +536,16 @@ export default function userSimilarityGraph(data, svg, user, articles) {
       const endDate = d3.select('#date2').attr('value');
       const { community: thisCom } = datas.find(e => e.id === d);
       console.log(thisCom);
-      const us = datas.filter(_d => _d.community === thisCom).map(e => e.id);
-      userDailyActivity(articles, us, commentTimelineSvg, beginDate, endDate);
+      const us = datas.filter(_d => _d.community === thisCom);
+      const repliedArticles = [];
+      us.forEach((usr) => {
+        usr.repliedArticle.forEach((art) => {
+          if (!repliedArticles.some(e => e.article_id === art.article_id)) {
+            repliedArticles.push(art);
+          }
+        });
+      });
+      userDailyActivity(repliedArticles, us.map(e => e.id), commentTimelineSvg, beginDate, endDate);
       // console.log(d);
       // if (!selectedUser.includes(newUserAxisValues[d])) {
       //   selectedUser.push(newUserAxisValues[d]);

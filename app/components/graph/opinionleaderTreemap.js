@@ -182,8 +182,6 @@ export default function treemap(cellNodes, beforeThisDate,
     console.log(articleNodes);
     const article = articleNodes.find(e => e.article_id === article_id);
     commentTimeline(article, commentTimelineSvg, data.$this);
-    d3.select(nodes[index])
-      .style('fill', 'black');
     // submit(d);
     // const adj = cellLinks.filter(e => e.target.index === d.index);
     // const index = selectedArticleNodes.findIndex(e => e === d.title);
@@ -218,6 +216,9 @@ export default function treemap(cellNodes, beforeThisDate,
 
     // // push userid to selectedUser (union)
     if (d.data.tag === 0) {
+      d3.select(nodes[index])
+        .style('fill', 'black');
+      d.data.tag = 1;
       console.log('push');
       selectedArticleNodes.push(article_id);
       d.data.messages.forEach((e) => {
@@ -225,6 +226,11 @@ export default function treemap(cellNodes, beforeThisDate,
           selectedUser.push({ id: e.push_userid, group: selectedArticleNodes.length });
         }
       });
+    } else {
+      d3.select(nodes[index])
+        .style('fill', color(d.parent.data.name));
+      d.data.tag = 0;
+      selectedUser = selectedUser.filter(e => !d.data.messages.some(mes => mes.push_userid === e.id));
     }
     // console.log(cellNodes);
     drawSelectedUserTable(selectedUser);
