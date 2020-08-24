@@ -131,13 +131,13 @@ export default function userSimilarityGraph(data, svg, user, articles) {
   function drawSlider() {
     d3.select('.option').selectAll('*').remove();
     const sliderSvg = d3.select('.option').append('div')
-      .style('display', 'inline-block')
+      // .style('display', 'inline-block')
       .append('svg')
       .attr('class', 'sliderSvg')
-      .attr('width', '220px')
+      .attr('width', '160px')
       .attr('height', '50px')
       .append('g')
-      .attr('transform', 'scale(0.8) translate(10, 0)');
+      .attr('transform', 'scale(0.6) translate(10, 0)');
     let similarThresh = 0.2;
     let articleThresh = 1;
     const similaritySlider = slider.sliderBottom()
@@ -154,7 +154,7 @@ export default function userSimilarityGraph(data, svg, user, articles) {
 
     const gSlider1 = sliderSvg.append('g')
       .attr('class', 'similaritySlider')
-      .attr('transform', `translate(${3 * margin.left},${margin.top / 2})`);
+      .attr('transform', `translate(${3 * margin.left},${margin.top})`);
     const sliderText1 = sliderSvg.append('g')
       .attr('transform', `translate(0,${margin.top})`)
       .append('text')
@@ -167,13 +167,13 @@ export default function userSimilarityGraph(data, svg, user, articles) {
       .selectAll('text')
       .attr('y', 10);
     const repliedSliderSvg = d3.select('.option').append('div')
-      .style('display', 'inline-block')
+      // .style('display', 'inline-block')
       .append('svg')
       .attr('class', 'repliedSliderSvg')
       .attr('height', '50px')
-      .attr('width', '220px')
+      .attr('width', '160px')
       .append('g')
-      .attr('transform', 'scale(0.8)');
+      .attr('transform', 'scale(0.6)');
     const repliedSlider = slider.sliderBottom()
       .min(0)
       .max(100)
@@ -188,7 +188,7 @@ export default function userSimilarityGraph(data, svg, user, articles) {
 
     const gSlider2 = repliedSliderSvg.append('g')
       .attr('class', 'repliedSlider')
-      .attr('transform', `translate(${3 * margin.left + 10},${margin.top / 2})`);
+      .attr('transform', `translate(${3 * margin.left + 10},${margin.top})`);
     const sliderText2 = repliedSliderSvg.append('g')
       .attr('transform', `translate(0,${margin.top})`)
       .append('text')
@@ -205,12 +205,12 @@ export default function userSimilarityGraph(data, svg, user, articles) {
 
   function drawFilterDiv() {
     let filterDiv = d3.select('.heatMap').select('.option').append('div')
-      .style('display', 'inline-block')
-      .attr('class', 'filterDiv');
+      // .style('display', 'inline-block')
+      .attr('class', 'filterDiv d-flex align-items-center');
     filterDiv = filterDiv.append('div')
-      .style('margin-bottom', '0px')
-      .style('display', 'flex')
-      .style('transform', 'scale(0.8)')
+      .style('margin-left', '10px')
+      .style('align-self', 'center')
+      .style('font-size', 'x-small')
       .text('ArticleGroupBy:');
     const tagInput = filterDiv.append('div')
       .style('margin-left', '10px');
@@ -349,17 +349,12 @@ export default function userSimilarityGraph(data, svg, user, articles) {
     console.log(similarity, simThresh, artThresh);
     d3.select('.position').remove();
     d3.select('.groupLegends').remove();
-    // svg.attr('height', h);
-    // svg.attr('width', w);
-    // svg.attr('height', h);
     svg.call(d3.zoom()
       .extent([[0, 0], [width, height]])
       .scaleExtent([0.1, 8])
       .on('zoom', zoomed));
-    const position = svg.append('g')
-      .attr('class', 'position');
-    const group = position.append('g')
-      .attr('class', 'group')
+    const position = svg.append('g').attr('class', 'position');
+    const group = position.append('g').attr('class', 'group')
       .attr('transform', 'translate(-30,-100)');
     function zoomed() {
       group.attr('transform', d3.event.transform);
@@ -543,6 +538,10 @@ export default function userSimilarityGraph(data, svg, user, articles) {
       console.log('sorted articles', articles);
       console.log(bothRepliedArticles);
       updateArticleMatrix(bothRepliedArticles, index, i);
+      const beginDate = d3.select('#date1').attr('value');
+      const endDate = d3.select('#date2').attr('value');
+      const ids = datas.filter(e => e.community === index).map(e => e.id);
+      userDailyActivity(bothRepliedArticles, ids, commentTimelineSvg, beginDate, endDate);
       // updateArticleMatrixv2(bothRepliedArticles, index);
     };
     let selectedUser = [];
@@ -1170,14 +1169,12 @@ export default function userSimilarityGraph(data, svg, user, articles) {
       // lineGroup.selectAll('line').remove();
     }
     function updateArticleMatrix(highlightArticles, communityIndex, communityI) {
-      // console.log(highlightArticles);
       const focusH = 400;
       articleGroup.selectAll('.articleXAxis').remove();
       articleGroup.select('.lineGroup').selectAll('line').remove();
       const communityUserCount = communityI ? 2 : datas.filter(e => e.community === communityIndex).length;
       const focusGridWidth = 25;
       const highlightArticle_id = highlightArticles.map(e => e.article_id);
-      // console.log(highlightArticle_id);
       const focusArticleScaleY = d3.scaleBand().domain(highlightArticle_id)
         .paddingInner(0.3)
         .range([0, focusH]);
@@ -1286,7 +1283,7 @@ export default function userSimilarityGraph(data, svg, user, articles) {
         .attr('class', 'brush')
         .attr('transform', `translate(${-activityTranslateX}, 0)`)
         .call(brush)
-        .call(brush.move, contextYScale.range());
+        .call(brush.move, [0, Math.min(contextYScale.range()[1], 120)]);
       // .call(brush.move, [[0, 0],
       //   [activityTranslateX, Math.min(contextYScale.range()[1], 120)]]);
       context.select('.overlay')
@@ -2068,7 +2065,6 @@ export default function userSimilarityGraph(data, svg, user, articles) {
                       const nextArticleCommunity = arr[j].find(e => e.community === temCommunity);
                       if (!nextArticleCommunity) return 0;
                       const sameArticles = nextArticleCommunity.level[0].filter(e => _d.some(e1 => e1.article_id === e.article_id));
-                      console.log(sameArticles);
                       rectClick(sameArticles, i);
                       return 0;
                     });

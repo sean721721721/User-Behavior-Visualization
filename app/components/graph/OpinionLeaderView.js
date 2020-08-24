@@ -13519,7 +13519,7 @@ class OpinionLeaderView extends React.Component {
         </div> */}
         <div className="heatMap">
           <div className="optionDiv" style={{width: '100%', display: 'grid' }}>
-            <div className="option" style={{width: '100%', display: 'inline' }} />
+            <div className="option d-flex justify-content-start" style={{width: '100%', display: 'inline' }} />
           </div>
           {/* <div className="option"/> */}
           <div className="timeline" style={{width: '100%', display: 'grid' }}>
@@ -13527,7 +13527,7 @@ class OpinionLeaderView extends React.Component {
           </div>
         </div>
         <div className="contextDiv">
-          <div className="option" style={{width: '100%', height: '50px', display: 'inline' }}/>
+          <div className="option " style={{width: '100%', height: '50px', display: 'inline' }}/>
           <svg id="context" width="100%" height="100%" />
         </div>
         <div className="commentTimeline" style={{overflowY: 'scroll', overflowX: 'hidden'}}>

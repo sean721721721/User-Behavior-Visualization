@@ -93,6 +93,11 @@ export default function userDailyActivity(data, user, svg, begin, end) {
         .style('stroke', 'black')
         .style('opacity', 1);
     } else {
+      Tooltip
+        .style('opacity', 1)
+        .html(`<p style="color: white;">Title: ${d.article_title}</p>`)
+        .style('left', `${d3.event.pageX + 25}px`)
+        .style('top', `${d3.event.pageY}px`);
       svg.selectAll('.article')
         .attr('opacity', '0');
       const articleId = d.article_id.replace(/\./gi, '');
@@ -161,6 +166,22 @@ export default function userDailyActivity(data, user, svg, begin, end) {
   //   .on('mouseover', d => mouseover(data[i], d))
   //   .on('mouseout', mouseout);
 
+  for (let i = 0; i < user.length; i += 1) {
+    svg.append('g')
+      .attr('transform', 'translate(100, 20)')
+      .selectAll()
+      .data(user)
+      .enter()
+      .append('rect')
+      .attr('x', 0)
+      .attr('y', d => userScale(d))
+      .attr('width', timeScale.range()[1])
+      .attr('height', userScale.bandwidth())
+      .attr('stroke', 'black')
+      .attr('stroke-width', '0.3px')
+      .style('fill', (d, index) => (index % 2 ? 'white' : 'gainsboro'));
+  }
+
   for (let i = 0; i < data.length; i += 1) {
     if (data[i].messages.some(mes => user.includes(mes.push_userid))) {
       const articleId = data[i].article_id.replace(/\./gi, '');
@@ -217,7 +238,7 @@ export default function userDailyActivity(data, user, svg, begin, end) {
   svg.append('g')
     .attr('class', 'yAxis')
     .attr('transform', 'translate(100, 20)')
-    .call(d3.axisLeft(userScale).tickSize(-500))
+    .call(d3.axisLeft(userScale))
     .attr('stroke-width', '0.5px');
 
   svg.append('g')
@@ -226,6 +247,8 @@ export default function userDailyActivity(data, user, svg, begin, end) {
     .call(d3.axisTop(timeScale)
       .ticks(d3.timeDay.every(1))
       .tickFormat(d3.timeFormat('%m/%d')));
+
+  svg.selectAll('path').remove();
 
   // svg.append('g')
   //   .attr('transform', () => {
@@ -497,7 +520,7 @@ export default function userDailyActivity(data, user, svg, begin, end) {
     });
 
     svg.select('.yAxis')
-      .call(d3.axisLeft(updateYScale).tickSize(-500))
+      .call(d3.axisLeft(updateYScale))
       .attr('stroke-width', '0.5px');
     const aDay = 60 * 60 * 24 * 1000;
     if ((date2 - date1) / aDay <= 1) {
@@ -519,6 +542,7 @@ export default function userDailyActivity(data, user, svg, begin, end) {
       svg.select('.xAxis')
         .call(d3.axisTop(updateXScale).ticks(d3.timeDay.every(1)).tickFormat(d3.timeFormat('%m/%d')));
     }
+    svg.selectAll('path').remove();
   }
 }
 
