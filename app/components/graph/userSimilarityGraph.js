@@ -415,10 +415,25 @@ export default function userSimilarityGraph(data, svg, user, articles) {
       matrix, origMatrix, newUserAxisValues, users,
     );
     console.log('permuted_mat, permuted_origMat: ', permuted_mat, permuted_origMat);
+
     let [secondOrdering_mat, secondOrdering_origMat] = matrixReorderingByCommunity(
       permuted_mat, permuted_origMat, community, newUserAxisValues, users,
     );
+
+    // find user group index
+    const groupIndex = [];
+    newUserAxisValues.forEach((e, index) => {
+      const tempCom = community.find(e1 => e1.id === e).community;
+      const existedCommunity = groupIndex.find(e1 => e1.community === tempCom);
+      if (existedCommunity) existedCommunity.num += 1;
+      else groupIndex.push({ community: tempCom, num: 1, index });
+    });
+    console.log('groupIndex:', groupIndex);
+
     // const [secondOrdering_mat, secondOrdering_origMat] = [permuted_mat, permuted_origMat];
+    [secondOrdering_mat, secondOrdering_origMat] = moveNonSimilarUsersToCorner(
+      secondOrdering_mat, secondOrdering_origMat, groupIndex, newUserAxisValues, users,
+    );
     console.log('secondOrdering_mat, secondOrdering_origMat: ', secondOrdering_mat, secondOrdering_origMat);
 
     const gridSize = 20;
@@ -559,16 +574,6 @@ export default function userSimilarityGraph(data, svg, user, articles) {
       //   userActivityTimeline(filtered_articles, commentTimelineSvg, selectedUser);
       // }
     };
-
-    // find user group index
-    const groupIndex = [];
-    newUserAxisValues.forEach((e, index) => {
-      const tempCom = community.find(e1 => e1.id === e).community;
-      const existedCommunity = groupIndex.find(e1 => e1.community === tempCom);
-      if (existedCommunity) existedCommunity.num += 1;
-      else groupIndex.push({ community: tempCom, num: 1, index });
-    });
-    console.log('groupIndex:', groupIndex);
 
     // reorder community inner matrix
     // [secondOrdering_mat, secondOrdering_origMat] = communityInnerMatrixReordering(secondOrdering_mat, secondOrdering_origMat, newUserAxisValues, users, groupIndex);
@@ -1000,7 +1005,7 @@ export default function userSimilarityGraph(data, svg, user, articles) {
           }
         });
       }
-      // console.log('community permutation for matrix', perm);
+      console.log('community permutation for matrix', perm);
       const tempUser = userAxis.slice();
       for (let j = 0; j < us.length; j += 1) {
         userAxis[j] = tempUser[perm[j]];
@@ -1016,6 +1021,53 @@ export default function userSimilarityGraph(data, svg, user, articles) {
       return [permutedMat, permutedOrigMat];
       // return [mat, origMat];
     }
+
+    function moveNonSimilarUsersToCorner(mat, origMat, groupInd, userAxis, us) {
+      const avgSimilarity = [];
+      let sortedSimilarty = [];
+      for (let i = 0; i < groupInd.length; i += 1) {
+        const pos = groupInd[i].index;
+        const { num } = groupInd[i];
+        let total = 0;
+        for (let j = pos; j < pos + num; j += 1) {
+          for (let k = j + 1; k < pos + num; k += 1) {
+            console.log(origMat[j][k], total);
+            total += origMat[j][k];
+          }
+        }
+        const avg = total / (num * (num - 1) / 2);
+        avgSimilarity.push(avg);
+
+        const totalArr = [];
+        for (let j = pos; j < pos + num; j += 1) {
+          let t = 0;
+          for (let k = pos; k < pos + num; k += 1) {
+            t += origMat[j][k];
+          }
+          totalArr.push({ index: j, total: t });
+        }
+        totalArr.sort((a, b) => b.total - a.total);
+        sortedSimilarty = sortedSimilarty.concat(totalArr);
+      }
+      const perm = [];
+      sortedSimilarty.forEach((e) => { perm.push(e.index); });
+
+      const tempUser = userAxis.slice();
+      for (let j = 0; j < us.length; j += 1) {
+        userAxis[j] = tempUser[perm[j]];
+      }
+      let permutedMat = reorder.permute(mat, perm);
+      permutedMat = reorder.transpose(permutedMat);
+      permutedMat = reorder.permute(permutedMat, perm);
+      permutedMat = reorder.transpose(permutedMat);
+      let permutedOrigMat = reorder.permute(origMat, perm);
+      permutedOrigMat = reorder.transpose(permutedOrigMat);
+      permutedOrigMat = reorder.permute(permutedOrigMat, perm);
+      permutedOrigMat = reorder.transpose(permutedOrigMat);
+      return [permutedMat, permutedOrigMat];
+      // return [mat, origMat];
+    }
+
 
     function communityInnerMatrixReordering(mat, origMat, userAxis, us, communityData) {
       let copyMat = mat.slice();
@@ -1169,8 +1221,8 @@ export default function userSimilarityGraph(data, svg, user, articles) {
       const contextXScale = d3.scaleBand().range([0, 400])
         .domain(depthIndex);
 
-      const brush = d3.brush()
-        .extent([[0, 0], [activityTranslateX - 30, contextYScale.range()[1]]])
+      const brush = d3.brushY()
+        .extent([[0, 0], [activityTranslateX, contextYScale.range()[1]]])
         .on('brush end', brushed);
 
       position.append('defs').append('clipPath')
@@ -1234,13 +1286,9 @@ export default function userSimilarityGraph(data, svg, user, articles) {
         .attr('class', 'brush')
         .attr('transform', `translate(${-activityTranslateX}, 0)`)
         .call(brush)
-        .call(brush.move, [[0, 0],
-          [
-            // Math.min(contextXScale.range()[1], 50),
-            activityTranslateX,
-            // Math.min(yScale.range()[1], gridSize * 3),
-            Math.min(contextYScale.range()[1], 120),
-          ]]);
+        .call(brush.move, contextYScale.range());
+      // .call(brush.move, [[0, 0],
+      //   [activityTranslateX, Math.min(contextYScale.range()[1], 120)]]);
       context.select('.overlay')
         .attr('width', activityTranslateX)
         .attr('fill', 'lightgray');
@@ -1279,7 +1327,9 @@ export default function userSimilarityGraph(data, svg, user, articles) {
         if (d3.event.sourceEvent && d3.event.sourceEvent.type === 'zoom') return; // ignore brush-by-zoom
 
         const s = d3.event.selection || contextYScale.range();
-        if (s[1][1]) focus.attr('transform', `translate(${activityTranslateX + 75}, ${s[0][1] + 90})`);
+        console.log(s);
+        // if (s[1][1]) focus.attr('transform', `translate(${activityTranslateX + 75}, ${s[0][1] + 90})`);
+        if (s[1]) focus.attr('transform', `translate(${activityTranslateX + 75}, ${s[0] + 90})`);
         else focus.attr('transform', `translate(${activityTranslateX + 75}, ${90})`);
 
         const newDepthDomainX = contextXScale.domain();
@@ -1289,7 +1339,8 @@ export default function userSimilarityGraph(data, svg, user, articles) {
           const newUserDomainY = newUserAxisValues.filter(e => datas.find(e1 => e1.id === e).community === communityIndex);
           focusUserScaleY.domain(newUserDomainY);
         }
-        const newArticleDomainY = contextYScale.domain().slice(s[0][1] / contextYScale.bandwidth(), s[1][1] / contextYScale.bandwidth());
+        // const newArticleDomainY = contextYScale.domain().slice(s[0][1] / contextYScale.bandwidth(), s[1][1] / contextYScale.bandwidth());
+        const newArticleDomainY = contextYScale.domain().slice(s[0] / contextYScale.bandwidth(), s[1] / contextYScale.bandwidth());
         focusArticleScaleY.domain(newArticleDomainY);
         focusUserScaleY.range([0, focusArticleScaleY.bandwidth()]);
         focusLineGroup.selectAll('*').remove();
@@ -1301,9 +1352,11 @@ export default function userSimilarityGraph(data, svg, user, articles) {
         focus.append('rect')
           .attr('class', 'unfocus')
           .attr('width', contextXScale.range()[1])
-          .attr('height', s[1][1] ? s[0][1] : 0)
+          // .attr('height', s[1][1] ? s[0][1] : 0)
+          .attr('height', s[1] ? s[0] : 0)
           .attr('x', 0)
-          .attr('y', -s[0][1] - 30)
+          // .attr('y', -s[0][1] - 30)
+          .attr('y', -s[0] - 30)
           .attr('fill', 'lightgray');
 
         focus.append('rect')
@@ -1311,7 +1364,8 @@ export default function userSimilarityGraph(data, svg, user, articles) {
           .attr('width', contextXScale.range()[1])
           .attr('height', 4)
           .attr('x', 0)
-          .attr('y', s[1][1] ? s[0][1] - s[0][1] - 30 : -s[0][1] - 30)
+          // .attr('y', s[1][1] ? s[0][1] - s[0][1] - 30 : -s[0][1] - 30)
+          .attr('y', s[1] ? s[0] - s[0] - 30 : -s[0] - 30)
           .attr('fill', 'darkgray');
 
         // after focus area
@@ -1319,9 +1373,11 @@ export default function userSimilarityGraph(data, svg, user, articles) {
         focus.append('rect')
           .attr('class', 'unfocus')
           .attr('width', contextXScale.range()[1])
-          .attr('height', () => focusMargin + contextYScale.bandwidth() * contextYScale.domain().slice(s[1][1] / contextYScale.bandwidth()).length)
+          // .attr('height', () => focusMargin + contextYScale.bandwidth() * contextYScale.domain().slice(s[1][1] / contextYScale.bandwidth()).length)
+          .attr('height', () => focusMargin + contextYScale.bandwidth() * contextYScale.domain().slice(s[1] / contextYScale.bandwidth()).length)
           .attr('x', 0)
-          .attr('y', s[1][1] ? 400 : -30)
+          // .attr('y', s[1][1] ? 400 : -30)
+          .attr('y', s[1] ? 400 : -30)
           .attr('fill', 'lightgray');
 
         focus.append('rect')
@@ -1329,7 +1385,8 @@ export default function userSimilarityGraph(data, svg, user, articles) {
           .attr('width', contextXScale.range()[1])
           .attr('height', 4)
           .attr('x', 0)
-          .attr('y', s[1][1] ? 400 : -30)
+          // .attr('y', s[1][1] ? 400 : -30)
+          .attr('y', s[1] ? 400 : -30)
           .attr('fill', 'darkgray');
 
         // article box
