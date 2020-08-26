@@ -40,7 +40,7 @@ export default function treemap(cellNodes, beforeThisDate,
     .attr('transform',
       `translate(${margin.left},${margin.top})`);
   const selectedArticleNodes = [];
-  console.log(cellNodes);
+  // console.log(cellNodes);
   const data = { children: [] };
   const authorNodes = cellNodes.filter(e => e.responder);
   authorNodes.sort((a, b) => b.pageRank - a.pagrRank);
@@ -79,7 +79,7 @@ export default function treemap(cellNodes, beforeThisDate,
   // Give the data to this cluster layout:
   const root = d3.hierarchy(data).sum(d => d.value); // Here the size of each leave is given in the 'value' field in input data
   // Then d3.treemap computes the position of each element of the hierarchy
-  console.log(width, height);
+  // console.log(width, height);
   d3.treemap()
     .size([width, height])
     .paddingTop(15)

@@ -12,24 +12,27 @@ import * as d3 from 'd3';
 import * as slider from 'd3-simple-slider';
 
 export default function userDailyActivity(data, user, svg, begin, end) {
-  // console.log(user);
-  // console.log(data);
+  console.log(user);
+  console.log(data);
   // console.log(begin);
   svg.selectAll('*').remove();
   const h = parseFloat(d3.select('.commentTimeline').style('height'));
   const w = parseFloat(d3.select('.commentTimeline').style('width'));
   let original_date1 = new Date(begin);
+  original_date1.setHours(0, 0, 0);
   let original_date2 = new Date(end);
+  original_date2.setHours(23, 59, 59);
+  console.log(original_date1, original_date2);
   let filteredArticles = [];
   // Range
   d3.select('div#slider-range').select('svg').remove();
   const sliderRange = slider.sliderBottom()
-    .min(new Date(begin))
-    .max(new Date(end))
+    .min(original_date1)
+    .max(original_date2)
     .width(300)
     .tickFormat(d3.timeFormat('%m/%d %H'))
     .ticks(5)
-    .default([new Date(begin), new Date(end)])
+    .default([original_date1, original_date2])
     .fill('#2196f3')
     .on('onchange', (val) => {
       update(new Date(val[0]), new Date(val[1]));
@@ -66,11 +69,11 @@ export default function userDailyActivity(data, user, svg, begin, end) {
   const myColor = d3.scaleLinear()
     .range([d3.interpolateYlGn(0), d3.interpolateYlGn(0.8)])
     .domain([0, 10]);
-  const xScale = getXScale(new Date(begin), new Date(end));
-  const timeScale = d3.scaleTime().domain([new Date(begin), new Date(end)]).range([0, 500]);
+  const xScale = getXScale(original_date1, original_date2);
+  const timeScale = d3.scaleTime().domain([original_date1, original_date2]).range([0, 500]);
   const userScaleRange = user.length * 10;
   const userScale = d3.scaleBand().domain(user).range([0, userScaleRange]);
-  const yDomain = getYDomain(new Date(begin), new Date(end));
+  const yDomain = getYDomain(original_date1, original_date2);
   // console.log(yDomain);
   const xDomain = oneToNArray(24);
   const x = d3.scaleBand()
@@ -317,12 +320,16 @@ export default function userDailyActivity(data, user, svg, begin, end) {
         }
       });
     });
+    console.log(userList);
     userList.forEach((e) => {
-      const earliestDate = new Date(`${e.time[0].month}/${e.time[0].date}`);
-      const latestDate = new Date(`${e.time[e.time.length - 1].month}/${e.time[e.time.length - 1].date}`);
-      const diffTime = Math.abs(latestDate - earliestDate);
-      const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-      e.totalDate = diffDays;
+      if (!e.time[0]) e.totalDate = 0;
+      else {
+        const earliestDate = new Date(`${e.time[0].month}/${e.time[0].date}`);
+        const latestDate = new Date(`${e.time[e.time.length - 1].month}/${e.time[e.time.length - 1].date}`);
+        const diffTime = Math.abs(latestDate - earliestDate);
+        const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+        e.totalDate = diffDays;
+      }
     });
     return userList;
   }

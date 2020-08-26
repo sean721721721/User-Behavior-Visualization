@@ -346,7 +346,7 @@ export default function userSimilarityGraph(data, svg, user, articles) {
   }
 
   function adjacencyMatrixNoAuthor(similarity, simThresh, artThresh) {
-    console.log(similarity, simThresh, artThresh);
+    // console.log(similarity, simThresh, artThresh);
     d3.select('.position').remove();
     d3.select('.groupLegends').remove();
     svg.call(d3.zoom()
@@ -362,7 +362,7 @@ export default function userSimilarityGraph(data, svg, user, articles) {
     const color = d => d3.schemeTableau10[d];
     // Article Similarity
 
-    console.log(similarity);
+    // console.log(similarity);
     const [datas, users, similaritys] = filterAlwaysNonSimilarUser(data, user, similarity, simThresh, artThresh);
     console.log('datas:', datas, 'users:', users, 'similaritys:', similaritys);
     // similarity for articles grouping
@@ -423,12 +423,12 @@ export default function userSimilarityGraph(data, svg, user, articles) {
       if (existedCommunity) existedCommunity.num += 1;
       else groupIndex.push({ community: tempCom, num: 1, index });
     });
-    console.log('groupIndex:', groupIndex);
+    // console.log('groupIndex:', groupIndex);
 
     // const [secondOrdering_mat, secondOrdering_origMat] = [permuted_mat, permuted_origMat];
-    [secondOrdering_mat, secondOrdering_origMat] = moveNonSimilarUsersToCorner(
-      secondOrdering_mat, secondOrdering_origMat, groupIndex, newUserAxisValues, users,
-    );
+    // [secondOrdering_mat, secondOrdering_origMat] = moveNonSimilarUsersToCorner(
+    //   secondOrdering_mat, secondOrdering_origMat, groupIndex, newUserAxisValues, users,
+    // );
     console.log('secondOrdering_mat, secondOrdering_origMat: ', secondOrdering_mat, secondOrdering_origMat);
 
     const gridSize = 20;
@@ -525,23 +525,28 @@ export default function userSimilarityGraph(data, svg, user, articles) {
         bothRepliedArticles = xUser.repliedArticle.filter(
           e => yUser.repliedArticle.some(e2 => e2.article_id === e.article_id),
         );
+        const beginDate = d3.select('#date1').attr('value');
+        const endDate = d3.select('#date2').attr('value');
+        // const ids = datas.filter(e => e.community === index).map(e => e.id);
+        userDailyActivity(bothRepliedArticles, [xID, yID], commentTimelineSvg, beginDate, endDate);
       } else {
         const articleIdArr = d.map(e => e.article_id);
         articleIdArr.forEach((e) => {
           bothRepliedArticles.push(articles.find(e1 => e1.article_id === e));
         });
+
+        const beginDate = d3.select('#date1').attr('value');
+        const endDate = d3.select('#date2').attr('value');
+        const ids = datas.filter(e => e.community === index).map(e => e.id);
+        userDailyActivity(bothRepliedArticles, ids, commentTimelineSvg, beginDate, endDate);
       }
       articles.sort((a, b) => {
         if (bothRepliedArticles.find(e => e.article_title === b.article_title)) return 1;
         return -1;
       });
       console.log('sorted articles', articles);
-      console.log(bothRepliedArticles);
+      console.log('bothRepliedArticles', bothRepliedArticles);
       updateArticleMatrix(bothRepliedArticles, index, i);
-      const beginDate = d3.select('#date1').attr('value');
-      const endDate = d3.select('#date2').attr('value');
-      const ids = datas.filter(e => e.community === index).map(e => e.id);
-      userDailyActivity(bothRepliedArticles, ids, commentTimelineSvg, beginDate, endDate);
       // updateArticleMatrixv2(bothRepliedArticles, index);
     };
     let selectedUser = [];
@@ -969,7 +974,8 @@ export default function userSimilarityGraph(data, svg, user, articles) {
       }
 
       const gra = reorder.mat2graph(mat);
-      const perm = reorder.spectral_order(gra);
+      // const perm = reorder.spectral_order(gra);
+      const perm = reorder.pca_order(mat);
 
       const orig_gra = reorder.mat2graph(origMat);
       const orig_perm = reorder.spectral_order(orig_gra);
@@ -997,12 +1003,18 @@ export default function userSimilarityGraph(data, svg, user, articles) {
       const max_community = Math.max(...com.map(p => p.community));
       const perm = [];
       for (let i = 0; i <= max_community; i += 1) {
-        com.forEach((e, index) => {
-          if (e.community === i) {
-            const ind = userAxis.findIndex(d => d === e.id);
-            perm.push(ind);
+        // com.forEach((e, index) => {
+        //   if (e.community === i) {
+        //     const ind = userAxis.findIndex(d => d === e.id);
+        //     perm.push(ind);
+        //   }
+        // });
+        for (let j = 0; j < userAxis.length; j += 1) {
+          const id = userAxis[j];
+          if (com.find(e => e.id === id).community === i) {
+            perm.push(j);
           }
-        });
+        }
       }
       console.log('community permutation for matrix', perm);
       const tempUser = userAxis.slice();
@@ -1030,7 +1042,6 @@ export default function userSimilarityGraph(data, svg, user, articles) {
         let total = 0;
         for (let j = pos; j < pos + num; j += 1) {
           for (let k = j + 1; k < pos + num; k += 1) {
-            console.log(origMat[j][k], total);
             total += origMat[j][k];
           }
         }
@@ -1202,13 +1213,12 @@ export default function userSimilarityGraph(data, svg, user, articles) {
         });
       });
       const articleTree = buildArticleTree(highlightArticles);
-      console.log(articleTree);
+      console.log('articleTree', articleTree);
       const articleTreeId = sortedArticleId(articleTree, highlightArticles);
       const contextYScale = d3.scaleBand()
         .range([0, articleTreeId.length * 30])
         .domain(articleTreeId);
 
-      console.log(contextYScale.domain());
       const fillArrayFrom0To5 = () => {
         const arr = [];
         for (let i = 1; i <= 10; i += 1) arr.push(i);
@@ -1324,13 +1334,12 @@ export default function userSimilarityGraph(data, svg, user, articles) {
         if (d3.event.sourceEvent && d3.event.sourceEvent.type === 'zoom') return; // ignore brush-by-zoom
 
         const s = d3.event.selection || contextYScale.range();
-        console.log(s);
         // if (s[1][1]) focus.attr('transform', `translate(${activityTranslateX + 75}, ${s[0][1] + 90})`);
         if (s[1]) focus.attr('transform', `translate(${activityTranslateX + 75}, ${s[0] + 90})`);
         else focus.attr('transform', `translate(${activityTranslateX + 75}, ${90})`);
 
         const newDepthDomainX = contextXScale.domain();
-        if (communityI) {
+        if (typeof communityI === 'number') {
           focusUserScaleY.domain([newUserAxisValues[communityIndex], newUserAxisValues[communityI]]);
         } else {
           const newUserDomainY = newUserAxisValues.filter(e => datas.find(e1 => e1.id === e).community === communityIndex);
@@ -1611,7 +1620,6 @@ export default function userSimilarityGraph(data, svg, user, articles) {
       }
 
       function buildArticleTree(articleArr) {
-        console.log(articleArr);
         const copyArtArr = JSON.parse(JSON.stringify(articleArr));
         // copyArtArr.sort((a, b) => ((new Date(a.date) - new Date(b.date)) > 0 ? 1 : -1));
         const arr = copyArtArr.filter(e => e.article_title[0] !== 'R');
@@ -1844,10 +1852,7 @@ export default function userSimilarityGraph(data, svg, user, articles) {
 
       function drawRelationRatio(index, userCount) {
         const communityIndexDatas = datas.filter(e => e.community === index);
-        console.log(index, communityIndexDatas);
-        // console.log(communityIndexDatas);
         const communityIndexArticles = computeNumOfArticlesOfEachCommunity();
-        // console.log('communityIndexArticles', communityIndexArticles);
         const communityEachLevelCount = [];
         communityIndexArticles.forEach((e) => {
           const levelOne = e.articles.filter(a => a.count > 0);
@@ -1860,8 +1865,7 @@ export default function userSimilarityGraph(data, svg, user, articles) {
             level: [levelOne, levelTwo, levelThree, levelFour, levelFive],
           });
         });
-        console.log(communityIndexArticles);
-        console.log('communityEachLevelCount', communityEachLevelCount);
+        // console.log('communityEachLevelCount', communityEachLevelCount);
         const tem = comunityIndexY[index];
         let nex = positionScale.length - 1;
         if (comunityIndexY[index + 1]) nex = comunityIndexY[index + 1];

@@ -32,9 +32,9 @@ export default function commentTimeline(data, svg, $this) {
     .attr('id', (d, i) => `article_${i}`)
     .attr('transform', () => {
       articleIndex += 1;
-      return `translate(40,${100 + articleIndex * 130})`;
+      return `translate(40,${150 + articleIndex * 150})`;
     })
-    .each((d, i) => {
+    .each((d, index, nodes) => {
       const xAxis = makeXAxis(d);
       const yAxis_left = makeYAxis('left');
       const yAxis_right = makeYAxis('right');
@@ -46,7 +46,20 @@ export default function commentTimeline(data, svg, $this) {
         })
         .y(m => yScale(m.articleId, m.value)) // set the y values for the line generator
         .curve(d3.curveMonotoneX); // apply smoothing to the line
-      const axis = d3.select(`#article_${i}`);
+      const axis = d3.select(nodes[index]);
+      const info = axis.append('g');
+      info.append('text')
+        .text(`Title: ${d.title}`)
+        .attr('x', 30)
+        .attr('y', -130);
+      info.append('text')
+        .text(`Author: ${d.author}`)
+        .attr('x', 30)
+        .attr('y', -110);
+      info.append('text')
+        .text(`推: ${d.message_count[0].count}  噓: ${d.message_count[1].count}  →: ${d.message_count[2].count}`)
+        .attr('x', 30)
+        .attr('y', -90);
       axis.append('g')
         .attr('transform', 'translate(10, -80)')
         .call(yAxis_left)

@@ -144,7 +144,7 @@ export default function AuthorTable(nodes, div, $this, callback) {
     const node = [];
     const link = [];
     const alpha = 0.85;
-    console.log(new Date());
+    const start = new Date();
     computeSentimentMatrix(selectedNode, node, link);
     computeTotalWeightOfEachNode(node, link);
     pageRank(node, link, alpha);
@@ -158,7 +158,7 @@ export default function AuthorTable(nodes, div, $this, callback) {
     });
     // console.log(node);
     console.log(selectedNode.children);
-    console.log(new Date());
+    console.log(start - new Date());
 
     function computeSentimentMatrix(termNode, n, l) {
       termNode.children.forEach((e) => {

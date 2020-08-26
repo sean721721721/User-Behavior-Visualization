@@ -312,7 +312,7 @@ class Grid extends React.Component {
       method: 'get',
     });
     // console.log(e);
-    console.log(url);
+    // console.log(url);
     // console.log(myRequest);
     // fetch(myRequest)
     //   .then(res => res.json())

@@ -13531,7 +13531,7 @@ class OpinionLeaderView extends React.Component {
           <svg id="context" width="100%" height="100%" />
         </div>
         <div className="commentTimeline" style={{overflowY: 'scroll', overflowX: 'hidden'}}>
-        <div className="row align-items-center p-0" style={{borderBottom: '2px solid gray'}}>
+        <div className="row align-items-center p-0" style={{borderBottom: '2px solid lightgray'}}>
           <div className="col-sm-2"><p id="value-range"></p></div>
           <div className="col-sm"><div id="slider-range"></div></div>
         </div>

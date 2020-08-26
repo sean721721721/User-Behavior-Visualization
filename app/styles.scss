@@ -86,6 +86,7 @@ video {
     font-size: 100%;
     font: inherit;
     vertical-align: baseline;
+    
 }
 
 * {
@@ -142,11 +143,16 @@ table {
 /* reset css end */
 
 body {
+    user-select: none;
     background: lightgray;
     //text-align: center;
     font-family: "Times New Roman", Times, serif;
     /*margin-left: 1px;
     margin-right: 1px;*/
+}
+
+.container-fluid {
+    background-color: lightgray;
 }
 
 fieldset {
@@ -331,7 +337,7 @@ path:hover {
         display: grid;
         grid-column: col1 / colend;
         grid-template-columns: [sscol1] 100fr [sscolend];
-        grid-template-rows: [ssrow1] 70% [ssrow2] 30% [ssrowend];
+        grid-template-rows: [ssrow1] 69% [ssrow2] 10px [ssrow3] auto [ssrowend];
     }   
 }
 
@@ -343,7 +349,7 @@ path:hover {
 
 @media (min-width: 900px) {
     .graph {
-        grid-template-columns: [sscol1] 0.0fr [sscol2] 0.0fr [sscol3] 30.3fr [sscol4] 0.4fr [sscol5] 69.3fr [sscolend];
+        grid-template-columns: [sscol1] 0% [sscol2] 0% [sscol3] 30% [sscol4] 10px [sscol5] auto [sscolend];
     }   
 }
 
@@ -355,11 +361,11 @@ path:hover {
 
 @media (min-width: 300px) {
     .network {
+        background-color: white;
         // height: 100vh;
         display: grid;
-        border: 2px solid gray;
-        border-top-left-radius: 5px;
-        border-top-right-radius: 5px;
+        border: 2px solid white;
+        border-radius: 5px;
         grid-column: sscol1 / sscolend;
         grid-row: ssrow1 / ssrow2;
         grid-template-columns: [nwcol1] 8fr [nwcol2] 2fr [nwcolend];
@@ -398,24 +404,25 @@ path:hover {
 }
 
 .articleStatus {
-    border: 2px solid gray;
-    border-top: 0px solid gray;
-    border-bottom-left-radius: 5px;
-    border-bottom-right-radius: 5px;
+    border: 2px solid white;
+    border-radius: 5px;
+    // border-top: 0px solid gray;
+    // border-bottom-left-radius: 5px;
+    // border-bottom-right-radius: 5px;
     display: grid;
     grid-column: sscol3 / sscol4;
-    grid-row: ssrow2 / ssrowend;
+    grid-row: ssrow3 / ssrowend;
 }
 
 @media (min-width: 375px) {
     .opinionLeaderView {
         height: 200vh;
-        border: 2px solid gray;
-        border-radius: 5px;
+        // border: 2px solid gray;
+        // border-radius: 5px;
         display: grid;
         grid-column: sscol1 / sscolend;
-        grid-template-rows: [acrow1] 7fr [acrow2] 3fr [acrowend];
-        grid-template-columns: [accol1] 3fr [accol2] 2.5fr [accol3] 1fr [accol4] 3.5fr [accolend];
+        grid-template-rows: [acrow1] 70% [acrow2] 10px [acrow3] auto [acrowend];
+        grid-template-columns: [accol1] 30% [accol2] 25% [accol3] 10px [accol4] auto [accolend];
     }
 }
 
@@ -433,11 +440,13 @@ path:hover {
 
 @media (min-width: 300px) {
     .heatMap {
+        background-color: white;
         display: grid;
         grid-column: accol1 / accol3;
-        border: 2px solid gray;
-        border-left: 0px solid gray;
-        border-top: 0px solid gray;
+        border: 2px solid white;
+        border-radius: 5px;
+        // border-left: 0px solid gray;
+        // border-top: 0px solid gray;
         grid-row: acrow1 / acrow2;
         grid-template-rows: [hmrow1] 1fr [hmrow2] 9fr [hmrowend];
     }
@@ -452,7 +461,7 @@ path:hover {
 
 .optionDiv {
     display: grid;
-    border-bottom: 2px solid gray;
+    border-bottom: 2px solid lightgray;
     grid-row: hmrow1 / hmrow2;
 }
 
@@ -462,9 +471,12 @@ path:hover {
 }
 @media (min-width: 300px) {
     .contextDiv {
+        background-color: white;
         height: 100vh;
+        border: 2px solid white;
+        border-radius: 5px;
         // display: inline;
-        grid-column: accol3 / accolend;
+        grid-column: accol4 / accolend;
         // grid-row: acrow1 / acrowend;
         overflow-x: scroll;
         overflow-y: scroll;
@@ -473,10 +485,9 @@ path:hover {
 
 @media (min-width: 600px) {
     .contextDiv {
-        border-bottom: 2px solid gray;
         height: 90vh;
         display: grid;
-        grid-column: accol3 / accolend;
+        grid-column: accol4 / accolend;
         grid-row: acrow1 / acrowend;
         overflow-x: scroll;
         overflow-y: scroll;
@@ -490,10 +501,12 @@ path:hover {
 //     overflow-y: scroll;
 // }
 .commentTimeline {
+    background-color: white;
     display: grid;
-    border-right: 2px solid gray;
+    border: 2px solid white;
+    border-radius: 5px;
     grid-column: accol1 / accol3;
-    grid-row: acrow2 / acrowend;
+    grid-row: acrow3 / acrowend;
 }
 
 .selectedUserTable {
