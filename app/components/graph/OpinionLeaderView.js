@@ -140,11 +140,11 @@ class OpinionLeaderView extends React.Component {
       const fixedUserArr = e.map(usr => usr.id);
       const url = [];
       const betweenDate = (new Date(endDate) - new Date(beginDate)) / (1000 * 3600 * 24);
-      for (let i = 0; i < betweenDate; i += 2) {
+      for (let i = 0; i < betweenDate; i += 5) {
         const newBeginDate = new Date(beginDate);
         const newEndDate = new Date(beginDate);
         newBeginDate.setDate(newBeginDate.getDate() + i);
-        newEndDate.setDate(newEndDate.getDate() + (i + 2));
+        newEndDate.setDate(newEndDate.getDate() + (i + 5));
         if (new Date(newEndDate) > new Date(endDate)) url.push(encodeURI(getReqstr(fixedUserArr, newBeginDate, new Date(endDate))));
         else url.push(encodeURI(getReqstr(fixedUserArr, newBeginDate, newEndDate)));
       }
