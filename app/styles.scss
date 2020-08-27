@@ -337,7 +337,7 @@ path:hover {
         display: grid;
         grid-column: col1 / colend;
         grid-template-columns: [sscol1] 100fr [sscolend];
-        grid-template-rows: [ssrow1] 69% [ssrow2] 10px [ssrow3] auto [ssrowend];
+        grid-template-rows: [ssrow1] 69% [ssrow2] 20px [ssrow3] auto [ssrowend];
     }   
 }
 
@@ -349,7 +349,7 @@ path:hover {
 
 @media (min-width: 900px) {
     .graph {
-        grid-template-columns: [sscol1] 0% [sscol2] 0% [sscol3] 30% [sscol4] 10px [sscol5] auto [sscolend];
+        grid-template-columns: [sscol1] 0% [sscol2] 0% [sscol3] 30% [sscol4] 20px [sscol5] auto [sscolend];
     }   
 }
 
@@ -361,21 +361,19 @@ path:hover {
 
 @media (min-width: 300px) {
     .network {
-        background-color: white;
         // height: 100vh;
         display: grid;
-        border: 2px solid white;
-        border-radius: 5px;
         grid-column: sscol1 / sscolend;
         grid-row: ssrow1 / ssrow2;
         grid-template-columns: [nwcol1] 8fr [nwcol2] 2fr [nwcolend];
-        grid-template-rows: [nwrow1] 6fr [nwrow2] 4fr [nwrowend];
+        // grid-template-rows: [nwrow1] 6fr [nwrow2] 4fr [nwrowend];
+        grid-template-rows: [nwrow1] 42% [nwrow2] 28% [nwrow3] 20px [nwrow4] auto [acrowend];
     }  
 }
 
-@media (min-width: 900px) {
+@media (min-width: 600px) {
     .network {
-        // height: 90vh;
+        height: 90vh;
         grid-column: sscol3 / sscol4;
         grid-row: ssrow1 / ssrow2;
     } 
@@ -393,14 +391,29 @@ path:hover {
     display: grid;
     grid-column: nwcol1 / nwcol2;
     grid-row: nwrow1 / nwrow2;
+    border: 2px solid white;
+    border-top-left-radius: 5px;
     // grid-template-rows: [nwrow1] 0.1fr [nwrow2] 0.9fr [nwrowend];
 }
 
 .authorList {
     display: grid;
+    background-color: white;
+    border: 2px solid white;
+    border-bottom-left-radius: 5px;
     grid-column: nwcol1 / nwcol2;
-    grid-row: nwrow2 / nwrowend;
+    grid-row: nwrow2 / nwrow3;
     // grid-template-rows: [nwrow1] 0.1fr [nwrow2] 0.9fr [nwrowend];
+}
+
+.selectedUserTable {
+    display: grid;
+    background-color: white;
+    border: 2px solid white;
+    border-top-right-radius: 5px;
+    border-bottom-right-radius: 5px;
+    grid-column: nwcol2 / nwcolend;
+    grid-row: nwrow1 / nwrow3;
 }
 
 .articleStatus {
@@ -410,8 +423,8 @@ path:hover {
     // border-bottom-left-radius: 5px;
     // border-bottom-right-radius: 5px;
     display: grid;
-    grid-column: sscol3 / sscol4;
-    grid-row: ssrow3 / ssrowend;
+    grid-column: nwcol1 / nwcolend;
+    grid-row: nwrow4 / nwrowend;
 }
 
 @media (min-width: 375px) {
@@ -421,13 +434,14 @@ path:hover {
         // border-radius: 5px;
         display: grid;
         grid-column: sscol1 / sscolend;
-        grid-template-rows: [acrow1] 70% [acrow2] 10px [acrow3] auto [acrowend];
-        grid-template-columns: [accol1] 30% [accol2] 25% [accol3] 10px [accol4] auto [accolend];
+        grid-template-rows: [acrow1] 70% [acrow2] 20px [acrow3] auto [acrowend];
+        grid-template-columns: [accol1] 30% [accol2] 25% [accol3] 20px [accol4] auto [accolend];
     }
 }
 
 @media (min-width: 600px) {
     .opinionLeaderView {
+        // grid-row: ssrow1 / ssrowend;
         height: 90vh;
     }
 }
@@ -507,13 +521,6 @@ path:hover {
     border-radius: 5px;
     grid-column: accol1 / accol3;
     grid-row: acrow3 / acrowend;
-}
-
-.selectedUserTable {
-    display: grid;
-    // border-top: 2px solid gray;
-    grid-column: nwcol2 / nwcolend;
-    grid-row: nwrow1 / nwrowend;
 }
 
 // .wordTree {
