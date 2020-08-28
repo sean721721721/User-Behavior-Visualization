@@ -423,12 +423,14 @@ export default function userSimilarityGraph(data, svg, user, articles) {
       if (existedCommunity) existedCommunity.num += 1;
       else groupIndex.push({ community: tempCom, num: 1, index });
     });
-    // console.log('groupIndex:', groupIndex);
+    console.log('groupIndex:', groupIndex);
 
     // const [secondOrdering_mat, secondOrdering_origMat] = [permuted_mat, permuted_origMat];
     // [secondOrdering_mat, secondOrdering_origMat] = moveNonSimilarUsersToCorner(
     //   secondOrdering_mat, secondOrdering_origMat, groupIndex, newUserAxisValues, users,
     // );
+
+    [secondOrdering_mat, secondOrdering_origMat] = communityInnerMatrixReordering(secondOrdering_mat, secondOrdering_origMat, newUserAxisValues, users, groupIndex);
     console.log('secondOrdering_mat, secondOrdering_origMat: ', secondOrdering_mat, secondOrdering_origMat);
 
     const gridSize = 20;
@@ -1084,11 +1086,13 @@ export default function userSimilarityGraph(data, svg, user, articles) {
       let copyOriginalMat = origMat.slice();
       communityData.forEach((com) => {
         const onlyCommunity = [];
-        for (let i = 0; i < mat.length; i += 1) {
+        for (let i = com.index; i < com.index + com.num; i += 1) {
           onlyCommunity.push(mat[i].slice(com.index, com.index + com.num));
         }
+        console.log(onlyCommunity);
         const gra = reorder.mat2graph(onlyCommunity);
-        const prePerm = reorder.spectral_order(gra);
+        // const prePerm = reorder.spectral_order(gra);
+        const prePerm = reorder.pca_order(onlyCommunity);
         // const orig_gra = reorder.mat2graph(origMat);
         // const orig_perm = reorder.spectral_order(orig_gra);
         const perm = [];
@@ -1104,16 +1108,14 @@ export default function userSimilarityGraph(data, svg, user, articles) {
           userAxis[j] = tempUser[perm[j]];
         }
         console.log(userAxis);
-        let permutedMat = reorder.permute(mat, perm);
-        permutedMat = reorder.transpose(permutedMat);
-        permutedMat = reorder.permute(permutedMat, perm);
-        permutedMat = reorder.transpose(permutedMat);
-        copyMat = permutedMat;
-        let originalMat = reorder.permute(origMat, perm);
-        originalMat = reorder.transpose(originalMat);
-        originalMat = reorder.permute(originalMat, perm);
-        originalMat = reorder.transpose(originalMat);
-        copyOriginalMat = originalMat;
+        copyMat = reorder.permute(copyMat, perm);
+        copyMat = reorder.transpose(copyMat);
+        copyMat = reorder.permute(copyMat, perm);
+        copyMat = reorder.transpose(copyMat);
+        copyOriginalMat = reorder.permute(copyOriginalMat, perm);
+        copyOriginalMat = reorder.transpose(copyOriginalMat);
+        copyOriginalMat = reorder.permute(copyOriginalMat, perm);
+        copyOriginalMat = reorder.transpose(copyOriginalMat);
       });
 
       return [copyMat, copyOriginalMat];

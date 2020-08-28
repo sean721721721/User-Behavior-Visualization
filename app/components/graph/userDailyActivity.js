@@ -12,8 +12,8 @@ import * as d3 from 'd3';
 import * as slider from 'd3-simple-slider';
 
 export default function userDailyActivity(data, user, svg, begin, end) {
-  console.log(user);
-  console.log(data);
+  // console.log(user);
+  // console.log(data);
   // console.log(begin);
   svg.selectAll('*').remove();
   const h = parseFloat(d3.select('.commentTimeline').style('height'));
@@ -64,7 +64,7 @@ export default function userDailyActivity(data, user, svg, begin, end) {
   svg.selectAll('*').remove();
   const gridSize = 12;
   const userListByReplyCountPerHours = computeUserListByReplyCountPerHours(data, user);
-  console.log(userListByReplyCountPerHours);
+  // console.log(userListByReplyCountPerHours);
   const color = d3.schemeTableau10;
   const myColor = d3.scaleLinear()
     .range([d3.interpolateYlGn(0), d3.interpolateYlGn(0.8)])
@@ -320,7 +320,7 @@ export default function userDailyActivity(data, user, svg, begin, end) {
         }
       });
     });
-    console.log(userList);
+    // console.log(userList);
     userList.forEach((e) => {
       if (!e.time[0]) e.totalDate = 0;
       else {
