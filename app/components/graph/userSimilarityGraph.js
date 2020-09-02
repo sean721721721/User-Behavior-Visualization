@@ -1136,7 +1136,7 @@ export default function userSimilarityGraph(data, svg, user, articles) {
         }
       });
       const filteredDs = ds.filter(e => e.repliedArticle.length > artTh);
-      const filteredUs = us.filter(e => filteredDs.some(e1 => e1.id === e));
+      const filteredUs = filteredDs.map(e => e.id);
       const filteredSim = sims.filter(e => filteredDs.some(e1 => e1.id === e.source) && filteredDs.some(e1 => e1.id === e.target));
       return [filteredDs, filteredUs, filteredSim];
     }
