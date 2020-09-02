@@ -22,7 +22,7 @@ import { userActivityTimeline } from './userActivityTimeline';
 import { userDailyActivity } from './userDailyActivity';
 
 export default function userSimilarityGraph(data, svg, user, articles) {
-  // console.log(user);
+  console.log(user);
   const svgScale = d3.scaleSqrt().domain([1, 200]).range([0.5, 0.1]);
   const commentTimelineSvg = d3.select('#commentTimeline');
   const h = parseFloat(d3.select('.heatMap').style('height'));
@@ -43,7 +43,7 @@ export default function userSimilarityGraph(data, svg, user, articles) {
   const articlesCommunity = jLouvainClustering(articleIds, articleSimilarity);
   // const articlesCommunity = articleGroupByTag(articleIds, filteredArticles);
   // console.log('articlesCommunity', articlesCommunity);
-  const selectedUser = [];
+  const selectedUser = user;
   drawSlider();
   drawFilterDiv();
   drawSortOptionDiv();
@@ -534,6 +534,7 @@ export default function userSimilarityGraph(data, svg, user, articles) {
       });
       if (selectedArticles.length > 0) userDailyActivity(selectedArticles, selectedUser, commentTimelineSvg, beginDate, endDate);
       else userDailyActivity(repliedArticles, selectedUser, commentTimelineSvg, beginDate, endDate);
+      console.log('tickclick');
       updateArticleMatrix(repliedArticles);
     };
 
@@ -739,7 +740,7 @@ export default function userSimilarityGraph(data, svg, user, articles) {
         .attr('class', 'brush')
         .attr('transform', `translate(${positionScale[positionScale.length - 1] + 30}, 0)`)
         .call(brush)
-        .call(brush.move, [0, positionScale[positionScale.length - 1]]);
+        .call(brush.move, [0, 0]);
 
       context.select('.handle.handle--n')
         .attr('height', 20)
@@ -1327,7 +1328,6 @@ export default function userSimilarityGraph(data, svg, user, articles) {
         focusUserScaleY.range([0, focusArticleScaleY.bandwidth()]);
         focusLineGroup.selectAll('*').remove();
         focusLineGroup.append('g');
-
         // articleTree context lighgray area
         focus.selectAll('.unfocus').remove();
         // before focus area
