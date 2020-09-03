@@ -765,12 +765,14 @@ export default function userSimilarityGraph(data, svg, user, articles) {
           const tempPosition = (positionScale[index + 1] + positionScale[index]) / 2;
           if (tempPosition >= s[0] && tempPosition <= s[1]) selectedUser.push(newUserAxisValues[index]);
         });
+        // setting all co-cluster rect stroke-width to 1
+        console.log(d3.select('.radialGroup'));
+        d3.select('.radialGroup').selectAll('rect')
+          .attr('stroke-width', '1px');
         tickClick();
       }
 
       drawUserAxis();
-      leftSvg.append('g').attr('class', 'radialGroup')
-        .attr('transform', `translate(0,${positionScale[positionScale.length - 1] + 30})`);
       function drawUserAxis() {
         // y-axis
         leftSvg.append('g')
@@ -789,8 +791,9 @@ export default function userSimilarityGraph(data, svg, user, articles) {
           })
           .attr('dy', '0.2em')
           .style('font-size', (d, index) => (positionScale[index + 1] - positionScale[index]) / 2)
-          .on('mouseover', mouseover)
-          .on('mouseout', mouseout)
+          .style('pointer-events', 'none')
+          // .on('mouseover', mouseover)
+          // .on('mouseout', mouseout)
           .on('click', tickClick);
 
         // x-axis
@@ -818,8 +821,9 @@ export default function userSimilarityGraph(data, svg, user, articles) {
             return color(community[index].community);
           })
           .style('font-size', (d, index) => (positionScale[index + 1] - positionScale[index]) / 2)
-          .on('mouseover', mouseover)
-          .on('mouseout', mouseout)
+          .style('pointer-events', 'none')
+          // .on('mouseover', mouseover)
+          // .on('mouseout', mouseout)
           .on('click', tickClick);
         // leftSvg.select('.xAxis')
         //   .attr('transform', `translate(${positionScale[positionScale.length - 1]},-30)`);
