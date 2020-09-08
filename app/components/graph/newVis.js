@@ -47950,7 +47950,19 @@ class Graph extends Component {
       <div className="graph" ref={this.myRef}>
         <div className="network">
           <div className="termMap">
-            <svg id="graph" width="100%" height="100%" style={{}} />
+            <div className="termMapFilter">
+              <div style={{ marginLeft: '10px', alignSelf: 'center', fontSize: 'x-small' }}>
+                <div style={{ marginLeft: '10px' }}>
+                  <input checked type="radio" id="union" name="set" value="union" />
+                  <label htmlFor="union" style={{ marginLeft: '10px' }}>union</label>
+                  <input type="radio" id="intersection" name="set" value="intersection" />
+                  <label htmlFor="intersection" style={{ marginLeft: '10px' }}>intersection</label>
+                </div>
+              </div>
+            </div>
+            <div className="treemap">
+              <svg id="graph" width="100%" height="100%" style={{}} />
+            </div>
           </div>
           <div className="selectedUserTable d-flex flex-column" style={{ minHeight: '400px' }} />
           <div className="authorList" id="authorList" style={{ overflowY: 'scroll' }} />

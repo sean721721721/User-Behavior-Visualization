@@ -144,7 +144,9 @@ class OpinionLeaderView extends React.Component {
         const newBeginDate = new Date(beginDate);
         const newEndDate = new Date(beginDate);
         newBeginDate.setDate(newBeginDate.getDate() + i);
+        newBeginDate.setHours(0, 0, 0);
         newEndDate.setDate(newEndDate.getDate() + (i + 5));
+        newEndDate.setHours(23, 59, 59);
         if (new Date(newEndDate) > new Date(endDate)) url.push(encodeURI(getReqstr(fixedUserArr, newBeginDate, new Date(endDate))));
         else url.push(encodeURI(getReqstr(fixedUserArr, newBeginDate, newEndDate)));
       }

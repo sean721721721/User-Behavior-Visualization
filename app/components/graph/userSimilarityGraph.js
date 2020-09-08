@@ -23,6 +23,7 @@ import { userDailyActivity } from './userDailyActivity';
 
 export default function userSimilarityGraph(data, svg, user, articles) {
   console.log(user);
+  console.log(data);
   const svgScale = d3.scaleSqrt().domain([1, 200]).range([0.5, 0.1]);
   const commentTimelineSvg = d3.select('#commentTimeline');
   const h = parseFloat(d3.select('.heatMap').style('height'));
@@ -43,7 +44,7 @@ export default function userSimilarityGraph(data, svg, user, articles) {
   const articlesCommunity = jLouvainClustering(articleIds, articleSimilarity);
   // const articlesCommunity = articleGroupByTag(articleIds, filteredArticles);
   // console.log('articlesCommunity', articlesCommunity);
-  const selectedUser = user;
+  const selectedUser = user.slice();
   drawSlider();
   drawFilterDiv();
   drawSortOptionDiv();
@@ -363,6 +364,7 @@ export default function userSimilarityGraph(data, svg, user, articles) {
     // Article Similarity
 
     // console.log(similarity);
+    console.log(user);
     const [datas, users, similaritys] = filterAlwaysNonSimilarUser(data, user, similarity, simThresh, artThresh);
     console.log('datas:', datas, 'users:', users, 'similaritys:', similaritys);
     // similarity for articles grouping
@@ -1127,21 +1129,23 @@ export default function userSimilarityGraph(data, svg, user, articles) {
     }
 
     function filterAlwaysNonSimilarUser(ds, us, sims, simTh, artTh) {
-      const copyUsers = us.slice();
+      ds = ds.filter(e => e.repliedArticle.length > artTh);
+      const copyUsers = ds.map(e => e.id);
       const isBelowThreshold = currentValue => currentValue.value < simTh;
+      let removeUnusedSims = sims.filter(e1 => copyUsers.includes(e1.source) && copyUsers.includes(e1.target));
       copyUsers.forEach((e) => {
-        const filteredSimilarity = sims.filter(e1 => e1.source === e || e1.target === e);
+        const filteredSimilarity = removeUnusedSims.filter(e1 => e1.source === e || e1.target === e);
+        console.log(e, filteredSimilarity);
         if (filteredSimilarity.filter(e1 => e1.source !== e1.target).every(isBelowThreshold)) {
-          // console.log(e);
-          // console.log(filteredSimilarity);
-          sims = sims.filter(e1 => !(e1.source === e || e1.target === e));
+          console.log('underthreshold');
+          removeUnusedSims = removeUnusedSims.filter(e1 => !(e1.source === e || e1.target === e));
           ds = ds.filter(e1 => e1.id !== e);
           us = us.filter(e1 => e1 !== e);
         }
       });
-      const filteredDs = ds.filter(e => e.repliedArticle.length > artTh);
+      const filteredDs = ds;
       const filteredUs = filteredDs.map(e => e.id);
-      const filteredSim = sims.filter(e => filteredDs.some(e1 => e1.id === e.source) && filteredDs.some(e1 => e1.id === e.target));
+      const filteredSim = removeUnusedSims.filter(e => filteredDs.some(e1 => e1.id === e.source) && filteredDs.some(e1 => e1.id === e.target));
       return [filteredDs, filteredUs, filteredSim];
     }
 

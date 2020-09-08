@@ -393,7 +393,18 @@ path:hover {
     grid-row: nwrow1 / nwrow2;
     border: 2px solid white;
     border-top-left-radius: 5px;
-    // grid-template-rows: [nwrow1] 0.1fr [nwrow2] 0.9fr [nwrowend];
+    grid-template-rows: [tmrow1] 0.1fr [tmrow2] auto [tmrowend];
+}
+
+.termMapFilter {
+    display: grid;
+    background-color: white;
+    grid-row: tmrow1 / tmrow2;
+}
+
+.treemap {
+    display: grid;
+    grid-row: tmrow2 / tmrowend;
 }
 
 .authorList {

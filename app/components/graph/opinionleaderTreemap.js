@@ -29,8 +29,8 @@ export default function treemap(cellNodes, beforeThisDate,
     top: 10, right: 10, bottom: 10, left: 10,
   };
 
-  const w = parseFloat(d3.select('.termMap').style('width'));
-  const h = parseFloat(d3.select('.termMap').style('height'));
+  const w = parseFloat(d3.select('.treemap').style('width'));
+  const h = parseFloat(d3.select('.treemap').style('height'));
   const width = w - margin.left - margin.right;
   const height = h - margin.top - margin.bottom;
   const mostUserNum = 1000;
@@ -182,6 +182,7 @@ export default function treemap(cellNodes, beforeThisDate,
     console.log(articleNodes);
     const article = articleNodes.find(e => e.article_id === article_id);
     commentTimeline(article, commentTimelineSvg, data.$this);
+    const clickType = d3.select('input[name="set"]:checked').property('value');
     // submit(d);
     // const adj = cellLinks.filter(e => e.target.index === d.index);
     // const index = selectedArticleNodes.findIndex(e => e === d.title);
@@ -221,11 +222,23 @@ export default function treemap(cellNodes, beforeThisDate,
       d.data.tag = 1;
       console.log('push');
       selectedArticleNodes.push(article_id);
-      d.data.messages.forEach((e) => {
-        if (!selectedUser.some(u => u.id === e.push_userid)) {
-          selectedUser.push({ id: e.push_userid, group: selectedArticleNodes.length });
-        }
-      });
+      if (clickType === 'union') {
+        d.data.messages.forEach((e) => {
+          if (!selectedUser.some(u => u.id === e.push_userid)) {
+            selectedUser.push({ id: e.push_userid, group: selectedArticleNodes.length });
+          }
+        });
+      } else if (clickType === 'intersection' && selectedUser.length > 0) {
+        // intersection
+        console.log('intersection');
+        selectedUser = selectedUser.filter(e => d.data.messages.some(e1 => e1.push_userid === e.id));
+      } else {
+        d.data.messages.forEach((e) => {
+          if (!selectedUser.some(u => u.id === e.push_userid)) {
+            selectedUser.push({ id: e.push_userid, group: selectedArticleNodes.length });
+          }
+        });
+      }
     } else {
       d3.select(nodes[index])
         .style('fill', color(d.parent.data.name));
