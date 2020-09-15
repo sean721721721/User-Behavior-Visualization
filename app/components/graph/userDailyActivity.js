@@ -50,7 +50,7 @@ export default function userDailyActivity(data, user, svg, begin, end) {
 
   gRange.call(sliderRange);
   gRange.select('.axis')
-    .attr('transform', 'transform(0, 0)')
+    .attr('transform', 'translate(0, 0)')
     .selectAll('text')
     .attr('y', 10);
   gRange.selectAll('.parameter-value')
