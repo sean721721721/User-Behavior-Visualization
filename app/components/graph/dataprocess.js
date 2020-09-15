@@ -4,7 +4,6 @@ import * as d3 from 'd3';
 import * as science from 'science';
 import * as Queue from 'tiny-queue';
 import * as reorder from 'reorder.js/index';
-import { DllPlugin } from 'webpack';
 
 function computeUserSimilarityByArticles(userAuthorRelationShipArr) {
   const similarityScale = d3.scaleLinear().domain([0, 2]).range([1, 0]);
