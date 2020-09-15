@@ -106,7 +106,7 @@ export default function commentTimeline(data, svg, $this) {
     })
     .enter()
     .append('circle')
-    .attr('class', d => d.push_userid)
+    .attr('class', d => `id_${d.push_userid}`)
     .attr('fill', (d) => {
       let color = 'green';
       switch (d.push_tag) {
@@ -149,11 +149,11 @@ export default function commentTimeline(data, svg, $this) {
           const y = parseFloat(d3.select(_n[_i]).attr('cy'));
           d3.selectAll('.articles').each((d2, i2, n2) => {
             // console.log(d2);
-            d3.select(n2[i2]).selectAll(`.${_d.push_userid}`).each((_d2, _i2, _n2) => {
+            d3.select(n2[i2]).selectAll(`.id_${_d.push_userid}`).each((_d2, _i2, _n2) => {
               // console.log(d3.select(this).attr('cx'));
               if (i < i2) {
                 linkCoordinateWithSameUser.push({
-                  class: _d.push_userid,
+                  class: `id_${_d.push_userid}`,
                   x1: x,
                   y1: y + (100 + (i * 130)),
                   x2: parseFloat(d3.select(_n2[_i2]).attr('cx')),

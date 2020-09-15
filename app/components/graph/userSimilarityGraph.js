@@ -408,6 +408,7 @@ export default function userSimilarityGraph(data, svg, user, articles) {
       matrix[i] = matrix[i].map(e => similarityScale(e));
       // matrix[i] = matrix[i].map(e => e * 100);
     }
+    console.log('matrix', matrix);
     const [permuted_mat, permuted_origMat] = matrixReordering(
       matrix, origMatrix, newUserAxisValues, users,
     );
@@ -460,7 +461,7 @@ export default function userSimilarityGraph(data, svg, user, articles) {
     const mouseover = (d, index, i) => {
       if (typeof d === 'string') {
         // user axis
-        d3.selectAll(`circle.${d}`).attr('r', 10);
+        d3.selectAll(`circle.id_${d}`).attr('r', 10);
       }
       const xUser = newUserAxisValues[index];
       const yUser = newUserAxisValues[i];
@@ -553,11 +554,11 @@ export default function userSimilarityGraph(data, svg, user, articles) {
       .enter()
       .append('g')
       .attr('class', (d, index) => `group_${index}`)
-      .attr('transform', (d, index) => `translate(${100 * (index % 4)}, ${20 * Math.floor(index / 4)})`)
+      .attr('transform', (d, index) => `translate(${130 * (index % 4)}, ${20 * Math.floor(index / 4)})`)
       // .attr('transform', (d, index) => `translate(0 ${20 * index})`)
       .each((d, index, nodes) => {
         d3.select(nodes[index]).append('text')
-          .text(`Group ${index}`)
+          .text(`Community ${index}`)
           .attr('x', 10);
 
         d3.select(nodes[index]).append('circle')
@@ -725,9 +726,9 @@ export default function userSimilarityGraph(data, svg, user, articles) {
       //       });
       //   }
       // }
-
-      const brush = d3.brushY()
-        .extent([[0, 0], [500, positionScale[positionScale.length - 1]]])
+      const reverseScale = svgScale(datas.length) > 0 ? svgScale(datas.length) : 0.4;
+      const brush = d3.brushX()
+        .extent([[0, 0], [positionScale[positionScale.length - 1] * reverseScale * Math.sqrt(2), 20]])
         .on('end', brushed);
 
       leftSvg.append('defs').append('clipPath')
@@ -736,45 +737,62 @@ export default function userSimilarityGraph(data, svg, user, articles) {
         .attr('width', width)
         .attr('height', height);
 
-      const context = leftSvg;
+      const context = group;
 
       context.append('g')
         .attr('class', 'brush')
-        .attr('transform', `translate(${positionScale[positionScale.length - 1] + 30}, 0)`)
+        // .attr('transform', `translate(${positionScale[positionScale.length - 1] + 30}, 0)`)
+        .attr('transform', 'translate(0, 0)')
         .call(brush)
         .call(brush.move, [0, 0]);
 
       context.select('.handle.handle--n')
-        .attr('height', 20)
+        // .attr('height', 20)
         .attr('fill', 'darkgray');
       context.select('.handle.handle--s')
-        .attr('height', 20)
+        // .attr('height', 20)
         .attr('fill', 'darkgray');
 
+      d3.select('.brush').append('path')
+        .attr('d', 'M 0 0 L 0 0 L 0 0');
       function brushed(d) {
         console.log(d);
-        context.select('.handle.handle--n')
-          .attr('height', 20)
+        context.select('.handle.handle--w')
+          // .attr('height', 20)
           .attr('fill', 'darkgray');
-        context.select('.handle.handle--s')
-          .attr('height', 20)
+        context.select('.handle.handle--e')
+          // .attr('height', 20)
           .attr('fill', 'darkgray');
         if (d3.event.sourceEvent && d3.event.sourceEvent.type === 'zoom') return; // ignore brush-by-zoom
         const s = d3.event.selection;
-        const focusUser = [];
+        const focusUserIndex = [];
         selectedUser.splice(0, selectedUser.length);
         positionScale.forEach((e, index) => {
-          const tempPosition = (positionScale[index + 1] + positionScale[index]) / 2;
-          if (tempPosition >= s[0] && tempPosition <= s[1]) selectedUser.push(newUserAxisValues[index]);
+          const tempPosition = (positionScale[index + 1] + positionScale[index]) / 2 * reverseScale * Math.sqrt(2);
+          if (tempPosition >= s[0] && tempPosition <= s[1]) {
+            selectedUser.push(newUserAxisValues[index]);
+            focusUserIndex.push(index);
+          }
         });
+        console.log(focusUserIndex);
+        console.log(positionScale);
         // setting all co-cluster rect stroke-width to 1
-        console.log(d3.select('.radialGroup'));
         d3.select('.radialGroup').selectAll('rect')
-          .attr('stroke-width', '1px');
+          .attr('stroke-width', '0.5px');
+        // highlight selected grid of heatmap
+        d3.select('.brush').select('path')
+          .transition()
+          .attr('d', () => {
+            const start = positionScale[focusUserIndex[0]] * reverseScale * Math.sqrt(2);
+            const end = positionScale[focusUserIndex[focusUserIndex.length - 1] + 1] * reverseScale * Math.sqrt(2);
+            return `M ${start} ${0} L ${(end + start) / 2} ${-(end - start) / 2} L ${end} ${0}`;
+          })
+          .attr('stroke', 'red')
+          .attr('stroke-width', '2px');
         tickClick();
       }
 
-      drawUserAxis();
+      // drawUserAxis();
       function drawUserAxis() {
         // y-axis
         leftSvg.append('g')
@@ -1188,7 +1206,7 @@ export default function userSimilarityGraph(data, svg, user, articles) {
       highlightArticle_id.forEach((id) => {
         datas.forEach((usr) => {
           if (!usr.repliedArticle.some(e => e.article_id === id)) {
-            articleGroup.select(`.${usr.id}`)
+            articleGroup.select(`.id_${usr.id}`)
               .selectAll('circle')
               .data([{ article_id: id }])
               .enter()
@@ -1689,7 +1707,7 @@ export default function userSimilarityGraph(data, svg, user, articles) {
           .data(tree)
           .enter()
           .append('g')
-          .attr('class', d => d.article_id)
+          .attr('class', d => `articleID_${d.article_id}`)
           .attr('transform', d => `translate(50,${contextYScale(d.article_id) + contextYScale.bandwidth() / 2})`)
           .each((d, index, nodes) => {
             let depth = 1;
@@ -1762,7 +1780,7 @@ export default function userSimilarityGraph(data, svg, user, articles) {
       const radialGroupMargin = 50;
       const radial = group.append('g')
         .attr('class', 'radialGroup')
-        .attr('transform', `translate(0, 10) scale(${svgScale(datas.length) > 0 ? svgScale(datas.length) : 0.4})`)
+        .attr('transform', `translate(0, 30) scale(${svgScale(datas.length) > 0 ? svgScale(datas.length) : 0.4})`)
         .attr('stroke', 'black')
         .attr('stroke-width', '0.5px');
       const articleGroupHeatmap = leftSvg.append('g').attr('class', 'articleGroupHeatmap');

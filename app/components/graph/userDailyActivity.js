@@ -104,7 +104,7 @@ export default function userDailyActivity(data, user, svg, begin, end) {
       svg.selectAll('.article')
         .attr('opacity', '0');
       const articleId = d.article_id.replace(/\./gi, '');
-      svg.selectAll(`.${articleId}`)
+      svg.selectAll(`.articleID_${articleId}`)
         .attr('opacity', '1');
     }
   };
@@ -189,7 +189,7 @@ export default function userDailyActivity(data, user, svg, begin, end) {
     if (data[i].messages.some(mes => user.includes(mes.push_userid))) {
       const articleId = data[i].article_id.replace(/\./gi, '');
       svg.append('g')
-        .attr('class', `pointer ${articleId}`)
+        .attr('class', `pointer articleID_${articleId}`)
         .attr('transform', 'translate(100, 10)')
         .selectAll()
         .data([data[i]])
@@ -213,7 +213,7 @@ export default function userDailyActivity(data, user, svg, begin, end) {
       const postYear = new Date(data[i].date).getFullYear();
       const filteredMessages = data[i].messages.filter(e => user.includes(e.push_userid));
       svg.append('g')
-        .attr('class', `article ${articleId}`)
+        .attr('class', `article articleID_${articleId}`)
         .attr('transform', 'translate(100, 20)')
         .selectAll()
         .data(filteredMessages)
@@ -389,7 +389,7 @@ export default function userDailyActivity(data, user, svg, begin, end) {
     if (original_date1 < new Date(date1) || original_date2 > new Date(date2)) {
       filteredArticles.forEach((art) => {
         const article_id = art.article_id.replace(/\./gi, '');
-        svg.selectAll(`.${article_id}`)
+        svg.selectAll(`.articleID_${article_id}`)
           .each((d, index, nodes) => {
             if (d3.select(nodes[index]).attr('class')[0] === 'p') {
               // article pointers
@@ -433,7 +433,7 @@ export default function userDailyActivity(data, user, svg, begin, end) {
       // article pointers
       svg.selectAll('.pointer')
         .each((d, index, nodes) => {
-          const article_id = d3.select(nodes[index]).attr('class').slice(8);
+          const article_id = d3.select(nodes[index]).attr('class').slice(18);
           const article = data.find(e => e.article_id.replace(/\./gi, '') === article_id);
           if (new Date(article.date) > new Date(date1) && new Date(article.date) < new Date(date2)) {
             d3.select(nodes[index])
@@ -449,7 +449,8 @@ export default function userDailyActivity(data, user, svg, begin, end) {
       // user activities
       svg.selectAll('.article')
         .each((d, index, nodes) => {
-          const article_id = d3.select(nodes[index]).attr('class').slice(8);
+          const article_id = d3.select(nodes[index]).attr('class').slice(18);
+          console.log(article_id);
           const article = data.find(e => e.article_id.replace(/\./gi, '') === article_id);
           const postYear = new Date(article.date).getFullYear();
           const beginDateMinusTwo = new Date(date1);

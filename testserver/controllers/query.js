@@ -255,6 +255,7 @@ let findquery = async function findquery(page, queryobj, ptt, limit, sort) {
   let query;
   console.log(queryobj);
   if (limit < 0) {
+    console.log(pagepost);
     query = pagepost.find(queryobj).sort(sort);
   } else {
     query = pagepost
