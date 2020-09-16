@@ -650,24 +650,18 @@ export default function userSimilarityGraph(data, svg, user, articles) {
         .call(brush.move, [0, 0]);
 
       context.select('.handle.handle--n')
-        // .attr('height', 20)
         .attr('fill', 'slategray');
       context.select('.handle.handle--s')
-        // .attr('height', 20)
         .attr('fill', 'slategray');
 
       d3.select('.brush').append('path')
         .attr('d', 'M 0 0 L 0 0 L 0 0');
+
       function brushed(d) {
         console.log(d);
-        context.select('.handle.handle--w')
-          // .attr('height', 20)
-          .attr('fill', 'slategray');
-        context.select('.handle.handle--e')
-          // .attr('height', 20)
-          .attr('fill', 'slategray');
         if (d3.event.sourceEvent && d3.event.sourceEvent.type === 'zoom') return; // ignore brush-by-zoom
         const s = d3.event.selection;
+        console.log(s);
         const focusUserIndex = [];
         selectedUser.splice(0, selectedUser.length);
         positionScale.forEach((e, index) => {
@@ -677,8 +671,23 @@ export default function userSimilarityGraph(data, svg, user, articles) {
             focusUserIndex.push(index);
           }
         });
-        console.log(focusUserIndex);
-        console.log(positionScale);
+        // resize brush controller
+        console.log(d3.select(this));
+        console.log(d3.select('.brush').nodes()[0].__brush);
+        const fixedX1 = positionScale[focusUserIndex[0]] * reverseScale * Math.sqrt(2);
+        const fixedX2 = positionScale[focusUserIndex[focusUserIndex.length - 1] + 1] * reverseScale * Math.sqrt(2) - 6;
+        d3.select('.brush').nodes()[0].__brush.selection[0][0] = fixedX1;
+        d3.select('.brush').nodes()[0].__brush.selection[1][0] = fixedX2;
+        context.select('.handle.handle--w')
+          .attr('x', fixedX1)
+          .attr('fill', 'slategray');
+        context.select('.handle.handle--e')
+          .attr('x', fixedX2)
+          .attr('fill', 'slategray');
+        context.select('.selection')
+          .attr('x', fixedX1)
+          .attr('width', fixedX2 - fixedX1);
+        console.log(s);
         // setting all co-cluster rect stroke-width to 1
         d3.select('.radialGroup').selectAll('rect')
           .attr('stroke', 'slategray')
