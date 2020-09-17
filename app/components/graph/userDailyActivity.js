@@ -86,7 +86,6 @@ export default function userDailyActivity(data, user, svg, begin, end) {
     .padding(0.05);
   const Tooltip = d3.select('.tooltip');
   const mouseover = (d, e) => {
-    console.log(d);
     if (e) {
       Tooltip
         .style('opacity', 1)

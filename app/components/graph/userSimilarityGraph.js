@@ -14,7 +14,6 @@ import * as slider from 'd3-simple-slider';
 import netClustering from 'netclustering';
 import CheckboxGroup from 'antd/lib/checkbox/Group';
 import { cps } from 'redux-saga/effects';
-import jLouvain from './jLouvain';
 import { userActivityTimeline } from './userActivityTimeline';
 import { userDailyActivity } from './userDailyActivity';
 import * as dp from './dataprocess';
@@ -39,63 +38,13 @@ export default function userSimilarityGraph(data, svg, user, articles) {
   const [filteredArticles, articleSimilarity] = dp.computeArticleSimilarity(data);
   console.log('articleSimilarity: ', articleSimilarity.length);
   const articleIds = filteredArticles.map(e => e.article_id);
-  const articlesCommunity = jLouvainClustering(articleIds, articleSimilarity);
+  const articlesCommunity = dp.jLouvainClustering(articleIds, articleSimilarity);
   // const articlesCommunity = articleGroupByTag(articleIds, filteredArticles);
-  // console.log('articlesCommunity', articlesCommunity);
+  console.log('articlesCommunity', articlesCommunity);
   const selectedUser = user.slice();
   drawSlider();
   drawFilterDiv();
   drawSortOptionDiv();
-
-  function jLouvainClustering(nodes, edges) {
-    const edge_data = edges.map((e) => {
-      e.weight = e.value * 10;
-      return e;
-    });
-
-    // console.log('Input Node Data2', nodes);
-    // console.log('Input Edge Data2', edge_data);
-
-    const node_data3 = [];
-    for (let i = 0; i < nodes.length; i += 1) {
-      node_data3.push(i);
-    }
-    let edge_data3 = [];
-    edge_data3 = edge_data.map((e) => {
-      const s = nodes.findIndex(d => d === e.source);
-      const t = nodes.findIndex(d => d === e.target);
-      return { source: s, target: t, weight: e.weight };
-    });
-
-    // console.log('Input Node Data3', node_data3);
-    // console.log('Input Edge Data3', edge_data3);
-
-    const community3 = jLouvain().nodes(node_data3).edges(edge_data3);
-    // console.log(community3());
-    // Drawing code
-    const original_node_data = d3.entries(nodes);
-    // console.log(original_node_data);
-
-    const forceSimulation = d3.forceSimulation()
-      .force('link', d3.forceLink().id(d => d.key));
-    forceSimulation
-      .nodes(original_node_data);
-
-    forceSimulation
-      .force('link')
-      .links(edge_data3);
-    // Communnity detection on click event
-    const community_assignment_result = community3();
-    // console.log(original_node_data);
-    // console.log('Resulting Community Data', community_assignment_result);
-    const final = [];
-    const keys = Object.keys(community_assignment_result);
-    for (let i = 0; i < keys.length; i += 1) {
-      final.push({ id: nodes[keys[i]], community: community_assignment_result[keys[i]] });
-    }
-    // console.log('node after clustering', final);
-    return final;
-  }
 
   function drawSlider() {
     d3.select('.option').selectAll('*').remove();
@@ -294,7 +243,7 @@ export default function userSimilarityGraph(data, svg, user, articles) {
     for (let i = 0; i < users.length; i += 1) {
       axisDomain.push(i);
     }
-    const community = jLouvainClustering(users, similaritys);
+    const community = dp.jLouvainClustering(users, similaritys);
     community.forEach((e) => {
       datas.find(e1 => e1.id === e.id).community = e.community;
     });

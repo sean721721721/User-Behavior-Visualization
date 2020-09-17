@@ -4,6 +4,7 @@ import * as d3 from 'd3';
 import * as science from 'science';
 import * as Queue from 'tiny-queue';
 import * as reorder from 'reorder.js/index';
+import jLouvain from './jLouvain';
 
 function computeUserSimilarityByArticles(userAuthorRelationShipArr) {
   const similarityScale = d3.scaleLinear().domain([0, 2]).range([1, 0]);
@@ -97,7 +98,75 @@ function computeArticleSimilarity(userArr) {
       }
     }
   }
+
   return [articleArray, array];
+}
+
+function jLouvainClustering(nodes, edges) {
+  const edgeData = edges.map((e) => {
+    e.weight = e.value * 10;
+    return e;
+  });
+
+    // console.log('Input Node Data2', nodes);
+    // console.log('Input Edge Data2', edgeData);
+
+  const nodeData3 = [];
+  for (let i = 0; i < nodes.length; i += 1) {
+    nodeData3.push(i);
+  }
+  let edgeData3 = [];
+  edgeData3 = edgeData.map((e) => {
+    const s = nodes.findIndex(d => d === e.source);
+    const t = nodes.findIndex(d => d === e.target);
+    return { source: s, target: t, weight: e.weight };
+  });
+
+  // console.log('Input Node Data3', nodeData3);
+  // console.log('Input Edge Data3', edgeData3);
+
+  const community3 = jLouvain().nodes(nodeData3).edges(edgeData3);
+  // console.log(community3());
+  // Drawing code
+  const originalNodeData = d3.entries(nodes);
+  // console.log(originalNodeData);
+
+  const forceSimulation = d3.forceSimulation()
+    .force('link', d3.forceLink().id(d => d.key));
+  forceSimulation
+    .nodes(originalNodeData);
+
+  forceSimulation
+    .force('link')
+    .links(edgeData3);
+  // Communnity detection on click event
+  const communityAssignmentResult = community3();
+  // console.log(originalNodeData);
+  // console.log('Resulting Community Data', communityAssignmentResult);
+  const final = [];
+  const keys = Object.keys(communityAssignmentResult);
+  for (let i = 0; i < keys.length; i += 1) {
+    final.push({ id: nodes[keys[i]], community: communityAssignmentResult[keys[i]] });
+  }
+  // console.log('node after clustering', final);
+  for (let i = 0; i < 100; i += 1) {
+    const countForCom = [];
+    for (let j = 0; j < final.length; j += 1) {
+      const existed = countForCom.find(e => e.community === final[j].community);
+      if (existed) existed.count += 1;
+      else countForCom.push({ community: final[j].community, count: 1 });
+    }
+    console.log(`communityCount: ${countForCom.length} mergeCount: ${i + 1}`);
+    if (countForCom.length > 50) {
+      const filtered = countForCom.filter(e => e.count <= (i + 1));
+      final.forEach((e) => {
+        e.community = filtered.some(e1 => e1.community === e.community) ? filtered[0].community : e.community;
+      });
+    } else {
+      break;
+    }
+  }
+  return final;
 }
 
 function filterAlwaysNonSimilarUser(ds, us, sims, simTh, artTh) {
@@ -107,9 +176,9 @@ function filterAlwaysNonSimilarUser(ds, us, sims, simTh, artTh) {
   let removeUnusedSims = sims.filter(e1 => copyUsers.includes(e1.source) && copyUsers.includes(e1.target));
   copyUsers.forEach((e) => {
     const filteredSimilarity = removeUnusedSims.filter(e1 => e1.source === e || e1.target === e);
-    console.log(e, filteredSimilarity);
+    // console.log(e, filteredSimilarity);
     if (filteredSimilarity.filter(e1 => e1.source !== e1.target).every(isBelowThreshold)) {
-      console.log('underthreshold');
+    //   console.log('underthreshold');
       removeUnusedSims = removeUnusedSims.filter(e1 => !(e1.source === e || e1.target === e));
       copyDs = copyDs.filter(e1 => e1.id !== e);
       copyDs = copyDs.filter(e1 => e1 !== e);
@@ -356,6 +425,7 @@ function communityInnerMatrixReordering(mat, origMat, userAxis, us, communityDat
 export {
   computeUserSimilarityByArticles,
   computeArticleSimilarity,
+  jLouvainClustering,
   filterAlwaysNonSimilarUser,
   relationToMatrix,
   matrixReordering,
