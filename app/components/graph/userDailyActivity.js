@@ -86,6 +86,7 @@ export default function userDailyActivity(data, user, svg, begin, end) {
     .padding(0.05);
   const Tooltip = d3.select('.tooltip');
   const mouseover = (d, e) => {
+    console.log(d);
     if (e) {
       Tooltip
         .style('opacity', 1)
@@ -101,15 +102,15 @@ export default function userDailyActivity(data, user, svg, begin, end) {
         .html(`<p style="color: white;">Title: ${d.article_title}</p>`)
         .style('left', `${d3.event.pageX + 25}px`)
         .style('top', `${d3.event.pageY}px`);
-      svg.selectAll('.article')
+      fixedSvg.selectAll('.article')
         .attr('opacity', '0');
       const articleId = d.article_id.replace(/\./gi, '');
-      svg.selectAll(`.articleID_${articleId}`)
+      fixedSvg.selectAll(`.articleID_${articleId}`)
         .attr('opacity', '1');
     }
   };
   const mouseout = (d) => {
-    svg.selectAll('.article')
+    fixedSvg.selectAll('.article')
       .attr('opacity', 1);
 
     Tooltip
@@ -168,10 +169,10 @@ export default function userDailyActivity(data, user, svg, begin, end) {
   //   .attr('border', '0.5px solid black')
   //   .on('mouseover', d => mouseover(data[i], d))
   //   .on('mouseout', mouseout);
-
+  const fixedSvg = svg.append('g')
+    .attr('transform', 'translate(100, 40)');
   for (let i = 0; i < user.length; i += 1) {
-    svg.append('g')
-      .attr('transform', 'translate(100, 20)')
+    fixedSvg.append('g')
       .selectAll()
       .data(user)
       .enter()
@@ -188,46 +189,65 @@ export default function userDailyActivity(data, user, svg, begin, end) {
   for (let i = 0; i < data.length; i += 1) {
     if (data[i].messages.some(mes => user.includes(mes.push_userid))) {
       const articleId = data[i].article_id.replace(/\./gi, '');
-      svg.append('g')
+      fixedSvg.append('g')
         .attr('class', `pointer articleID_${articleId}`)
-        .attr('transform', 'translate(100, 10)')
+        .attr('transform', 'translate(0, -10)')
         .selectAll()
         .data([data[i]])
         .enter()
-        .append('rect')
-        .attr('x', (d, index) => {
-          const postTime = new Date(d.date);
-          return timeScale(postTime);
-        })
-        .attr('opacity', (d, index) => {
-          const postTime = new Date(d.date);
-          return timeScale(postTime) < 500 ? 1 : 0;
-        })
-        .attr('y', 0)
-        .attr('width', 2)
-        .attr('height', 10)
-        .style('fill', 'blue')
-        .on('mouseover', d => mouseover(d))
-        .on('mouseout', mouseout);
+        .each((d, index, nodes) => {
+          d3.select(nodes[index]).append('rect')
+            .attr('x', (_d) => {
+              const postTime = new Date(_d.date);
+              return timeScale(postTime);
+            })
+            .attr('opacity', (_d) => {
+              const postTime = new Date(_d.date);
+              return timeScale(postTime) < 500 ? 1 : 0;
+            })
+            .attr('y', 0)
+            .attr('width', 2)
+            .attr('height', 10)
+            .style('fill', color[0])
+            .on('mouseover', _d => mouseover(_d))
+            .on('mouseout', mouseout);
+          d3.select(nodes[index]).append('circle')
+            .attr('cx', (_d) => {
+              const postTime = new Date(_d.date);
+              return timeScale(postTime) + 1;
+            })
+            .attr('opacity', (_d) => {
+              const postTime = new Date(_d.date);
+              return timeScale(postTime) < 500 ? 1 : 0;
+            })
+            .attr('cy', 0)
+            .attr('r', 4)
+            .style('fill', color[0])
+            .on('mouseover', _d => mouseover(_d))
+            .on('mouseout', mouseout);
+        });
 
       const postYear = new Date(data[i].date).getFullYear();
       const filteredMessages = data[i].messages.filter(e => user.includes(e.push_userid));
-      svg.append('g')
+      fixedSvg.append('g')
         .attr('class', `article articleID_${articleId}`)
-        .attr('transform', 'translate(100, 20)')
         .selectAll()
         .data(filteredMessages)
         .enter()
         .append('rect')
         .attr('x', (d, index) => {
-          const date = dateFormat(d);
-          const commentTime = new Date(new Date(date).setFullYear(postYear));
-          return timeScale(commentTime);
+          // const date = dateFormat(d);
+          // const commentTime = new Date(new Date(date).setFullYear(postYear));
+          // return timeScale(commentTime);
+          const postTime = new Date(data[i].date);
+          return timeScale(postTime);
         })
         .attr('opacity', (d, index) => {
-          const date = dateFormat(d);
-          const commentTime = new Date(new Date(date).setFullYear(postYear));
-          return timeScale(commentTime) < 500 ? 1 : 0;
+          // const date = dateFormat(d);
+          // const commentTime = new Date(new Date(date).setFullYear(postYear));
+          // return timeScale(commentTime) < 500 ? 1 : 0;
+          const postTime = new Date(data[i].date);
+          return timeScale(postTime);
         })
         .attr('y', d => userScale(d.push_userid))
         .attr('width', 2)
@@ -238,22 +258,21 @@ export default function userDailyActivity(data, user, svg, begin, end) {
     }
   }
 
-  svg.append('g')
+  fixedSvg.append('g')
     .attr('class', 'yAxis')
-    .attr('transform', 'translate(100, 20)')
     .call(d3.axisLeft(userScale))
     .attr('stroke-width', '0.5px');
 
-  svg.append('g')
+  fixedSvg.append('g')
     .attr('class', 'xAxis')
-    .attr('transform', 'translate(100, 20)')
     .call(d3.axisTop(timeScale)
       .ticks(d3.timeDay.every(1))
-      .tickFormat(d3.timeFormat('%m/%d')));
+      .tickFormat(d3.timeFormat('%m/%d'))
+      .tickSizeInner([20]));
 
-  svg.selectAll('path').remove();
+  fixedSvg.selectAll('path').remove();
 
-  // svg.append('g')
+  // fixedSvg.append('g')
   //   .attr('transform', () => {
   //     if (i === 0) return 'translate(10, 100)';
   //     return `translate(10, ${userOffset * gridSize + 100})`;
@@ -261,21 +280,21 @@ export default function userDailyActivity(data, user, svg, begin, end) {
   //   .append('text')
   //   .text(userListByReplyCountPerHours[i].id);
 
-  // svg.append('g')
+  // fixedSvg.append('g')
   //   .attr('class', 'yAxis')
   //   .attr('transform', () => {
   //     if (i === 0) return 'translate(200, 100)';
   //     return `translate(200, ${userOffset * gridSize + 100})`;
   //   })
   //   .call(d3.axisLeft(y).tickSize(0));
-  // svg.append('g')
+  // fixedSvg.append('g')
   //   .attr('class', 'xAxis')
   //   .attr('transform', () => {
   //     if (i === 0) return 'translate(200, 100)';
   //     return `translate(200, ${userOffset * gridSize + 100})`;
   //   })
   //   .call(d3.axisTop(x).tickSize(0));
-  // svg.selectAll('.yAxis')
+  // fixedSvg.selectAll('.yAxis')
   //   .selectAll('.tick')
   //   .selectAll('text')
   //   .style('color', (d) => {
@@ -283,7 +302,7 @@ export default function userDailyActivity(data, user, svg, begin, end) {
   //     if (date.getDay() > 0 && date.getDay() < 6) return 'black';
   //     return 'lightgray';
   //   });
-  // svg.selectAll('.xAxis')
+  // fixedSvg.selectAll('.xAxis')
   //   .selectAll('.tick')
   //   .selectAll('text')
   //   .style('color', (d) => {
@@ -374,11 +393,11 @@ export default function userDailyActivity(data, user, svg, begin, end) {
   function commentTypeColor(tag) {
     switch (tag) {
       case '推':
-        return 'green';
+        return color[4];
       case '噓':
-        return 'red';
+        return color[2];
       case '→':
-        return 'yellow';
+        return color[5];
       default:
         return 'black';
     }
@@ -389,7 +408,7 @@ export default function userDailyActivity(data, user, svg, begin, end) {
     if (original_date1 < new Date(date1) || original_date2 > new Date(date2)) {
       filteredArticles.forEach((art) => {
         const article_id = art.article_id.replace(/\./gi, '');
-        svg.selectAll(`.articleID_${article_id}`)
+        fixedSvg.selectAll(`.articleID_${article_id}`)
           .each((d, index, nodes) => {
             if (d3.select(nodes[index]).attr('class')[0] === 'p') {
               // article pointers
@@ -398,6 +417,10 @@ export default function userDailyActivity(data, user, svg, begin, end) {
                   .attr('visibility', 'visible')
                   .selectAll('rect')
                   .attr('x', _d => updateXScale(new Date(_d.date)))
+                  .attr('opacity', _d => (updateXScale(new Date(_d.date)) < 500 && updateXScale(new Date(_d.date)) > 0 ? 1 : 0));
+                d3.select(nodes[index])
+                  .selectAll('circle')
+                  .attr('cx', _d => updateXScale(new Date(_d.date)) + 1)
                   .attr('opacity', _d => (updateXScale(new Date(_d.date)) < 500 && updateXScale(new Date(_d.date)) > 0 ? 1 : 0));
               } else {
                 d3.select(nodes[index])
@@ -413,14 +436,18 @@ export default function userDailyActivity(data, user, svg, begin, end) {
                   .attr('visibility', 'visible')
                   .selectAll('rect')
                   .attr('x', (e, i) => {
-                    const date = dateFormat(e);
-                    const commentTime = new Date(new Date(date).setFullYear(postYear));
-                    return updateXScale(commentTime);
+                    // const date = dateFormat(e);
+                    // const commentTime = new Date(new Date(date).setFullYear(postYear));
+                    // return updateXScale(commentTime);
+                    const postDate = new Date(art.date);
+                    return updateXScale(postDate);
                   })
                   .attr('opacity', (e, i) => {
-                    const date = dateFormat(e);
-                    const commentTime = new Date(new Date(date).setFullYear(postYear));
-                    return updateXScale(commentTime) < 500 && updateXScale(commentTime) > 0 ? 1 : 0;
+                    // const date = dateFormat(e);
+                    // const commentTime = new Date(new Date(date).setFullYear(postYear));
+                    // return updateXScale(commentTime) < 500 && updateXScale(commentTime) > 0 ? 1 : 0;
+                    const postDate = new Date(art.date);
+                    return updateXScale(postDate) < 500 && updateXScale(postDate) > 0 ? 1 : 0;
                   });
               } else {
                 d3.select(nodes[index])
@@ -431,7 +458,7 @@ export default function userDailyActivity(data, user, svg, begin, end) {
       });
     } else {
       // article pointers
-      svg.selectAll('.pointer')
+      fixedSvg.selectAll('.pointer')
         .each((d, index, nodes) => {
           const article_id = d3.select(nodes[index]).attr('class').slice(18);
           const article = data.find(e => e.article_id.replace(/\./gi, '') === article_id);
@@ -441,16 +468,19 @@ export default function userDailyActivity(data, user, svg, begin, end) {
               .selectAll('rect')
               .attr('x', _d => updateXScale(new Date(_d.date)))
               .attr('opacity', _d => (updateXScale(new Date(_d.date)) < 500 && updateXScale(new Date(_d.date)) > 0 ? 1 : 0));
+            d3.select(nodes[index])
+              .selectAll('circle')
+              .attr('cx', _d => updateXScale(new Date(_d.date)) + 1)
+              .attr('opacity', _d => (updateXScale(new Date(_d.date)) < 500 && updateXScale(new Date(_d.date)) > 0 ? 1 : 0));
           } else {
             d3.select(nodes[index])
               .attr('visibility', 'hidden');
           }
         });
       // user activities
-      svg.selectAll('.article')
+      fixedSvg.selectAll('.article')
         .each((d, index, nodes) => {
           const article_id = d3.select(nodes[index]).attr('class').slice(18);
-          console.log(article_id);
           const article = data.find(e => e.article_id.replace(/\./gi, '') === article_id);
           const postYear = new Date(article.date).getFullYear();
           const beginDateMinusTwo = new Date(date1);
@@ -460,14 +490,18 @@ export default function userDailyActivity(data, user, svg, begin, end) {
               .attr('visibility', 'visible')
               .selectAll('rect')
               .attr('x', (_d, _index) => {
-                const date = dateFormat(_d);
-                const commentTime = new Date(new Date(date).setFullYear(postYear));
-                return updateXScale(commentTime);
+                // const date = dateFormat(_d);
+                // const commentTime = new Date(new Date(date).setFullYear(postYear));
+                // return updateXScale(commentTime);
+                const postDate = new Date(article.date);
+                return updateXScale(postDate);
               })
               .attr('opacity', (_d, _index) => {
-                const date = dateFormat(_d);
-                const commentTime = new Date(new Date(date).setFullYear(postYear));
-                return updateXScale(commentTime) < 500 && updateXScale(commentTime) > 0 ? 1 : 0;
+                // const date = dateFormat(_d);
+                // const commentTime = new Date(new Date(date).setFullYear(postYear));
+                // return updateXScale(commentTime) < 500 && updateXScale(commentTime) > 0 ? 1 : 0;
+                const postDate = new Date(article.date);
+                return updateXScale(postDate) < 500 && updateXScale(postDate) > 0 ? 1 : 0;
               });
           } else {
             d3.select(nodes[index])
@@ -477,7 +511,7 @@ export default function userDailyActivity(data, user, svg, begin, end) {
     }
 
     // // article pointers
-    // svg.selectAll('.pointer')
+    // fixedSvg.selectAll('.pointer')
     //   .each((d, index, nodes) => {
     //     const article_id = d3.select(nodes[index]).attr('class').slice(8);
     //     const article = data.find(e => e.article_id.replace(/\./gi, '') === article_id);
@@ -493,7 +527,7 @@ export default function userDailyActivity(data, user, svg, begin, end) {
     //     }
     //   });
     // // user activities
-    // svg.selectAll('.article')
+    // fixedSvg.selectAll('.article')
     //   .each((d, index, nodes) => {
     //     const article_id = d3.select(nodes[index]).attr('class').slice(8);
     //     const article = data.find(e => e.article_id.replace(/\./gi, '') === article_id);
@@ -527,30 +561,30 @@ export default function userDailyActivity(data, user, svg, begin, end) {
       return new Date(beginDateMinusTwo) < new Date(e.date) && new Date(date2) > new Date(e.date);
     });
 
-    svg.select('.yAxis')
+    fixedSvg.select('.yAxis')
       .call(d3.axisLeft(updateYScale))
       .attr('stroke-width', '0.5px');
     const aDay = 60 * 60 * 24 * 1000;
     if ((date2 - date1) / aDay <= 1) {
-      svg.select('.xAxis')
-        .call(d3.axisTop(updateXScale).tickFormat(d3.timeFormat('%H:%M')));
+      fixedSvg.select('.xAxis')
+        .call(d3.axisTop(updateXScale).tickFormat(d3.timeFormat('%H:%M')).tickSizeInner([20]));
     } else if ((date2 - date1) / aDay < 5) {
-      svg.select('.xAxis')
-        .call(d3.axisTop(updateXScale).ticks(d3.timeDay.every(1)).tickFormat(d3.timeFormat('%m/%d %H:%M')));
+      fixedSvg.select('.xAxis')
+        .call(d3.axisTop(updateXScale).ticks(d3.timeDay.every(1)).tickFormat(d3.timeFormat('%m/%d %H:%M')).tickSizeInner([20]));
     } else if ((date2 - date1) / aDay < 15) {
-      svg.select('.xAxis')
-        .call(d3.axisTop(updateXScale).ticks(d3.timeDay.every(3)).tickFormat(d3.timeFormat('%m/%d')));
+      fixedSvg.select('.xAxis')
+        .call(d3.axisTop(updateXScale).ticks(d3.timeDay.every(3)).tickFormat(d3.timeFormat('%m/%d')).tickSizeInner([20]));
     } else if ((date2 - date1) / aDay < 30) {
-      svg.select('.xAxis')
-        .call(d3.axisTop(updateXScale).ticks(d3.timeDay.every(5)).tickFormat(d3.timeFormat('%m/%d')));
+      fixedSvg.select('.xAxis')
+        .call(d3.axisTop(updateXScale).ticks(d3.timeDay.every(5)).tickFormat(d3.timeFormat('%m/%d')).tickSizeInner([20]));
     } else if ((date2 - date1) / aDay < 60) {
-      svg.select('.xAxis')
-        .call(d3.axisTop(updateXScale).ticks(d3.timeDay.every(10)).tickFormat(d3.timeFormat('%m/%d')));
+      fixedSvg.select('.xAxis')
+        .call(d3.axisTop(updateXScale).ticks(d3.timeDay.every(10)).tickFormat(d3.timeFormat('%m/%d')).tickSizeInner([20]));
     } else {
-      svg.select('.xAxis')
-        .call(d3.axisTop(updateXScale).ticks(d3.timeDay.every(1)).tickFormat(d3.timeFormat('%m/%d')));
+      fixedSvg.select('.xAxis')
+        .call(d3.axisTop(updateXScale).ticks(d3.timeDay.every(1)).tickFormat(d3.timeFormat('%m/%d')).tickSizeInner([20]));
     }
-    svg.selectAll('path').remove();
+    fixedSvg.selectAll('path').remove();
   }
 }
 

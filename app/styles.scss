@@ -168,6 +168,10 @@ svg {
     border: 0px;
 }
 
+div.tooltip {
+    pointer-events: none;
+}
+
 div.tooltip.a {
     position: absolute;
     text-align: left;
