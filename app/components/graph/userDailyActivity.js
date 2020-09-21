@@ -90,16 +90,7 @@ export default function userDailyActivity(data, user, svg, begin, end) {
     .padding(0.05);
   const Tooltip = d3.select('.tooltip');
   const mouseover = (d, e) => {
-    if (e) {
-      Tooltip
-        .style('opacity', 1)
-        .html(`<p style="color: white;">${d.article_title} <br> ${e.push_tag} ${e.push_userid}: ${e.push_content}</p>`)
-        .style('left', `${d3.event.pageX + 25}px`)
-        .style('top', `${d3.event.pageY}px`);
-      d3.select(this)
-        .style('stroke', 'black')
-        .style('opacity', 1);
-    } else {
+    if (Array.isArray(e)) {
       Tooltip
         .style('opacity', 1)
         .html(`<p style="color: white;">Title: ${d.article_title}</p>`)
@@ -114,8 +105,32 @@ export default function userDailyActivity(data, user, svg, begin, end) {
       const articleId = d.article_id.replace(/\./gi, '');
       fixedSvg.selectAll(`.articleID_${articleId}`)
         .attr('opacity', '1');
-      fixedSvg.selectAll(`.repostLink.${articleId}`)
-        .attr('opacity', '1');
+      for (let i = 0; i < e.length; i += 1) {
+        if (d.article_title[0] === 'R') {
+          if (d.article_title.substring(4) === e[i].article_title) {
+            const repostId = e[i].article_id.replace(/\./gi, '');
+            fixedSvg.selectAll(`.articleID_${repostId}`)
+              .attr('opacity', '1');
+            fixedSvg.selectAll(`.repostLink.${repostId}`)
+              .attr('opacity', '1');
+          }
+        } else if (d.article_title === e[i].article_title.substring(4)) {
+          const repostId = d.article_id.replace(/\./gi, '');
+          fixedSvg.selectAll(`.articleID_${repostId}`)
+            .attr('opacity', '1');
+          fixedSvg.selectAll(`.repostLink.${repostId}`)
+            .attr('opacity', '1');
+        }
+      }
+    } else {
+      Tooltip
+        .style('opacity', 1)
+        .html(`<p style="color: white;">${d.article_title} <br> ${e.push_tag} ${e.push_userid}: ${e.push_content}</p>`)
+        .style('left', `${d3.event.pageX + 25}px`)
+        .style('top', `${d3.event.pageY}px`);
+      d3.select(this)
+        .style('stroke', 'black')
+        .style('opacity', 1);
     }
   };
   const mouseout = (d) => {
@@ -242,7 +257,7 @@ export default function userDailyActivity(data, user, svg, begin, end) {
             .attr('width', 20)
             .attr('height', 2)
             .style('fill', color[0])
-            .on('mouseover', _d => mouseover(_d))
+            .on('mouseover', _d => mouseover(_d, data))
             .on('mouseout', mouseout);
           d3.select(nodes[index]).append('circle')
             .attr('cy', (_d) => {
@@ -254,9 +269,11 @@ export default function userDailyActivity(data, user, svg, begin, end) {
               return timeScale(postTime) < h ? 1 : 0;
             })
             .attr('cx', 0)
-            .attr('r', 4)
+            .attr('r', 6)
+            .attr('stroke', 'black')
+            .attr('stroke-width', _d => (_d.article_title[0] !== 'R' ? '2px' : '0px'))
             .style('fill', color[0])
-            .on('mouseover', _d => mouseover(_d))
+            .on('mouseover', _d => mouseover(_d, data))
             .on('mouseout', mouseout);
         });
 
@@ -328,7 +345,7 @@ export default function userDailyActivity(data, user, svg, begin, end) {
           .attr('id', `${articleId1}_${articleId2}`)
           .attr('d', line([{ x: -20, y: y1 }, { x: curveOffset(y2 - y1), y: (y1 + y2) / 2 }, { x: -20, y: y2 }]))
           .attr('stroke', 'gray')
-          .attr('stroke-width', '2px')
+          .attr('stroke-width', '4px')
           .attr('fill', 'none')
           .on('mouseover', () => repostLinkMouseOver([sortedArticles[i].article_id, sortedArticles[j].article_id]))
           .on('mouseout', mouseout);
@@ -477,8 +494,8 @@ export default function userDailyActivity(data, user, svg, begin, end) {
     for (let i = 0; i < filteredSortedArticles.length; i += 1) {
       for (let j = i + 1; j < filteredSortedArticles.length; j += 1) {
         if (filteredSortedArticles[i].article_title === filteredSortedArticles[j].article_title.substring(4)) {
-          const y1 = updateYScale(new Date(sortedArticles[i].date));
-          const y2 = updateYScale(new Date(sortedArticles[j].date));
+          const y1 = updateYScale(new Date(filteredSortedArticles[i].date));
+          const y2 = updateYScale(new Date(filteredSortedArticles[j].date));
           const articleId1 = filteredSortedArticles[i].article_id.replace(/\./gi, '');
           const articleId2 = filteredSortedArticles[j].article_id.replace(/\./gi, '');
           const line = d3.line()
@@ -490,7 +507,7 @@ export default function userDailyActivity(data, user, svg, begin, end) {
             .attr('id', `${articleId1}_${articleId2}`)
             .attr('d', line([{ x: -20, y: y1 }, { x: curveOffset(y2 - y1), y: (y1 + y2) / 2 }, { x: -20, y: y2 }]))
             .attr('stroke', 'gray')
-            .attr('stroke-width', '2px')
+            .attr('stroke-width', '4px')
             .attr('fill', 'none')
             .on('mouseover', () => repostLinkMouseOver([filteredSortedArticles[i].article_id, filteredSortedArticles[j].article_id]))
             .on('mouseout', mouseout);
