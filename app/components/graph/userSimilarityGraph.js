@@ -22,7 +22,8 @@ export default function userSimilarityGraph(data, svg, user, articles) {
   console.log(user);
   console.log(data);
   const svgScale = d3.scaleSqrt().domain([1, 200]).range([0.5, 0.1]);
-  const commentTimelineSvg = d3.select('#commentTimeline');
+  // const commentTimelineSvg = d3.select('#commentTimeline');
+  const commentTimelineSvg = d3.select('#context');
   const h = parseFloat(d3.select('.heatMap').style('height'));
   const focusHeight = 500;
   svg.selectAll('*').remove();
@@ -390,7 +391,7 @@ export default function userSimilarityGraph(data, svg, user, articles) {
       if (selectedArticles.length > 0) userDailyActivity(selectedArticles, selectedUser, commentTimelineSvg, beginDate, endDate);
       else userDailyActivity(repliedArticles, selectedUser, commentTimelineSvg, beginDate, endDate);
       console.log('tickclick');
-      updateArticleMatrix(repliedArticles);
+      // updateArticleMatrix(repliedArticles);
     };
 
     // reorder community inner matrix
