@@ -364,8 +364,13 @@ export default function userSimilarityGraph(data, svg, user, articles) {
           }
         });
       });
+      const sortedUs = [];
+      newUserAxisValues.forEach((e) => {
+        const usr = us.find(u => u.id === e);
+        if (usr) sortedUs.push(usr);
+      });
       bothRepliedArticles = selectedArticles.length >= 1 ? selectedArticles : bothRepliedArticles;
-      userDailyActivity(bothRepliedArticles, selectedUser, commentTimelineSvg, beginDate, endDate);
+      userDailyActivity(bothRepliedArticles, sortedUs, commentTimelineSvg, beginDate, endDate);
 
       articles.sort((a, b) => {
         if (bothRepliedArticles.find(e => e.article_title === b.article_title)) return 1;
@@ -388,8 +393,13 @@ export default function userSimilarityGraph(data, svg, user, articles) {
           }
         });
       });
-      if (selectedArticles.length > 0) userDailyActivity(selectedArticles, selectedUser, commentTimelineSvg, beginDate, endDate);
-      else userDailyActivity(repliedArticles, selectedUser, commentTimelineSvg, beginDate, endDate);
+      const sortedUs = [];
+      newUserAxisValues.forEach((e) => {
+        const usr = us.find(u => u.id === e);
+        if (usr) sortedUs.push(usr);
+      });
+      if (selectedArticles.length > 0) userDailyActivity(selectedArticles, sortedUs, commentTimelineSvg, beginDate, endDate);
+      else userDailyActivity(repliedArticles, sortedUs, commentTimelineSvg, beginDate, endDate);
       console.log('tickclick');
       // updateArticleMatrix(repliedArticles);
     };
