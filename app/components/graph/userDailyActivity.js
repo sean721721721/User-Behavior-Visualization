@@ -109,32 +109,38 @@ export default function userDailyActivity(data, user, svg, begin, end) {
       .attr('opacity', 1);
     fixedSvg.selectAll(`.pointer.articleID_${articleId}`)
       .selectAll('rect')
+      .transition()
+      .duration(1000)
       .attr('width', isClicked ? 20 + userScale.range()[1] : 20);
     console.log(article);
-    const postYear = new Date(article.date).getFullYear();
-    const filteredMessages = article.messages.filter(e => userID.includes(e.push_userid));
-    fixedSvg.selectAll()
-      .data(filteredMessages)
-      .enter()
-      .append('rect')
-      .attr('class', 'commentTime')
-      .attr('y', (d, index) => {
-        const date = dateFormat(d);
-        const commentTime = new Date(new Date(date).setFullYear(postYear));
-        return timeScale(commentTime);
-      })
-      .attr('opacity', (d, index) => {
-        const date = dateFormat(d);
-        const commentTime = new Date(new Date(date).setFullYear(postYear));
-        return timeScale(commentTime) < 500 ? 1 : 0;
-      })
-      .attr('x', d => userScale(d.push_userid))
-      .attr('height', 2)
-      .attr('width', userScale.bandwidth())
-      .style('fill', d => commentTypeColor(d.push_tag))
-      .on('mouseover', d => mouseover(article.article_id, d))
-      .on('mouseout', d => mouseout(d, article.article_id));
-    if (!isClicked) {
+    if (isClicked) {
+      const postYear = new Date(article.date).getFullYear();
+      const filteredMessages = article.messages.filter(e => userID.includes(e.push_userid));
+      fixedSvg.selectAll()
+        .data(filteredMessages)
+        .enter()
+        .append('rect')
+        .attr('class', 'commentTime')
+        .attr('x', d => userScale(d.push_userid))
+        .attr('height', 2)
+        .attr('width', userScale.bandwidth())
+        .style('fill', d => commentTypeColor(d.push_tag))
+        .attr('opacity', (d, index) => {
+          const date = dateFormat(d);
+          const commentTime = new Date(new Date(date).setFullYear(postYear));
+          return timeScale(commentTime) < 500 ? 1 : 0;
+        })
+        .attr('y', timeScale(new Date(article.date)))
+        .transition()
+        .duration(1000)
+        .attr('y', (d, index) => {
+          const date = dateFormat(d);
+          const commentTime = new Date(new Date(date).setFullYear(postYear));
+          return timeScale(commentTime);
+        })
+        .on('mouseover', d => mouseover(article.article_id, d))
+        .on('mouseout', d => mouseout(d, article.article_id));
+    } else {
       fixedSvg.selectAll('.commentTime').remove();
     }
   };
