@@ -403,7 +403,7 @@ export default function userDailyActivity(data, user, svg, begin, end) {
           }
         });
         const includesUser2 = [];
-        sortedArticles[i].messages.forEach((mes) => {
+        sortedArticles[j].messages.forEach((mes) => {
           if (userID.includes(mes.push_userid)) {
             if (!includesUser2.includes(mes.push_userid)) {
               includesUser2.push(mes.push_userid);
@@ -419,7 +419,7 @@ export default function userDailyActivity(data, user, svg, begin, end) {
           .attr('id', `${articleId1}_${articleId2}`)
           .attr('d', line([
             { x: pointerOffset(includesUser1.length) - 20, y: y1 },
-            { x: curveOffset(y2 - y1), y: (y1 + y2) / 2 },
+            { x: Math.min(pointerOffset(includesUser1.length) - 20, pointerOffset(includesUser2.length) - 20) - 20, y: (y1 + y2) / 2 },
             { x: pointerOffset(includesUser2.length) - 20, y: y2 },
           ]))
           .attr('stroke', 'gray')
@@ -760,7 +760,7 @@ export default function userDailyActivity(data, user, svg, begin, end) {
             .attr('visibility', 'visible')
             .attr('d', line([
               { x: pointerOffset(includesUser1.length) - 20, y: y1 },
-              { x: curveOffset(y2 - y1), y: (y1 + y2) / 2 },
+              { x: Math.min(pointerOffset(includesUser1.length) - 20, pointerOffset(includesUser2.length) - 20) - 20, y: (y1 + y2) / 2 },
               { x: pointerOffset(includesUser2.length) - 20, y: y2 },
             ]));
         }
