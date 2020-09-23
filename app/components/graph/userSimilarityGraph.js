@@ -378,7 +378,7 @@ export default function userSimilarityGraph(data, svg, user, articles) {
       });
       console.log('sorted articles', articles);
       console.log('bothRepliedArticles', bothRepliedArticles);
-      updateArticleMatrix(bothRepliedArticles);
+      // updateArticleMatrix(bothRepliedArticles);
     };
 
     const tickClick = (d) => {
@@ -649,9 +649,9 @@ export default function userSimilarityGraph(data, svg, user, articles) {
           .attr('width', fixedX2 - fixedX1);
         console.log(s);
         // setting all co-cluster rect stroke-width to 1
-        d3.select('.radialGroup').selectAll('rect')
-          .attr('stroke', 'slategray')
-          .attr('stroke-width', '0.3px');
+        // d3.select('.radialGroup').selectAll('rect')
+        //   .attr('stroke', 'slategray')
+        //   .attr('stroke-width', '0.3px');
         // highlight selected grid of heatmap
         d3.select('.brush').select('path')
           .transition()
@@ -911,10 +911,10 @@ export default function userSimilarityGraph(data, svg, user, articles) {
           // contextYScale.domain(articleSortBy(sortType, articlesWithTypeComment));
           const arr = articleSortBy(sortType, articlesWithTypeComment, highlightArticles);
           // updateArticleMatrix(arr, communityIndex, communityI);
-          updateArticleMatrix(arr);
+          // updateArticleMatrix(arr);
           // drawArticleTree(articleTree);
         });
-      drawArticleTree(articleTree);
+      // drawArticleTree(articleTree);
 
       context.select('.brush').remove();
       context.select('.axis').remove();

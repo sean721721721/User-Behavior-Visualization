@@ -415,6 +415,9 @@ path:hover {
     display: grid;
     background-color: white;
     border: 2px solid white;
+    border-top: 1px solid slategray;
+    border-right: 1px solid slategray;
+    border-top-right-radius: 5px;
     border-bottom-left-radius: 5px;
     grid-column: nwcol1 / nwcol2;
     grid-row: nwrow2 / nwrow3;

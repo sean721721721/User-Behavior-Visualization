@@ -130,6 +130,8 @@ export default function userDailyActivity(data, user, svg, begin, end) {
           const commentTime = new Date(new Date(date).setFullYear(postYear));
           return timeScale(commentTime) < 500 ? 1 : 0;
         })
+        .on('mouseover', d => mouseover(article, d))
+        .on('mouseout', d => mouseout(d, article.article_id))
         .attr('y', timeScale(new Date(article.date)))
         .transition()
         .duration(1000)
@@ -137,25 +139,34 @@ export default function userDailyActivity(data, user, svg, begin, end) {
           const date = dateFormat(d);
           const commentTime = new Date(new Date(date).setFullYear(postYear));
           return timeScale(commentTime);
-        })
-        .on('mouseover', d => mouseover(article.article_id, d))
-        .on('mouseout', d => mouseout(d, article.article_id));
+        });
     } else {
       fixedSvg.selectAll('.commentTime').remove();
     }
   };
 
   const mouseover = (d, e) => {
-    console.log(d, e);
+    console.log(d, e, isClicked);
     if (isClicked) {
       if (d.article_id === isClicked) {
-        const date = new Date(d.date);
-        Tooltip
-          .style('opacity', 1)
-          .html(`<p style="color: white;">Title: ${d.article_title}<br>
-            Date: ${date.getFullYear()}/${date.getMonth() + 1}/${date.getDate()} ${date.getHours()}:${date.getMinutes()}</p>`)
-          .style('left', `${d3.event.pageX + 25}px`)
-          .style('top', `${d3.event.pageY + 25}px`);
+        if (Array.isArray(e)) {
+          const date = new Date(d.date);
+          Tooltip
+            .style('opacity', 1)
+            .html(`<p style="color: white;">Title: ${d.article_title}<br>
+              Date: ${date.getFullYear()}/${date.getMonth() + 1}/${date.getDate()} ${date.getHours()}:${date.getMinutes()}</p>`)
+            .style('left', `${d3.event.pageX + 25}px`)
+            .style('top', `${d3.event.pageY + 25}px`);
+        } else {
+          Tooltip
+            .style('opacity', 1)
+            .html(`<p style="color: white;">${e.push_tag} ${e.push_userid}: ${e.push_content} ${e.push_ipdatetime}</p>`)
+            .style('left', `${d3.event.pageX + 25}px`)
+            .style('top', `${d3.event.pageY + 25}px`);
+          d3.select(this)
+            .style('stroke', 'black')
+            .style('opacity', 1);
+        }
       }
       if (d !== isClicked) return;
     }
@@ -295,21 +306,101 @@ export default function userDailyActivity(data, user, svg, begin, end) {
   //   .on('mouseout', mouseout);
   const fixedSvg = svg.append('g')
     .attr('transform', 'translate(100, 100)');
-  for (let i = 0; i < userID.length; i += 1) {
-    fixedSvg.append('g')
-      .selectAll()
-      .data(userID)
-      .enter()
-      .append('rect')
-      .attr('y', 0)
-      .attr('x', d => userScale(d))
-      .attr('height', timeScale.range()[1])
-      .attr('width', userScale.bandwidth())
-      .attr('stroke', 'black')
-      .attr('stroke-width', '0.3px')
-      .style('fill', (d, index) => (index % 2 ? 'white' : 'gainsboro'));
+  // for (let i = 0; i < userID.length; i += 1) {
+  //   fixedSvg.append('g')
+  //     .selectAll()
+  //     .data(userID)
+  //     .enter()
+  //     .append('rect')
+  //     .attr('y', 0)
+  //     .attr('x', d => userScale(d))
+  //     .attr('height', timeScale.range()[1])
+  //     .attr('width', userScale.bandwidth())
+  //     .attr('stroke', 'black')
+  //     .attr('stroke-width', '0.3px')
+  //     .style('fill', (d, index) => (index % 2 ? 'white' : 'gainsboro'));
+  // }
+
+  // add gray area for off day
+  for (let i = timeScale.domain()[0]; i < timeScale.domain()[1]; i = new Date(i).setDate(new Date(i).getDate() + 1)) {
+    if (new Date(i).getDay() > 5 || new Date(i).getDay() < 1) {
+      fixedSvg.selectAll()
+        .data([i])
+        .enter()
+        .append('rect')
+        .attr('class', 'offday')
+        .attr('x', 0)
+        .attr('y', d => timeScale(new Date(d)))
+        .attr('fill', 'lightgray')
+        .attr('width', userScale.range()[1])
+        .attr('height', (d) => {
+          const nextDate = new Date(d);
+          const temp = new Date(d);
+          nextDate.setDate(nextDate.getDate() + 1);
+          return timeScale(nextDate) - timeScale(temp);
+        });
+    } else {
+      fixedSvg.selectAll()
+        .data([new Date(new Date(new Date(i).setHours(0)).setMinutes(0)).setSeconds(0)])
+        .enter()
+        .append('rect')
+        .attr('class', 'beforWork')
+        .attr('x', 0)
+        .attr('y', d => timeScale(new Date(d)))
+        .attr('fill', 'lightgray')
+        .attr('width', userScale.range()[1])
+        .attr('height', (d) => {
+          const workHour = new Date(d);
+          const temp = new Date(d);
+          workHour.setHours(workHour.getHours() + 9);
+          return timeScale(workHour) - timeScale(temp);
+        });
+      fixedSvg.selectAll()
+        .data([new Date(new Date(new Date(i).setHours(18)).setMinutes(0)).setSeconds(0)])
+        .enter()
+        .append('rect')
+        .attr('class', 'afterWork')
+        .attr('x', 0)
+        .attr('y', d => timeScale(new Date(d)))
+        .attr('fill', 'lightgray')
+        .attr('width', userScale.range()[1])
+        .attr('height', (d) => {
+          const midnight = new Date(d);
+          const temp = new Date(d);
+          midnight.setHours(midnight.getHours() + 6);
+          return timeScale(midnight) - timeScale(temp);
+        });
+    }
+  }
+  // add repost link
+  const sortedArticles = data.sort((a, b) => new Date(a.date) - new Date(b.date))
+    .filter(art => art.messages.some(mes => userID.includes(mes.push_userid)));
+  const curveOffset = d3.scaleLinear().domain([0, 610]).range([-30, -100]);
+  for (let i = 0; i < sortedArticles.length; i += 1) {
+    for (let j = i + 1; j < sortedArticles.length; j += 1) {
+      if (sortedArticles[i].article_title === sortedArticles[j].article_title.substring(4)) {
+        const y1 = timeScale(new Date(sortedArticles[i].date));
+        const y2 = timeScale(new Date(sortedArticles[j].date));
+        const articleId1 = sortedArticles[i].article_id.replace(/\./gi, '');
+        const articleId2 = sortedArticles[j].article_id.replace(/\./gi, '');
+        const line = d3.line()
+          .curve(d3.curveBasis)
+          .x(d => d.x)
+          .y(d => d.y);
+        fixedSvg.append('path')
+          .attr('class', `repostLink ${articleId1}`)
+          .attr('id', `${articleId1}_${articleId2}`)
+          .attr('d', line([{ x: -20, y: y1 }, { x: curveOffset(y2 - y1), y: (y1 + y2) / 2 }, { x: -20, y: y2 }]))
+          .attr('stroke', 'gray')
+          .attr('stroke-width', '4px')
+          .attr('fill', 'none')
+          .on('mouseover', () => repostLinkMouseOver([sortedArticles[i].article_id, sortedArticles[j].article_id]))
+          .on('mouseout', mouseout);
+      }
+    }
   }
 
+  // add article pointers
   for (let i = 0; i < data.length; i += 1) {
     if (data[i].messages.some(mes => userID.includes(mes.push_userid))) {
       const articleId = data[i].article_id.replace(/\./gi, '');
@@ -388,7 +479,7 @@ export default function userDailyActivity(data, user, svg, begin, end) {
 
   fixedSvg.append('g')
     .attr('class', 'xAxis')
-    .call(d3.axisTop(userScale))
+    .call(d3.axisTop(userScale).tickSizeInner([-h]))
     .selectAll('text')
     .style('text-anchor', 'start')
     .attr('font-size', 14)
@@ -404,33 +495,8 @@ export default function userDailyActivity(data, user, svg, begin, end) {
       .tickFormat(d3.timeFormat('%m/%d'))
       .tickSizeInner([20]));
 
-  fixedSvg.selectAll('path').remove();
+  // fixedSvg.selectAll('path').remove();
 
-  const sortedArticles = data.sort((a, b) => new Date(a.date) - new Date(b.date));
-  const curveOffset = d3.scaleLinear().domain([0, 610]).range([-30, -100]);
-  for (let i = 0; i < sortedArticles.length; i += 1) {
-    for (let j = i + 1; j < sortedArticles.length; j += 1) {
-      if (sortedArticles[i].article_title === sortedArticles[j].article_title.substring(4)) {
-        const y1 = timeScale(new Date(sortedArticles[i].date));
-        const y2 = timeScale(new Date(sortedArticles[j].date));
-        const articleId1 = sortedArticles[i].article_id.replace(/\./gi, '');
-        const articleId2 = sortedArticles[j].article_id.replace(/\./gi, '');
-        const line = d3.line()
-          .curve(d3.curveBasis)
-          .x(d => d.x)
-          .y(d => d.y);
-        fixedSvg.append('path')
-          .attr('class', `repostLink ${articleId1}`)
-          .attr('id', `${articleId1}_${articleId2}`)
-          .attr('d', line([{ x: -20, y: y1 }, { x: curveOffset(y2 - y1), y: (y1 + y2) / 2 }, { x: -20, y: y2 }]))
-          .attr('stroke', 'gray')
-          .attr('stroke-width', '4px')
-          .attr('fill', 'none')
-          .on('mouseover', () => repostLinkMouseOver([sortedArticles[i].article_id, sortedArticles[j].article_id]))
-          .on('mouseout', mouseout);
-      }
-    }
-  }
   // fixedSvg.append('g')
   //   .attr('transform', () => {
   //     if (i === 0) return 'translate(10, 100)';
@@ -578,7 +644,43 @@ export default function userDailyActivity(data, user, svg, begin, end) {
           return timeScale(commentTime) < h && timeScale(commentTime) > 0 ? 1 : 0;
         });
     }
-    fixedSvg.selectAll('path').remove();
+    // update offday rect
+    fixedSvg.selectAll('.offday')
+      .attr('y', d => (timeScale(new Date(d)) > 0 ? timeScale(new Date(d)) : 0))
+      .attr('height', (d) => {
+        const nextDate = new Date(d);
+        const tempDate = new Date(d);
+        nextDate.setDate(nextDate.getDate() + 1);
+        const tempDatePos = timeScale(tempDate) > 0 ? timeScale(tempDate) : 0;
+        const nextDatePos = timeScale(nextDate) < h ? timeScale(nextDate) : h;
+        return nextDatePos - tempDatePos;
+      })
+      .attr('opacity', d => (timeScale(new Date(d)) < h ? 1 : 0));
+    // update beforeWorl rect
+    fixedSvg.selectAll('.beforWork')
+      .attr('y', d => (timeScale(new Date(d)) > 0 ? timeScale(new Date(d)) : 0))
+      .attr('height', (d) => {
+        const workHour = new Date(d);
+        const tempDate = new Date(d);
+        workHour.setHours(workHour.getHours() + 9);
+        const tempDatePos = timeScale(tempDate) > 0 ? timeScale(tempDate) : 0;
+        const workHourPos = timeScale(workHour) < h ? timeScale(workHour) : h;
+        return workHourPos - tempDatePos;
+      })
+      .attr('opacity', d => (timeScale(new Date(d)) < h ? 1 : 0));
+    // update afterWork rect
+    fixedSvg.selectAll('.afterWork')
+      .attr('y', d => (timeScale(new Date(d)) > 0 ? timeScale(new Date(d)) : 0))
+      .attr('height', (d) => {
+        const workHour = new Date(d);
+        const tempDate = new Date(d);
+        workHour.setHours(workHour.getHours() + 6);
+        const tempDatePos = timeScale(tempDate) > 0 ? timeScale(tempDate) : 0;
+        const workHourPos = timeScale(workHour) < h ? timeScale(workHour) : h;
+        return workHourPos - tempDatePos;
+      })
+      .attr('opacity', d => (timeScale(new Date(d)) < h ? 1 : 0));
+    // fixedSvg.selectAll('path').remove();
     // const updateYScale = d3.scaleTime().domain([new Date(date1), new Date(date2)]).range([0, h]);
     const updateXScale = d3.scaleBand().domain(userID).range([0, userScaleRange]);
     // const curveOffset = d3.scaleLinear().domain([0, 610]).range([-30, -100]);
@@ -586,6 +688,8 @@ export default function userDailyActivity(data, user, svg, begin, end) {
       return new Date(date1) < new Date(e.date) && new Date(date2) > new Date(e.date);
     });
     console.log(filteredSortedArticles);
+    // update reposting link
+    fixedSvg.selectAll('path.repostLink').attr('visibility', 'hidden');
     for (let i = 0; i < filteredSortedArticles.length; i += 1) {
       for (let j = i + 1; j < filteredSortedArticles.length; j += 1) {
         if (filteredSortedArticles[i].article_title === filteredSortedArticles[j].article_title.substring(4)) {
@@ -597,16 +701,9 @@ export default function userDailyActivity(data, user, svg, begin, end) {
             .curve(d3.curveBasis)
             .x(d => d.x)
             .y(d => d.y);
-          fixedSvg.append('path')
-            .attr('class', `repostLink ${articleId1}`)
-            .attr('id', `${articleId1}_${articleId2}`)
+          fixedSvg.select(`path#${articleId1}_${articleId2}`)
+            .attr('visibility', 'visible')
             .attr('d', line([{ x: -20, y: y1 }, { x: curveOffset(y2 - y1), y: (y1 + y2) / 2 }, { x: -20, y: y2 }]))
-            .attr('stroke', 'gray')
-            .attr('stroke-width', '4px')
-            .attr('fill', 'none')
-            .attr('opacity', isClicked ? 0 : 1)
-            .on('mouseover', () => repostLinkMouseOver([filteredSortedArticles[i].article_id, filteredSortedArticles[j].article_id]))
-            .on('mouseout', mouseout);
         }
       }
     }
@@ -721,9 +818,9 @@ export default function userDailyActivity(data, user, svg, begin, end) {
       return new Date(beginDateMinusTwo) < new Date(e.date) && new Date(date2) > new Date(e.date);
     });
 
-    fixedSvg.select('.xAxis')
-      .call(d3.axisTop(updateXScale))
-      .attr('stroke-width', '0.5px');
+    // fixedSvg.select('.xAxis')
+    //   .call(d3.axisTop(updateXScale).tickSizeInner([-h]))
+    //   .attr('stroke-width', '0.5px');
     const aDay = 60 * 60 * 24 * 1000;
     if ((date2 - date1) / aDay <= 1) {
       fixedSvg.select('.yAxis')
