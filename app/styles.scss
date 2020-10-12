@@ -479,7 +479,7 @@ path:hover {
         border-radius: 5px;
         // border-left: 0px solid gray;
         // border-top: 0px solid gray;
-        grid-row: acrow1 / acrow2;
+        grid-row: acrow1 / acrowend;
         grid-template-rows: [hmrow1] 1fr [hmrow2] 9fr [hmrowend];
     }
 }
@@ -538,7 +538,7 @@ path:hover {
     border: 2px solid white;
     border-radius: 5px;
     grid-column: accol1 / accol3;
-    grid-row: acrow3 / acrowend;
+    // grid-row: acrow3 / acrowend;
 }
 
 // .wordTree {

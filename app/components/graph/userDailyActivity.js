@@ -115,7 +115,7 @@ export default function userDailyActivity(data, user, svg, begin, end) {
         }
       }
     });
-    const pointerWidth = d3.scaleLinear().domain([1, userID.length]).range([5, 60]);
+    const pointerWidth = d3.scaleLinear().domain([1, userID.length]).range([5, 80]);
     fixedSvg.selectAll(`.pointer.articleID_${articleId}`)
       .selectAll('rect')
       .transition()
@@ -137,7 +137,7 @@ export default function userDailyActivity(data, user, svg, begin, end) {
         .attr('opacity', (d, index) => {
           const date = dateFormat(d);
           const commentTime = new Date(new Date(date).setFullYear(postYear));
-          return timeScale(commentTime) < 500 ? 1 : 0;
+          return timeScale(commentTime) < h ? 1 : 0;
         })
         .on('mouseover', d => mouseover(article, d))
         .on('mouseout', d => mouseout(d, article.article_id))
@@ -165,7 +165,7 @@ export default function userDailyActivity(data, user, svg, begin, end) {
             .html(`<p style="color: white;">Title: ${d.article_title}<br>
               Date: ${date.getFullYear()}/${date.getMonth() + 1}/${date.getDate()} ${date.getHours()}:${date.getMinutes()}</p>`)
             .style('left', `${d3.event.pageX + 25}px`)
-            .style('top', `${d3.event.pageY + 25}px`);
+            .style('top', `${d3.event.pageY - 100}px`);
         } else {
           Tooltip
             .style('opacity', 1)
@@ -188,7 +188,7 @@ export default function userDailyActivity(data, user, svg, begin, end) {
         .html(`<p style="color: white;">Title: ${title}<br>
           Date: ${date.getFullYear()}/${date.getMonth() + 1}/${date.getDate()} ${date.getHours()}:${date.getMinutes()}</p>`)
         .style('left', `${d3.event.pageX + 25}px`)
-        .style('top', `${d3.event.pageY + 25}px`);
+        .style('top', `${d3.event.pageY - 100}px`);
       fixedSvg.selectAll('.repostLink')
         .attr('opacity', '0');
       fixedSvg.selectAll('.pointer')
@@ -381,9 +381,28 @@ export default function userDailyActivity(data, user, svg, begin, end) {
         });
     }
   }
+  // axis
+  fixedSvg.append('g')
+    .attr('class', 'xAxis')
+    .call(d3.axisTop(userScale).tickSizeInner([-h]))
+    .selectAll('text')
+    .style('text-anchor', 'start')
+    .attr('font-size', 14)
+    .attr('fill', d => color[user.find(e => e.id === d).community])
+    .attr('dx', '0.8em')
+    .attr('dy', '0.5em')
+    .attr('transform', 'rotate(-90)');
+
+  fixedSvg.append('g')
+    .attr('class', 'yAxis')
+    .call(d3.axisLeft(timeScale)
+      .ticks(d3.timeDay.every(1))
+      .tickFormat(d3.timeFormat('%m/%d'))
+      .tickSizeInner([40]));
+
   // add repost link
   const pointerScale = d3.scaleLinear().domain([1, userID.length]).range([3, 10]);
-  const pointerOffset = d3.scaleLinear().domain([1, userID.length]).range([15, -40]);
+  const pointerOffset = d3.scaleLinear().domain([1, userID.length]).range([15, -60]);
   const sortedArticles = data.sort((a, b) => new Date(a.date) - new Date(b.date))
     .filter(art => art.messages.some(mes => userID.includes(mes.push_userid)));
   const curveOffset = d3.scaleLinear().domain([0, 610]).range([-30, -100]);
@@ -476,6 +495,7 @@ export default function userDailyActivity(data, user, svg, begin, end) {
             })
             .attr('cx', pointerOffset(includesUser.length))
             .attr('r', pointerScale(includesUser.length))
+            .attr('r', 5)
             .attr('stroke', 'black')
             .attr('stroke-width', _d => (_d.article_title[0] !== 'R' ? '2px' : '0px'))
             .style('fill', color[0])
@@ -493,18 +513,18 @@ export default function userDailyActivity(data, user, svg, begin, end) {
         .enter()
         .append('circle')
         .attr('cy', (d, index) => {
-          // const date = dateFormat(d);
-          // const commentTime = new Date(new Date(date).setFullYear(postYear));
-          // return timeScale(commentTime);
-          const postTime = new Date(data[i].date);
-          return timeScale(postTime);
+          const date = dateFormat(d);
+          const commentTime = new Date(new Date(date).setFullYear(postYear));
+          return timeScale(commentTime);
+          // const postTime = new Date(data[i].date);
+          // return timeScale(postTime);
         })
         .attr('opacity', (d, index) => {
-          // const date = dateFormat(d);
-          // const commentTime = new Date(new Date(date).setFullYear(postYear));
-          // return timeScale(commentTime) < 500 ? 1 : 0;
-          const postTime = new Date(data[i].date);
-          return timeScale(postTime);
+          const date = dateFormat(d);
+          const commentTime = new Date(new Date(date).setFullYear(postYear));
+          return timeScale(commentTime) < h ? 1 : 0;
+          // const postTime = new Date(data[i].date);
+          // return timeScale(postTime);
         })
         .attr('cx', d => userScale(d.push_userid) + userScale.bandwidth() / 2)
         .attr('r', 4)
@@ -515,24 +535,6 @@ export default function userDailyActivity(data, user, svg, begin, end) {
         .on('click', click);
     }
   }
-
-  fixedSvg.append('g')
-    .attr('class', 'xAxis')
-    .call(d3.axisTop(userScale).tickSizeInner([-h]))
-    .selectAll('text')
-    .style('text-anchor', 'start')
-    .attr('font-size', 14)
-    .attr('fill', d => color[user.find(e => e.id === d).community])
-    .attr('dx', '0.8em')
-    .attr('dy', '1em')
-    .attr('transform', 'rotate(-90)');
-
-  fixedSvg.append('g')
-    .attr('class', 'yAxis')
-    .call(d3.axisLeft(timeScale)
-      .ticks(d3.timeDay.every(1))
-      .tickFormat(d3.timeFormat('%m/%d'))
-      .tickSizeInner([40]));
 
   // fixedSvg.selectAll('path').remove();
 
@@ -797,18 +799,18 @@ export default function userDailyActivity(data, user, svg, begin, end) {
                   .attr('visibility', 'visible')
                   .selectAll('circle')
                   .attr('cy', (e, i) => {
-                    // const date = dateFormat(e);
-                    // const commentTime = new Date(new Date(date).setFullYear(postYear));
-                    // return updateYScale(commentTime);
-                    const postDate = new Date(art.date);
-                    return timeScale(postDate);
+                    const date = dateFormat(e);
+                    const commentTime = new Date(new Date(date).setFullYear(postYear));
+                    return timeScale(commentTime);
+                    // const postDate = new Date(art.date);
+                    // return timeScale(postDate);
                   })
                   .attr('opacity', (e, i) => {
-                    // const date = dateFormat(e);
-                    // const commentTime = new Date(new Date(date).setFullYear(postYear));
-                    // return updateYScale(commentTime) < 500 && updateYScale(commentTime) > 0 ? 1 : 0;
-                    const postDate = new Date(art.date);
-                    return timeScale(postDate) < h && timeScale(postDate) > 0 ? 1 : 0;
+                    const date = dateFormat(e);
+                    const commentTime = new Date(new Date(date).setFullYear(postYear));
+                    return timeScale(commentTime) < h && timeScale(commentTime) > 0 ? 1 : 0;
+                    // const postDate = new Date(art.date);
+                    // return timeScale(postDate) < h && timeScale(postDate) > 0 ? 1 : 0;
                   });
               } else {
                 d3.select(nodes[index])
@@ -851,18 +853,18 @@ export default function userDailyActivity(data, user, svg, begin, end) {
               .attr('visibility', 'visible')
               .selectAll('circle')
               .attr('cy', (_d, _index) => {
-                // const date = dateFormat(_d);
-                // const commentTime = new Date(new Date(date).setFullYear(postYear));
-                // return timeScale(commentTime);
-                const postDate = new Date(article.date);
-                return timeScale(postDate);
+                const date = dateFormat(_d);
+                const commentTime = new Date(new Date(date).setFullYear(postYear));
+                return timeScale(commentTime);
+                // const postDate = new Date(article.date);
+                // return timeScale(postDate);
               })
               .attr('opacity', (_d, _index) => {
-                // const date = dateFormat(_d);
-                // const commentTime = new Date(new Date(date).setFullYear(postYear));
-                // return timeScale(commentTime) < 500 && timeScale(commentTime) > 0 ? 1 : 0;
-                const postDate = new Date(article.date);
-                return timeScale(postDate) < h && timeScale(postDate) > 0 ? 1 : 0;
+                const date = dateFormat(_d);
+                const commentTime = new Date(new Date(date).setFullYear(postYear));
+                return timeScale(commentTime) < h && timeScale(commentTime) > 0 ? 1 : 0;
+                // const postDate = new Date(article.date);
+                // return timeScale(postDate) < h && timeScale(postDate) > 0 ? 1 : 0;
               });
           } else {
             d3.select(nodes[index])

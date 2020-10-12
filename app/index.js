@@ -1,6 +1,7 @@
 // @flow
 import React from 'react';
 import { render } from 'react-dom';
+import Favicon from 'react-favicon';
 import middleware from './middlewares/sagamiddleware';
 import rootSaga from './middlewares/sagaeffect';
 import Route from './components/route';
@@ -11,5 +12,10 @@ import 'bootstrap/dist/css/bootstrap.min.css';
 const { sagaMiddleware } = middleware;
 // then run the saga
 sagaMiddleware.run(rootSaga);
-
-render(<Route />, document.getElementById('app'));
+// console.log(PUBLIC_URL);
+render(
+  <div>
+    {/* <Favicon url="https://notorious-2019.com/favicon.ico" /> */}
+    <Route />
+  </div>, document.getElementById('app'),
+);

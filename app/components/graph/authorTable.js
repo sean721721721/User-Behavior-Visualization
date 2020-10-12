@@ -231,7 +231,8 @@ export default function AuthorTable(nodes, div, $this, callback) {
       const total_num = node_data.length;
       const link_num = link_data.length;
       const tolerance = 1e-6;
-      const loopMax = 1;
+      const loopMax = 100;
+      // const loopMax = 1;
       for (let k = 0; k < loopMax; k += 1) {
         const newPageRank = [];
         for (let i = 0; i < total_num; i += 1) {

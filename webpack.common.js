@@ -13,6 +13,7 @@ module.exports = {
       template: `${__dirname}/app/index.html`,
       filename: 'index.html',
       inject: 'body',
+      favicon: `${__dirname}/app/favicon.ico`,
     }),
   ],
   output: {

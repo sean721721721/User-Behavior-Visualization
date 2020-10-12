@@ -3,6 +3,7 @@ import React from 'react';
 import {
   BrowserRouter as Router, Route, Link, Redirect, withRouter,
 } from 'react-router-dom';
+import Favicon from 'react-favicon';
 // import LoginTab from './Login';
 import Grid from './grid';
 import Input from './Input';
@@ -201,6 +202,7 @@ function AuthExample() {
             <Link to="/ptttool">Protected Page</Link>
           </li>
         </ul> */}
+        {/* <Favicon url="../favicon.ico" /> */}
         <Redirect to={from} />
         <Route path="/login" component={LoginTab} />
         <PrivateRoute path="/ptttool" component={Protected} />
