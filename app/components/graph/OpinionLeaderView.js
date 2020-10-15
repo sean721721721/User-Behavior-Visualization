@@ -379,7 +379,7 @@ class OpinionLeaderView extends React.Component {
     if (cellData.children) {
       // console.log(cellData);
       // if (data.$this.state.hover !== 1) {
-      console.log('do OPView rendering');
+      // console.log('do OPView rendering');
       treemap(cellData.children,
         beforeThisDate, articleCellSvg, cellForceSimulation,
         totalAuthorInfluence, data.$this, optionsWord, handleSubmit);

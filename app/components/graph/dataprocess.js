@@ -320,7 +320,7 @@ function matrixReorderingByCommunity(mat, origMat, com, userAxis, us) {
       }
     }
   }
-  console.log('community permutation for matrix', perm);
+//   console.log('community permutation for matrix', perm);
   const tempUser = userAxis.slice();
   for (let j = 0; j < us.length; j += 1) {
     userAxis[j] = tempUser[perm[j]];
@@ -390,7 +390,7 @@ function communityInnerMatrixReordering(mat, origMat, userAxis, us, communityDat
     for (let i = com.index; i < com.index + com.num; i += 1) {
       onlyCommunity.push(mat[i].slice(com.index, com.index + com.num));
     }
-    console.log(onlyCommunity);
+    // console.log(onlyCommunity);
     const gra = reorder.mat2graph(onlyCommunity);
     // const prePerm = reorder.spectral_order(gra);
     const prePerm = reorder.pca_order(onlyCommunity);
@@ -408,7 +408,7 @@ function communityInnerMatrixReordering(mat, origMat, userAxis, us, communityDat
     for (let j = 0; j < us.length; j += 1) {
       userAxis[j] = tempUser[perm[j]];
     }
-    console.log(userAxis);
+    // console.log(userAxis);
     copyMat = reorder.permute(copyMat, perm);
     copyMat = reorder.transpose(copyMat);
     copyMat = reorder.permute(copyMat, perm);

@@ -33,7 +33,7 @@ class Page extends React.Component {
     this.setState(() => ({
       type: str,
     }));
-    console.log(e);
+    // console.log(e);
     onSubmit(e);
   };
 

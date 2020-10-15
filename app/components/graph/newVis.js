@@ -15099,7 +15099,7 @@ class Graph extends Component {
     ];
 
     const a = communityInnerMatrixReordering(m1, gropuIndex);
-    console.log(a);
+    // console.log(a);
 
 
     const tMat = [
@@ -47855,7 +47855,7 @@ class Graph extends Component {
     permuted = reorder.transpose(permuted);
     permuted = reorder.permute(permuted, perms);
     permuted = reorder.transpose(permuted);
-    console.log(permuted);
+    // console.log(permuted);
     
     let mat = [
       [1, 1, 1, 0, 0, 0],
@@ -47953,10 +47953,37 @@ class Graph extends Component {
             <div className="termMapFilter">
               <div style={{ marginLeft: '10px', alignSelf: 'center', fontSize: 'x-small' }}>
                 <div style={{ marginLeft: '10px' }}>
-                  <input checked type="radio" id="union" name="set" value="union" />
-                  <label htmlFor="union" style={{ marginLeft: '10px' }}>union</label>
-                  <input type="radio" id="intersection" name="set" value="intersection" />
-                  <label htmlFor="intersection" style={{ marginLeft: '10px' }}>intersection</label>
+                  <fieldset>
+                    <label htmlFor="union" style={{ marginLeft: '10px' }}>
+                      union:
+                      <input
+                        checked
+                        type="radio"
+                        id="union"
+                        name="set"
+                        value="union"
+                      />
+                    </label>
+                    <label htmlFor="intersection" style={{ marginLeft: '10px' }}>
+                      intersection:
+                      <input
+                        type="radio"
+                        id="intersection"
+                        name="set"
+                        value="intersection"
+                      />
+                    </label>
+                  </fieldset>
+                  <label htmlFor="intersection" style={{ marginLeft: '10px' }}>
+                      full calculate:
+                    <input
+                      chekced
+                      type="checkbox"
+                      id="quickTest"
+                      name="pageRank"
+                      value="quickTest"
+                    />
+                  </label>
                 </div>
               </div>
             </div>

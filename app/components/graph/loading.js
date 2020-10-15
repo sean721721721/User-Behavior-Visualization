@@ -9,6 +9,7 @@
 import * as d3 from 'd3';
 
 export default function loading(temp, total, svg) {
+  console.log(temp, total, svg);
   const h = parseFloat(d3.select('#timeLine').style('height'));
   const w = parseFloat(d3.select('#timeLine').style('width'));
   const color = d3.schemeTableau10;
@@ -33,13 +34,16 @@ export default function loading(temp, total, svg) {
       .attr('x', w / 2 - 100)
       .attr('y', 50)
       .attr('height', 10)
-      .transition()
-      .duration(1000)
-      .attr('width', 200 * (temp / total));
+      // .transition()
+      // .duration(1000)
+      .attr('width', () => {
+        console.log(temp);
+        return 200 * (temp / total);
+      });
     svg.selectAll('text')
       .text(`${Math.round(100 * (temp / total))} %`)
-      .transition()
-      .duration(1000)
+      // .transition()
+      // .duration(1000)
       .attr('x', (w / 2 - 100) + 200 * (temp / total) + 10)
       .attr('y', 60);
   }

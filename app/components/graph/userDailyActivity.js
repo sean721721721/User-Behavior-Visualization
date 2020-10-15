@@ -13,8 +13,6 @@ import * as slider from 'd3-simple-slider';
 import AuthorTable from './authorTable';
 
 export default function userDailyActivity(data, user, svg, begin, end) {
-  console.log(user);
-  console.log(data);
   // console.log(begin);
   svg.selectAll('*').remove();
   // const h = parseFloat(d3.select('.commentTimeline').style('height'));
@@ -25,7 +23,7 @@ export default function userDailyActivity(data, user, svg, begin, end) {
   original_date1.setHours(0, 0, 0);
   let original_date2 = new Date(end);
   original_date2.setHours(23, 59, 59);
-  console.log(original_date1, original_date2);
+  // console.log(original_date1, original_date2);
   let filteredArticles = [];
   // Range
   d3.select('div#slider-range').select('svg').remove();
@@ -74,7 +72,7 @@ export default function userDailyActivity(data, user, svg, begin, end) {
     .domain([0, 10]);
   const xScale = getXScale(original_date1, original_date2);
   const timeScale = d3.scaleTime().domain([original_date1, original_date2]).range([0, h]);
-  console.log('height', h);
+  // console.log('height', h);
   const userScaleRange = 400;
   const userID = user.map(e => e.id);
   const userScale = d3.scaleBand().domain(userID).range([0, userScaleRange]);

@@ -19,8 +19,8 @@ import { userDailyActivity } from './userDailyActivity';
 import * as dp from './dataprocess';
 
 export default function userSimilarityGraph(data, svg, user, articles) {
-  console.log(user);
-  console.log(data);
+  // console.log(user);
+  // console.log(data);
   const svgScale = d3.scaleSqrt().domain([1, 200]).range([0.5, 0.1]);
   // const commentTimelineSvg = d3.select('#commentTimeline');
   const commentTimelineSvg = d3.select('#context');
@@ -209,7 +209,7 @@ export default function userSimilarityGraph(data, svg, user, articles) {
       .on('zoom', zoomed));
     const position = svg.append('g').attr('class', 'position');
     const group = position.append('g').attr('class', 'group')
-      .attr('transform', 'translate(-30,-100)');
+      .attr('transform', 'translate(-30, 200)');
     function zoomed() {
       group.attr('transform', d3.event.transform);
     }
@@ -217,7 +217,7 @@ export default function userSimilarityGraph(data, svg, user, articles) {
     // Article Similarity
 
     // console.log(similarity);
-    console.log(user);
+    // console.log(user);
     const [datas, users, similaritys] = dp.filterAlwaysNonSimilarUser(data, user, similarity, simThresh, artThresh);
     console.log('datas:', datas, 'users:', users, 'similaritys:', similaritys);
     // similarity for articles grouping
@@ -232,7 +232,7 @@ export default function userSimilarityGraph(data, svg, user, articles) {
     // const articleIds = filteredArticles.map(e => e.article_id);
     // const articlesCommunity = jLouvainClustering(articleIds, articleSimilarity);
     // const articlesCommunity = articleGroupByTag(articleIds, filteredArticles);
-    console.log('articlesCommunity', articlesCommunity);
+    // console.log('articlesCommunity', articlesCommunity);
 
 
     // articlesOrderByCommunity = articlesOrdering(articles, articlesCommunity);
@@ -261,11 +261,11 @@ export default function userSimilarityGraph(data, svg, user, articles) {
       matrix[i] = matrix[i].map(e => similarityScale(e));
       // matrix[i] = matrix[i].map(e => e * 100);
     }
-    console.log('matrix', matrix);
+    // console.log('matrix', matrix);
     const [permuted_mat, permuted_origMat] = dp.matrixReordering(
       matrix, origMatrix, newUserAxisValues, users,
     );
-    console.log('permuted_mat, permuted_origMat: ', permuted_mat, permuted_origMat);
+    // console.log('permuted_mat, permuted_origMat: ', permuted_mat, permuted_origMat);
 
     let [secondOrdering_mat, secondOrdering_origMat] = dp.matrixReorderingByCommunity(
       permuted_mat, permuted_origMat, community, newUserAxisValues, users,
@@ -279,7 +279,7 @@ export default function userSimilarityGraph(data, svg, user, articles) {
       if (existedCommunity) existedCommunity.num += 1;
       else groupIndex.push({ community: tempCom, num: 1, index });
     });
-    console.log('groupIndex:', groupIndex);
+    console.log('position Index of each user community:', groupIndex);
 
     // const [secondOrdering_mat, secondOrdering_origMat] = [permuted_mat, permuted_origMat];
     // [secondOrdering_mat, secondOrdering_origMat] = moveNonSimilarUsersToCorner(
@@ -287,7 +287,7 @@ export default function userSimilarityGraph(data, svg, user, articles) {
     // );
 
     [secondOrdering_mat, secondOrdering_origMat] = dp.communityInnerMatrixReordering(secondOrdering_mat, secondOrdering_origMat, newUserAxisValues, users, groupIndex);
-    console.log('secondOrdering_mat, secondOrdering_origMat: ', secondOrdering_mat, secondOrdering_origMat);
+    // console.log('secondOrdering_mat, secondOrdering_origMat: ', secondOrdering_mat, secondOrdering_origMat);
 
     const gridSize = 20;
     d3.select('.position').attr('transform', `scale(1) translate(${2 * margin.left},${4 * margin.top})`);
@@ -618,10 +618,10 @@ export default function userSimilarityGraph(data, svg, user, articles) {
         .attr('d', 'M 0 0 L 0 0 L 0 0');
 
       function brushed(d) {
-        console.log(d);
+        // console.log(d);
         if (d3.event.sourceEvent && d3.event.sourceEvent.type === 'zoom') return; // ignore brush-by-zoom
         const s = d3.event.selection;
-        console.log(s);
+        // console.log(s);
         const focusUserIndex = [];
         selectedUser.splice(0, selectedUser.length);
         positionScale.forEach((e, index) => {
@@ -632,8 +632,8 @@ export default function userSimilarityGraph(data, svg, user, articles) {
           }
         });
         // resize brush controller
-        console.log(d3.select(this));
-        console.log(d3.select('.brush').nodes()[0].__brush);
+        // console.log(d3.select(this));
+        // console.log(d3.select('.brush').nodes()[0].__brush);
         const fixedX1 = positionScale[focusUserIndex[0]] * reverseScale * Math.sqrt(2);
         const fixedX2 = positionScale[focusUserIndex[focusUserIndex.length - 1] + 1] * reverseScale * Math.sqrt(2) - 6;
         d3.select('.brush').nodes()[0].__brush.selection[0][0] = fixedX1;
@@ -647,7 +647,7 @@ export default function userSimilarityGraph(data, svg, user, articles) {
         context.select('.selection')
           .attr('x', fixedX1)
           .attr('width', fixedX2 - fixedX1);
-        console.log(s);
+        // console.log(s);
         // setting all co-cluster rect stroke-width to 1
         // d3.select('.radialGroup').selectAll('rect')
         //   .attr('stroke', 'slategray')
@@ -1628,6 +1628,8 @@ export default function userSimilarityGraph(data, svg, user, articles) {
                           }
                         });
                       }
+                      console.log('selectedArticles: ', selectedArticles);
+                      console.log(_d);
                       rectClick(_d, i);
                     })
                     .on('mouseover', _d => coClusterMouseover(_d, i));
@@ -1650,9 +1652,7 @@ export default function userSimilarityGraph(data, svg, user, articles) {
             if (i !== j) {
               positionIndex += diffAterSame;
               diffAterSame = 0;
-              // positionIndex += 1;
               const pIndex = positionIndex;
-              // console.log(pIndex);
               const nex = comunityIndexY[j];
               const nex_nex = comunityIndexY[j + 1] ? comunityIndexY[j + 1] : positionScale.length - 1;
               const maxWidth_nex = (positionScale[nex_nex] - positionScale[nex]) * Math.sqrt(2);
@@ -1735,11 +1735,13 @@ export default function userSimilarityGraph(data, svg, user, articles) {
                         groupRadial.selectAll('rect').attr('stroke-width', '1px');
                         d3.select(_nodes[_index]).attr('stroke-width', '10px');
                         articles.forEach((e) => {
-                          if (_d.some(e1 => e1.article_id === e.article_id)) {
+                          if (sameArticles.some(e1 => e1.article_id === e.article_id)) {
                             selectedArticles.push(e);
                           }
                         });
                       }
+                      console.log('selectedArticles: ', selectedArticles);
+                      console.log(sameArticles);
                       rectClick(sameArticles, i);
                       return 0;
                     });

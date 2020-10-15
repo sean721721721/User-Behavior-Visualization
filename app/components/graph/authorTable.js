@@ -16,6 +16,7 @@ import _ from 'lodash';
 // import { max } from 'moment';
 // import { Row, Form } from 'antd';
 import * as jsnx from 'jsnetworkx';
+import { loading } from './loading';
 import OpinionLeaderView from './OpinionLeaderView';
 
 export default function AuthorTable(nodes, div, $this, callback) {
@@ -231,7 +232,8 @@ export default function AuthorTable(nodes, div, $this, callback) {
       const total_num = node_data.length;
       const link_num = link_data.length;
       const tolerance = 1e-6;
-      const loopMax = 100;
+      const clickType = d3.select('input[name="pageRank"]').property('checked');
+      const loopMax = clickType ? 100 : 1;
       // const loopMax = 1;
       for (let k = 0; k < loopMax; k += 1) {
         const newPageRank = [];
@@ -261,6 +263,7 @@ export default function AuthorTable(nodes, div, $this, callback) {
         for (let m = 0; m < total_num; m += 1) {
           node_data[m].pageRank = newPageRank[m];
         }
+        loading(k, loopMax, d3.select('#graph'));
         console.log(`leaderPageRank: ${err}, total_num * tolerance: ${total_num * tolerance}`);
         if (err < total_num * tolerance) break;
       }

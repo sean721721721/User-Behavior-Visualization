@@ -324,7 +324,7 @@ class Grid extends React.Component {
       .then((response) => {
         if (response.status >= 200 && response.status < 300) {
           // console.log(response.status);
-          console.log(response);
+          // console.log(response);
           return response.json();
         }
         const error = new Error(response.statusText);

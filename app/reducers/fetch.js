@@ -7,7 +7,7 @@ const fetch = (
   },
   action,
 ) => {
-  console.log(state, action);
+  // console.log(state, action);
   switch (action.type) {
     case 'CARD_FETCH_SUCCEEDED': {
       const cards = action.cards.map(card => ({ ...card, deleted: false }));
