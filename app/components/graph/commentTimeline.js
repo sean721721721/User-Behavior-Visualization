@@ -16,6 +16,7 @@ export default function commentTimeline(data, svg, $this) {
   const w = parseFloat(d3.select('#articleStatus').style('width'));
   const xScaleWidth = w - 110;
   const timePeriod = 3;
+  const yAxisRange = 100;
   // const opinionLeader = nodes.find(e => e.id === $this.state.mouseOverUser);
   const timeScaleObjArr = [];
   timeScale(data, timeScaleObjArr);
@@ -24,6 +25,7 @@ export default function commentTimeline(data, svg, $this) {
     .domain([0, 1])
     .range([0, h]);
   let articleIndex = -1; // control each article lines position
+  const offset = -60;
   const articleTime = svg.selectAll('g')
     .data([data])
     .enter()
@@ -60,8 +62,20 @@ export default function commentTimeline(data, svg, $this) {
         .text(`推: ${d.message_count[0].count}  噓: ${d.message_count[1].count}  →: ${d.message_count[2].count}`)
         .attr('x', 30)
         .attr('y', -90);
+      info.append('text')
+        .text(d.url)
+        .attr('x', 30)
+        .attr('y', -70)
+        .attr('fill', 'blue')
+        .on('mouseover', (_d, i, n) => {
+          d3.select(n[i]).attr('text-decoration', 'underline');
+        })
+        .on('mouseout', (_d, i, n) => {
+          d3.select(n[i]).attr('text-decoration', 'none');
+        })
+        .on('click', () => { window.open(d.url); });
       axis.append('g')
-        .attr('transform', 'translate(10, -80)')
+        .attr('transform', `translate(10, ${offset})`)
         .call(yAxis_left)
         .append('text')
         .attr('fill', 'black')
@@ -70,7 +84,7 @@ export default function commentTimeline(data, svg, $this) {
         .attr('transform', 'translate(-30, 50) rotate(-90)')
         .text('Push - Boo');
       axis.append('g')
-        .attr('transform', `translate(${xScaleWidth}, -80)`)
+        .attr('transform', `translate(${xScaleWidth}, ${offset})`)
         .call(yAxis_right)
         .append('text')
         .attr('fill', 'black')
@@ -79,7 +93,7 @@ export default function commentTimeline(data, svg, $this) {
         .attr('transform', 'translate(40, 50) rotate(-90)')
         .text('comments per 10 mins');
       axis.append('g')
-        .attr('transform', 'translate(0, 20)')
+        .attr('transform', `translate(0, ${offset + yAxisRange})`)
         .call(xAxis)
         .append('g')
         .attr('transform', 'translate(0, -50)')
@@ -133,7 +147,7 @@ export default function commentTimeline(data, svg, $this) {
     .attr('cy', (d) => {
       let value = d.value > 100 ? 100 : d.value;
       value = d.value < -100 ? -100 : value;
-      return yScale(d.articleId, value) - 80;
+      return yScale(d.articleId, value) + offset;
     });
 
   commentTime.append('title')
@@ -229,11 +243,11 @@ export default function commentTimeline(data, svg, $this) {
   function makeYAxis(direction) {
     if (direction === 'left') {
       const commentScoreScale = d3.scaleLinear().domain([-100, 100])
-        .range([100, 0]);
+        .range([yAxisRange, 0]);
       return d3.axisLeft(commentScoreScale).ticks(3);
     } if (direction === 'right') {
       const commentScoreScale = d3.scaleLinear().domain([0, 100])
-        .range([100, 0]);
+        .range([yAxisRange, 0]);
       return d3.axisRight(commentScoreScale).ticks(3);
     }
     return null;

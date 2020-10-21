@@ -96,6 +96,9 @@ export default function userDailyActivity(data, user, svg, begin, end) {
       .style('opacity', 0)
       .style('left', '0px')
       .style('top', '0px');
+    if (isClicked) {
+      tooltipForArticle(article);
+    }
     fixedSvg.selectAll('.repostLink')
       .attr('opacity', isClicked ? 0 : 1);
     fixedSvg.selectAll('.pointer')
@@ -153,17 +156,11 @@ export default function userDailyActivity(data, user, svg, begin, end) {
   };
 
   const mouseover = (d, e) => {
-    console.log(d, e, isClicked);
+    // console.log(d, e, isClicked);
     if (isClicked) {
       if (d.article_id === isClicked) {
         if (Array.isArray(e)) {
-          const date = new Date(d.date);
-          Tooltip
-            .style('opacity', 1)
-            .html(`<p style="color: white;">Title: ${d.article_title}<br>
-              Date: ${date.getFullYear()}/${date.getMonth() + 1}/${date.getDate()} ${date.getHours()}:${date.getMinutes()}</p>`)
-            .style('left', `${d3.event.pageX + 25}px`)
-            .style('top', `${d3.event.pageY - 100}px`);
+          tooltipForArticle(d);
         } else {
           Tooltip
             .style('opacity', 1)
@@ -180,13 +177,7 @@ export default function userDailyActivity(data, user, svg, begin, end) {
 
     if (Array.isArray(e)) {
       const title = d.article_title || '';
-      const date = new Date(d.date);
-      Tooltip
-        .style('opacity', 1)
-        .html(`<p style="color: white;">Title: ${title}<br>
-          Date: ${date.getFullYear()}/${date.getMonth() + 1}/${date.getDate()} ${date.getHours()}:${date.getMinutes()}</p>`)
-        .style('left', `${d3.event.pageX + 25}px`)
-        .style('top', `${d3.event.pageY - 100}px`);
+      tooltipForArticle(d);
       fixedSvg.selectAll('.repostLink')
         .attr('opacity', '0');
       fixedSvg.selectAll('.pointer')
@@ -227,11 +218,11 @@ export default function userDailyActivity(data, user, svg, begin, end) {
   };
   const mouseout = (d, articleId) => {
     console.log(d);
-    Tooltip
-      .style('opacity', 0)
-      .style('left', '0px')
-      .style('top', '0px');
     if (!isClicked) {
+      Tooltip
+        .style('opacity', 0)
+        .style('left', '0px')
+        .style('top', '0px');
       fixedSvg.selectAll('.repostLink')
         .attr('opacity', 1);
       fixedSvg.selectAll('.article')
@@ -574,6 +565,17 @@ export default function userDailyActivity(data, user, svg, begin, end) {
   //     return 'lightgray';
   //   });
   // }
+
+  function tooltipForArticle(d) {
+    const date = new Date(d.date);
+    Tooltip
+      .style('opacity', 1)
+      .html(`<p style="color: white;">Title: ${d.article_title}<br>
+        Date: ${date.getFullYear()}/${date.getMonth() + 1}/${date.getDate()} ${date.getHours()}:${date.getMinutes()}<br>
+        <a href="${d.url}" target="_blank" style="color: cornflowerblue;">Go To Post Page</a></p>`)
+      .style('left', `${d3.event.pageX + 25}px`)
+      .style('top', `${d3.event.pageY - 100}px`);
+  }
   function computeUserListByReplyCountPerHours(d, u) {
     const userList = [];
     u.forEach((e) => {
