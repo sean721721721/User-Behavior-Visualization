@@ -389,6 +389,39 @@ export default function userDailyActivity(data, user, svg, begin, end) {
       .tickFormat(d3.timeFormat('%m/%d'))
       .tickSizeInner([40]));
 
+  // legend
+  fixedSvg.append('circle')
+    .attr('cx', 0)
+    .attr('cy', h + 50)
+    .attr('r', 5)
+    .attr('fill', commentTypeColor('推'));
+  fixedSvg.append('text')
+    .text('推')
+    .attr('x', 10)
+    .attr('y', h + 50);
+  fixedSvg.append('circle')
+    .attr('cx', 50)
+    .attr('cy', h + 50)
+    .attr('r', 5)
+    .attr('fill', commentTypeColor('→'));
+  fixedSvg.append('text')
+    .text('→')
+    .attr('x', 60)
+    .attr('y', h + 50);
+  fixedSvg.append('circle')
+    .attr('cx', 100)
+    .attr('cy', h + 50)
+    .attr('r', 5)
+    .attr('fill', commentTypeColor('噓'));
+  fixedSvg.append('text')
+    .text('噓')
+    .attr('x', 110)
+    .attr('y', h + 50);
+  
+  fixedSvg.append('text')
+    .text('白色區域: 平日9:00 - 18:00')
+    .attr('x', 160)
+    .attr('y', h + 50);
   // add repost link
   const pointerScale = d3.scaleLinear().domain([1, userID.length]).range([3, 10]);
   const pointerOffset = d3.scaleLinear().domain([1, userID.length]).range([15, -60]);
@@ -574,7 +607,7 @@ export default function userDailyActivity(data, user, svg, begin, end) {
         Date: ${date.getFullYear()}/${date.getMonth() + 1}/${date.getDate()} ${date.getHours()}:${date.getMinutes()}<br>
         <a href="${d.url}" target="_blank" style="color: cornflowerblue;">Go To Post Page</a></p>`)
       .style('left', `${d3.event.pageX + 25}px`)
-      .style('top', `${d3.event.pageY - 100}px`);
+      .style('top', `${d3.event.pageY - 130}px`);
   }
   function computeUserListByReplyCountPerHours(d, u) {
     const userList = [];

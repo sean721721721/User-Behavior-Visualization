@@ -162,7 +162,7 @@ class Page extends React.Component {
               />
             </label>
             <label htmlFor="x">
-                comment threshold:
+                #comments &gt;
               <input
                 className="form-control"
                 type="commentThreshold"

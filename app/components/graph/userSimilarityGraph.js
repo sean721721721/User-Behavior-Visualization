@@ -214,6 +214,16 @@ export default function userSimilarityGraph(data, svg, user, articles) {
       group.attr('transform', d3.event.transform);
     }
     const color = d => d3.schemeTableau10[d];
+    const colorArray = [
+      d3.interpolateBlues,
+      d3.interpolateOranges,
+      d3.interpolateReds,
+      d3.interpolateGnBu,
+      d3.interpolateGreens,
+      d3.interpolateYlOrBr,
+      d3.interpolatePurples,
+      d3.interpolateGreys,
+    ];
     // Article Similarity
 
     // console.log(similarity);
@@ -257,15 +267,15 @@ export default function userSimilarityGraph(data, svg, user, articles) {
     const [matrix, origMatrix] = dp.relationToMatrix(similaritys, users);
     const similarityScale = d3.scalePow().exponent(0.5).range([0, 100]);
     // enlarge the difference between users
-    for (let i = 0; i < users.length; i += 1) {
-      matrix[i] = matrix[i].map(e => similarityScale(e));
-      // matrix[i] = matrix[i].map(e => e * 100);
-    }
-    // console.log('matrix', matrix);
+    // for (let i = 0; i < users.length; i += 1) {
+    //   matrix[i] = matrix[i].map(e => similarityScale(e));
+    //   // matrix[i] = matrix[i].map(e => e * 100);
+    // }
+    console.log('matrix', matrix);
     const [permuted_mat, permuted_origMat] = dp.matrixReordering(
       matrix, origMatrix, newUserAxisValues, users,
     );
-    // console.log('permuted_mat, permuted_origMat: ', permuted_mat, permuted_origMat);
+    console.log('permuted_mat, permuted_origMat: ', permuted_mat, permuted_origMat);
 
     let [secondOrdering_mat, secondOrdering_origMat] = dp.matrixReorderingByCommunity(
       permuted_mat, permuted_origMat, community, newUserAxisValues, users,
@@ -514,10 +524,12 @@ export default function userSimilarityGraph(data, svg, user, articles) {
                   if (xUser.community === yUser.community) {
                     const communityColor = d3.scaleLinear()
                       .range(['white', color(xUser.community)])
-                      .domain([0, 100]);
-                    return communityColor(d);
+                      .domain([0, 1]);
+                    // return communityColor(d);
+                    return colorArray[xUser.community](d);
                   }
-                  return leftMyColor(d);
+                  // return leftMyColor(d);
+                  return colorArray[7](d);
                 })
                 .attr('visibility', i >= index ? 'hidden' : 'visible')
                 .on('mouseover', () => mouseover(secondOrdering_origMat[i][index], index, i))
@@ -538,7 +550,8 @@ export default function userSimilarityGraph(data, svg, user, articles) {
             const end = positionScale[i] + bandWidthScale(size);
             return `M ${start} ${start} L ${end} ${start} L ${end} ${end}`;
           })
-          .attr('fill', color(tempUser.community))
+          // .attr('fill', color(tempUser.community))
+          .attr('fill', colorArray[tempUser.community](1))
           .on('click', () => {
             selectedUser.splice(0, selectedUser.length);
             selectedUser.push(newUserAxisValues[i]);
@@ -546,48 +559,137 @@ export default function userSimilarityGraph(data, svg, user, articles) {
           });
       }
       // draw user group heatmap
-      // for (let i = 0; i < groupIndex.length - 1; i += 1) {
-      //   const rectX = groupIndex[i].index;
-      //   for (let j = i + 1; j < groupIndex.length; j += 1) {
-      //     const rectY = groupIndex[j].index;
-      //     leftSvg.append('g')
-      //       .attr('class', `community${groupIndex[i].community}${groupIndex[j].community}`)
-      //       .append('rect')
-      //       .attr('x', positionScale[rectX])
-      //       .attr('y', positionScale[rectY])
-      //       .attr('rx', () => {
-      //         const tem = groupIndex[i].index;
-      //         const nex = tem + groupIndex[i].num;
-      //         return Math.min(15, (positionScale[nex] - positionScale[tem]) / 10);
-      //       })
-      //       .attr('ry', () => {
-      //         const tem = groupIndex[j].index;
-      //         const nex = groupIndex[j + 1] ? groupIndex[j + 1].index : positionScale.length - 1;
-      //         return Math.min(15, (positionScale[nex] - positionScale[tem]) / 10);
-      //       })
-      //       .attr('stroke', 'white')
-      //       .attr('stroke-width', '2px')
-      //       .attr('height', () => {
-      //         const tem = groupIndex[j].index;
-      //         const nex = groupIndex[j + 1] ? groupIndex[j + 1].index : positionScale.length - 1;
-      //         return positionScale[nex] - positionScale[tem];
-      //       })
-      //       .attr('width', () => {
-      //         const tem = groupIndex[i].index;
-      //         const nex = tem + groupIndex[i].num;
-      //         return positionScale[nex] - positionScale[tem];
-      //       })
-      //       .attr('fill', () => {
-      //         let totalSim = 0;
-      //         for (let k = rectX; k < rectX + groupIndex[i].num; k += 1) {
-      //           for (let l = rectY; l < rectY + groupIndex[j].num; l += 1) {
-      //             totalSim += secondOrdering_mat[k][l];
-      //           }
-      //         }
-      //         // console.log(totalSim);
-      //         return leftMyColor(totalSim / (groupIndex[i].num * groupIndex[j].num));
+      for (let i = 0; i < groupIndex.length; i += 1) {
+        let totalSim = 0;
+        for (let j = groupIndex[i].index; j < groupIndex[i].index + groupIndex[i].num; j += 1) {
+          for (let k = groupIndex[i].index; k < groupIndex[i].index + groupIndex[i].num; k += 1) {
+            totalSim += secondOrdering_mat[j][k];
+          }
+        }
+        totalSim -= groupIndex[i].num;
+        const avgSim = totalSim / (groupIndex[i].num * groupIndex[i].num - groupIndex[i].num);
+        leftSvg.append('g')
+          .attr('class', `avgSimilarityPath community${groupIndex[i].community}`)
+          .append('path')
+          .attr('fill', colorArray[groupIndex[i].community](avgSim))
+          .attr('stroke', color(groupIndex[i].community))
+          .attr('stroke-width', '5px')
+          .attr('d', () => {
+            const tempX = groupIndex[i].index;
+            const nextX = groupIndex[i].index + groupIndex[i].num;
+            const start = positionScale[tempX];
+            const end = positionScale[nextX];
+            return `M ${start} ${start} L ${end} ${start} L ${end} ${end}`;
+          })
+          .on('mouseover', (d, index, nodes) => {
+            d3.select(nodes[index]).attr('opacity', 0);
+          })
+          .on('mouseout', (d, index, nodes) => {
+            d3.select(nodes[index]).attr('opacity', 1);
+          });
+      }
+
+      // console.log(groupIndex);
+      // for (let i = 0; i < groupIndex.length; i += 1) {
+      //   leftSvg.append('g')
+      //     .attr('class', `community${groupIndex[i].community}`)
+      //     .append('path')
+      //     .attr('fill', 'none')
+      //     .attr('stroke', color(groupIndex[i].community))
+      //     .attr('stroke-width', '5px')
+      //     .attr('d', () => {
+      //       const tempX = groupIndex[i].index;
+      //       const nextX = groupIndex[i].index + groupIndex[i].num;
+      //       const start = positionScale[tempX];
+      //       const end = positionScale[nextX];
+      //       return `M ${start} ${start} L ${end} ${start} L ${end} ${end}`;
+      //     });
+      //   // leftSvg.select(`.community${groupIndex[i].community}`)
+      //   //   .append('path')
+      //   //   .attr('fill', 'none')
+      //   //   .attr('stroke', color(groupIndex[i].community))
+      //   //   .attr('stroke-width', '5px')
+      //   //   .attr('d', () => {
+      //   //     const tempX = groupIndex[i].index;
+      //   //     const nextX = groupIndex[i].index + groupIndex[i].num;
+      //   //     const start = positionScale[tempX];
+      //   //     const end = positionScale[positionScale.length - 1];
+      //   //     return `M ${start} ${start} L ${end} ${start}`;
+      //   //   });
+      //   for (let j = i; j < groupIndex.length - 1; j += 1) {
+      //     leftSvg.select(`.community${groupIndex[i].community}`)
+      //       .append('path')
+      //       .attr('fill', 'none')
+      //       .attr('stroke', color(groupIndex[i].community))
+      //       .attr('stroke-width', '5px')
+      //       .attr('d', () => {
+      //         const startX = groupIndex[j + 1].index + groupIndex[j + 1].num;
+      //         const startY = groupIndex[i].index;
+      //         const endX = startX;
+      //         const endY = groupIndex[i].index + groupIndex[i].num;
+      //         return `M ${positionScale[startX]} ${positionScale[startY]} L ${positionScale[endX]} ${positionScale[endY]}`;
       //       });
       //   }
+      //   for (let k = i - 1; k >= 0; k -= 1) {
+      //     leftSvg.select(`.community${groupIndex[i].community}`)
+      //       .append('path')
+      //       .attr('fill', 'none')
+      //       .attr('stroke', color(groupIndex[i].community))
+      //       .attr('stroke-width', '5px')
+      //       .attr('d', () => {
+      //         const startX = groupIndex[i].index;
+      //         const endX = groupIndex[i].index + groupIndex[i].num;
+      //         const Y = groupIndex[k].index;
+      //         // const tempX = groupIndex[i].index;
+      //         // const nextX = groupIndex[i].index + groupIndex[i].num;
+      //         const x1 = positionScale[startX];
+      //         const y1 = positionScale[Y];
+      //         const x2 = positionScale[endX];
+      //         const y2 = y1;
+      //         return `M ${x1} ${y1} L ${x2} ${y2}`;
+      //       });
+      //   }
+      //   // const rectX = groupIndex[i].index;
+      //   // for (let j = i + 1; j < groupIndex.length; j += 1) {
+      //   //   const rectY = groupIndex[j].index;
+      //   //   leftSvg.append('g')
+      //   //     .attr('class', `community${groupIndex[i].community}${groupIndex[j].community}`)
+      //   //     .append('rect')
+      //   //     .attr('x', positionScale[rectX])
+      //   //     .attr('y', positionScale[rectY])
+      //   //     .attr('rx', () => {
+      //   //       const tem = groupIndex[i].index;
+      //   //       const nex = tem + groupIndex[i].num;
+      //   //       return Math.min(15, (positionScale[nex] - positionScale[tem]) / 10);
+      //   //     })
+      //   //     .attr('ry', () => {
+      //   //       const tem = groupIndex[j].index;
+      //   //       const nex = groupIndex[j + 1] ? groupIndex[j + 1].index : positionScale.length - 1;
+      //   //       return Math.min(15, (positionScale[nex] - positionScale[tem]) / 10);
+      //   //     })
+      //   //     .attr('stroke', 'white')
+      //   //     .attr('stroke-width', '2px')
+      //   //     .attr('height', () => {
+      //   //       const tem = groupIndex[j].index;
+      //   //       const nex = groupIndex[j + 1] ? groupIndex[j + 1].index : positionScale.length - 1;
+      //   //       return positionScale[nex] - positionScale[tem];
+      //   //     })
+      //   //     .attr('width', () => {
+      //   //       const tem = groupIndex[i].index;
+      //   //       const nex = tem + groupIndex[i].num;
+      //   //       return positionScale[nex] - positionScale[tem];
+      //   //     })
+      //   //     .attr('fill', () => {
+      //   //       let totalSim = 0;
+      //   //       for (let k = rectX; k < rectX + groupIndex[i].num; k += 1) {
+      //   //         for (let l = rectY; l < rectY + groupIndex[j].num; l += 1) {
+      //   //           totalSim += secondOrdering_mat[k][l];
+      //   //         }
+      //   //       }
+      //   //       // console.log(totalSim);
+      //   //       return leftMyColor(totalSim / (groupIndex[i].num * groupIndex[j].num));
+      //   //     });
+      //   // }
       // }
       const reverseScale = svgScale(datas.length) > 0 ? svgScale(datas.length) : 0.4;
       const brush = d3.brushX()
@@ -607,7 +709,15 @@ export default function userSimilarityGraph(data, svg, user, articles) {
         // .attr('transform', `translate(${positionScale[positionScale.length - 1] + 30}, 0)`)
         .attr('transform', 'translate(0, 0)')
         .call(brush)
-        .call(brush.move, [0, 0]);
+        .call(brush.move, [0, 0])
+        .on('mouseover', () => {
+          d3.selectAll('.avgSimilarityPath')
+            .attr('opacity', 0);
+        })
+        .on('mouseout', () => {
+          d3.selectAll('.avgSimilarityPath')
+            .attr('opacity', 1);
+        });
 
       context.select('.handle.handle--n')
         .attr('fill', 'slategray');
