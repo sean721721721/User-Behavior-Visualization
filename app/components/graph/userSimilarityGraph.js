@@ -217,8 +217,8 @@ export default function userSimilarityGraph(data, svg, user, articles) {
     const colorArray = [
       d3.interpolateBlues,
       d3.interpolateOranges,
-      d3.interpolateReds,
       d3.interpolateGnBu,
+      d3.interpolateReds,
       d3.interpolateGreens,
       d3.interpolateYlOrBr,
       d3.interpolatePurples,
@@ -437,7 +437,7 @@ export default function userSimilarityGraph(data, svg, user, articles) {
         d3.select(nodes[index]).append('circle')
           .attr('cx', 0)
           .attr('cy', -5)
-          .attr('fill', color(index))
+          .attr('fill', colorArray[index](0.5))
           .attr('r', 5);
       });
 
@@ -559,35 +559,7 @@ export default function userSimilarityGraph(data, svg, user, articles) {
           });
       }
       // draw user group heatmap
-      for (let i = 0; i < groupIndex.length; i += 1) {
-        let totalSim = 0;
-        for (let j = groupIndex[i].index; j < groupIndex[i].index + groupIndex[i].num; j += 1) {
-          for (let k = groupIndex[i].index; k < groupIndex[i].index + groupIndex[i].num; k += 1) {
-            totalSim += secondOrdering_mat[j][k];
-          }
-        }
-        totalSim -= groupIndex[i].num;
-        const avgSim = totalSim / (groupIndex[i].num * groupIndex[i].num - groupIndex[i].num);
-        leftSvg.append('g')
-          .attr('class', `avgSimilarityPath community${groupIndex[i].community}`)
-          .append('path')
-          .attr('fill', colorArray[groupIndex[i].community](avgSim))
-          .attr('stroke', color(groupIndex[i].community))
-          .attr('stroke-width', '5px')
-          .attr('d', () => {
-            const tempX = groupIndex[i].index;
-            const nextX = groupIndex[i].index + groupIndex[i].num;
-            const start = positionScale[tempX];
-            const end = positionScale[nextX];
-            return `M ${start} ${start} L ${end} ${start} L ${end} ${end}`;
-          })
-          .on('mouseover', (d, index, nodes) => {
-            d3.select(nodes[index]).attr('opacity', 0);
-          })
-          .on('mouseout', (d, index, nodes) => {
-            d3.select(nodes[index]).attr('opacity', 1);
-          });
-      }
+      drawAverageSimilarity();
 
       // console.log(groupIndex);
       // for (let i = 0; i < groupIndex.length; i += 1) {
@@ -833,6 +805,105 @@ export default function userSimilarityGraph(data, svg, user, articles) {
           .on('click', tickClick);
         // leftSvg.select('.xAxis')
         //   .attr('transform', `translate(${positionScale[positionScale.length - 1]},-30)`);
+      }
+
+      function drawAverageSimilarity() {
+        for (let i = 0; i < groupIndex.length; i += 1) {
+          let selfTotalSim = 0;
+          const similarityArray = [];
+          for (let j = groupIndex[i].index; j < groupIndex[i].index + groupIndex[i].num; j += 1) {
+            for (let k = groupIndex[i].index; k < groupIndex[i].index + groupIndex[i].num; k += 1) {
+              selfTotalSim += secondOrdering_mat[j][k];
+              similarityArray.push(secondOrdering_mat[j][k]);
+            }
+          }
+          selfTotalSim -= groupIndex[i].num;
+          const selfAvgSim = selfTotalSim / (groupIndex[i].num * groupIndex[i].num - groupIndex[i].num);
+
+          // self average similarity
+          leftSvg.append('g')
+            .attr('class', `avgSimilarityPath community${groupIndex[i].community}`)
+            .append('path')
+            .attr('fill', colorArray[groupIndex[i].community](selfAvgSim))
+            // .attr('fill', colorArray[colorArray.length - 1](selfAvgSim))
+            .attr('stroke', colorArray[groupIndex[i].community](1))
+            .attr('stroke-width', '5px')
+            .attr('d', () => {
+              const tempX = groupIndex[i].index;
+              const nextX = groupIndex[i].index + groupIndex[i].num;
+              const start = positionScale[tempX];
+              const end = positionScale[nextX];
+              return `M ${start} ${start} L ${end} ${start} L ${end} ${end}`;
+            })
+            .on('mouseover', (d, index, nodes) => {
+              d3.select(nodes[index]).attr('opacity', 0);
+            })
+            .on('mouseout', (d, index, nodes) => {
+              d3.select(nodes[index]).attr('opacity', 1);
+            });
+
+          // self quantile similarity
+          similarityArray.sort((a, b) => a - b);
+          const quantile = [
+            d3.quantile(similarityArray, 0.25),
+            d3.quantile(similarityArray, 0.5),
+            d3.quantile(similarityArray, 0.75),
+          ];
+          console.log(quantile[2] - quantile[0]);
+          leftSvg.append('g')
+            .attr('class', `avgSimilarityPath community${groupIndex[i].community}`)
+            .selectAll()
+            .data(quantile)
+            .enter()
+            .append('path')
+            .attr('fill', d => colorArray[groupIndex[i].community](d))
+            // .attr('stroke', colorArray[groupIndex[i].community](1))
+            // .attr('stroke-width', '5px')
+            .attr('d', (d, index) => {
+              const tempX = groupIndex[i].index;
+              const nextX = groupIndex[i].index + groupIndex[i].num;
+              const start = positionScale[tempX];
+              const end = positionScale[nextX];
+              return `
+                M ${start + (end - start) * index / 6} ${start + (end - start) * index / 6} 
+                L ${start + (end - start) * (6 - index) / 6} ${start + (end - start) * index / 6} 
+                L ${start + (end - start) * (6 - index) / 6} ${start + (end - start) * (6 - index) / 6}`;
+            })
+            .on('mouseover', (d, index, nodes) => {
+              d3.select(nodes[index]).attr('opacity', 0);
+            })
+            .on('mouseout', (d, index, nodes) => {
+              d3.select(nodes[index]).attr('opacity', 1);
+            });
+
+          // average similarity between communities
+          for (let j = i + 1; j < groupIndex.length; j += 1) {
+            let totalSim = 0;
+            for (let x = groupIndex[j - 1].index + groupIndex[j - 1].num; x < groupIndex[j].index + groupIndex[j].num; x += 1) {
+              for (let y = groupIndex[i].index; y < groupIndex[i].index + groupIndex[i].num; y += 1) {
+                totalSim += secondOrdering_mat[x][y];
+              }
+            }
+            const avgSim = totalSim / (groupIndex[i].num * groupIndex[j].num);
+            // console.log(totalSim);
+            leftSvg.append('g')
+              .attr('class', `avgSimilarityPath community${groupIndex[i].community}`)
+              .append('rect')
+              .attr('fill', colorArray[colorArray.length - 1](avgSim))
+              .attr('stroke', colorArray[colorArray.length - 1](1))
+              .attr('stroke-width', '1px')
+              .attr('x', positionScale[groupIndex[j].index])
+              .attr('y', positionScale[groupIndex[i].index])
+              .attr('width', positionScale[groupIndex[j].index + groupIndex[j].num] - positionScale[groupIndex[j].index])
+              .attr('height', positionScale[groupIndex[i].index + groupIndex[i].num] - positionScale[groupIndex[i].index])
+              .on('mouseover', (d, index, nodes) => {
+                d3.select(nodes[index]).attr('opacity', 0);
+              })
+              .on('mouseout', (d, index, nodes) => {
+                d3.select(nodes[index]).attr('opacity', 1);
+              });
+          }
+        }
       }
     }
 
@@ -1674,7 +1745,6 @@ export default function userSimilarityGraph(data, svg, user, articles) {
           const nex_tem = comunityIndexY[i + 1] ? comunityIndexY[i + 1] : positionScale.length - 1;
           const numOfArticles = arr[i].reduce((acc, obj) => acc + obj.level[0].length, 0);
           const maxWidth_tem = (positionScale[nex_tem] - positionScale[tem]) * Math.sqrt(2);
-          const radialColor = d3.scaleLinear().domain([-1, 4]).range(['white', color(i)]);
           const scale = d3.scaleLinear().domain([0, numOfArticles]).range([0, maxWidth_tem]);
           for (let k = 0; k < arr.length; k += 1) {
             groupRadial.append('g')
@@ -1719,10 +1789,7 @@ export default function userSimilarityGraph(data, svg, user, articles) {
                       const sameArticles = d.level[0].filter(e => d.level[0].some(e1 => e1.article_id === e.article_id));
                       return scale(sameArticles.length);
                     })
-                    .attr('fill', (_d, _index) => {
-                      const c = d3.hsl(radialColor(_index));
-                      return c;
-                    })
+                    .attr('fill', (_d, _index) => colorArray[i](_index * 0.25))
                     // .attr('stroke', (_d, _index) => (_index === 0 ? 'black' : 'none'))
                     .on('click', (_d, _index, _nodes) => {
                       selectedArticles.splice(0, selectedArticles.length);
@@ -1754,7 +1821,6 @@ export default function userSimilarityGraph(data, svg, user, articles) {
           const nex_tem = comunityIndexY[i + 1] ? comunityIndexY[i + 1] : positionScale.length - 1;
           const numOfArticles = arr[i].reduce((acc, obj) => acc + obj.level[0].length, 0);
           const maxWidth_tem = (positionScale[nex_tem] - positionScale[tem]) * Math.sqrt(2);
-          const radialColor = d3.scaleLinear().domain([-1, 4]).range(['white', color(i)]);
           const scale = d3.scaleLinear().domain([0, numOfArticles]).range([0, maxWidth_tem]);
           let positionIndex = i;
           let diffAterSame = 0;
@@ -1827,10 +1893,7 @@ export default function userSimilarityGraph(data, svg, user, articles) {
                       const sameArticles = nextArticleCommunity.level[0].filter(e => _d.some(e1 => e1.article_id === e.article_id));
                       return heightScale(sameArticles.length);
                     })
-                    .attr('fill', (_d, _index) => {
-                      const c = d3.hsl(radialColor(_index));
-                      return c;
-                    })
+                    .attr('fill', (_d, _index) => colorArray[i](_index * 0.25))
                     // .attr('stroke', (_d, _index) => (_index === 0 ? 'black' : 'none'))
                     .on('click', (_d, _index, _nodes, levelIndex) => {
                       const temCommunity = d.community;
