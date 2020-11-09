@@ -47974,16 +47974,18 @@ class Graph extends Component {
                       />
                     </label>
                   </fieldset>
-                  <label htmlFor="intersection" style={{ marginLeft: '10px' }}>
-                      full calculate:
-                    <input
-                      chekced
-                      type="checkbox"
-                      id="quickTest"
-                      name="pageRank"
-                      value="quickTest"
-                    />
-                  </label>
+                  <fieldset>
+                    <label htmlFor="intersection" style={{ marginLeft: '10px' }}>
+                        full calculate:
+                      <input
+                        chekced
+                        type="checkbox"
+                        id="quickTest"
+                        name="pageRank"
+                        value="quickTest"
+                      />
+                    </label>
+                  </fieldset>
                 </div>
               </div>
             </div>

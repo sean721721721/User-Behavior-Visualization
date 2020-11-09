@@ -265,7 +265,7 @@ export default function AuthorTable(nodes, div, $this, callback) {
         }
         loading(k, loopMax, d3.select('#graph'));
         console.log(`leaderPageRank: ${err}, total_num * tolerance: ${total_num * tolerance}`);
-        if (err < total_num * tolerance) break;
+        if (err <= total_num * tolerance) break;
       }
     }
     function findMinimumPagerank(node_data) {
