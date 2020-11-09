@@ -422,23 +422,30 @@ export default function userSimilarityGraph(data, svg, user, articles) {
     const groupLegend = d3.select('#timeLine')
       .append('g').attr('class', 'groupLegends')
       .attr('transform', `translate(${margin.left}, ${margin.top})`);
+    const legendSize = 15;
     groupLegend.selectAll('rect')
       .data(groupIndex)
       .enter()
       .append('g')
       .attr('class', (d, index) => `group_${index}`)
-      .attr('transform', (d, index) => `translate(${130 * (index % 4)}, ${20 * Math.floor(index / 4)})`)
+      .attr('transform', (d, index) => `translate(${110 * ((index % 2) + 4)}, ${50 * Math.floor(index / 2)})`)
       // .attr('transform', (d, index) => `translate(0 ${20 * index})`)
       .each((d, index, nodes) => {
         d3.select(nodes[index]).append('text')
           .text(`Community ${index}`)
-          .attr('x', 10);
+          .attr('x', 0)
+          .attr('font-size', 12);
 
-        d3.select(nodes[index]).append('circle')
-          .attr('cx', 0)
-          .attr('cy', -5)
-          .attr('fill', colorArray[index](0.5))
-          .attr('r', 5);
+        d3.select(nodes[index])
+          .selectAll()
+          .data([1, 0.8, 0.6, 0.4, 0.2])
+          .enter()
+          .append('rect')
+          .attr('x', (_d, _index) => _index * legendSize)
+          .attr('y', 10)
+          .attr('width', legendSize)
+          .attr('height', legendSize)
+          .attr('fill', _d => colorArray[index](_d));
       });
 
     const artComWidth = 100 + Math.max(...articlesCommunity.map(e => e.community)) * (2 + 10);
@@ -819,7 +826,7 @@ export default function userSimilarityGraph(data, svg, user, articles) {
           }
           selfTotalSim -= groupIndex[i].num;
           const selfAvgSim = selfTotalSim / (groupIndex[i].num * groupIndex[i].num - groupIndex[i].num);
-
+          console.log(`community ${groupIndex[i].community} avgSim ${selfAvgSim}`);
           // self average similarity
           leftSvg.append('g')
             .attr('class', `avgSimilarityPath community${groupIndex[i].community}`)
