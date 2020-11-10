@@ -41,7 +41,7 @@ export default function userSimilarityGraph(data, svg, user, articles) {
   const articleIds = filteredArticles.map(e => e.article_id);
   const articlesCommunity = dp.jLouvainClustering(articleIds, articleSimilarity);
   // const articlesCommunity = articleGroupByTag(articleIds, filteredArticles);
-  console.log('articlesCommunity', articlesCommunity);
+  console.log('[articlesCommunity]', [articlesCommunity]);
   const selectedUser = user.slice();
   drawSlider();
   drawFilterDiv();
@@ -229,7 +229,7 @@ export default function userSimilarityGraph(data, svg, user, articles) {
     // console.log(similarity);
     // console.log(user);
     const [datas, users, similaritys] = dp.filterAlwaysNonSimilarUser(data, user, similarity, simThresh, artThresh);
-    console.log('datas:', datas, 'users:', users, 'similaritys:', similaritys);
+    console.log('[datas]:', [datas], '[users]:', [users], '[similaritys]:', [similaritys]);
     // similarity for articles grouping
     // let filteredArticles = articles;
     // filteredArticles = filteredArticles.filter(
@@ -271,11 +271,11 @@ export default function userSimilarityGraph(data, svg, user, articles) {
     //   matrix[i] = matrix[i].map(e => similarityScale(e));
     //   // matrix[i] = matrix[i].map(e => e * 100);
     // }
-    console.log('matrix', matrix);
+    console.log('[matrix]', [matrix]);
     const [permuted_mat, permuted_origMat] = dp.matrixReordering(
       matrix, origMatrix, newUserAxisValues, users,
     );
-    console.log('permuted_mat, permuted_origMat: ', permuted_mat, permuted_origMat);
+    console.log('[permuted_mat], [permuted_origMat]: ', [permuted_mat], [permuted_origMat]);
 
     let [secondOrdering_mat, secondOrdering_origMat] = dp.matrixReorderingByCommunity(
       permuted_mat, permuted_origMat, community, newUserAxisValues, users,
@@ -499,13 +499,14 @@ export default function userSimilarityGraph(data, svg, user, articles) {
         leftSvgGroup.selectAll()
           .data(secondOrdering_mat[i])
           .enter()
-          .append('rect')
+          // .append('rect')
           .each((d, index, nodes) => {
-            const xUser = community.find(e => e.id === newUserAxisValues[index]);
-            const yUser = community.find(e => e.id === newUserAxisValues[i]);
+            const xUser = datas.find(e => e.id === newUserAxisValues[index]);
+            const yUser = datas.find(e => e.id === newUserAxisValues[i]);
             if (i < index || xUser.community === yUser.community) {
             // if (i <= index) {
               d3.select(nodes[index])
+                .append('rect')
                 .attr('class', () => {
                   const xUserID = newUserAxisValues[index];
                   const yUserID = newUserAxisValues[i];
@@ -538,8 +539,63 @@ export default function userSimilarityGraph(data, svg, user, articles) {
                   // return leftMyColor(d);
                   return colorArray[7](d);
                 })
+                // .attr('stroke', 'black')
+                // .attr('stroke-width', Math.random() * 5)
                 .attr('visibility', i >= index ? 'hidden' : 'visible')
                 .on('mouseover', () => mouseover(secondOrdering_origMat[i][index], index, i))
+                .on('mouseout', mouseout)
+                .on('click', () => {
+                  selectedUser.splice(0, selectedUser.length);
+                  selectedUser.push(newUserAxisValues[i]);
+                  selectedUser.push(newUserAxisValues[index]);
+                  rectClick(d, index, i);
+                });
+              // author similarity
+              const authorSim = dp.computeUserSimilarityByAuthors(xUser, yUser);
+              d3.select(nodes[index])
+                .append('rect')
+                .attr('class', () => {
+                  const xUserID = newUserAxisValues[index];
+                  const yUserID = newUserAxisValues[i];
+                  return `${xUserID} ${yUserID} y${i} x${index}`;
+                })
+                .attr('x', () => {
+                  const size = datas.find(e => e.id === xUser.id).repliedArticle.length;
+                  return positionScale[index] + bandWidthScale(size) / 4;
+                })
+                .attr('y', () => {
+                  const size = datas.find(e => e.id === yUser.id).repliedArticle.length;
+                  return positionScale[i] + bandWidthScale(size) / 4;
+                })
+                .attr('rx', () => {
+                  if (i > index) return 0;
+                  const size = datas.find(e => e.id === xUser.id).repliedArticle.length;
+                  return Math.min(15, bandWidthScale(size) / 10);
+                })
+                .attr('width', () => {
+                  const size = datas.find(e => e.id === xUser.id).repliedArticle.length;
+                  return bandWidthScale(size) / 2;
+                })
+                .attr('height', () => {
+                  const size = datas.find(e => e.id === yUser.id).repliedArticle.length;
+                  return bandWidthScale(size) / 2;
+                })
+                .style('fill', () => {
+                  if (i > index) return leftMyColor(100);
+                  if (xUser.community === yUser.community) {
+                    const communityColor = d3.scaleLinear()
+                      .range(['white', color(xUser.community)])
+                      .domain([0, 1]);
+                    // return communityColor(d);
+                    return colorArray[xUser.community](authorSim);
+                  }
+                  // return leftMyColor(d);
+                  return colorArray[7](authorSim);
+                })
+                // .attr('stroke', 'black')
+                // .attr('stroke-width', Math.random() * 5)
+                .attr('visibility', i >= index ? 'hidden' : 'visible')
+                .on('mouseover', () => mouseover(authorSim, index, i))
                 .on('mouseout', mouseout)
                 .on('click', () => {
                   selectedUser.splice(0, selectedUser.length);
@@ -816,18 +872,33 @@ export default function userSimilarityGraph(data, svg, user, articles) {
 
       function drawAverageSimilarity() {
         for (let i = 0; i < groupIndex.length; i += 1) {
+          const [similarityArray, selfAvgSimilarity] = computeAvgSim(i);
+          console.log(`community ${groupIndex[i].community} avgSim ${selfAvgSimilarity}`);
+          // self average similarity
+          drawSelfAvgSim(selfAvgSimilarity, i);
+          // self quantile similarity
+          drawQuantileSimilarity(similarityArray, i);
+          // average similarity between communities
+          drawAvgSimBetweenComs(i);
+        }
+
+        function computeAvgSim(i) {
           let selfTotalSim = 0;
-          const similarityArray = [];
+          const simArr = [];
           for (let j = groupIndex[i].index; j < groupIndex[i].index + groupIndex[i].num; j += 1) {
             for (let k = groupIndex[i].index; k < groupIndex[i].index + groupIndex[i].num; k += 1) {
-              selfTotalSim += secondOrdering_mat[j][k];
-              similarityArray.push(secondOrdering_mat[j][k]);
+              if (j !== k) {
+                selfTotalSim += secondOrdering_mat[j][k];
+                simArr.push(secondOrdering_mat[j][k]);
+              }
             }
           }
-          selfTotalSim -= groupIndex[i].num;
+          simArr.sort((a, b) => a - b);
           const selfAvgSim = selfTotalSim / (groupIndex[i].num * groupIndex[i].num - groupIndex[i].num);
-          console.log(`community ${groupIndex[i].community} avgSim ${selfAvgSim}`);
-          // self average similarity
+          return [simArr, selfAvgSim];
+        }
+
+        function drawSelfAvgSim(selfAvgSim, i) {
           leftSvg.append('g')
             .attr('class', `avgSimilarityPath community${groupIndex[i].community}`)
             .append('path')
@@ -848,13 +919,13 @@ export default function userSimilarityGraph(data, svg, user, articles) {
             .on('mouseout', (d, index, nodes) => {
               d3.select(nodes[index]).attr('opacity', 1);
             });
+        }
 
-          // self quantile similarity
-          similarityArray.sort((a, b) => a - b);
+        function drawQuantileSimilarity(simArr, i) {
           const quantile = [
-            d3.quantile(similarityArray, 0.25),
-            d3.quantile(similarityArray, 0.5),
-            d3.quantile(similarityArray, 0.75),
+            d3.quantile(simArr, 0.25),
+            d3.quantile(simArr, 0.5),
+            d3.quantile(simArr, 0.75),
           ];
           console.log(quantile[2] - quantile[0]);
           leftSvg.append('g')
@@ -882,8 +953,9 @@ export default function userSimilarityGraph(data, svg, user, articles) {
             .on('mouseout', (d, index, nodes) => {
               d3.select(nodes[index]).attr('opacity', 1);
             });
+        }
 
-          // average similarity between communities
+        function drawAvgSimBetweenComs(i) {
           for (let j = i + 1; j < groupIndex.length; j += 1) {
             let totalSim = 0;
             for (let x = groupIndex[j - 1].index + groupIndex[j - 1].num; x < groupIndex[j].index + groupIndex[j].num; x += 1) {

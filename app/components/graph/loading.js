@@ -9,7 +9,7 @@
 import * as d3 from 'd3';
 
 export default function loading(temp, total, svg) {
-  console.log(temp, total, svg);
+  // console.log(temp, total, svg);
   const h = parseFloat(d3.select('#timeLine').style('height'));
   const w = parseFloat(d3.select('#timeLine').style('width'));
   const color = d3.schemeTableau10;
@@ -37,7 +37,6 @@ export default function loading(temp, total, svg) {
       // .transition()
       // .duration(1000)
       .attr('width', () => {
-        console.log(temp);
         return 200 * (temp / total);
       });
     svg.selectAll('text')

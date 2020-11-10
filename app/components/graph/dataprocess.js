@@ -320,7 +320,7 @@ function matrixReorderingByCommunity(mat, origMat, com, userAxis, us) {
       }
     }
   }
-//   console.log('community permutation for matrix', perm);
+  //   console.log('community permutation for matrix', perm);
   const tempUser = userAxis.slice();
   for (let j = 0; j < us.length; j += 1) {
     userAxis[j] = tempUser[perm[j]];
@@ -422,6 +422,29 @@ function communityInnerMatrixReordering(mat, origMat, userAxis, us, communityDat
   return [copyMat, copyOriginalMat];
 }
 
+function computeUserSimilarityByAuthors(user1, user2) {
+  const temp = user1.repliedArticle;
+  const next = user2.repliedArticle;
+  const tempAuthorList = [];
+  const nextAuthorList = [];
+  temp.forEach((a) => {
+    if (!tempAuthorList.includes(a.tuhor)) tempAuthorList.push(a.author);
+  });
+  next.forEach((a) => {
+    if (!nextAuthorList.includes(a.tuhor)) nextAuthorList.push(a.author);
+  });
+  const tempdiff = tempAuthorList.filter(
+    o1 => nextAuthorList.filter(o2 => o2 === o1).length === 0,
+  );
+  const nextdiff = nextAuthorList.filter(
+    o1 => tempAuthorList.filter(o2 => o2 === o1).length === 0,
+  );
+  const intersectArticles = tempAuthorList.length - tempdiff.length;
+  const nextintersectArticles = nextAuthorList.length - nextdiff.length;
+  const similarity = intersectArticles / (tempAuthorList.length + nextAuthorList.length - intersectArticles);
+  return similarity;
+}
+
 export {
   computeUserSimilarityByArticles,
   computeArticleSimilarity,
@@ -433,4 +456,5 @@ export {
   matrixReorderingByCommunity,
   moveNonSimilarUsersToCorner,
   communityInnerMatrixReordering,
+  computeUserSimilarityByAuthors,
 };
