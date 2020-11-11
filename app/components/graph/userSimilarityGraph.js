@@ -21,7 +21,7 @@ import * as dp from './dataprocess';
 export default function userSimilarityGraph(data, svg, user, articles) {
   // console.log(user);
   // console.log(data);
-  const svgScale = d3.scaleSqrt().domain([1, 200]).range([0.5, 0.1]);
+  const svgScale = d3.scaleSqrt().domain([0, 200]).range([0.5, 0.1]);
   // const commentTimelineSvg = d3.select('#commentTimeline');
   const commentTimelineSvg = d3.select('#context');
   const h = parseFloat(d3.select('.heatMap').style('height'));
@@ -459,8 +459,8 @@ export default function userSimilarityGraph(data, svg, user, articles) {
       const curLen = current.repliedArticle ? current.repliedArticle.length : current;
       return preLen + curLen;
     });
-    const bandWidthScale = d3.scaleSqrt().domain([1, totalReplied])
-      .range([5, 500]);
+    const bandWidthScale = d3.scaleSqrt().domain([0, totalReplied])
+      .range([0, 500]);
     const positionScale = computePosition(datas, bandWidthScale);
 
     const activityTranslateX = 120;
@@ -1690,7 +1690,7 @@ export default function userSimilarityGraph(data, svg, user, articles) {
         temp.push(community.find(e => e.id === newUserAxisValues[axisIndex]).community);
         comunityIndexY.push(axisIndex);
       }
-      const articleGroupWidthScale = d3.scaleLinear().domain([1, filteredArticles.length]).range([20, 2000]);
+      const articleGroupWidthScale = d3.scaleLinear().domain([0, filteredArticles.length]).range([0, 2000]);
       const articleGroupIndexArray = [];
       const articleGroupYScale = [0];
       const padding = 2;

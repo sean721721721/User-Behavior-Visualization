@@ -116,12 +116,12 @@ export default function userDailyActivity(data, user, svg, begin, end) {
         }
       }
     });
-    const pointerWidth = d3.scaleLinear().domain([1, userID.length]).range([5, 80]);
+    const pointerWidth = d3.scaleLinear().domain([0, userID.length]).range([0, -80]);
     fixedSvg.selectAll(`.pointer.articleID_${articleId}`)
       .selectAll('rect')
       .transition()
       .duration(1000)
-      .attr('width', isClicked ? pointerWidth(includesUser.length) + userScale.range()[1] : pointerWidth(includesUser.length));
+      .attr('width', isClicked ? -pointerWidth(includesUser.length) + userScale.range()[1] : -pointerWidth(includesUser.length));
     console.log(article);
     if (isClicked) {
       const postYear = new Date(article.date).getFullYear();
@@ -423,8 +423,8 @@ export default function userDailyActivity(data, user, svg, begin, end) {
     .attr('x', 160)
     .attr('y', h + 50);
   // add repost link
-  const pointerScale = d3.scaleLinear().domain([1, userID.length]).range([3, 10]);
-  const pointerOffset = d3.scaleLinear().domain([1, userID.length]).range([15, -60]);
+  const pointerScale = d3.scaleLinear().domain([0, userID.length]).range([0, 10]);
+  const pointerOffset = d3.scaleLinear().domain([0, userID.length]).range([0, -80]);
   const sortedArticles = data.sort((a, b) => new Date(a.date) - new Date(b.date))
     .filter(art => art.messages.some(mes => userID.includes(mes.push_userid)));
   const curveOffset = d3.scaleLinear().domain([0, 610]).range([-30, -100]);
@@ -459,9 +459,9 @@ export default function userDailyActivity(data, user, svg, begin, end) {
           .attr('class', `repostLink ${articleId1}`)
           .attr('id', `${articleId1}_${articleId2}`)
           .attr('d', line([
-            { x: pointerOffset(includesUser1.length) - 20, y: y1 },
-            { x: Math.min(pointerOffset(includesUser1.length) - 20, pointerOffset(includesUser2.length) - 20) - 20, y: (y1 + y2) / 2 },
-            { x: pointerOffset(includesUser2.length) - 20, y: y2 },
+            { x: pointerOffset(includesUser1.length), y: y1 },
+            { x: Math.min(pointerOffset(includesUser1.length) - 20, pointerOffset(includesUser2.length) - 20), y: (y1 + y2) / 2 },
+            { x: pointerOffset(includesUser2.length), y: y2 },
           ]))
           .attr('stroke', 'gray')
           .attr('stroke-width', '4px')
@@ -486,7 +486,7 @@ export default function userDailyActivity(data, user, svg, begin, end) {
       });
       fixedSvg.append('g')
         .attr('class', `pointer articleID_${articleId}`)
-        .attr('transform', 'translate(-20, 0)')
+        .attr('transform', 'translate(0, 0)')
         .selectAll()
         .data([data[i]])
         .enter()
@@ -501,7 +501,7 @@ export default function userDailyActivity(data, user, svg, begin, end) {
               return timeScale(postTime) < h ? 1 : 0;
             })
             .attr('x', pointerOffset(includesUser.length))
-            .attr('width', -pointerOffset(includesUser.length) + 20)
+            .attr('width', -pointerOffset(includesUser.length))
             .attr('height', 2)
             .style('fill', color[0])
             .on('mouseover', _d => mouseover(_d, data))
@@ -516,7 +516,7 @@ export default function userDailyActivity(data, user, svg, begin, end) {
               return timeScale(postTime) < h ? 1 : 0;
             })
             .attr('cx', pointerOffset(includesUser.length))
-            .attr('r', pointerScale(includesUser.length))
+            // .attr('r', pointerScale(includesUser.length))
             .attr('r', 5)
             .attr('stroke', 'black')
             .attr('stroke-width', _d => (_d.article_title[0] !== 'R' ? '2px' : '0px'))

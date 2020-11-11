@@ -82,8 +82,8 @@ export default function treemap(cellNodes, beforeThisDate,
   // console.log(width, height);
   d3.treemap()
     .size([width, height])
-    .paddingTop(15)
-    .paddingRight(10)
+    // .paddingTop(15)
+    // .paddingRight(10)
     .paddingInner(0)(root);
 
   // prepare a color scale
@@ -97,48 +97,63 @@ export default function treemap(cellNodes, beforeThisDate,
     .range([0.5, 1]);
 
     // use this information to add rectangles:
-  articleTreemap
-    .selectAll('rect')
+  d3.select('.treemap')
+    .datum(root)
+    .selectAll()
     .data(root.leaves())
     .enter()
-    .append('rect')
-    .attr('x', d => d.x0)
-    .attr('y', d => d.y0)
-    .attr('rx', d => Math.min(d.x1 - d.x0, d.y1 - d.y0) / 20)
-    .attr('ry', d => Math.min(d.x1 - d.x0, d.y1 - d.y0) / 20)
-    .attr('width', d => d.x1 - d.x0)
-    .attr('height', d => d.y1 - d.y0)
-    .style('stroke', 'black')
-    .style('fill', d => color(d.parent.data.name))
-    .style('opacity', d => opacity(d.data.value))
-    .on('click', (d, index, nodes) => articleNodeClicked(d, d.data.id, index, nodes))
-    .append('title')
-    .text((d) => {
-      const title = d.data.name.replace('mister_', '');
-      return title;
-    });
+    .append('div')
+    .attr('class', 'node')
+    .style('position', 'absolute')
+    .style('overflow', 'hidden')
+    .style('left', d => `${d.x0}px`)
+    .style('top', d => `${d.y0}px`)
+    .style('width', d => `${Math.max(0, d.x1 - d.x0 - 1)}px`)
+    .style('height', d => `${Math.max(0, d.y1 - d.y0 - 1)}px`)
+    .style('background', d => color(d.parent.data.name))
+    // .text(d => d.data.name);
+  // articleTreemap
+  //   .selectAll('rect')
+  //   .data(root.leaves())
+  //   .enter()
+    // .append('rect')
+    // .attr('x', d => d.x0)
+    // .attr('y', d => d.y0)
+    // // .attr('rx', d => Math.min(d.x1 - d.x0, d.y1 - d.y0) / 20)
+    // // .attr('ry', d => Math.min(d.x1 - d.x0, d.y1 - d.y0) / 20)
+    // .attr('width', d => d.x1 - d.x0)
+    // .attr('height', d => d.y1 - d.y0)
+    // .style('stroke', 'black')
+    // .style('fill', d => color(d.parent.data.name))
+    // .style('opacity', d => opacity(d.data.value))
+    // .on('click', (d, index, nodes) => articleNodeClicked(d, d.data.id, index, nodes))
+    // .append('title')
+    // .text((d) => {
+    //   const title = d.data.name.replace('mister_', '');
+    //   return title;
+    // });
 
   // and to add the text labels
   articleTreemap
     .selectAll('text')
     .data(root.leaves())
     .enter()
-    .append('text')
-    .attr('x', d => d.x0 + 5) // +10 to adjust position (more right)
-    .attr('y', d => d.y0 + 15) // +20 to adjust position (lower)
-    .text((d) => {
-      const length = d.x1 - d.x0;
-      const title = d.data.name.replace('mister_', '');
-      if (title.length > 10) {
-        const shortTitle = title.slice(0, 10 + ((length - 150) / 20));
-        return shortTitle;
-      }
-      return title;
-      // const name = d.data.name.split(' ')[0];
-      // return name;
-    })
-    .attr('font-size', '11px')
-    .attr('fill', 'white')
+    // .append('text')
+    // .attr('x', d => d.x0 + 5) // +10 to adjust position (more right)
+    // .attr('y', d => d.y0 + 15) // +20 to adjust position (lower)
+    // .text((d) => {
+    //   const length = d.x1 - d.x0;
+    //   const title = d.data.name.replace('mister_', '');
+    //   if (title.length > 10) {
+    //     const shortTitle = title.slice(0, 10 + ((length - 150) / 20));
+    //     return shortTitle;
+    //   }
+    //   return title;
+    //   // const name = d.data.name.split(' ')[0];
+    //   // return name;
+    // })
+    // .attr('font-size', '11px')
+    // .attr('fill', 'white')
     .append('title')
     .text((d) => {
       const title = d.data.name.replace('mister_', '');
@@ -162,19 +177,37 @@ export default function treemap(cellNodes, beforeThisDate,
     .attr('fill', 'white');
 
   // Add title for the 3 groups
-  articleTreemap
-    .selectAll('titles')
+  d3.select('.treemap')
+    .selectAll()
     .data(root.descendants().filter(d => d.depth === 1))
     .enter()
-    .append('text')
-    .attr('x', d => d.x0)
-    .attr('y', d => d.y0 + 11)
+    .append('div')
+    .style('position', 'absolute')
+    .style('overflow', 'hidden')
+    .style('text-align', 'center')
+    .style('left', d => `${d.x0}px`)
+    .style('top', d => `${Math.max(0, d.y1 + d.y0) / 2 - 9}px`)
+    .style('width', d => `${Math.max(0, d.x1 - d.x0 - 11)}px`)
+    .style('height', d => `20px`)
     .text((d) => {
       const name = d.data.name.split(' ')[0];
       return name;
     })
     .attr('font-size', '12px')
     .attr('fill', d => color(d.data.name));
+  // articleTreemap
+  //   .selectAll('titles')
+  //   .data(root.descendants().filter(d => d.depth === 1))
+  //   .enter()
+  //   .append('text')
+  //   .attr('x', d => d.x0)
+  //   .attr('y', d => d.y0 + 11)
+  //   .text((d) => {
+  //     const name = d.data.name.split(' ')[0];
+  //     return name;
+  //   })
+  //   .attr('font-size', '12px')
+  //   .attr('fill', d => color(d.data.name));
   let selectedUser = [];
 
   function articleNodeClicked(d, article_id, index, nodes) {

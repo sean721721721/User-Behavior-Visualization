@@ -47989,7 +47989,7 @@ class Graph extends Component {
                 </div>
               </div>
             </div>
-            <div className="treemap">
+            <div className="treemap" style={{ position: 'relative' }}>
               <svg id="graph" width="100%" height="100%" style={{}} />
             </div>
           </div>
