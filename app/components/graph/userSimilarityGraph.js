@@ -551,8 +551,13 @@ export default function userSimilarityGraph(data, svg, user, articles) {
       const curLen = current.repliedArticle ? current.repliedArticle.length : current;
       return preLen + curLen;
     });
-    const bandWidthScale = d3.scaleSqrt().domain([0, totalReplied])
-      .range([0, 500]);
+    // const bandWidthScale = d3.scaleSqrt().domain([0, totalReplied])
+    //   .range([0, maxSize]);
+    const rectMargin = 10;
+    const maxReplied = Math.max(...datas.map(usr => usr.repliedArticle.length));
+    const maxSize = 100;
+    const bandWidthScale = d3.scaleSqrt().domain([0, maxReplied])
+      .range([0, maxSize]);
     const positionScale = computePosition(datas, bandWidthScale);
 
     const activityTranslateX = 120;
@@ -585,7 +590,6 @@ export default function userSimilarityGraph(data, svg, user, articles) {
         const curLen = current.repliedArticle ? current.repliedArticle.length : current;
         return (preLen < curLen) ? preLen : curLen;
       });
-
       for (let i = 0; i < permuted_mat.length; i += 1) {
         const leftSvgGroup = leftSvg.append('g');
         leftSvgGroup.selectAll()
@@ -596,7 +600,29 @@ export default function userSimilarityGraph(data, svg, user, articles) {
             const xUser = datas.find(e => e.id === newUserAxisValues[index]);
             const yUser = datas.find(e => e.id === newUserAxisValues[i]);
             if (i < index || xUser.community === yUser.community) {
-            // if (i <= index) {
+              // user rect
+              d3.select(nodes[index])
+                .append('rect')
+                .attr('class', () => {
+                  const xUserID = newUserAxisValues[index];
+                  const yUserID = newUserAxisValues[i];
+                  return `userRect ${xUserID} ${yUserID} y${i} x${index}`;
+                })
+                .attr('x', (index % newUserAxisValues.length) * (maxSize + rectMargin))
+                .attr('y', i * (maxSize + rectMargin))
+                .attr('rx', () => {
+                  if (i > index) return 0;
+                  const size = datas.find(e => e.id === xUser.id).repliedArticle.length;
+                  return Math.min(15, bandWidthScale(size) / 10);
+                })
+                .attr('width', maxSize)
+                .attr('height', maxSize)
+                .attr('fill', 'white')
+                .attr('stroke', 'black')
+                .attr('stroke-width', '1px')
+                .attr('opacity', i >= index ? 0 : 1);
+
+              // article similarity
               d3.select(nodes[index])
                 .append('rect')
                 .attr('class', () => {
@@ -604,8 +630,18 @@ export default function userSimilarityGraph(data, svg, user, articles) {
                   const yUserID = newUserAxisValues[i];
                   return `articleSimilarity ${xUserID} ${yUserID} y${i} x${index}`;
                 })
-                .attr('x', () => positionScale[index])
-                .attr('y', positionScale[i])
+                // .attr('x', () => positionScale[index])
+                // .attr('y', positionScale[i])
+                .attr('x', () => {
+                  const size = datas.find(e => e.id === xUser.id).repliedArticle.length;
+                  const offset = (bandWidthScale.range()[1] - bandWidthScale(size)) / 2;
+                  return (index % newUserAxisValues.length) * (maxSize + rectMargin) + offset;
+                })
+                .attr('y', () => {
+                  const size = datas.find(e => e.id === yUser.id).repliedArticle.length;
+                  const offset = (bandWidthScale.range()[1] - bandWidthScale(size)) / 2;
+                  return i * (maxSize + rectMargin) + offset;
+                })
                 .attr('rx', () => {
                   if (i > index) return 0;
                   const size = datas.find(e => e.id === xUser.id).repliedArticle.length;
@@ -631,8 +667,6 @@ export default function userSimilarityGraph(data, svg, user, articles) {
                   // return leftMyColor(d);
                   return colorArray[7](d);
                 })
-                // .attr('stroke', 'black')
-                // .attr('stroke-width', Math.random() * 5)
                 .attr('opacity', i >= index ? 0 : 1)
                 .on('mouseover', () => mouseover(secondOrdering_origMat[i][index], index, i))
                 .on('mouseout', mouseout)
@@ -651,13 +685,23 @@ export default function userSimilarityGraph(data, svg, user, articles) {
                   const yUserID = newUserAxisValues[i];
                   return `authorSimilarity ${xUserID} ${yUserID} y${i} x${index}`;
                 })
+                // .attr('x', () => {
+                //   const size = datas.find(e => e.id === xUser.id).repliedArticle.length;
+                //   return positionScale[index] + bandWidthScale(size) / 4;
+                // })
+                // .attr('y', () => {
+                //   const size = datas.find(e => e.id === yUser.id).repliedArticle.length;
+                //   return positionScale[i] + bandWidthScale(size) / 4;
+                // })
                 .attr('x', () => {
                   const size = datas.find(e => e.id === xUser.id).repliedArticle.length;
-                  return positionScale[index] + bandWidthScale(size) / 4;
+                  const offset = (bandWidthScale.range()[1] - (bandWidthScale(size) / 2)) / 2;
+                  return (index % newUserAxisValues.length) * (maxSize + rectMargin) + offset;
                 })
                 .attr('y', () => {
                   const size = datas.find(e => e.id === yUser.id).repliedArticle.length;
-                  return positionScale[i] + bandWidthScale(size) / 4;
+                  const offset = (bandWidthScale.range()[1] - (bandWidthScale(size) / 2)) / 2;
+                  return i * (maxSize + rectMargin) + offset;
                 })
                 .attr('rx', () => {
                   if (i > index) return 0;
@@ -699,10 +743,18 @@ export default function userSimilarityGraph(data, svg, user, articles) {
           });
         const tempUser = community.find(e => e.id === newUserAxisValues[i]);
         leftSvgGroup.append('path')
+          // .attr('d', () => {
+          //   const start = positionScale[i];
+          //   const size = datas.find(e => e.id === tempUser.id).repliedArticle.length;
+          //   const end = positionScale[i] + bandWidthScale(size);
+          //   return `M ${start} ${start} L ${end} ${start} L ${end} ${end}`;
+          // })
           .attr('d', () => {
-            const start = positionScale[i];
             const size = datas.find(e => e.id === tempUser.id).repliedArticle.length;
-            const end = positionScale[i] + bandWidthScale(size);
+            const offset = (bandWidthScale.range()[1] - bandWidthScale(size)) / 2;
+            console.log(offset);
+            const start = i * (maxSize + rectMargin) + offset;
+            const end = start + bandWidthScale(size);
             return `M ${start} ${start} L ${end} ${start} L ${end} ${end}`;
           })
           // .attr('fill', color(tempUser.community))
