@@ -123,26 +123,107 @@ export default function userSimilarityGraph(data, svg, user, articles) {
   }
 
   function drawFilterDiv() {
-    let filterDiv = d3.select('.heatMap').select('.option').append('div')
-      // .style('display', 'inline-block')
+    // let filterDiv = d3.select('.heatMap').select('.option').append('div')
+    //   .attr('class', 'filterDiv d-flex align-items-center');
+    // filterDiv = filterDiv.append('div')
+    //   .style('margin-left', '10px')
+    //   .style('align-self', 'center')
+    //   .style('font-size', 'x-small')
+    //   .text('ArticleGroupBy:');
+    // const tagInput = filterDiv.append('div')
+    //   .style('margin-left', '10px');
+    // tagInput.append('input')
+    //   .attr('type', 'radio')
+    //   .attr('id', 'tag')
+    //   .attr('name', 'group')
+    //   .attr('value', 'tag')
+    //   .property('checked', true);
+    // tagInput.append('label')
+    //   .attr('for', 'tag')
+    //   .style('margin-left', '10px')
+    //   .text('tag');
+    let simOptionsDiv = d3.select('.heatMap').select('.option').append('div')
       .attr('class', 'filterDiv d-flex align-items-center');
-    filterDiv = filterDiv.append('div')
+    simOptionsDiv = simOptionsDiv.append('div')
       .style('margin-left', '10px')
       .style('align-self', 'center')
-      .style('font-size', 'x-small')
-      .text('ArticleGroupBy:');
-    const tagInput = filterDiv.append('div')
-      .style('margin-left', '10px');
-    tagInput.append('input')
-      .attr('type', 'radio')
-      .attr('id', 'tag')
-      .attr('name', 'group')
-      .attr('value', 'tag')
+      .style('font-size', 'x-small');
+    simOptionsDiv.append('p').text('Similarity options:');
+    simOptionsDiv = simOptionsDiv.append('div').style('margin-left', '10px');
+    const usersArticlesSim = simOptionsDiv.append('div')
+      .style('float', 'left');
+    usersArticlesSim.append('input')
+      .attr('type', 'checkbox')
+      .attr('id', 'userArticle')
+      .attr('name', 'similarity')
+      .attr('value', 'userArticle')
       .property('checked', true);
-    tagInput.append('label')
-      .attr('for', 'tag')
+    usersArticlesSim.append('label')
+      .attr('for', 'userArticle')
       .style('margin-left', '10px')
-      .text('tag');
+      .text('userArticle');
+    const usersAuthorSim = simOptionsDiv.append('div')
+      .style('float', 'left');
+    usersAuthorSim.append('input')
+      .attr('type', 'checkbox')
+      .attr('id', 'userAuthor')
+      .attr('name', 'similarity')
+      .attr('value', 'userAuthor')
+      .property('checked', true);
+    usersAuthorSim.append('label')
+      .attr('for', 'userAuthor')
+      .style('margin-left', '10px')
+      .text('userAuthor');
+    const comsSim = simOptionsDiv.append('div')
+      .style('float', 'left');
+    comsSim.append('input')
+      .attr('type', 'checkbox')
+      .attr('id', 'community')
+      .attr('name', 'similarity')
+      .attr('value', 'community')
+      .property('checked', true);
+    comsSim.append('label')
+      .attr('for', 'community')
+      .style('margin-left', '10px')
+      .text('community');
+    const quantileSim = simOptionsDiv.append('div')
+      .style('float', 'left');
+    quantileSim.append('input')
+      .attr('type', 'checkbox')
+      .attr('id', 'quantile')
+      .attr('name', 'similarity')
+      .attr('value', 'quantile')
+      .property('checked', true);
+    quantileSim.append('label')
+      .attr('for', 'quantile')
+      .style('margin-left', '10px')
+      .text('quantile');
+    simOptionsDiv.selectAll('input').on('change', (d, index, nodes) => {
+      const type = d3.select(nodes[index]).attr('value');
+      const checked = d3.select(nodes[index]).property('checked');
+      switch (type) {
+        case 'userArticle':
+          d3.selectAll('.articleSimilarity')
+            .attr('visibility', checked ? 'visible' : 'hidden');
+          break;
+        case 'userAuthor':
+          d3.selectAll('.authorSimilarity')
+            .attr('visibility', checked ? 'visible' : 'hidden');
+          break;
+        case 'community':
+          d3.selectAll('.avgSimilarityPath')
+            .attr('visibility', checked ? 'visible' : 'hidden');
+          break;
+      
+        case 'quantile':
+          d3.selectAll('.quantileSimilarityPath')
+            .attr('visibility', checked ? 'visible' : 'hidden');
+          break;
+      
+        default:
+          break;
+      }
+    })
   }
   // heatMapWithAuthor();
 
@@ -428,13 +509,14 @@ export default function userSimilarityGraph(data, svg, user, articles) {
       .enter()
       .append('g')
       .attr('class', (d, index) => `group_${index}`)
-      .attr('transform', (d, index) => `translate(${110 * ((index % 2) + 4)}, ${50 * Math.floor(index / 2)})`)
+      .attr('transform', (d, index) => `translate(${110 * ((index % 2) + 4)}, ${70 * Math.floor(index / 2)})`)
       // .attr('transform', (d, index) => `translate(0 ${20 * index})`)
       .each((d, index, nodes) => {
         d3.select(nodes[index]).append('text')
           .text(`Community ${index}`)
           .attr('x', 0)
-          .attr('font-size', 12);
+          .attr('font-size', 14)
+          .attr('fill', colorArray[index](1));
 
         d3.select(nodes[index])
           .selectAll()
@@ -446,6 +528,16 @@ export default function userSimilarityGraph(data, svg, user, articles) {
           .attr('width', legendSize)
           .attr('height', legendSize)
           .attr('fill', _d => colorArray[index](_d));
+        d3.select(nodes[index])
+          .selectAll()
+          .data(['1', '.8', '.6', '.4', '.2'])
+          .enter()
+          .append('text')
+          .text(_d => _d)
+          .attr('x', (_d, _index) => _index * legendSize + 5)
+          .attr('y', 35)
+          .attr('font-size', 10)
+          .attr('fill', 'black');
       });
 
     const artComWidth = 100 + Math.max(...articlesCommunity.map(e => e.community)) * (2 + 10);
@@ -510,7 +602,7 @@ export default function userSimilarityGraph(data, svg, user, articles) {
                 .attr('class', () => {
                   const xUserID = newUserAxisValues[index];
                   const yUserID = newUserAxisValues[i];
-                  return `${xUserID} ${yUserID} y${i} x${index}`;
+                  return `articleSimilarity ${xUserID} ${yUserID} y${i} x${index}`;
                 })
                 .attr('x', () => positionScale[index])
                 .attr('y', positionScale[i])
@@ -541,7 +633,7 @@ export default function userSimilarityGraph(data, svg, user, articles) {
                 })
                 // .attr('stroke', 'black')
                 // .attr('stroke-width', Math.random() * 5)
-                .attr('visibility', i >= index ? 'hidden' : 'visible')
+                .attr('opacity', i >= index ? 0 : 1)
                 .on('mouseover', () => mouseover(secondOrdering_origMat[i][index], index, i))
                 .on('mouseout', mouseout)
                 .on('click', () => {
@@ -557,7 +649,7 @@ export default function userSimilarityGraph(data, svg, user, articles) {
                 .attr('class', () => {
                   const xUserID = newUserAxisValues[index];
                   const yUserID = newUserAxisValues[i];
-                  return `${xUserID} ${yUserID} y${i} x${index}`;
+                  return `authorSimilarity ${xUserID} ${yUserID} y${i} x${index}`;
                 })
                 .attr('x', () => {
                   const size = datas.find(e => e.id === xUser.id).repliedArticle.length;
@@ -594,7 +686,7 @@ export default function userSimilarityGraph(data, svg, user, articles) {
                 })
                 // .attr('stroke', 'black')
                 // .attr('stroke-width', Math.random() * 5)
-                .attr('visibility', i >= index ? 'hidden' : 'visible')
+                .attr('opacity', i >= index ? 0 : 1)
                 .on('mouseover', () => mouseover(authorSim, index, i))
                 .on('mouseout', mouseout)
                 .on('click', () => {
@@ -929,7 +1021,7 @@ export default function userSimilarityGraph(data, svg, user, articles) {
           ];
           console.log(quantile[2] - quantile[0]);
           leftSvg.append('g')
-            .attr('class', `avgSimilarityPath community${groupIndex[i].community}`)
+            .attr('class', `quantileSimilarityPath community${groupIndex[i].community}`)
             .selectAll()
             .data(quantile)
             .enter()

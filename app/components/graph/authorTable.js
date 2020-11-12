@@ -104,10 +104,19 @@ export default function AuthorTable(nodes, div, $this, callback) {
     console.log('table clicked');
     const pushAuthor = JSON.parse(JSON.stringify(d));
     pushAuthor.id = pushAuthor.oldId;
-    topicWithSelectedAuthor.children.push(pushAuthor);
-    console.log(topicWithSelectedAuthor, pushAuthor);
-    callback(topicWithSelectedAuthor, pushAuthor.id);
-    authorIndex += 1;
+    if (!topicWithSelectedAuthor.children.some(e => e.id === pushAuthor.id)) {
+      topicWithSelectedAuthor.children.push(pushAuthor);
+      console.log(topicWithSelectedAuthor, pushAuthor);
+      callback(topicWithSelectedAuthor, pushAuthor.id);
+      authorIndex += 1;
+    } else {
+      const index = topicWithSelectedAuthor.children.findIndex(e => e.id === pushAuthor.id);
+      if (topicWithSelectedAuthor.children.length > 1) {
+        topicWithSelectedAuthor.children.splice(index, 1);
+        console.log(topicWithSelectedAuthor, pushAuthor);
+        callback(topicWithSelectedAuthor, topicWithSelectedAuthor.children[0].id);
+      }
+    }
   }
 
   function financial(x) {

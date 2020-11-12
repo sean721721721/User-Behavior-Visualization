@@ -430,6 +430,7 @@ export default function userDailyActivity(data, user, svg, begin, end) {
   const curveOffset = d3.scaleLinear().domain([0, 610]).range([-30, -100]);
   for (let i = 0; i < sortedArticles.length; i += 1) {
     for (let j = i + 1; j < sortedArticles.length; j += 1) {
+      if (!sortedArticles.article_title) break;
       if (sortedArticles[i].article_title === sortedArticles[j].article_title.substring(4)) {
         const y1 = timeScale(new Date(sortedArticles[i].date));
         const y2 = timeScale(new Date(sortedArticles[j].date));
@@ -739,7 +740,7 @@ export default function userDailyActivity(data, user, svg, begin, end) {
         workHour.setHours(workHour.getHours() + 9);
         const tempDatePos = timeScale(tempDate) > 0 ? timeScale(tempDate) : 0;
         const workHourPos = timeScale(workHour) < h ? timeScale(workHour) : h;
-        return workHourPos - tempDatePos;
+        return Math.max(0, workHourPos - tempDatePos);
       })
       .attr('opacity', d => (timeScale(new Date(d)) < h ? 1 : 0));
     // update afterWork rect
@@ -751,7 +752,7 @@ export default function userDailyActivity(data, user, svg, begin, end) {
         workHour.setHours(workHour.getHours() + 6);
         const tempDatePos = timeScale(tempDate) > 0 ? timeScale(tempDate) : 0;
         const workHourPos = timeScale(workHour) < h ? timeScale(workHour) : h;
-        return workHourPos - tempDatePos;
+        return Math.max(0, workHourPos - tempDatePos);
       })
       .attr('opacity', d => (timeScale(new Date(d)) < h ? 1 : 0));
     // fixedSvg.selectAll('path').remove();
@@ -761,7 +762,6 @@ export default function userDailyActivity(data, user, svg, begin, end) {
     const filteredSortedArticles = sortedArticles.filter((e) => {
       return new Date(date1) < new Date(e.date) && new Date(date2) > new Date(e.date);
     });
-    console.log(filteredSortedArticles);
     // update reposting link
     fixedSvg.selectAll('path.repostLink').attr('visibility', 'hidden');
     for (let i = 0; i < filteredSortedArticles.length; i += 1) {

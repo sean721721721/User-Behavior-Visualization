@@ -36,6 +36,7 @@ export default function treemap(cellNodes, beforeThisDate,
   const mostUserNum = 1000;
   // append the svg object to the body of the page
   svg.selectAll('*').remove();
+  d3.select('.treemap').selectAll('div').remove();
   const articleTreemap = svg.append('g')
     .attr('transform',
       `translate(${margin.left},${margin.top})`);
@@ -81,7 +82,7 @@ export default function treemap(cellNodes, beforeThisDate,
   // Then d3.treemap computes the position of each element of the hierarchy
   // console.log(width, height);
   d3.treemap()
-    .size([width, height])
+    .size([w, h])
     // .paddingTop(15)
     // .paddingRight(10)
     .paddingInner(0)(root);
@@ -111,6 +112,13 @@ export default function treemap(cellNodes, beforeThisDate,
     .style('width', d => `${Math.max(0, d.x1 - d.x0 - 1)}px`)
     .style('height', d => `${Math.max(0, d.y1 - d.y0 - 1)}px`)
     .style('background', d => color(d.parent.data.name))
+    .style('border', '1px solid black')
+    .on('click', (d, index, nodes) => articleNodeClicked(d, d.data.id, index, nodes))
+    .append('title')
+    .text((d) => {
+      const title = d.data.name.replace('mister_', '');
+      return title;
+    });
     // .text(d => d.data.name);
   // articleTreemap
   //   .selectAll('rect')
@@ -185,10 +193,12 @@ export default function treemap(cellNodes, beforeThisDate,
     .style('position', 'absolute')
     .style('overflow', 'hidden')
     .style('text-align', 'center')
-    .style('left', d => `${d.x0}px`)
+    .style('left', d => `${Math.max(0, (d.x1 + d.x0) / 2 - Math.max(0, d.x1 - d.x0 - 11) / 2)}px`)
     .style('top', d => `${Math.max(0, d.y1 + d.y0) / 2 - 9}px`)
     .style('width', d => `${Math.max(0, d.x1 - d.x0 - 11)}px`)
-    .style('height', d => `20px`)
+    .style('height', (d) => {
+      return (d.y1 - d.y0) > 20 ? '20px' : '0px';
+    })
     .text((d) => {
       const name = d.data.name.split(' ')[0];
       return name;
@@ -251,7 +261,7 @@ export default function treemap(cellNodes, beforeThisDate,
     // // push userid to selectedUser (union)
     if (d.data.tag === 0) {
       d3.select(nodes[index])
-        .style('fill', 'black');
+        .style('background', 'black');
       d.data.tag = 1;
       console.log('push');
       selectedArticleNodes.push(article_id);
@@ -274,7 +284,7 @@ export default function treemap(cellNodes, beforeThisDate,
       }
     } else {
       d3.select(nodes[index])
-        .style('fill', color(d.parent.data.name));
+        .style('background', color(d.parent.data.name));
       d.data.tag = 0;
       selectedUser = selectedUser.filter(e => !d.data.messages.some(mes => mes.push_userid === e.id));
     }
