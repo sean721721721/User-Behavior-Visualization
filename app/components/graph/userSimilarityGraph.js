@@ -448,13 +448,19 @@ export default function userSimilarityGraph(data, svg, user, articles) {
       const beginDate = d3.select('#date1').attr('value');
       const endDate = d3.select('#date2').attr('value');
       const us = datas.filter(_d => selectedUser.includes(_d.id));
-      us.forEach((usr) => {
-        usr.repliedArticle.forEach((art) => {
-          if (!bothRepliedArticles.some(e => e.article_id === art.article_id)) {
-            bothRepliedArticles.push(art);
-          }
+      if (us.length === 2) {
+        bothRepliedArticles = us[0].repliedArticle.filter((a) => {
+          return us[1].repliedArticle.some(_a => a.article_id === _a.article_id);
         });
-      });
+      } else {
+        us.forEach((usr) => {
+          usr.repliedArticle.forEach((art) => {
+            if (!bothRepliedArticles.some(e => e.article_id === art.article_id)) {
+              bothRepliedArticles.push(art);
+            }
+          });
+        });
+      }
       const sortedUs = [];
       newUserAxisValues.forEach((e) => {
         const usr = us.find(u => u.id === e);
@@ -553,7 +559,7 @@ export default function userSimilarityGraph(data, svg, user, articles) {
     });
     // const bandWidthScale = d3.scaleSqrt().domain([0, totalReplied])
     //   .range([0, maxSize]);
-    const rectMargin = 10;
+    const rectMargin = 20;
     const maxReplied = Math.max(...datas.map(usr => usr.repliedArticle.length));
     const maxSize = 100;
     const bandWidthScale = d3.scaleSqrt().domain([0, maxReplied])
@@ -600,149 +606,218 @@ export default function userSimilarityGraph(data, svg, user, articles) {
             const xUser = datas.find(e => e.id === newUserAxisValues[index]);
             const yUser = datas.find(e => e.id === newUserAxisValues[i]);
             if (i < index || xUser.community === yUser.community) {
+              const xSize = datas.find(e => e.id === xUser.id).repliedArticle.length;
+              const ySize = datas.find(e => e.id === yUser.id).repliedArticle.length;
+              const bothReplied = getBothRepliedArticle(xUser, yUser);
               // user rect
-              d3.select(nodes[index])
-                .append('rect')
-                .attr('class', () => {
-                  const xUserID = newUserAxisValues[index];
-                  const yUserID = newUserAxisValues[i];
-                  return `userRect ${xUserID} ${yUserID} y${i} x${index}`;
-                })
-                .attr('x', (index % newUserAxisValues.length) * (maxSize + rectMargin))
-                .attr('y', i * (maxSize + rectMargin))
-                .attr('rx', () => {
-                  if (i > index) return 0;
-                  const size = datas.find(e => e.id === xUser.id).repliedArticle.length;
-                  return Math.min(15, bandWidthScale(size) / 10);
-                })
-                .attr('width', maxSize)
-                .attr('height', maxSize)
-                .attr('fill', 'white')
-                .attr('stroke', 'black')
-                .attr('stroke-width', '1px')
-                .attr('opacity', i >= index ? 0 : 1);
-
+              drawUserRect(nodes, index, i);
+              // reply time
+              drawReplyTime(nodes, index, i, xUser, yUser, bothReplied);
               // article similarity
-              d3.select(nodes[index])
-                .append('rect')
-                .attr('class', () => {
-                  const xUserID = newUserAxisValues[index];
-                  const yUserID = newUserAxisValues[i];
-                  return `articleSimilarity ${xUserID} ${yUserID} y${i} x${index}`;
-                })
-                // .attr('x', () => positionScale[index])
-                // .attr('y', positionScale[i])
-                .attr('x', () => {
-                  const size = datas.find(e => e.id === xUser.id).repliedArticle.length;
-                  const offset = (bandWidthScale.range()[1] - bandWidthScale(size)) / 2;
-                  return (index % newUserAxisValues.length) * (maxSize + rectMargin) + offset;
-                })
-                .attr('y', () => {
-                  const size = datas.find(e => e.id === yUser.id).repliedArticle.length;
-                  const offset = (bandWidthScale.range()[1] - bandWidthScale(size)) / 2;
-                  return i * (maxSize + rectMargin) + offset;
-                })
-                .attr('rx', () => {
-                  if (i > index) return 0;
-                  const size = datas.find(e => e.id === xUser.id).repliedArticle.length;
-                  return Math.min(15, bandWidthScale(size) / 10);
-                })
-                .attr('width', () => {
-                  const size = datas.find(e => e.id === xUser.id).repliedArticle.length;
-                  return bandWidthScale(size);
-                })
-                .attr('height', () => {
-                  const size = datas.find(e => e.id === yUser.id).repliedArticle.length;
-                  return bandWidthScale(size);
-                })
-                .style('fill', () => {
-                  if (i > index) return leftMyColor(100);
-                  if (xUser.community === yUser.community) {
-                    const communityColor = d3.scaleLinear()
-                      .range(['white', color(xUser.community)])
-                      .domain([0, 1]);
-                    // return communityColor(d);
-                    return colorArray[xUser.community](d);
-                  }
-                  // return leftMyColor(d);
-                  return colorArray[7](d);
-                })
-                .attr('opacity', i >= index ? 0 : 1)
-                .on('mouseover', () => mouseover(secondOrdering_origMat[i][index], index, i))
-                .on('mouseout', mouseout)
-                .on('click', () => {
-                  selectedUser.splice(0, selectedUser.length);
-                  selectedUser.push(newUserAxisValues[i]);
-                  selectedUser.push(newUserAxisValues[index]);
-                  rectClick(d, index, i);
-                });
+              drawArticleSimilarity(d, nodes, index, i, xUser, yUser, xSize, ySize);
               // author similarity
-              const authorSim = dp.computeUserSimilarityByAuthors(xUser, yUser);
-              d3.select(nodes[index])
-                .append('rect')
-                .attr('class', () => {
-                  const xUserID = newUserAxisValues[index];
-                  const yUserID = newUserAxisValues[i];
-                  return `authorSimilarity ${xUserID} ${yUserID} y${i} x${index}`;
-                })
-                // .attr('x', () => {
-                //   const size = datas.find(e => e.id === xUser.id).repliedArticle.length;
-                //   return positionScale[index] + bandWidthScale(size) / 4;
-                // })
-                // .attr('y', () => {
-                //   const size = datas.find(e => e.id === yUser.id).repliedArticle.length;
-                //   return positionScale[i] + bandWidthScale(size) / 4;
-                // })
-                .attr('x', () => {
-                  const size = datas.find(e => e.id === xUser.id).repliedArticle.length;
-                  const offset = (bandWidthScale.range()[1] - (bandWidthScale(size) / 2)) / 2;
-                  return (index % newUserAxisValues.length) * (maxSize + rectMargin) + offset;
-                })
-                .attr('y', () => {
-                  const size = datas.find(e => e.id === yUser.id).repliedArticle.length;
-                  const offset = (bandWidthScale.range()[1] - (bandWidthScale(size) / 2)) / 2;
-                  return i * (maxSize + rectMargin) + offset;
-                })
-                .attr('rx', () => {
-                  if (i > index) return 0;
-                  const size = datas.find(e => e.id === xUser.id).repliedArticle.length;
-                  return Math.min(15, bandWidthScale(size) / 10);
-                })
-                .attr('width', () => {
-                  const size = datas.find(e => e.id === xUser.id).repliedArticle.length;
-                  return bandWidthScale(size) / 2;
-                })
-                .attr('height', () => {
-                  const size = datas.find(e => e.id === yUser.id).repliedArticle.length;
-                  return bandWidthScale(size) / 2;
-                })
-                .style('fill', () => {
-                  if (i > index) return leftMyColor(100);
-                  if (xUser.community === yUser.community) {
-                    const communityColor = d3.scaleLinear()
-                      .range(['white', color(xUser.community)])
-                      .domain([0, 1]);
-                    // return communityColor(d);
-                    return colorArray[xUser.community](authorSim);
-                  }
-                  // return leftMyColor(d);
-                  return colorArray[7](authorSim);
-                })
-                // .attr('stroke', 'black')
-                // .attr('stroke-width', Math.random() * 5)
-                .attr('opacity', i >= index ? 0 : 1)
-                .on('mouseover', () => mouseover(authorSim, index, i))
-                .on('mouseout', mouseout)
-                .on('click', () => {
-                  selectedUser.splice(0, selectedUser.length);
-                  selectedUser.push(newUserAxisValues[i]);
-                  selectedUser.push(newUserAxisValues[index]);
-                  rectClick(d, index, i);
-                });
+              drawAuthorSimilarity(d, nodes, index, i, xUser, yUser, xSize, ySize);
             }
           });
-        const tempUser = community.find(e => e.id === newUserAxisValues[i]);
-        leftSvgGroup.append('path')
+        // user self path
+        drawUserPath(leftSvgGroup, i);
+      }
+      // draw user group heatmap
+      drawAverageSimilarity();
+      // brush & focus Users
+      rangeSelectingUsers();
+
+      function drawUserRect(n, indX, indY) {
+        d3.select(n[indX])
+          .append('rect')
+          .attr('class', () => {
+            const xUserID = newUserAxisValues[indX];
+            const yUserID = newUserAxisValues[indY];
+            return `userRect ${xUserID} ${yUserID} y${indY} x${indX}`;
+          })
+          .attr('x', (indX % newUserAxisValues.length) * (maxSize + rectMargin))
+          .attr('y', indY * (maxSize + rectMargin))
+          .attr('width', maxSize)
+          .attr('height', maxSize)
+          .attr('fill', 'white')
+          .attr('stroke', 'black')
+          .attr('stroke-width', '1px')
+          .attr('opacity', indY >= indX ? 0 : 1);
+      }
+
+      function drawReplyTime(n, indX, indY, user1, user2, bothRepliedArticles) {
+        const xUserAvgRepliedTime = averageReplyTime(user1, bothRepliedArticles);
+        const yUserAvgRepliedTime = averageReplyTime(user2, bothRepliedArticles);
+        const threeHours = 60 * 60 * 3;
+        const thisTimeRectwidth = 5;
+        d3.select(n[indX])
+          .selectAll()
+          .data([xUserAvgRepliedTime, yUserAvgRepliedTime])
+          .enter()
+          .append('path')
+          .attr('d', (_d, _index) => {
+            const minutes = _d / 60;
+            const initX = ((indX % newUserAxisValues.length) + 1) * (maxSize + rectMargin) - ((4 - _index) * thisTimeRectwidth);
+            const initY = indY * (maxSize + rectMargin);
+            console.log(_d, minutes);
+            if (minutes < 30) {
+              const long = (_d / (30 * 60)) * maxSize;
+              console.log(long);
+              return `M ${initX} ${initY} 
+              L ${initX} ${initY + long}`;
+            }
+            if (minutes < (3 * 60)) {
+              const long = ((_d - (30 * 60)) / (3 * 60 * 60)) * maxSize;
+              console.log(long);
+
+              return `M ${initX} ${initY} 
+              L ${initX} ${initY + (_index * thisTimeRectwidth) + maxSize} 
+              L ${initX - long} ${initY + (_index * thisTimeRectwidth) + maxSize}`;
+            }
+            if (minutes < (6 * 60)) {
+              const long = ((_d - (3 * 60 * 60)) / (3 * 60 * 60)) * maxSize;
+              console.log(long);
+
+              return `M ${initX} ${initY} 
+              L ${initX} ${initY + (_index * thisTimeRectwidth) + maxSize} 
+              L ${initX - maxSize - 2 * (_index * thisTimeRectwidth)} ${initY + (_index * thisTimeRectwidth) + maxSize} 
+              L ${initX - maxSize - 2 * (_index * thisTimeRectwidth)} ${initY + maxSize - long - (_index * thisTimeRectwidth)}`;
+            }
+            const long = Math.min(maxSize, ((_d - (6 * 60 * 60)) / (18 * 60 * 60)) * maxSize);
+            console.log(long);
+            return `M ${initX} ${initY} 
+              L ${initX} ${initY + (_index * thisTimeRectwidth) + maxSize} 
+              L ${initX - maxSize - 2 * (_index * thisTimeRectwidth)} ${initY + (_index * thisTimeRectwidth) + maxSize} 
+              L ${initX - maxSize - 2 * (_index * thisTimeRectwidth)} ${initY - (_index * thisTimeRectwidth)} 
+              L ${initX - maxSize + long + (_index * thisTimeRectwidth)} ${initY - (_index * thisTimeRectwidth)}`;
+            // const size = datas.find(e => e.id === tempUser.id).repliedArticle.length;
+            // const offset = (bandWidthScale.range()[1] - bandWidthScale(size)) / 2;
+            // console.log(offset);
+            // const start = i * (maxSize + rectMargin) + offset;
+            // const end = start + bandWidthScale(size);
+            // return `M ${start} ${start} L ${end} ${start} L ${end} ${end}`;
+          })
+          .attr('fill', 'none')
+          .attr('stroke', (_d, _index) => (_index === 0 ? 'red' : 'blue'))
+          .attr('stroke-width', '5px')
+          .attr('opacity', indY >= indX ? 0 : 1);
+        // .append('rect')
+        // .attr('x', (_d, _index) => {
+        //   return ((index % newUserAxisValues.length) + 1) * (maxSize + rectMargin) - ((_index + 3) * thisTimeRectwidth);
+        // })
+        // .attr('y', () => {
+        //   return i * (maxSize + rectMargin);
+        // })
+        // .attr('width', 5)
+        // .attr('height', _d => Math.min((_d / threeHours) * 100, 100))
+        // .attr('fill', (_d, _index) => (_index === 0 ? 'red' : 'blue'))
+        // .attr('opacity', i >= index ? 0 : 1);
+      }
+
+      function drawArticleSimilarity(_d, n, indX, indY, user1, user2, size1, size2) {
+        d3.select(n[indX])
+          .append('rect')
+          .attr('class', () => {
+            const xUserID = newUserAxisValues[indX];
+            const yUserID = newUserAxisValues[indY];
+            return `articleSimilarity ${xUserID} ${yUserID} y${indY} x${indX}`;
+          })
+        // .attr('x', () => positionScale[indX])
+        // .attr('y', positionScale[i])
+          .attr('x', () => {
+            const offset = (bandWidthScale.range()[1] - bandWidthScale(size1)) / 2;
+            return (indX % newUserAxisValues.length) * (maxSize + rectMargin) + offset;
+          })
+          .attr('y', () => {
+            const offset = (bandWidthScale.range()[1] - bandWidthScale(size2)) / 2;
+            return indY * (maxSize + rectMargin) + offset;
+          })
+          .attr('rx', () => {
+            if (indY > indX) return 0;
+            return Math.min(15, bandWidthScale(size1) / 10);
+          })
+          .attr('width', () => bandWidthScale(size1))
+          .attr('height', () => bandWidthScale(size2))
+          .style('fill', () => {
+            if (indY > indX) return leftMyColor(100);
+            if (user1.community === user2.community) {
+              const communityColor = d3.scaleLinear()
+                .range(['white', color(user1.community)])
+                .domain([0, 1]);
+              // return communityColor(_d);
+              return colorArray[user1.community](_d);
+            }
+            // return leftMyColor(_d);
+            return colorArray[7](_d);
+          })
+          .attr('opacity', indY >= indX ? 0 : 1)
+          .on('mouseover', () => mouseover(secondOrdering_origMat[indY][indX], indX, indY))
+          .on('mouseout', mouseout)
+          .on('click', () => {
+            selectedUser.splice(0, selectedUser.length);
+            selectedUser.push(newUserAxisValues[indY]);
+            selectedUser.push(newUserAxisValues[indX]);
+            rectClick(_d, indX, indY);
+          });
+      }
+
+      function drawAuthorSimilarity(_d, n, indX, indY, user1, user2, size1, size2) {
+        const authorSim = dp.computeUserSimilarityByAuthors(user1, user2);
+        d3.select(n[indX])
+          .append('rect')
+          .attr('class', () => {
+            const xUserID = newUserAxisValues[indX];
+            const yUserID = newUserAxisValues[indY];
+            return `authorSimilarity ${xUserID} ${yUserID} y${indY} x${indX}`;
+          })
+        // .attr('x', () => {
+        //   const size = datas.find(e => e.id === xUser.id).repliedArticle.length;
+        //   return positionScale[index] + bandWidthScale(size) / 4;
+        // })
+        // .attr('y', () => {
+        //   const size = datas.find(e => e.id === yUser.id).repliedArticle.length;
+        //   return positionScale[i] + bandWidthScale(size) / 4;
+        // })
+          .attr('x', () => {
+            const offset = (bandWidthScale.range()[1] - (bandWidthScale(size1) / 2)) / 2;
+            return (indX % newUserAxisValues.length) * (maxSize + rectMargin) + offset;
+          })
+          .attr('y', () => {
+            const offset = (bandWidthScale.range()[1] - (bandWidthScale(size2) / 2)) / 2;
+            return indY * (maxSize + rectMargin) + offset;
+          })
+          .attr('rx', () => {
+            if (indY > indX) return 0;
+            return Math.min(15, bandWidthScale(size1) / 10);
+          })
+          .attr('width', () => bandWidthScale(size1) / 2)
+          .attr('height', () => bandWidthScale(size2) / 2)
+          .style('fill', () => {
+            if (indY > indX) return leftMyColor(100);
+            if (user1.community === user2.community) {
+              const communityColor = d3.scaleLinear()
+                .range(['white', color(user1.community)])
+                .domain([0, 1]);
+              // return communityColor(d);
+              return colorArray[user1.community](authorSim);
+            }
+            // return leftMyColor(d);
+            return colorArray[7](authorSim);
+          })
+          .attr('opacity', indY >= indX ? 0 : 1)
+          .on('mouseover', () => mouseover(authorSim, indX, indY))
+          .on('mouseout', mouseout)
+          .on('click', () => {
+            selectedUser.splice(0, selectedUser.length);
+            selectedUser.push(newUserAxisValues[indY]);
+            selectedUser.push(newUserAxisValues[indX]);
+            rectClick(_d, indX, indY);
+          });
+      }
+
+      function drawUserPath(selectedGroup, ind) {
+        const tempUser = community.find(e => e.id === newUserAxisValues[ind]);
+        selectedGroup.append('path')
           // .attr('d', () => {
           //   const start = positionScale[i];
           //   const size = datas.find(e => e.id === tempUser.id).repliedArticle.length;
@@ -753,7 +828,7 @@ export default function userSimilarityGraph(data, svg, user, articles) {
             const size = datas.find(e => e.id === tempUser.id).repliedArticle.length;
             const offset = (bandWidthScale.range()[1] - bandWidthScale(size)) / 2;
             console.log(offset);
-            const start = i * (maxSize + rectMargin) + offset;
+            const start = ind * (maxSize + rectMargin) + offset;
             const end = start + bandWidthScale(size);
             return `M ${start} ${start} L ${end} ${start} L ${end} ${end}`;
           })
@@ -761,14 +836,107 @@ export default function userSimilarityGraph(data, svg, user, articles) {
           .attr('fill', colorArray[tempUser.community](1))
           .on('click', () => {
             selectedUser.splice(0, selectedUser.length);
-            selectedUser.push(newUserAxisValues[i]);
+            selectedUser.push(newUserAxisValues[ind]);
             rectClick();
           });
       }
-      // draw user group heatmap
-      drawAverageSimilarity();
 
-      // console.log(groupIndex);
+      function rangeSelectingUsers() {
+        const reverseScale = svgScale(datas.length) > 0 ? svgScale(datas.length) : 0.4;
+        const widthOfHeatmap = (maxSize + rectMargin) * datas.length - rectMargin;
+        const brush = d3.brushX()
+          .extent([[0, 0], [widthOfHeatmap * reverseScale * Math.sqrt(2), 20]])
+          .on('end', brushed);
+
+        leftSvg.append('defs').append('clipPath')
+          .attr('id', 'clip')
+          .append('rect')
+          .attr('width', width)
+          .attr('height', height);
+
+        const context = group;
+
+        context.append('g')
+          .attr('class', 'brush')
+        // .attr('transform', `translate(${positionScale[positionScale.length - 1] + 30}, 0)`)
+          .attr('transform', 'translate(0, 0)')
+          .call(brush)
+          .call(brush.move, [0, 0])
+          .on('mouseover', () => {
+            d3.selectAll('.avgSimilarityPath')
+              .attr('opacity', 0);
+          })
+          .on('mouseout', () => {
+            d3.selectAll('.avgSimilarityPath')
+              .attr('opacity', 1);
+          });
+
+        context.select('.handle.handle--n')
+          .attr('fill', 'slategray');
+        context.select('.handle.handle--s')
+          .attr('fill', 'slategray');
+
+        d3.select('.brush').append('path')
+          .attr('d', 'M 0 0 L 0 0 L 0 0');
+        function brushed(d) {
+          if (d3.event.sourceEvent && d3.event.sourceEvent.type === 'zoom') return; // ignore brush-by-zoom
+          const s = d3.event.selection;
+          const focusUserIndex = [];
+          selectedUser.splice(0, selectedUser.length);
+          console.log(s[0] / reverseScale, s[1] / reverseScale, (s[0] / reverseScale)/ ((maxSize + rectMargin) * Math.sqrt(2)), (s[1] / reverseScale) / ((maxSize + rectMargin) * Math.sqrt(2)));
+          const start = Math.round((s[0] / reverseScale) / ((maxSize + rectMargin) * Math.sqrt(2)));
+          const end = Math.floor((s[1] / reverseScale) / ((maxSize + rectMargin) * Math.sqrt(2)));
+          for (let i = start; i <= end; i += 1) {
+            selectedUser.push(newUserAxisValues[i]);
+          }
+          console.log(selectedUser);
+          // positionScale.forEach((e, index) => {
+          //   const tempPosition = (positionScale[index + 1] + positionScale[index]) / 2 * reverseScale * Math.sqrt(2);
+          //   if (tempPosition >= s[0] && tempPosition <= s[1]) {
+          //     selectedUser.push(newUserAxisValues[index]);
+          //     focusUserIndex.push(index);
+          //   }
+          // });
+          // resize brush controller
+          // console.log(d3.select(this));
+          // console.log(d3.select('.brush').nodes()[0].__brush);
+          const fixedX1 = start * (maxSize + rectMargin) * reverseScale * Math.sqrt(2);
+          const fixedX2 = (end * (maxSize + rectMargin) + maxSize) * reverseScale * Math.sqrt(2);
+          // const fixedX1 = positionScale[focusUserIndex[0]] * reverseScale * Math.sqrt(2);
+          // const fixedX2 = positionScale[focusUserIndex[focusUserIndex.length - 1] + 1] * reverseScale * Math.sqrt(2) - 6;
+
+          d3.select('.brush').nodes()[0].__brush.selection[0][0] = fixedX1;
+          d3.select('.brush').nodes()[0].__brush.selection[1][0] = fixedX2;
+          context.select('.handle.handle--w')
+            .attr('x', fixedX1)
+            .attr('fill', 'slategray');
+          context.select('.handle.handle--e')
+            .attr('x', fixedX2)
+            .attr('fill', 'slategray');
+          context.select('.selection')
+            .attr('x', fixedX1)
+            .attr('width', fixedX2 - fixedX1);
+          // console.log(s);
+          // setting all co-cluster rect stroke-width to 1
+          // d3.select('.radialGroup').selectAll('rect')
+          //   .attr('stroke', 'slategray')
+          //   .attr('stroke-width', '0.3px');
+          // highlight selected grid of heatmap
+          d3.select('.brush').select('path')
+            .transition()
+            .attr('d', () => {
+              return `M ${fixedX1} ${0} L ${(fixedX2 + fixedX1) / 2} ${-(fixedX2 - fixedX1) / 2} L ${fixedX2} ${0} L ${fixedX1} ${0}`;
+            })
+            .attr('stroke', 'black')
+            .attr('stroke-width', '2px')
+            .attr('fill', 'gray')
+            .attr('opacity', '0.5')
+            .style('pointer-events', 'none');
+          tickClick();
+        }
+      }
+      function drawUserGroupHeatmap() {
+        // console.log(groupIndex);
       // for (let i = 0; i < groupIndex.length; i += 1) {
       //   leftSvg.append('g')
       //     .attr('class', `community${groupIndex[i].community}`)
@@ -870,91 +1038,6 @@ export default function userSimilarityGraph(data, svg, user, articles) {
       //   //     });
       //   // }
       // }
-      const reverseScale = svgScale(datas.length) > 0 ? svgScale(datas.length) : 0.4;
-      const brush = d3.brushX()
-        .extent([[0, 0], [positionScale[positionScale.length - 1] * reverseScale * Math.sqrt(2), 20]])
-        .on('end', brushed);
-
-      leftSvg.append('defs').append('clipPath')
-        .attr('id', 'clip')
-        .append('rect')
-        .attr('width', width)
-        .attr('height', height);
-
-      const context = group;
-
-      context.append('g')
-        .attr('class', 'brush')
-        // .attr('transform', `translate(${positionScale[positionScale.length - 1] + 30}, 0)`)
-        .attr('transform', 'translate(0, 0)')
-        .call(brush)
-        .call(brush.move, [0, 0])
-        .on('mouseover', () => {
-          d3.selectAll('.avgSimilarityPath')
-            .attr('opacity', 0);
-        })
-        .on('mouseout', () => {
-          d3.selectAll('.avgSimilarityPath')
-            .attr('opacity', 1);
-        });
-
-      context.select('.handle.handle--n')
-        .attr('fill', 'slategray');
-      context.select('.handle.handle--s')
-        .attr('fill', 'slategray');
-
-      d3.select('.brush').append('path')
-        .attr('d', 'M 0 0 L 0 0 L 0 0');
-
-      function brushed(d) {
-        // console.log(d);
-        if (d3.event.sourceEvent && d3.event.sourceEvent.type === 'zoom') return; // ignore brush-by-zoom
-        const s = d3.event.selection;
-        // console.log(s);
-        const focusUserIndex = [];
-        selectedUser.splice(0, selectedUser.length);
-        positionScale.forEach((e, index) => {
-          const tempPosition = (positionScale[index + 1] + positionScale[index]) / 2 * reverseScale * Math.sqrt(2);
-          if (tempPosition >= s[0] && tempPosition <= s[1]) {
-            selectedUser.push(newUserAxisValues[index]);
-            focusUserIndex.push(index);
-          }
-        });
-        // resize brush controller
-        // console.log(d3.select(this));
-        // console.log(d3.select('.brush').nodes()[0].__brush);
-        const fixedX1 = positionScale[focusUserIndex[0]] * reverseScale * Math.sqrt(2);
-        const fixedX2 = positionScale[focusUserIndex[focusUserIndex.length - 1] + 1] * reverseScale * Math.sqrt(2) - 6;
-        d3.select('.brush').nodes()[0].__brush.selection[0][0] = fixedX1;
-        d3.select('.brush').nodes()[0].__brush.selection[1][0] = fixedX2;
-        context.select('.handle.handle--w')
-          .attr('x', fixedX1)
-          .attr('fill', 'slategray');
-        context.select('.handle.handle--e')
-          .attr('x', fixedX2)
-          .attr('fill', 'slategray');
-        context.select('.selection')
-          .attr('x', fixedX1)
-          .attr('width', fixedX2 - fixedX1);
-        // console.log(s);
-        // setting all co-cluster rect stroke-width to 1
-        // d3.select('.radialGroup').selectAll('rect')
-        //   .attr('stroke', 'slategray')
-        //   .attr('stroke-width', '0.3px');
-        // highlight selected grid of heatmap
-        d3.select('.brush').select('path')
-          .transition()
-          .attr('d', () => {
-            const start = positionScale[focusUserIndex[0]] * reverseScale * Math.sqrt(2);
-            const end = positionScale[focusUserIndex[focusUserIndex.length - 1] + 1] * reverseScale * Math.sqrt(2);
-            return `M ${start} ${0} L ${(end + start) / 2} ${-(end - start) / 2} L ${end} ${0} L ${start} ${0}`;
-          })
-          .attr('stroke', 'black')
-          .attr('stroke-width', '2px')
-          .attr('fill', 'gray')
-          .attr('opacity', '0.5')
-          .style('pointer-events', 'none');
-        tickClick();
       }
 
       // drawUserAxis();
@@ -1012,6 +1095,31 @@ export default function userSimilarityGraph(data, svg, user, articles) {
           .on('click', tickClick);
         // leftSvg.select('.xAxis')
         //   .attr('transform', `translate(${positionScale[positionScale.length - 1]},-30)`);
+      }
+
+      function getBothRepliedArticle(usr1, usr2) {
+        const articleArr = usr1.repliedArticle.filter(
+          a => usr2.repliedArticle.some(_a => _a.article_id === a.article_id),
+        );
+        return articleArr;
+      }
+
+      function averageReplyTime(usr, articleArr) {
+        // const postYear = new Date(a.date).getFullYear();
+        // const date = dateFormat(mes);
+        // const commentTime = new Date(new Date(date).setFullYear(postYear));
+        let sum = 0;
+        articleArr.forEach((a) => {
+          const postYear = new Date(a.date).getFullYear();
+          const mes = a.messages.find(m => m.push_userid === usr.id);
+          const date = dateFormat(mes);
+          const commentTime = new Date(new Date(date).setFullYear(postYear));
+          const diff = commentTime - new Date(a.date);
+          // console.log(new Date(a.date), commentTime, diff);
+          sum += diff;
+        });
+        const avg = sum / articleArr.length;
+        return avg / 1000;
       }
 
       function drawAverageSimilarity() {
