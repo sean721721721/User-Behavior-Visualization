@@ -561,7 +561,7 @@ export default function userSimilarityGraph(data, svg, user, articles) {
     //   .range([0, maxSize]);
     const rectMargin = 20;
     const maxReplied = Math.max(...datas.map(usr => usr.repliedArticle.length));
-    const maxSize = 100;
+    const maxSize = 50;
     const bandWidthScale = d3.scaleSqrt().domain([0, maxReplied])
       .range([0, maxSize]);
     const positionScale = computePosition(datas, bandWidthScale);
@@ -609,14 +609,17 @@ export default function userSimilarityGraph(data, svg, user, articles) {
               const xSize = datas.find(e => e.id === xUser.id).repliedArticle.length;
               const ySize = datas.find(e => e.id === yUser.id).repliedArticle.length;
               const bothReplied = getBothRepliedArticle(xUser, yUser);
+              const bothSize = bothReplied.length;
               // user rect
               drawUserRect(nodes, index, i);
               // reply time
-              drawReplyTime(nodes, index, i, xUser, yUser, bothReplied);
+              // drawReplyTime(nodes, index, i, xUser, yUser, bothReplied);
+              // drawNewReplyTime(nodes, index, i, xUser, yUser, bothReplied);
+              drawNewReplyTimeWithQuantile(nodes, index, i, xUser, yUser, bothReplied);
               // article similarity
-              drawArticleSimilarity(d, nodes, index, i, xUser, yUser, xSize, ySize);
+              drawArticleSimilarity(d, nodes, index, i, xUser, yUser, bothSize);
               // author similarity
-              drawAuthorSimilarity(d, nodes, index, i, xUser, yUser, xSize, ySize);
+              drawAuthorSimilarity(d, nodes, index, i, xUser, yUser, bothSize);
             }
           });
         // user self path
@@ -642,7 +645,7 @@ export default function userSimilarityGraph(data, svg, user, articles) {
           .attr('fill', 'white')
           .attr('stroke', 'black')
           .attr('stroke-width', '1px')
-          .attr('opacity', indY >= indX ? 0 : 1);
+          .attr('opacity', indY >= indX ? 0 : 0);
       }
 
       function drawReplyTime(n, indX, indY, user1, user2, bothRepliedArticles) {
@@ -714,7 +717,156 @@ export default function userSimilarityGraph(data, svg, user, articles) {
         // .attr('opacity', i >= index ? 0 : 1);
       }
 
-      function drawArticleSimilarity(_d, n, indX, indY, user1, user2, size1, size2) {
+      function drawNewReplyTime(n, indX, indY, user1, user2, bothRepliedArticles) {
+        const xUserAvgRepliedTime = averageReplyTime(user1, bothRepliedArticles);
+        const yUserAvgRepliedTime = averageReplyTime(user2, bothRepliedArticles);
+        const threeHours = 60 * 60 * 3;
+        const thisTimeRectwidth = 5;
+        d3.select(n[indX])
+          .append('circle')
+          .attr('r', 2.5)
+          .attr('cx', () => {
+            const initX = ((indX % newUserAxisValues.length) + 1) * (maxSize + rectMargin) - rectMargin;
+            return initX;
+          })
+          .attr('cy', () => {
+            const initY = indY * (maxSize + rectMargin);
+            return initY;
+          })
+          .attr('fill', 'black')
+          .attr('opacity', indY >= indX ? 0 : 1);
+        d3.select(n[indX])
+          .selectAll()
+          .data([xUserAvgRepliedTime, yUserAvgRepliedTime])
+          .enter()
+          .append('path')
+          .attr('d', (_d, _index) => {
+            const minutes = _d / 60;
+            const initX = ((indX % newUserAxisValues.length) + 1) * (maxSize + rectMargin) - rectMargin;
+            const initY = indY * (maxSize + rectMargin);
+            const long = Math.min(100, (minutes / (6 * 60)) * maxSize * 2);
+            if (long <= maxSize) {
+              return `M ${initX} ${initY} 
+              L ${initX - ((_index % 2) * long)} ${initY + (((_index + 1) % 2) * long)}`;
+            }
+            if (_index === 0) {
+              const fixedLong = long - maxSize;
+              return `M ${initX} ${initY} 
+                L ${initX} ${initY + maxSize} 
+                L ${initX - fixedLong} ${initY + maxSize}`;
+            }
+            const fixedLong = long - maxSize;
+            return `M ${initX} ${initY} 
+              L ${initX - maxSize} ${initY} 
+              L ${initX - maxSize} ${initY + fixedLong}`;
+          })
+          .attr('fill', 'none')
+          .attr('stroke', (_d, _index) => (_index === 0 ? 'black' : 'black'))
+          .attr('stroke-width', '5px')
+          .attr('opacity', indY >= indX ? 0 : 1);
+      }
+
+      function drawNewReplyTimeWithQuantile(n, indX, indY, user1, user2, bothRepliedArticles) {
+        const xUserRepliedTime = getAllReplyTime(user1, bothRepliedArticles);
+        const yUserRepliedTime = getAllReplyTime(user2, bothRepliedArticles);
+        const threeHours = 60 * 60 * 3;
+        const thisTimeRectwidth = 5;
+        d3.select(n[indX])
+          .append('circle')
+          .attr('r', 2.5)
+          .attr('cx', () => {
+            const initX = ((indX % newUserAxisValues.length) + 1) * (maxSize + rectMargin) - rectMargin;
+            return initX;
+          })
+          .attr('cy', () => {
+            const initY = indY * (maxSize + rectMargin);
+            return initY;
+          })
+          .attr('fill', 'black')
+          .attr('opacity', indY >= indX ? 0 : 1);
+        d3.select(n[indX])
+          .selectAll()
+          .data([xUserRepliedTime, yUserRepliedTime])
+          .enter()
+          .each((_d, _index, _n) => {
+            const quantile = [
+              d3.quantile(_d, 0.25),
+              d3.quantile(_d, 0.5),
+              d3.quantile(_d, 0.75),
+            ];
+            d3.select(_n[_index])
+              .selectAll()
+              .data([[quantile[0], quantile[2]], quantile[1]])
+              .enter()
+              .append('path')
+              .attr('d', (q, type) => {
+                const initX = ((indX % newUserAxisValues.length) + 1) * (maxSize + rectMargin) - rectMargin;
+                const initY = indY * (maxSize + rectMargin);
+                if (type === 0) {
+                  const q1_minutes = q[0] / 60;
+                  const q1_long = Math.min(100, (q1_minutes / (6 * 60)) * maxSize * 2);
+                  const q3_minutes = q[1] / 60;
+                  const q3_long = Math.min(100, (q3_minutes / (6 * 60)) * maxSize * 2);
+                  if (q3_long <= maxSize) {
+                    return `M ${initX} ${initY + (((_index + 1) % 2) * q1_long)} 
+                  L ${initX - ((_index % 2) * q3_long)} ${initY + (((_index + 1) % 2) * q3_long)}`;
+                  }
+                  if (q3_long > maxSize && q1_long < maxSize) {
+                    if (_index === 0) {
+                      const fixedLong = q3_long - maxSize;
+                      return `M ${initX} ${initY + (((_index + 1) % 2) * q1_long)} 
+                      L ${initX} ${initY + maxSize} 
+                      L ${initX - fixedLong} ${initY + maxSize}`;
+                    }
+                    const fixedLong = q3_long - maxSize;
+                    return `M ${initX - ((_index % 2) * q1_long)} ${initY} 
+                    L ${initX - maxSize} ${initY} 
+                    L ${initX - maxSize} ${initY + fixedLong}`;
+                  }
+                  if (q3_long > maxSize && q1_long > maxSize) {
+                    if (_index === 0) {
+                      const fixedLong = q3_long - maxSize;
+                      return `M ${initX - (q1_long - maxSize)} ${initY + maxSize} 
+                      L ${initX - fixedLong} ${initY + maxSize}`;
+                    }
+                    const fixedLong = q3_long - maxSize;
+                    return `M ${initX - maxSize} ${initY + (q1_long - maxSize)} 
+                    L ${initX - maxSize} ${initY + fixedLong}`;
+                  }
+                }
+                const q2_minutes = q / 60;
+                const q2_long = Math.min(99, (q2_minutes / (6 * 60)) * maxSize * 2);
+                if (q2_long <= maxSize) {
+                  // right side
+                  if (_index === 0) {
+                    return `M ${initX} ${initY + q2_long} L ${initX} ${initY + (q2_long + 1)}`;
+                  }
+                  // left side
+                  return `M ${initX - q2_long} ${initY} L ${initX - (q2_long + 1)} ${initY}`;
+                }
+                // right side
+                if (_index === 0) {
+                  return `M ${initX - (q2_long - maxSize)} ${initY + maxSize} L ${initX - (q2_long - maxSize + 1)} ${initY + maxSize}`;
+                }
+                // left side
+                return `M ${initX - maxSize} ${initY + (q2_long - maxSize)} L ${initX - maxSize} ${initY + (q2_long - maxSize + 1)}`;
+              })
+              .attr('fill', 'none')
+              .attr('stroke', (q, step) => {
+                if (step === 0) {
+                  return 'red';
+                }
+                if (step === 1) {
+                  return 'blue';
+                }
+                return 'green';
+              })
+              .attr('stroke-width', '5px')
+              .attr('opacity', indY >= indX ? 0 : 1);
+          })
+      }
+      function drawArticleSimilarity(_d, n, indX, indY, user1, user2, size) {
+        const fixedSize = maxSize - 10;
         d3.select(n[indX])
           .append('rect')
           .attr('class', () => {
@@ -725,19 +877,23 @@ export default function userSimilarityGraph(data, svg, user, articles) {
         // .attr('x', () => positionScale[indX])
         // .attr('y', positionScale[i])
           .attr('x', () => {
-            const offset = (bandWidthScale.range()[1] - bandWidthScale(size1)) / 2;
+            // const offset = (bandWidthScale.range()[1] - bandWidthScale(size)) / 2;
+            const offset = (bandWidthScale.range()[1] - fixedSize) / 2;
             return (indX % newUserAxisValues.length) * (maxSize + rectMargin) + offset;
           })
           .attr('y', () => {
-            const offset = (bandWidthScale.range()[1] - bandWidthScale(size2)) / 2;
+            // const offset = (bandWidthScale.range()[1] - bandWidthScale(size)) / 2;
+            const offset = (bandWidthScale.range()[1] - fixedSize) / 2;
             return indY * (maxSize + rectMargin) + offset;
           })
           .attr('rx', () => {
             if (indY > indX) return 0;
-            return Math.min(15, bandWidthScale(size1) / 10);
+            return Math.min(15, bandWidthScale(size) / 10);
           })
-          .attr('width', () => bandWidthScale(size1))
-          .attr('height', () => bandWidthScale(size2))
+          // .attr('width', () => bandWidthScale(size))
+          // .attr('height', () => bandWidthScale(size))
+          .attr('width', fixedSize)
+          .attr('height', fixedSize)
           .style('fill', () => {
             if (indY > indX) return leftMyColor(100);
             if (user1.community === user2.community) {
@@ -761,7 +917,7 @@ export default function userSimilarityGraph(data, svg, user, articles) {
           });
       }
 
-      function drawAuthorSimilarity(_d, n, indX, indY, user1, user2, size1, size2) {
+      function drawAuthorSimilarity(_d, n, indX, indY, user1, user2, size) {
         const authorSim = dp.computeUserSimilarityByAuthors(user1, user2);
         d3.select(n[indX])
           .append('rect')
@@ -779,19 +935,19 @@ export default function userSimilarityGraph(data, svg, user, articles) {
         //   return positionScale[i] + bandWidthScale(size) / 4;
         // })
           .attr('x', () => {
-            const offset = (bandWidthScale.range()[1] - (bandWidthScale(size1) / 2)) / 2;
+            const offset = (bandWidthScale.range()[1] - (bandWidthScale(size) / 2)) / 2;
             return (indX % newUserAxisValues.length) * (maxSize + rectMargin) + offset;
           })
           .attr('y', () => {
-            const offset = (bandWidthScale.range()[1] - (bandWidthScale(size2) / 2)) / 2;
+            const offset = (bandWidthScale.range()[1] - (bandWidthScale(size) / 2)) / 2;
             return indY * (maxSize + rectMargin) + offset;
           })
           .attr('rx', () => {
             if (indY > indX) return 0;
-            return Math.min(15, bandWidthScale(size1) / 10);
+            return Math.min(15, bandWidthScale(size) / 10);
           })
-          .attr('width', () => bandWidthScale(size1) / 2)
-          .attr('height', () => bandWidthScale(size2) / 2)
+          .attr('width', () => bandWidthScale(size) / 2)
+          .attr('height', () => bandWidthScale(size) / 2)
           .style('fill', () => {
             if (indY > indX) return leftMyColor(100);
             if (user1.community === user2.community) {
@@ -1122,6 +1278,22 @@ export default function userSimilarityGraph(data, svg, user, articles) {
         return avg / 1000;
       }
 
+      function getAllReplyTime(usr, articleArr) {
+        // simArr.sort((a, b) => a - b);
+        const arr = [];
+        articleArr.forEach((a) => {
+          const postYear = new Date(a.date).getFullYear();
+          const mes = a.messages.find(m => m.push_userid === usr.id);
+          const date = dateFormat(mes);
+          const commentTime = new Date(new Date(date).setFullYear(postYear));
+          const diff = commentTime - new Date(a.date);
+          arr.push(diff / 1000);
+        });
+        arr.sort((a, b) => a - b);
+        console.log(arr);
+        return arr;
+      }
+
       function drawAverageSimilarity() {
         for (let i = 0; i < groupIndex.length; i += 1) {
           const [similarityArray, selfAvgSimilarity] = computeAvgSim(i);
@@ -1175,9 +1347,9 @@ export default function userSimilarityGraph(data, svg, user, articles) {
 
         function drawQuantileSimilarity(simArr, i) {
           const quantile = [
-            d3.quantile(simArr, 0.25),
-            d3.quantile(simArr, 0.5),
             d3.quantile(simArr, 0.75),
+            d3.quantile(simArr, 0.5),
+            d3.quantile(simArr, 0.25),
           ];
           console.log(quantile[2] - quantile[0]);
           leftSvg.append('g')
