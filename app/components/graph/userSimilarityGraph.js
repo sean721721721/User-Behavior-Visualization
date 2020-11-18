@@ -638,14 +638,14 @@ export default function userSimilarityGraph(data, svg, user, articles) {
             const yUserID = newUserAxisValues[indY];
             return `userRect ${xUserID} ${yUserID} y${indY} x${indX}`;
           })
-          .attr('x', (indX % newUserAxisValues.length) * (maxSize + rectMargin))
-          .attr('y', indY * (maxSize + rectMargin))
-          .attr('width', maxSize)
-          .attr('height', maxSize)
+          .attr('x', (indX % newUserAxisValues.length) * (maxSize + rectMargin) - 5)
+          .attr('y', indY * (maxSize + rectMargin) - 5)
+          .attr('width', maxSize + (rectMargin / 2))
+          .attr('height', maxSize + (rectMargin / 2))
           .attr('fill', 'white')
-          .attr('stroke', 'black')
+          .attr('stroke', 'red')
           .attr('stroke-width', '1px')
-          .attr('opacity', indY >= indX ? 0 : 0);
+          // .attr('opacity', indY >= indX ? 0 : 0);
       }
 
       function drawReplyTime(n, indX, indY, user1, user2, bothRepliedArticles) {
@@ -770,20 +770,20 @@ export default function userSimilarityGraph(data, svg, user, articles) {
         const xUserRepliedTime = getAllReplyTime(user1, bothRepliedArticles);
         const yUserRepliedTime = getAllReplyTime(user2, bothRepliedArticles);
         const threeHours = 60 * 60 * 3;
-        const thisTimeRectwidth = 5;
-        d3.select(n[indX])
-          .append('circle')
-          .attr('r', 2.5)
-          .attr('cx', () => {
-            const initX = ((indX % newUserAxisValues.length) + 1) * (maxSize + rectMargin) - rectMargin;
-            return initX;
-          })
-          .attr('cy', () => {
-            const initY = indY * (maxSize + rectMargin);
-            return initY;
-          })
-          .attr('fill', 'black')
-          .attr('opacity', indY >= indX ? 0 : 1);
+        const thisTimeRectwidth = 10;
+        // d3.select(n[indX])
+        //   .append('circle')
+        //   .attr('r', 2.5)
+        //   .attr('cx', () => {
+        //     const initX = ((indX % newUserAxisValues.length) + 1) * (maxSize + rectMargin) - rectMargin;
+        //     return initX;
+        //   })
+        //   .attr('cy', () => {
+        //     const initY = indY * (maxSize + rectMargin);
+        //     return initY;
+        //   })
+        //   .attr('fill', 'black')
+        //   .attr('opacity', indY >= indX ? 0 : 1);
         d3.select(n[indX])
           .selectAll()
           .data([xUserRepliedTime, yUserRepliedTime])
@@ -803,35 +803,67 @@ export default function userSimilarityGraph(data, svg, user, articles) {
                 const initX = ((indX % newUserAxisValues.length) + 1) * (maxSize + rectMargin) - rectMargin;
                 const initY = indY * (maxSize + rectMargin);
                 if (type === 0) {
+                  // quantile q3 - q1
                   const q1_minutes = q[0] / 60;
                   const q1_long = Math.min(100, (q1_minutes / (6 * 60)) * maxSize * 2);
                   const q3_minutes = q[1] / 60;
                   const q3_long = Math.min(100, (q3_minutes / (6 * 60)) * maxSize * 2);
                   if (q3_long <= maxSize) {
-                    return `M ${initX} ${initY + (((_index + 1) % 2) * q1_long)} 
-                  L ${initX - ((_index % 2) * q3_long)} ${initY + (((_index + 1) % 2) * q3_long)}`;
+                    return `
+                      M ${initX - ((_index % 2) * q1_long)} ${initY + (((_index + 1) % 2) * q1_long)} 
+                      L ${initX - ((_index % 2) * q3_long)} ${initY + (((_index + 1) % 2) * q3_long)}
+                      L ${initX - ((_index % 2) * q3_long) + (((_index + 1) % 2) * thisTimeRectwidth)} ${initY + (((_index + 1) % 2) * q3_long) - ((_index % 2) * thisTimeRectwidth)} 
+                      L ${initX - ((_index % 2) * q1_long) + (((_index + 1) % 2) * thisTimeRectwidth)} ${initY + (((_index + 1) % 2) * q1_long) - ((_index % 2) * thisTimeRectwidth)} 
+                      L ${initX - ((_index % 2) * q1_long)} ${initY + (((_index + 1) % 2) * q1_long)} 
+                    `;
                   }
                   if (q3_long > maxSize && q1_long < maxSize) {
                     if (_index === 0) {
+                      // right side
                       const fixedLong = q3_long - maxSize;
-                      return `M ${initX} ${initY + (((_index + 1) % 2) * q1_long)} 
+                      return `
+                      M ${initX} ${initY + (((_index + 1) % 2) * q1_long)} 
                       L ${initX} ${initY + maxSize} 
-                      L ${initX - fixedLong} ${initY + maxSize}`;
+                      L ${initX - fixedLong} ${initY + maxSize} 
+                      L ${initX - fixedLong} ${initY + maxSize + thisTimeRectwidth} 
+                      L ${initX + thisTimeRectwidth} ${initY + maxSize + thisTimeRectwidth}
+                      L ${initX + thisTimeRectwidth} ${initY + (((_index + 1) % 2) * q1_long)} 
+                      L ${initX} ${initY + (((_index + 1) % 2) * q1_long)} 
+                      `;
                     }
+                    // left side
                     const fixedLong = q3_long - maxSize;
-                    return `M ${initX - ((_index % 2) * q1_long)} ${initY} 
-                    L ${initX - maxSize} ${initY} 
-                    L ${initX - maxSize} ${initY + fixedLong}`;
+                    return `
+                      M ${initX - ((_index % 2) * q1_long)} ${initY} 
+                      L ${initX - maxSize} ${initY} 
+                      L ${initX - maxSize} ${initY + fixedLong} 
+                      L ${initX - maxSize - thisTimeRectwidth} ${initY + fixedLong} 
+                      L ${initX - maxSize - thisTimeRectwidth} ${initY - thisTimeRectwidth} 
+                      L ${initX - ((_index % 2) * q1_long)} ${initY - thisTimeRectwidth} 
+                      L ${initX - ((_index % 2) * q1_long)} ${initY} 
+                    `;
                   }
                   if (q3_long > maxSize && q1_long > maxSize) {
                     if (_index === 0) {
+                      // right side
                       const fixedLong = q3_long - maxSize;
-                      return `M ${initX - (q1_long - maxSize)} ${initY + maxSize} 
-                      L ${initX - fixedLong} ${initY + maxSize}`;
+                      return `
+                        M ${initX - (q1_long - maxSize)} ${initY + maxSize} 
+                        L ${initX - fixedLong} ${initY + maxSize} 
+                        L ${initX - fixedLong} ${initY + maxSize + thisTimeRectwidth} 
+                        L ${initX - (q1_long - maxSize)} ${initY + maxSize + thisTimeRectwidth} 
+                        L ${initX - (q1_long - maxSize)} ${initY + maxSize} 
+                        `;
                     }
+                    // left side
                     const fixedLong = q3_long - maxSize;
-                    return `M ${initX - maxSize} ${initY + (q1_long - maxSize)} 
-                    L ${initX - maxSize} ${initY + fixedLong}`;
+                    return `
+                      M ${initX - maxSize} ${initY + (q1_long - maxSize)} 
+                      L ${initX - maxSize} ${initY + fixedLong}
+                      L ${initX - maxSize - thisTimeRectwidth} ${initY + fixedLong}
+                      L ${initX - maxSize - thisTimeRectwidth} ${initY + (q1_long - maxSize)}
+                      L ${initX - maxSize} ${initY + (q1_long - maxSize)}
+                    `;
                   }
                 }
                 const q2_minutes = q / 60;
@@ -839,29 +871,49 @@ export default function userSimilarityGraph(data, svg, user, articles) {
                 if (q2_long <= maxSize) {
                   // right side
                   if (_index === 0) {
-                    return `M ${initX} ${initY + q2_long} L ${initX} ${initY + (q2_long + 1)}`;
+                    return `
+                      M ${initX} ${initY + q2_long} 
+                      L ${initX} ${initY + (q2_long + 1)} 
+                      L ${initX + thisTimeRectwidth} ${initY + (q2_long + 1)} 
+                      L ${initX + thisTimeRectwidth} ${initY + q2_long} 
+                      `;
                   }
                   // left side
-                  return `M ${initX - q2_long} ${initY} L ${initX - (q2_long + 1)} ${initY}`;
+                  return `
+                    M ${initX - q2_long} ${initY} 
+                    L ${initX - (q2_long + 1)} ${initY} 
+                    L ${initX - (q2_long + 1)} ${initY - thisTimeRectwidth} 
+                    L ${initX - q2_long} ${initY - thisTimeRectwidth} 
+                    `;
                 }
                 // right side
                 if (_index === 0) {
-                  return `M ${initX - (q2_long - maxSize)} ${initY + maxSize} L ${initX - (q2_long - maxSize + 1)} ${initY + maxSize}`;
+                  return `
+                    M ${initX - (q2_long - maxSize)} ${initY + maxSize} 
+                    L ${initX - (q2_long - maxSize + 1)} ${initY + maxSize}
+                    L ${initX - (q2_long - maxSize + 1)} ${initY + maxSize + thisTimeRectwidth}
+                    L ${initX - (q2_long - maxSize)} ${initY + maxSize + thisTimeRectwidth}
+                    `;
                 }
                 // left side
-                return `M ${initX - maxSize} ${initY + (q2_long - maxSize)} L ${initX - maxSize} ${initY + (q2_long - maxSize + 1)}`;
+                return `
+                  M ${initX - maxSize} ${initY + (q2_long - maxSize)} 
+                  L ${initX - maxSize} ${initY + (q2_long - maxSize + 1)}
+                  L ${initX - maxSize - thisTimeRectwidth} ${initY + (q2_long - maxSize + 1)}
+                  L ${initX - maxSize - thisTimeRectwidth} ${initY + (q2_long - maxSize)}
+                  `;
               })
-              .attr('fill', 'none')
+              .attr('fill', 'white')
               .attr('stroke', (q, step) => {
                 if (step === 0) {
-                  return 'red';
+                  return 'black';
                 }
                 if (step === 1) {
-                  return 'blue';
+                  return 'black';
                 }
                 return 'green';
               })
-              .attr('stroke-width', '5px')
+              .attr('stroke-width', '1px')
               .attr('opacity', indY >= indX ? 0 : 1);
           })
       }
