@@ -222,7 +222,7 @@ export default function treemap(cellNodes, beforeThisDate,
 
   function articleNodeClicked(d, article_id, index, nodes) {
     const commentTimelineSvg = d3.select('#articleStatus');
-    console.log(articleNodes);
+    // console.log(articleNodes);
     const article = articleNodes.find(e => e.article_id === article_id);
     commentTimeline(article, commentTimelineSvg, data.$this);
     const clickType = d3.select('input[name="set"]:checked').property('value');
@@ -263,7 +263,7 @@ export default function treemap(cellNodes, beforeThisDate,
       d3.select(nodes[index])
         .style('background', 'black');
       d.data.tag = 1;
-      console.log('push');
+      // console.log('push');
       selectedArticleNodes.push(article_id);
       if (clickType === 'union') {
         d.data.messages.forEach((e) => {

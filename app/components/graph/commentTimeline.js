@@ -11,7 +11,7 @@ import * as d3 from 'd3';
 export default function commentTimeline(data, svg, $this) {
   svg.selectAll('*').remove();
   // svg.attr('viewBox', '0 0 960 500');
-  console.log(data, svg, $this);
+  // console.log(data, svg, $this);
   const h = parseFloat(d3.select('#articleStatus').style('height'));
   const w = parseFloat(d3.select('#articleStatus').style('width'));
   const xScaleWidth = w - 110;

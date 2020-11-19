@@ -20,14 +20,15 @@ import { loading } from './loading';
 import OpinionLeaderView from './OpinionLeaderView';
 
 export default function AuthorTable(nodes, div, $this, callback) {
-  // console.log(nodes);
+  console.log(nodes);
   div.selectAll('*').remove();
   // console.log(parseFloat(d3.select('.network').style('height')));
   // console.log(parseFloat(d3.select('.termMap').style('height')));
   const h = parseFloat(d3.select('.authorList').style('height'));
   const authorList = JSON.parse(JSON.stringify(nodes));
   const deltaLengthList = [];
-  const threshold = 200;
+  const threshold = 0;
+  const betweenness = calculateCentrality(authorList.children);
   // computeDeltaLength(authorList, deltaLengthList);
   const noCuttedAuthorIdList = JSON.parse(JSON.stringify(nodes));
   authorIdPreprocessing(authorList.children);
@@ -88,7 +89,7 @@ export default function AuthorTable(nodes, div, $this, callback) {
 
   tr.append('td').text(d => d.id);
 
-  tr.append('td').text(d => financial(d.pageRank));
+  tr.append('td').text(d => `${financial(d.pageRank)} ${financial(d.betweenness)}`);
 
   tr.append('td').text(d => d.responder.length);
 
@@ -120,9 +121,53 @@ export default function AuthorTable(nodes, div, $this, callback) {
   }
 
   function financial(x) {
-    return Number.parseFloat(x).toFixed(4);
+    return Number.parseFloat(x).toFixed(3);
   }
 
+  function calculateCentrality(authorArr) {
+    const G = new jsnx.Graph();
+    const list = getNodesAndLinks(authorArr);
+    buildGraph(list.nodes, list.links);
+    const between = jsnx.betweennessCentrality(G);
+    console.log(between);
+    addBetweennessAttr(authorArr, between);
+    // const termEigenVector = jsnx.eigenvectorCentrality(G);
+    // console.log(termEigenVector);
+    return between;
+    function getNodesAndLinks(arr) {
+      const ns = [];
+      const ls = [];
+      ns.push('centralPoint');
+      arr.forEach((author) => {
+        const authorID = author.id.split(' ')[0];
+        ns.push(authorID);
+        ls.push(['centralPoint', authorID]);
+        author.responder.forEach((article) => {
+          article.message.forEach((mes) => {
+            ls.push([authorID, mes.push_userid]);
+            if (!ns.includes(mes.push_userid)) {
+              ns.push(mes.push_userid);
+            }
+          });
+        });
+      });
+      console.log([ns, ls]);
+      G.addNodesFrom(ns);
+      G.addEdgesFrom(ls);
+      return { nodes: ns, links: ls };
+    }
+    function buildGraph(ns, ls) {
+      G.addNodesFrom(ns);
+      G.addEdgesFrom(ls);
+    }
+    function addBetweennessAttr(arr, bet) {
+      arr.forEach((usr) => {
+        const id = usr.id.split(' ')[0];
+        usr.betweenness = bet._stringValues[id];
+      });
+      console.log(arr);
+    }
+  }
   function mergeCellDataNodes(ns, ls) {
     ls = ls.filter(e => e.source !== e.target);
     // merge nodes by author & article
