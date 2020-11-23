@@ -52,19 +52,19 @@ export default function commentTimeline(data, svg, $this) {
       const info = axis.append('g');
       info.append('text')
         .text(`Title: ${d.title}`)
-        .attr('x', 30)
+        .attr('x', 0)
         .attr('y', -130);
       info.append('text')
         .text(`Author: ${d.author}`)
-        .attr('x', 30)
+        .attr('x', 0)
         .attr('y', -110);
       info.append('text')
         .text(`推: ${d.message_count[0].count}  噓: ${d.message_count[1].count}  →: ${d.message_count[2].count}`)
-        .attr('x', 30)
+        .attr('x', 0)
         .attr('y', -90);
       info.append('text')
         .text(d.url)
-        .attr('x', 30)
+        .attr('x', 0)
         .attr('y', -70)
         .attr('fill', 'blue')
         .on('mouseover', (_d, i, n) => {

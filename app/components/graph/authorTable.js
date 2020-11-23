@@ -28,7 +28,7 @@ export default function AuthorTable(nodes, div, $this, callback) {
   const authorList = JSON.parse(JSON.stringify(nodes));
   const deltaLengthList = [];
   const threshold = 0;
-  const betweenness = calculateCentrality(authorList.children);
+  // const betweenness = calculateCentrality(authorList.children);
   // computeDeltaLength(authorList, deltaLengthList);
   const noCuttedAuthorIdList = JSON.parse(JSON.stringify(nodes));
   authorIdPreprocessing(authorList.children);
