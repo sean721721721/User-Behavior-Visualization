@@ -613,7 +613,7 @@ export default function userSimilarityGraph(data, svg, user, articles) {
               const bothReplied = getBothRepliedArticle(xUser, yUser);
               const bothSize = bothReplied.length;
               // user rect
-              // drawUserRect(nodes, index, i);
+              drawUserRect(nodes, index, i);
 
               // article similarity
               drawArticleSimilarity(d, nodes, index, i, xUser, yUser, bothSize);
@@ -2175,9 +2175,14 @@ export default function userSimilarityGraph(data, svg, user, articles) {
       const numOfArtOfEachComunity = [];
       for (let i = 0; i < numOfArtCom; i += 1) {
         const tempCommunity = articlesCommunity.filter(e => e.community === i);
-        numOfArtOfEachComunity.push(tempCommunity);
+        if (tempCommunity.length) numOfArtOfEachComunity.push({ community: i, articles: tempCommunity });
       }
-      // console.log('numOfArtOfEachComunity', numOfArtOfEachComunity);
+      console.log('numOfArtOfEachComunity', numOfArtOfEachComunity);
+      const existedCommunityOfArticle = [];
+      numOfArtOfEachComunity.forEach((e) => {
+        existedCommunityOfArticle.push(e.community);
+      });
+      console.log('existedCommunityOfArticle', existedCommunityOfArticle);
       const artComPie = d3.pie()
         .value(d => d.length)
         .sort(null);
@@ -2201,7 +2206,12 @@ export default function userSimilarityGraph(data, svg, user, articles) {
       for (let i = 0; i < numOfArtCom; i += 1) {
         articleGroupIndexArray.push(i);
         if (i < numOfArtCom - 1) {
-          articleGroupYScale.push(padding + articleGroupYScale[i] + articleGroupWidthScale(numOfArtOfEachComunity[i].length));
+          const articlesOfCommunityI = numOfArtOfEachComunity.find(e => e.community === i);
+          if (articlesOfCommunityI) {
+            articleGroupYScale.push(padding + articleGroupYScale[i] + articleGroupWidthScale(articlesOfCommunityI.articles.length));
+          } else {
+            articleGroupYScale.push(0);
+          }
         }
       }
 
@@ -2235,7 +2245,9 @@ export default function userSimilarityGraph(data, svg, user, articles) {
       }
       console.log('articleGroupOfUserCommunity: ', articleGroupOfUserCommunity);
       // draw bipartite co-cluster graph
-      drawCoClusterGraph(articleGroupOfUserCommunity);
+      // drawCoClusterGraph(articleGroupOfUserCommunity);
+      drawNewCoClusterGraph(articleGroupOfUserCommunity);
+
       // draw article heatmap on the left side of the main heatMap
       // drawArticleGroupOfUserCommunity(articleGroupOfUserCommunity);
 
@@ -2530,6 +2542,253 @@ export default function userSimilarityGraph(data, svg, user, articles) {
           });
         }
       }
+
+      function drawNewCoClusterGraph(arr) {
+        const boxHeight = 200;
+        const maxHeight = 50;
+        const positionOfArticleCom = [];
+        console.log(Math.max(...numOfArtOfEachComunity.map(e => e.articles.length)));
+        const scale = d3.scaleLinear().domain([0, Math.max(...numOfArtOfEachComunity.map(e => e.articles.length))]).range([0, maxHeight]);
+        // calculate all article community position
+        for (let i = 0; i < arr.length; i += 1) {
+          const tem = comunityIndexY[i];
+          const nex_tem = comunityIndexY[i + 1] ? comunityIndexY[i + 1] : positionScale.length - 1;
+          // const maxWidth_tem = (positionScale[nex_tem] - positionScale[tem]) * Math.sqrt(2);
+          const maxWidth_tem = ((nex_tem - tem) * (maxSize + rectMargin) - rectMargin) * Math.sqrt(2);
+          console.log('maxWidth_tem', nex_tem, tem, maxWidth_tem);
+          const numOfArticles = arr[i].reduce((acc, obj) => acc + obj.level[0].length, 0);
+          // article community position
+          for (let j = 0; j < arr[i].length; j += 1) {
+            arr[i][j].position = (j === 0) ? 0 : arr[i][j - 1].position + scale(arr[i][j - 1].level[0].length);
+          }
+          for (let j = 0; j < numOfArtOfEachComunity.length; j += 1) {
+            const prePosition = j <= 0 ? 0 : positionOfArticleCom[j - 1].position;
+            if (j > 0) {
+              positionOfArticleCom.push({
+                community: numOfArtOfEachComunity[j].community,
+                position: prePosition + scale(numOfArtOfEachComunity[j - 1].articles.length),
+              });
+            } else {
+              positionOfArticleCom.push({
+                community: numOfArtOfEachComunity[j].community,
+                position: prePosition,
+              });
+            }
+          }
+        }
+        console.log(positionOfArticleCom);
+        console.log(arr);
+        for (let i = 0; i < arr.length; i += 1) {
+          // user Community i
+          // const groupRadial = radial.select(`.group_${i}`);
+          const groupRadial = radial;
+          const tem = comunityIndexY[i];
+          const nex_tem = comunityIndexY[i + 1] ? comunityIndexY[i + 1] : positionScale.length - 1;
+          const numOfArticles = arr[i].reduce((acc, obj) => acc + obj.level[0].length, 0);
+          // const maxWidth_tem = (positionScale[nex_tem] - positionScale[tem]) * Math.sqrt(2);
+          const maxWidth_tem = ((nex_tem - tem) * (maxSize + rectMargin) - rectMargin) * Math.sqrt(2);
+          const widthScale = d3.scaleLinear().domain([0, numOfArticles]).range([0, maxWidth_tem]);
+          for (let k = 0; k < arr.length; k += 1) {
+            groupRadial.append('g')
+              .selectAll('path')
+              .data(arr[i])
+              .enter()
+              .append('g')
+              .each((d, index, nodes) => {
+                if (k > 0) {
+                  // blank area
+                  d3.select(nodes[index])
+                    .append('rect')
+                    .attr('x', (_d, _index) => (tem * (maxSize + rectMargin)) * Math.sqrt(2))
+                    .attr('y', (_d, _index) => {
+                      const { position: pos } = positionOfArticleCom.find(e => e.community === d.community);
+                      return pos;
+                    })
+                    .attr('width', maxWidth_tem)
+                    .attr('height', (_d) => {
+                      const { articles: art } = numOfArtOfEachComunity.find(e => e.community === d.community);
+                      return scale(art.length);
+                    })
+                    .attr('fill', 'none')
+                    .on('click', _d => rectClick(d, i));
+                } else {
+                  // for i === k show density of replied articles of userCommunity
+                  d3.select(nodes[index]).selectAll('path')
+                    .data(d.level)
+                    .enter()
+                    .append('rect')
+                    .attr('x', (_d, _index) => (tem * (maxSize + rectMargin)) * Math.sqrt(2))
+                    .attr('y', (_d, _index) => {
+                      const { position: pos } = positionOfArticleCom.find(e => e.community === d.community);
+                      return pos;
+                    })
+                    // .attr('x', (_d, _index) => positionScale[tem] * Math.sqrt(2) + d.position)
+                    .attr('height', (_d) => {
+                      const { articles: art } = numOfArtOfEachComunity.find(e => e.community === d.community);
+                      return scale(art.length);
+                    })
+                    .attr('width', (_d) => {
+                      const sameArticles = d.level[0].filter(e => d.level[0].some(e1 => e1.article_id === e.article_id));
+                      return widthScale(sameArticles.length);
+                    })
+                    .attr('fill', (_d, _index) => colorArray[i](_index * 0.25))
+                    // .attr('stroke', (_d, _index) => (_index === 0 ? 'black' : 'none'))
+                    .on('click', (_d, _index, _nodes) => {
+                      selectedArticles.splice(0, selectedArticles.length);
+                      if (d3.select(_nodes[_index]).attr('stroke-width') === '10px') {
+                        // already has been selected
+                        groupRadial.selectAll('rect').attr('stroke-width', '1px');
+                      } else {
+                        groupRadial.selectAll('rect').attr('stroke-width', '1px');
+                        d3.select(_nodes[_index]).attr('stroke-width', '10px');
+                        articles.forEach((e) => {
+                          if (_d.some(e1 => e1.article_id === e.article_id)) {
+                            selectedArticles.push(e);
+                          }
+                        });
+                      }
+                      console.log('selectedArticles: ', selectedArticles);
+                      console.log(_d);
+                      rectClick(_d, i);
+                    })
+                    .on('mouseover', _d => coClusterMouseover(_d, i));
+                }
+              });
+          }
+        }
+        // for (let i = 0; i < arr.length; i += 1) {
+        //   // const groupRadial = radial.select(`.group_${i}`);
+        //   const groupRadial = radial;
+        //   const tem = comunityIndexY[i];
+        //   const nex_tem = comunityIndexY[i + 1] ? comunityIndexY[i + 1] : positionScale.length - 1;
+        //   const numOfArticles = arr[i].reduce((acc, obj) => acc + obj.level[0].length, 0);
+        //   // const maxWidth_tem = (positionScale[nex_tem] - positionScale[tem]) * Math.sqrt(2);
+        //   // const maxWidth_tem = ((nex_tem - tem) * (maxSize + rectMargin)) * Math.sqrt(2);
+        //   const maxWidth_tem = ((nex_tem - tem) * (maxSize + rectMargin) - rectMargin) * Math.sqrt(2);
+        //   const scale = d3.scaleLinear().domain([0, numOfArticles]).range([0, maxWidth_tem]);
+        //   let positionIndex = i;
+        //   let diffAterSame = 0;
+        //   for (let j = 0; j < arr.length; j += 1) {
+        //     if (i !== j) {
+        //       positionIndex += diffAterSame;
+        //       diffAterSame = 0;
+        //       const pIndex = positionIndex;
+        //       const nex = comunityIndexY[j];
+        //       const nex_nex = comunityIndexY[j + 1] ? comunityIndexY[j + 1] : positionScale.length - 1;
+        //       const maxWidth_nex = ((nex_nex - nex) * (maxSize + rectMargin) - rectMargin) * Math.sqrt(2);
+        //       const numOfArticlesOfUserCommunity = arr[j].reduce((acc, obj) => acc + obj.level[0].length, 0);
+        //       const widthScale = d3.scaleLinear().domain([0, numOfArticlesOfUserCommunity]).range([0, maxWidth_nex]);
+        //       groupRadial.append('g')
+        //         .selectAll('path')
+        //         .data(arr[i])
+        //         .enter()
+        //         .append('g')
+        //         .each((d, index, nodes) => {
+        //           d3.select(nodes[index]).selectAll('path')
+        //             .data(d.level)
+        //             .enter()
+        //             .append('rect')
+        //             .attr('y', (_d) => {
+        //               const temCommunity = d.community;
+        //               const nextArticleCommunity = arr[j].find(e => e.community === temCommunity);
+        //               if (!nextArticleCommunity) return 0;
+        //               return widthScale(nextArticleCommunity.level[0].length);
+        //               // return boxHeight + pIndex * 20;
+        //               // return boxHeight + i * 20;
+        //               const temCommunity = d.community;
+        //               const nextArticleCommunity = arr[j].find(e => e.community === temCommunity);
+        //               if (!nextArticleCommunity) return 0;
+        //               const heightScale = d3.scaleLinear().domain([0, nextArticleCommunity.level[0].length]).range([0, boxHeight]);
+        //               const sameArticles = nextArticleCommunity.level[0].filter(e => _d.some(e1 => e1.article_id === e.article_id));
+        //               // return boxHeight * (i + 1) - heightScale(sameArticles.length);
+        //               return boxHeight * (pIndex + 1) - heightScale(sameArticles.length);
+        //             })
+        //             .attr('x', (_d, _index) => {
+        //               const temCommunity = d.community;
+        //               const nexCommunity = arr[j].find(e => e.community === temCommunity);
+        //               if (nexCommunity) {
+        //                 return (nex * (maxSize + rectMargin)) * Math.sqrt(2) + nexCommunity.position;
+        //               }
+        //               return (nex * (maxSize + rectMargin)) * Math.sqrt(2);
+        //             })
+        //             // .attr('x', (_d, _index) => {
+        //             //   const temCommunity = d.community;
+        //             //   const nexCommunity = arr[j].find(e => e.community === temCommunity);
+        //             //   if (nexCommunity) {
+        //             //     return positionScale[nex] * Math.sqrt(2) + nexCommunity.position;
+        //             //   }
+        //             //   return positionScale[nex] * Math.sqrt(2);
+        //             // })
+        //           // .attr('height', boxHeight)
+        //           // .attr('width', (d) => {
+        //           //   const temCommunity = d.community;
+        //           //   console.log(temCommunity, arr[j]);
+        //           //   const nextArticleCommunity = arr[j].find(e => e.community === temCommunity);
+        //           //   if (!nextArticleCommunity) return 0;
+        //           //   const sameArticles = nextArticleCommunity.level[0].filter(e => d.level[0].some(e1 => e1.article_id === e.article_id));
+        //           //   return widthScale(sameArticles.length);
+        //           // })
+        //             .attr('height', (_d) => {
+        //               // const temCommunity = d.community;
+        //               // const nextArticleCommunity = arr[j].find(e => e.community === temCommunity);
+        //               // if (!nextArticleCommunity) return 0;
+        //               // const sameArticles = nextArticleCommunity.level[0].filter(e => _d.some(e1 => e1.article_id === e.article_id));
+        //               // return widthScale(sameArticles.length);
+
+        //               const temCommunity = d.community;
+        //               const nextArticleCommunity = arr[j].find(e => e.community === temCommunity);
+        //               if (!nextArticleCommunity) return 0;
+        //               return widthScale(nextArticleCommunity.level[0].length);
+        //             })
+        //             .attr('width', (_d) => {
+        //               // return 20;
+        //               const temCommunity = d.community;
+        //               const nextArticleCommunity = arr[j].find(e => e.community === temCommunity);
+        //               if (!nextArticleCommunity) return 0;
+        //               const heightScale = d3.scaleLinear().domain([0, nextArticleCommunity.level[0].length]).range([0, boxHeight]);
+        //               const sameArticles = nextArticleCommunity.level[0].filter(e => _d.some(e1 => e1.article_id === e.article_id));
+        //               return heightScale(sameArticles.length);
+        //             })
+        //             .attr('fill', (_d, _index) => colorArray[i](_index * 0.25))
+        //             // .attr('stroke', (_d, _index) => (_index === 0 ? 'black' : 'none'))
+        //             .on('click', (_d, _index, _nodes, levelIndex) => {
+        //               const temCommunity = d.community;
+        //               const nextArticleCommunity = arr[j].find(e => e.community === temCommunity);
+        //               if (!nextArticleCommunity) return 0;
+        //               const sameArticles = nextArticleCommunity.level[0].filter(e => _d.some(e1 => e1.article_id === e.article_id));
+        //               selectedArticles.splice(0, selectedArticles.length);
+        //               if (d3.select(_nodes[_index]).attr('stroke-width') === '10px') {
+        //                 // already has been selected
+        //                 groupRadial.selectAll('rect').attr('stroke-width', '1px');
+        //               } else {
+        //                 groupRadial.selectAll('rect').attr('stroke-width', '1px');
+        //                 d3.select(_nodes[_index]).attr('stroke-width', '10px');
+        //                 articles.forEach((e) => {
+        //                   if (sameArticles.some(e1 => e1.article_id === e.article_id)) {
+        //                     selectedArticles.push(e);
+        //                   }
+        //                 });
+        //               }
+        //               console.log('selectedArticles: ', selectedArticles);
+        //               console.log(sameArticles);
+        //               rectClick(sameArticles, i);
+        //               return 0;
+        //             });
+        //         });
+        //     } else {
+        //       diffAterSame = 1;
+        //     }
+        //   }
+        // }
+
+        function coClusterMouseover(arts, communityIndex) {
+          const usrs = datas.filter(e => e.community === communityIndex);
+          usrs.forEach((u) => {
+            u.haveReplied = u.repliedArticle.filter(a => arts.some(_a => _a.article_id === a.article_id));
+          });
+        }
+      }
+
 
       function drawArticleGroupOfUserCommunity(arr) {
         console.log(arr);
