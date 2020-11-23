@@ -36,12 +36,13 @@ export default function userSimilarityGraph(data, svg, user, articles) {
   // const myGroups = getAllAuthorId(data); // author
   const clickedUser = [];
 
-  const [filteredArticles, articleSimilarity] = dp.computeArticleSimilarity(data);
-  console.log('articleSimilarity: ', articleSimilarity.length);
-  const articleIds = filteredArticles.map(e => e.article_id);
-  const articlesCommunity = dp.jLouvainClustering(articleIds, articleSimilarity);
-  // const articlesCommunity = articleGroupByTag(articleIds, filteredArticles);
-  console.log('[articlesCommunity]', [articlesCommunity]);
+  // const [filteredArticles, articleSimilarity] = dp.computeArticleSimilarity(data);
+  // console.log('articleSimilarity: ', articleSimilarity.length);
+  // const articleIds = filteredArticles.map(e => e.article_id);
+  // const articlesCommunity = dp.jLouvainClustering(articleIds, articleSimilarity);
+  // // const articlesCommunity = articleGroupByTag(articleIds, filteredArticles);
+  // console.log('[articlesCommunity]', [articlesCommunity]);
+
   const selectedUser = user.slice();
   drawSlider();
   drawFilterDiv();
@@ -317,15 +318,6 @@ export default function userSimilarityGraph(data, svg, user, articles) {
     //   e => e.messages.some(mes => datas.some(usr => usr.id === mes.push_userid)),
     // );
 
-    // similarity for articles grouping
-    // const [filteredArticles, articleSimilarity] = computeArticleSimilarity(datas);
-    // console.log('articleSimilarity: ', articleSimilarity);
-    // const articleIds = filteredArticles.map(e => e.article_id);
-    // const articlesCommunity = jLouvainClustering(articleIds, articleSimilarity);
-    // const articlesCommunity = articleGroupByTag(articleIds, filteredArticles);
-    // console.log('articlesCommunity', articlesCommunity);
-
-
     // articlesOrderByCommunity = articlesOrdering(articles, articlesCommunity);
     // console.log('articlesOrderByCommunity', articlesOrderByCommunity);
     const articlesOrderByCommunity = filteredArticles;
@@ -344,6 +336,14 @@ export default function userSimilarityGraph(data, svg, user, articles) {
     if (communityWord.length) {
       const score = communityWord[0].wordList.reduce((acc, obj) => acc + obj.score, 0);
     }
+
+    // similarity for articles grouping
+    const [filteredArticles, articleSimilarity] = dp.computeArticleSimilarity(datas);
+    console.log('articleSimilarity: ', articleSimilarity);
+    const articleIds = filteredArticles.map(e => e.article_id);
+    const articlesCommunity = dp.jLouvainClustering(articleIds, articleSimilarity);
+    // const articlesCommunity = articleGroupByTag(articleIds, filteredArticles);
+    console.log('articlesCommunity', articlesCommunity);
 
     const [matrix, origMatrix] = dp.relationToMatrix(similaritys, users);
     const similarityScale = d3.scalePow().exponent(0.5).range([0, 100]);
@@ -2546,7 +2546,7 @@ export default function userSimilarityGraph(data, svg, user, articles) {
 
       function drawNewCoClusterGraph(arr) {
         const boxHeight = 200;
-        const maxHeight = 50;
+        const maxHeight = 200;
         const intersectHeight = 10;
         const positionOfArticleCom = [];
         console.log(Math.max(...numOfArtOfEachComunity.map(e => e.articles.length)));

@@ -75,20 +75,35 @@ function computeArticleSimilarity(userArr) {
   const articleArray = [];
   userArr.forEach((u) => {
     u.repliedArticle.forEach((a) => {
-      if (!articleArray.some(e => e.article_id === a.article_id)) {
-        articleArray.push(a);
+      const existedArticle = articleArray.find(e => e.article_id === a.article_id);
+      console.log(u.community);
+      if (!existedArticle) {
+        articleArray.push({ ...a, userCommuniy: [u.community] });
+      } else {
+        existedArticle.userCommuniy.push(u.community);
       }
     });
   });
-  // console.log(articleArray);
+  console.log(articleArray);
+  // use userCommunity
   const array = [];
   for (let i = 0; i < articleArray.length; i += 1) {
-    const temp = articleArray[i];
+    const temp = JSON.parse(JSON.stringify(articleArray[i]));
     for (let j = i + 1; j < articleArray.length; j += 1) {
-      const next = articleArray[j];
-      const intersect = temp.cuttedTitle.filter(c1 => next.cuttedTitle.some(c2 => c2.word === c1.word));
-      // console.log(intersect, temp.cuttedTitle, next.cuttedTitle);
-      const sim = intersect.length / (temp.cuttedTitle.length + next.cuttedTitle.length - intersect.length);
+      const next = JSON.parse(JSON.stringify(articleArray[j]));
+      const intersect = [];
+      const union = [];
+      temp.userCommuniy.forEach((c) => {
+        const existed = next.userCommuniy.findIndex(e => e === c);
+        union.push(c);
+        if (existed >= 0) {
+          intersect.push(c);
+          next.userCommuniy.splice(existed, 1);
+        }
+      });
+      union.push(...next.userCommuniy);
+      const sim = intersect.length / union.length;
+      console.log(articleArray[i].userCommuniy, articleArray[j].userCommuniy, intersect, union, sim);
       if (sim) {
         array.push({
           source: temp.article_id,
@@ -98,6 +113,23 @@ function computeArticleSimilarity(userArr) {
       }
     }
   }
+
+  // const array = [];
+  // for (let i = 0; i < articleArray.length; i += 1) {
+  //   const temp = articleArray[i];
+  //   for (let j = i + 1; j < articleArray.length; j += 1) {
+  //     const next = articleArray[j];
+  //     const intersect = temp.cuttedTitle.filter(c1 => next.cuttedTitle.some(c2 => c2.word === c1.word));
+  //     const sim = intersect.length / (temp.cuttedTitle.length + next.cuttedTitle.length - intersect.length);
+  //     if (sim) {
+  //       array.push({
+  //         source: temp.article_id,
+  //         target: next.article_id,
+  //         value: sim,
+  //       });
+  //     }
+  //   }
+  // }
 
   return [articleArray, array];
 }
