@@ -103,7 +103,6 @@ function computeArticleSimilarity(userArr) {
       });
       union.push(...next.userCommuniy);
       const sim = intersect.length / union.length;
-      console.log(articleArray[i].userCommuniy, articleArray[j].userCommuniy, intersect, union, sim);
       if (sim) {
         array.push({
           source: temp.article_id,

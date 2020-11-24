@@ -89,7 +89,8 @@ export default function AuthorTable(nodes, div, $this, callback) {
 
   tr.append('td').text(d => d.id);
 
-  tr.append('td').text(d => `${financial(d.pageRank)} ${financial(d.betweenness)}`);
+  // tr.append('td').text(d => `${financial(d.pageRank)} ${financial(d.betweenness)}`);
+  tr.append('td').text(d => `${financial(d.pageRank)}`);
 
   tr.append('td').text(d => d.responder.length);
 
