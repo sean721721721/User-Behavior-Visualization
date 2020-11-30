@@ -300,10 +300,10 @@ export default function userSimilarityGraph(data, svg, user, articles) {
       d3.interpolateBlues,
       d3.interpolateOranges,
       d3.interpolateGreens,
+      d3.interpolatePurples,
+      d3.interpolateReds,
       d3.interpolateYlOrBr,
       d3.interpolateGnBu,
-      d3.interpolateReds,
-      d3.interpolatePurples,
       d3.interpolateGreys,
     ];
     // Article Similarity
@@ -2552,30 +2552,20 @@ export default function userSimilarityGraph(data, svg, user, articles) {
         console.log(Math.max(...numOfArtOfEachComunity.map(e => e.articles.length)));
         const scale = d3.scaleLinear().domain([0, Math.max(...numOfArtOfEachComunity.map(e => e.articles.length))]).range([0, maxHeight]);
         // calculate all article community position
-        for (let i = 0; i < arr.length; i += 1) {
-          const tem = comunityIndexY[i];
-          const nex_tem = comunityIndexY[i + 1] ? comunityIndexY[i + 1] : positionScale.length - 1;
-          // const maxWidth_tem = (positionScale[nex_tem] - positionScale[tem]) * Math.sqrt(2);
-          const maxWidth_tem = ((nex_tem - tem) * (maxSize + rectMargin) - rectMargin) * Math.sqrt(2);
-          console.log('maxWidth_tem', nex_tem, tem, maxWidth_tem);
-          const numOfArticles = arr[i].reduce((acc, obj) => acc + obj.level[0].length, 0);
-          // article community position
-          for (let j = 0; j < arr[i].length; j += 1) {
-            arr[i][j].position = (j === 0) ? 0 : arr[i][j - 1].position + scale(arr[i][j - 1].level[0].length);
-          }
-          for (let j = 0; j < numOfArtOfEachComunity.length; j += 1) {
-            const prePosition = j <= 0 ? 0 : positionOfArticleCom[j - 1].position;
-            if (j > 0) {
-              positionOfArticleCom.push({
-                community: numOfArtOfEachComunity[j].community,
-                position: prePosition + scale(numOfArtOfEachComunity[j - 1].articles.length) * (3 / 2),
-              });
-            } else {
-              positionOfArticleCom.push({
-                community: numOfArtOfEachComunity[j].community,
-                position: prePosition,
-              });
-            }
+
+        // article community position
+        for (let j = 0; j < numOfArtOfEachComunity.length; j += 1) {
+          const prePosition = j <= 0 ? 0 : positionOfArticleCom[j - 1].position;
+          if (j > 0) {
+            positionOfArticleCom.push({
+              community: numOfArtOfEachComunity[j].community,
+              position: prePosition + scale(numOfArtOfEachComunity[j - 1].articles.length) * (3 / 2),
+            });
+          } else {
+            positionOfArticleCom.push({
+              community: numOfArtOfEachComunity[j].community,
+              position: prePosition,
+            });
           }
         }
         console.log(positionOfArticleCom);
@@ -2590,74 +2580,10 @@ export default function userSimilarityGraph(data, svg, user, articles) {
           // const maxWidth_tem = (positionScale[nex_tem] - positionScale[tem]) * Math.sqrt(2);
           const maxWidth_tem = ((nex_tem - tem) * (maxSize + rectMargin) - rectMargin) * Math.sqrt(2);
           const widthScale = d3.scaleLinear().domain([0, numOfArticles]).range([0, maxWidth_tem]);
-          for (let k = 0; k < arr.length; k += 1) {
-            groupRadial.append('g')
-              .attr('class', `co-cluster_${i}_${k}`)
-              .selectAll('path')
-              .data(arr[i])
-              .enter()
-              .append('g')
-              .each((d, index, nodes) => {
-                if (k > 0) {
-                  // blank area
-                  d3.select(nodes[index])
-                    .append('rect')
-                    .attr('x', (_d, _index) => (tem * (maxSize + rectMargin)) * Math.sqrt(2))
-                    .attr('y', (_d, _index) => {
-                      const { position: pos } = positionOfArticleCom.find(e => e.community === d.community);
-                      return pos;
-                    })
-                    .attr('width', maxWidth_tem)
-                    .attr('height', (_d) => {
-                      const { articles: art } = numOfArtOfEachComunity.find(e => e.community === d.community);
-                      return scale(art.length);
-                    })
-                    .attr('fill', 'none')
-                    .on('click', _d => rectClick(d, i));
-                } else {
-                  // for i === k show density of replied articles of userCommunity
-                  d3.select(nodes[index]).selectAll('path')
-                    .data(d.level)
-                    .enter()
-                    .append('rect')
-                    .attr('x', (_d, _index) => (tem * (maxSize + rectMargin)) * Math.sqrt(2))
-                    .attr('y', (_d, _index) => {
-                      const { position: pos } = positionOfArticleCom.find(e => e.community === d.community);
-                      return pos;
-                    })
-                    // .attr('x', (_d, _index) => positionScale[tem] * Math.sqrt(2) + d.position)
-                    .attr('height', (_d) => {
-                      const { articles: art } = numOfArtOfEachComunity.find(e => e.community === d.community);
-                      return scale(art.length);
-                    })
-                    .attr('width', (_d) => {
-                      const totalArticlesOfThisCommunityOfArticle = numOfArtOfEachComunity.find(e => e.community === d.community).articles;
-                      const thisWidthScale = d3.scaleLinear().domain([0, totalArticlesOfThisCommunityOfArticle.length]).range([0, maxWidth_tem]);
-                      const sameArticles = d.level[0].filter(e => _d.some(e1 => e1.article_id === e.article_id));
-                      return thisWidthScale(sameArticles.length);
-                    })
-                    .attr('fill', (_d, _index) => colorArray[i](_index * 0.25))
-                    // .attr('stroke', (_d, _index) => (_index === 0 ? 'black' : 'none'))
-                    .on('click', (_d, _index, _nodes) => {
-                      selectedArticles.splice(0, selectedArticles.length);
-                      if (d3.select(_nodes[_index]).attr('stroke-width') === '10px') {
-                        // already has been selected
-                        groupRadial.selectAll('rect').attr('stroke-width', '1px');
-                      } else {
-                        groupRadial.selectAll('rect').attr('stroke-width', '1px');
-                        d3.select(_nodes[_index]).attr('stroke-width', '10px');
-                        articles.forEach((e) => {
-                          if (_d.some(e1 => e1.article_id === e.article_id)) {
-                            selectedArticles.push(e);
-                          }
-                        });
-                      }
-                      rectClick(_d, i);
-                    })
-                    .on('mouseover', _d => coClusterMouseover(_d, i));
-                }
-              });
-          }
+          // blank area
+          drawBlankAreaOfArticleCommunity(groupRadial, i, maxWidth_tem);
+          // articles replied by users
+          drawBipartiteOfUserAndArticles(groupRadial, i, maxWidth_tem);
         }
         for (let i = 0; i < arr.length; i += 1) {
           // const groupRadial = radial.select(`.group_${i}`);
@@ -2790,6 +2716,78 @@ export default function userSimilarityGraph(data, svg, user, articles) {
           usrs.forEach((u) => {
             u.haveReplied = u.repliedArticle.filter(a => arts.some(_a => _a.article_id === a.article_id));
           });
+        }
+
+        function drawBlankAreaOfArticleCommunity(svgGroup, com, maxWidth) {
+          const tempCom = comunityIndexY[com];
+          svgGroup.append('g')
+            .attr('class', `co-cluster_${com}`)
+            .selectAll('path')
+            .data(positionOfArticleCom)
+            .enter()
+            .append('rect')
+            .attr('x', () => (tempCom * (maxSize + rectMargin)) * Math.sqrt(2))
+            .attr('y', d => d.position)
+            .attr('height', (d) => {
+              const { articles: art } = numOfArtOfEachComunity.find(e => e.community === d.community);
+              return scale(art.length);
+            })
+            .attr('width', maxWidth)
+            .attr('fill', 'none')
+            .attr('stroke', 'black')
+            .attr('stroke-width', '1px');
+        }
+
+        function drawBipartiteOfUserAndArticles(svgGroup, com, maxWidth) {
+          const tempCom = comunityIndexY[com];
+          svgGroup.append('g')
+            .attr('class', `co-cluster_${com}`)
+            .selectAll('path')
+            .data(arr[com])
+            .enter()
+            .append('g')
+            .each((d, index, nodes) => {
+              // for i === k show density of replied articles of userCommunity
+              d3.select(nodes[index]).selectAll('path')
+                .data(d.level)
+                .enter()
+                .append('rect')
+                .attr('x', (_d, _index) => (tempCom * (maxSize + rectMargin)) * Math.sqrt(2))
+                .attr('y', (_d, _index) => {
+                  const { position: pos } = positionOfArticleCom.find(e => e.community === d.community);
+                  return pos;
+                })
+                // .attr('x', (_d, _index) => positionScale[tem] * Math.sqrt(2) + d.position)
+                .attr('height', (_d) => {
+                  const { articles: art } = numOfArtOfEachComunity.find(e => e.community === d.community);
+                  return scale(art.length);
+                })
+                .attr('width', (_d) => {
+                  const totalArticlesOfThisCommunityOfArticle = numOfArtOfEachComunity.find(e => e.community === d.community).articles;
+                  const thisWidthScale = d3.scaleLinear().domain([0, totalArticlesOfThisCommunityOfArticle.length]).range([0, maxWidth]);
+                  const sameArticles = d.level[0].filter(e => _d.some(e1 => e1.article_id === e.article_id));
+                  return thisWidthScale(sameArticles.length);
+                })
+                .attr('fill', (_d, _index) => colorArray[com](_index * 0.25))
+                // .attr('stroke', (_d, _index) => (_index === 0 ? 'black' : 'none'))
+                .on('click', (_d, _index, _nodes) => {
+                  selectedArticles.splice(0, selectedArticles.length);
+                  if (d3.select(_nodes[_index]).attr('stroke-width') === '10px') {
+                    // already has been selected
+                    svgGroup.selectAll('rect').attr('stroke-width', '1px');
+                  } else {
+                    svgGroup.selectAll('rect').attr('stroke-width', '1px');
+                    d3.select(_nodes[_index]).attr('stroke-width', '10px');
+                    articles.forEach((e) => {
+                      if (_d.some(e1 => e1.article_id === e.article_id)) {
+                        selectedArticles.push(e);
+                      }
+                    });
+                  }
+                  rectClick(_d, com);
+                })
+                .on('mouseover', _d => coClusterMouseover(_d, com));
+            });
         }
       }
 

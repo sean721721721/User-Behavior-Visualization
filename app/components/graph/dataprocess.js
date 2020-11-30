@@ -76,7 +76,6 @@ function computeArticleSimilarity(userArr) {
   userArr.forEach((u) => {
     u.repliedArticle.forEach((a) => {
       const existedArticle = articleArray.find(e => e.article_id === a.article_id);
-      console.log(u.community);
       if (!existedArticle) {
         articleArray.push({ ...a, userCommuniy: [u.community] });
       } else {
@@ -84,7 +83,6 @@ function computeArticleSimilarity(userArr) {
       }
     });
   });
-  console.log(articleArray);
   // use userCommunity
   const array = [];
   for (let i = 0; i < articleArray.length; i += 1) {
