@@ -2684,6 +2684,8 @@ export default function userSimilarityGraph(data, svg, user, articles) {
                       // return heightScale(nextArticleCommunity.length);
                     })
                     .attr('fill', (_d, _index) => colorArray[i](_index * 0.25))
+                    .attr('stroke', 'black')
+                    .attr('stroke-width', '1px')
                     // .attr('stroke', (_d, _index) => (_index === 0 ? 'black' : 'none'))
                     .on('click', (_d, _index, _nodes, levelIndex) => {
                       if (!nextArticleCommunity) return 0;
@@ -2770,6 +2772,8 @@ export default function userSimilarityGraph(data, svg, user, articles) {
                   const sameArticles = d.level[0].filter(e => _d.some(e1 => e1.article_id === e.article_id));
                   return thisWidthScale(sameArticles.length);
                 })
+                .attr('stroke', 'black')
+                .attr('stroke-width', '1px')
                 .attr('fill', (_d, _index) => colorArray[com](_index * 0.25))
                 // .attr('stroke', (_d, _index) => (_index === 0 ? 'black' : 'none'))
                 .on('click', (_d, _index, _nodes) => {

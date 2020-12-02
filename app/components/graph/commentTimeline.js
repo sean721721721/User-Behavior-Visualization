@@ -148,7 +148,9 @@ export default function commentTimeline(data, svg, $this) {
       let value = d.value > 100 ? 100 : d.value;
       value = d.value < -100 ? -100 : value;
       return yScale(d.articleId, value) + offset;
-    });
+    })
+    .attr('stroke', 'black')
+    .attr('stroke-width', '0.5px');
 
   commentTime.append('title')
     .text(d => d.push_ipdatetime);
