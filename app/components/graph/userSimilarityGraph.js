@@ -187,15 +187,15 @@ export default function userSimilarityGraph(data, svg, user, articles) {
       .attr('for', 'community')
       .style('margin-left', '10px')
       .text('community');
-    const quantileSim = simOptionsDiv.append('div')
+    const replyQuantileOption = simOptionsDiv.append('div')
       .style('float', 'left');
-    quantileSim.append('input')
+    replyQuantileOption.append('input')
       .attr('type', 'checkbox')
       .attr('id', 'quantile')
       .attr('name', 'similarity')
       .attr('value', 'quantile')
       .property('checked', true);
-    quantileSim.append('label')
+    replyQuantileOption.append('label')
       .attr('for', 'quantile')
       .style('margin-left', '10px')
       .text('quantile');
@@ -217,7 +217,7 @@ export default function userSimilarityGraph(data, svg, user, articles) {
           break;
       
         case 'quantile':
-          d3.selectAll('.quantileSimilarityPath')
+          d3.selectAll('.quantilePath')
             .attr('visibility', checked ? 'visible' : 'hidden');
           break;
       
@@ -806,6 +806,8 @@ export default function userSimilarityGraph(data, svg, user, articles) {
           .selectAll()
           .data([xUserRepliedTime, yUserRepliedTime])
           .enter()
+          .append('g')
+          .attr('class', 'quantilePath')
           .each((_d, _index, _n) => {
             const quantile = [
               d3.quantile(_d, 0.25),
