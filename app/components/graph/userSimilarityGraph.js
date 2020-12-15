@@ -1865,6 +1865,18 @@ export default function userSimilarityGraph(data, svg, user, articles) {
         }
         console.log(positionOfArticleCom);
         console.log(arr);
+        // simplify output arr of console.log
+        const simpleArr = [];
+        for (let i = 0; i < arr.length; i += 1) {
+          simpleArr.push({ arr: [], num: 0 });
+          simpleArr[i].num = (datas.filter(e => e.community === i).length);
+          for (let j = 0; j < arr[i].length; j += 1) {
+            simpleArr[i].arr.push({ community: arr[i][j].community, level: arr[i][j].level[0].length });
+            simpleArr[i].arr[j].num = articlesCommunity.filter(e => e.community === arr[i][j].community).length;
+          }
+        }
+        console.log(simpleArr);
+
         for (let i = 0; i < arr.length; i += 1) {
           // user Community i
           // const groupRadial = radial.select(`.group_${i}`);
