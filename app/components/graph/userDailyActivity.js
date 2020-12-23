@@ -66,7 +66,17 @@ export default function userDailyActivity(data, user, svg, begin, end) {
   const gridSize = 12;
   const userListByReplyCountPerHours = computeUserListByReplyCountPerHours(data, user);
   // console.log(userListByReplyCountPerHours);
-  const color = d3.schemeTableau10;
+  const color = [
+    d3.interpolateBlues,
+    d3.interpolateOranges,
+    d3.interpolateGreens,
+    d3.interpolatePurples,
+    d3.interpolateReds,
+    d3.interpolateYlOrBr,
+    d3.interpolateGnBu,
+    d3.interpolateGreys,
+  ];
+  const pushTypeColor = d3.schemeTableau10;
   const myColor = d3.scaleLinear()
     .range([d3.interpolateYlGn(0), d3.interpolateYlGn(0.8)])
     .domain([0, 10]);
@@ -377,7 +387,7 @@ export default function userDailyActivity(data, user, svg, begin, end) {
     .selectAll('text')
     .style('text-anchor', 'start')
     .attr('font-size', 14)
-    .attr('fill', d => color[user.find(e => e.id === d).community])
+    .attr('fill', d => color[user.find(e => e.id === d).community](0.8))
     .attr('dx', '0.8em')
     .attr('dy', '0.5em')
     .attr('transform', 'rotate(-90)');
@@ -504,7 +514,7 @@ export default function userDailyActivity(data, user, svg, begin, end) {
             .attr('x', pointerOffset(includesUser.length))
             .attr('width', -pointerOffset(includesUser.length))
             .attr('height', 2)
-            .style('fill', color[0])
+            .style('fill', color[0](0.8))
             .on('mouseover', _d => mouseover(_d, data))
             .on('mouseout', mouseout);
           d3.select(nodes[index]).append('circle')
@@ -521,7 +531,7 @@ export default function userDailyActivity(data, user, svg, begin, end) {
             .attr('r', 5)
             .attr('stroke', 'black')
             .attr('stroke-width', _d => (_d.article_title[0] !== 'R' ? '2px' : '0px'))
-            .style('fill', color[0])
+            .style('fill', color[0](0.8))
             .on('mouseover', _d => mouseover(_d, data))
             .on('mouseout', mouseout)
             .on('click', click);
@@ -553,6 +563,7 @@ export default function userDailyActivity(data, user, svg, begin, end) {
         .attr('r', 4)
         // .attr('width', userScale.bandwidth())
         .style('fill', d => commentTypeColor(d.push_tag))
+        .attr('stroke', 'black')
         .on('mouseover', d => mouseover(data[i], d))
         .on('mouseout', mouseout)
         .on('click', click);
@@ -693,11 +704,11 @@ export default function userDailyActivity(data, user, svg, begin, end) {
   function commentTypeColor(tag) {
     switch (tag) {
       case '推':
-        return color[4];
+        return pushTypeColor[4];
       case '噓':
-        return color[2];
+        return pushTypeColor[2];
       case '→':
-        return color[5];
+        return pushTypeColor[5];
       default:
         return 'black';
     }

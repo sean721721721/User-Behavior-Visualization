@@ -336,7 +336,6 @@ export default function userSimilarityGraph(data, svg, user, articles) {
     if (communityWord.length) {
       const score = communityWord[0].wordList.reduce((acc, obj) => acc + obj.score, 0);
     }
-
     // similarity for articles grouping
     const [filteredArticles, articleSimilarity] = dp.computeArticleSimilarity(datas);
     console.log('articleSimilarity: ', articleSimilarity);
@@ -574,6 +573,18 @@ export default function userSimilarityGraph(data, svg, user, articles) {
     drawUserRepliedArticleMatrix(articlesOrderByCommunity);
     drawUserGroupBipartiteRelations();
 
+    const removedUnusedDatas = JSON.parse(JSON.stringify(datas));
+    removedUnusedDatas.forEach((e) => {
+      e.totalReplyCount = e.repliedArticle.length;
+      delete e.orig_group;
+      delete e.haveReplied;
+      delete e.reply;
+      delete e.repliedArticle;
+      delete e.titleWordScore;
+      // delete e.totalReplyCount;
+    });
+    console.log('dataForNodeLink:', { nodes: removedUnusedDatas, links: similaritys });
+
     function computePosition(userArr, scale) {
       const arr = [];
       let init = 0;
@@ -662,7 +673,7 @@ export default function userSimilarityGraph(data, svg, user, articles) {
           })
           // .attr('stroke', 'red')
           .attr('stroke-width', '2px')
-          .attr('opacity', indY >= indX ? 0 : 1);
+          .attr('opacity', indY > indX ? 0 : 1);
       }
 
       function drawReplyTime(n, indX, indY, user1, user2, bothRepliedArticles) {
@@ -786,6 +797,9 @@ export default function userSimilarityGraph(data, svg, user, articles) {
       function drawNewReplyTimeWithQuantile(n, indX, indY, user1, user2, bothRepliedArticles) {
         const xUserRepliedTime = getAllReplyTime(user1, bothRepliedArticles);
         const yUserRepliedTime = getAllReplyTime(user2, bothRepliedArticles);
+        // for user study
+        if (user1.id === user2.id) datas.find(e => e.id === user1.id).replyTime = xUserRepliedTime;
+
         const threeHours = 60 * 60 * 3;
         const thisTimeRectwidth = 10;
         const thisTimeMaxLong = maxSize - 10;
@@ -924,8 +938,10 @@ export default function userSimilarityGraph(data, svg, user, articles) {
                   `;
               })
               .attr('fill', (q, step) => {
-                if (_index === 0) return colorArray[user1.community](0.6);
-                return colorArray[user2.community](0.6);
+                // if (_index === 0) return colorArray[user1.community](0.6);
+                // return colorArray[user2.community](0.6);
+                if (_index === 0) return colorArray[user1.community](secondOrdering_mat[indX][indY]);
+                return colorArray[user2.community](secondOrdering_mat[indX][indY]);
                 if (step === 0) {
                   return 'black';
                 }
@@ -947,7 +963,7 @@ export default function userSimilarityGraph(data, svg, user, articles) {
                 }
                 return 'green';
               })
-              .attr('stroke-width', (q, step) => step === 1 ? '2px' : '1px')
+              .attr('stroke-width', (q, step) => (step === 1 ? '3px' : '3px'))
               .attr('opacity', indY > indX ? 0 : 1);
           })
       }
@@ -1060,7 +1076,6 @@ export default function userSimilarityGraph(data, svg, user, articles) {
           .attr('d', () => {
             const size = datas.find(e => e.id === tempUser.id).repliedArticle.length;
             const offset = (bandWidthScale.range()[1] - bandWidthScale(size)) / 2 + ((maxSize - fixedSize) / 2);
-            console.log(offset);
             const start = ind * (maxSize + rectMargin) + offset;
             const end = start + bandWidthScale(size);
             return `M ${start} ${start} L ${end} ${start} L ${end} ${end} L ${start} ${end} L ${start} ${start}`;
@@ -1844,8 +1859,8 @@ export default function userSimilarityGraph(data, svg, user, articles) {
         const maxHeight = 200;
         const intersectHeight = 10;
         const positionOfArticleCom = [];
-        console.log(Math.max(...numOfArtOfEachComunity.map(e => e.articles.length)));
-        const scale = d3.scaleLinear().domain([0, Math.max(...numOfArtOfEachComunity.map(e => e.articles.length))]).range([0, maxHeight]);
+        const numberOfArticles = numOfArtOfEachComunity.reduce((acc, obj) => acc + obj.articles.length, 0);
+        const scale = d3.scaleLinear().domain([0, numberOfArticles]).range([0, datas.length * maxSize]);
         // calculate all article community position
 
         // article community position
@@ -1876,6 +1891,8 @@ export default function userSimilarityGraph(data, svg, user, articles) {
           }
         }
         console.log(simpleArr);
+        // article group label
+        drawArticleGroupLabel(radial);
 
         for (let i = 0; i < arr.length; i += 1) {
           // user Community i
@@ -1894,14 +1911,35 @@ export default function userSimilarityGraph(data, svg, user, articles) {
           // visual intersection
           drawIntersectionOfUserCommunities(groupRadial, i);
         }
-
+        radial.selectAll('rect')
+          .attr('stroke-width', '5px');
         function coClusterMouseover(arts, communityIndex) {
           const usrs = datas.filter(e => e.community === communityIndex);
           usrs.forEach((u) => {
             u.haveReplied = u.repliedArticle.filter(a => arts.some(_a => _a.article_id === a.article_id));
           });
         }
-
+        function drawArticleGroupLabel(svgGroup) {
+          svgGroup.append('g')
+            .attr('class', `article_group_label`)
+            .selectAll('path')
+            .data(positionOfArticleCom)
+            .enter()
+            .append('text')
+            .attr('x', -50)
+            .attr('y', (d, index) => {
+              const num = numOfArtOfEachComunity.find(e => e.community === d.community).articles.length;
+              console.log(scale(num) * (3 / 2) / 2);
+              return d.position + scale(num) / 2;
+            })
+            .attr('dominant-baseline', 'central')
+            .attr('font-size', (d) => {
+              const num = numOfArtOfEachComunity.find(e => e.community === d.community).articles.length;
+              return scale(num) / 2;
+            })
+            .attr('text-anchor', 'end')
+            .text((d, index) => `Group ${index + 1}`);
+        }
         function drawBlankAreaOfArticleCommunity(svgGroup, com, maxWidth) {
           const tempCom = comunityIndexY[com];
           svgGroup.append('g')
@@ -1910,6 +1948,7 @@ export default function userSimilarityGraph(data, svg, user, articles) {
             .data(positionOfArticleCom)
             .enter()
             .append('rect')
+            .attr('class', d => `blank_group_${d.community}`)
             .attr('x', () => (tempCom * (maxSize + rectMargin)) * Math.sqrt(2))
             .attr('y', d => d.position)
             .attr('height', (d) => {
@@ -1917,9 +1956,9 @@ export default function userSimilarityGraph(data, svg, user, articles) {
               return scale(art.length);
             })
             .attr('width', maxWidth)
-            .attr('fill', 'none')
+            .attr('fill', 'gray')
             .attr('stroke', 'black')
-            .attr('stroke-width', '1px');
+            // .attr('stroke-width', '1px');
         }
 
         function drawBipartiteOfUserAndArticles(svgGroup, com, maxWidth) {
@@ -1953,26 +1992,27 @@ export default function userSimilarityGraph(data, svg, user, articles) {
                   return thisWidthScale(sameArticles.length);
                 })
                 .attr('stroke', 'black')
-                .attr('stroke-width', '1px')
-                .attr('fill', (_d, _index) => colorArray[com](_index * 0.25))
+                // .attr('stroke-width', '1px')
+                .attr('fill', (_d, _index) => colorArray[com]((_index + 1) * 0.2))
                 // .attr('stroke', (_d, _index) => (_index === 0 ? 'black' : 'none'))
                 .on('click', (_d, _index, _nodes) => {
                   selectedArticles.splice(0, selectedArticles.length);
                   if (d3.select(_nodes[_index]).attr('stroke-width') === '10px') {
                     // already has been selected
-                    svgGroup.selectAll('rect').attr('stroke-width', '1px');
+                    svgGroup.selectAll('rect').attr('stroke-width', '3px');
                   } else {
-                    svgGroup.selectAll('rect').attr('stroke-width', '1px');
+                    svgGroup.selectAll('rect').attr('stroke-width', '3px');
                     d3.select(_nodes[_index]).attr('stroke-width', '10px');
                     articles.forEach((e) => {
-                      if (_d.some(e1 => e1.article_id === e.article_id)) {
-                        selectedArticles.push(e);
-                      }
+                      if (_d.some(e1 => e1.article_id === e.article_id)) selectedArticles.push(e);
                     });
                   }
                   rectClick(_d, com);
                 })
-                .on('mouseover', _d => coClusterMouseover(_d, com));
+                .on('mouseover', _d => coClusterMouseover(_d, com))
+                .each(() => {
+                  // svgGroup.select(`.co-cluster_${com}`).select(`.blank_group_${d.community}`).attr('fill', 'none');
+                });
             });
         }
 
@@ -2006,7 +2046,6 @@ export default function userSimilarityGraph(data, svg, user, articles) {
                     .append('rect')
                     .attr('x', _d => (nex * (maxSize + rectMargin)) * Math.sqrt(2))
                     .attr('y', (_d, _index) => {
-                      console.log(_d);
                       if (nextArticleCommunity) {
                         const artNum = numOfArtOfEachComunity.find(e => e.community === nextArticleCommunity.community).articles.length;
                         const offset = scale(artNum) + (pIndex - 1) * (scale(artNum) / 2 / arr.length);
@@ -2057,7 +2096,6 @@ export default function userSimilarityGraph(data, svg, user, articles) {
                       const totalArticlesOfThisCommunityOfArticle = numOfArtOfEachComunity.find(e => e.community === nextArticleCommunity.community).articles;
                       const thisWidthScale = d3.scaleLinear().domain([0, totalArticlesOfThisCommunityOfArticle.length]).range([0, maxWidth_nex]);
                       const maxWidth = thisWidthScale(nextArticleCommunity.level[0].length);
-                      console.log(maxWidth);
                       const heightScale = d3.scaleLinear().domain([0, nextArticleCommunity.level[0].length]).range([0, maxWidth]);
                       const sameArticles = nextArticleCommunity.level[0].filter(e => _d.some(e1 => e1.article_id === e.article_id));
                       return heightScale(sameArticles.length);
@@ -2065,7 +2103,7 @@ export default function userSimilarityGraph(data, svg, user, articles) {
                     })
                     .attr('fill', (_d, _index) => colorArray[com](_index * 0.25))
                     .attr('stroke', 'black')
-                    .attr('stroke-width', '1px')
+                    // .attr('stroke-width', '1px')
                     .attr('stroke', (_d, _index) => (_index === 0 ? 'black' : 'none'))
                     .on('click', (_d, _index, _nodes, levelIndex) => {
                       if (!nextArticleCommunity) return 0;
