@@ -173,10 +173,10 @@ class Page extends React.Component {
                 onChange={handlePT}
               />
             </label>
+            <Button name="submit" type="button" size="sm" onClick={e => this.getCR(e, 'All')}>
+              Query Submit
+            </Button>
           </fieldset>
-          <Button name="submit" type="button" size="sm" onClick={e => this.getCR(e, 'All')}>
-                Query Submit
-          </Button>
         </div>
       );
     }

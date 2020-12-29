@@ -49,77 +49,103 @@ export default function userSimilarityGraph(data, svg, user, articles) {
   drawSortOptionDiv();
 
   function drawSlider() {
-    d3.select('.option').selectAll('*').remove();
-    const sliderSvg = d3.select('.option').append('div')
-      // .style('display', 'inline-block')
-      .append('svg')
-      .attr('class', 'sliderSvg')
-      .attr('width', '160px')
-      .attr('height', '50px')
-      .append('g')
-      .attr('transform', 'scale(0.6) translate(10, 0)');
     let similarThresh = 0.2;
     let articleThresh = 1;
-    const similaritySlider = slider.sliderBottom()
-      .min(0)
-      .max(1)
-      .width(150)
-      .tickFormat(d3.format('.1'))
-      .ticks(5)
-      .default(similarThresh)
-      .on('onchange', (val) => {
-        similarThresh = val;
-        adjacencyMatrixNoAuthor(userSimilarity, similarThresh, articleThresh);
+    d3.select('.option').selectAll('*').remove();
+    const similarThreshDiv = d3.select('.option').append('div')
+      .style('padding', '10px');
+    similarThreshDiv.append('h6')
+      .text('Similarity >=');
+    similarThreshDiv.append('input')
+      .attr('type', 'number')
+      .on('keypress', (d, index, nodes) => {
+        if (d3.event.keyCode === 13) {
+          const val = d3.select(nodes[index]).property('value');
+          similarThresh = val;
+          adjacencyMatrixNoAuthor(userSimilarity, similarThresh, articleThresh);
+        }
       });
-
-    const gSlider1 = sliderSvg.append('g')
-      .attr('class', 'similaritySlider')
-      .attr('transform', `translate(${3 * margin.left},${margin.top})`);
-    const sliderText1 = sliderSvg.append('g')
-      .attr('transform', `translate(0,${margin.top})`)
-      .append('text')
-      .text('Similarity')
-      .attr('y', 5);
-    gSlider1.call(similaritySlider);
-
-    d3.select('.similaritySlider')
-      .selectAll('.tick')
-      .selectAll('text')
-      .attr('y', 10);
-    const repliedSliderSvg = d3.select('.option').append('div')
-      // .style('display', 'inline-block')
-      .append('svg')
-      .attr('class', 'repliedSliderSvg')
-      .attr('height', '50px')
-      .attr('width', '160px')
-      .append('g')
-      .attr('transform', 'scale(0.6)');
-    const repliedSlider = slider.sliderBottom()
-      .min(0)
-      .max(100)
-      .width(150)
-      // .tickFormat(d3.format('.1'))
-      .ticks(10)
-      .default(articleThresh)
-      .on('onchange', (val) => {
-        articleThresh = val;
-        adjacencyMatrixNoAuthor(userSimilarity, similarThresh, articleThresh);
+    const articleThreshDiv = d3.select('.option').append('div')
+      .style('padding', '10px');
+    articleThreshDiv.append('h6')
+      .text('ReplyCount >=');
+    articleThreshDiv.append('input')
+      .attr('type', 'number')
+      .on('keypress', (d, index, nodes) => {
+        if (d3.event.keyCode === 13) {
+          const val = d3.select(nodes[index]).property('value');
+          articleThresh = val;
+          adjacencyMatrixNoAuthor(userSimilarity, similarThresh, articleThresh);
+        }
       });
+    // const sliderSvg = d3.select('.option').append('div')
+    //   // .style('display', 'inline-block')
+    //   .append('svg')
+    //   .attr('class', 'sliderSvg')
+    //   .attr('width', '230px')
+    //   .attr('height', '50px')
+    //   .append('g')
+    //   .attr('transform', 'scale(0.8) translate(10, 0)');
+    // const similaritySlider = slider.sliderBottom()
+    //   .min(0)
+    //   .max(1)
+    //   .width(150)
+    //   .tickFormat(d3.format('.1'))
+    //   .ticks(5)
+    //   .default(similarThresh)
+    //   .on('onchange', (val) => {
+    //     similarThresh = val;
+    //     adjacencyMatrixNoAuthor(userSimilarity, similarThresh, articleThresh);
+    //   });
 
-    const gSlider2 = repliedSliderSvg.append('g')
-      .attr('class', 'repliedSlider')
-      .attr('transform', `translate(${3 * margin.left + 10},${margin.top})`);
-    const sliderText2 = repliedSliderSvg.append('g')
-      .attr('transform', `translate(0,${margin.top})`)
-      .append('text')
-      .text('ReplyCount')
-      .attr('y', 5);
-    gSlider2.call(repliedSlider);
+    // const gSlider1 = sliderSvg.append('g')
+    //   .attr('class', 'similaritySlider')
+    //   .attr('transform', `translate(${3 * margin.left},${margin.top})`);
+    // const sliderText1 = sliderSvg.append('g')
+    //   .attr('transform', `translate(0,${margin.top})`)
+    //   .append('text')
+    //   .text('Similarity')
+    //   .attr('y', 5);
+    // gSlider1.call(similaritySlider);
 
-    d3.select('.repliedSlider')
-      .selectAll('.tick')
-      .selectAll('text')
-      .attr('y', 10);
+    // d3.select('.similaritySlider')
+    //   .selectAll('.tick')
+    //   .selectAll('text')
+    //   .attr('y', 10);
+    // const repliedSliderSvg = d3.select('.option').append('div')
+    //   // .style('display', 'inline-block')
+    //   .append('svg')
+    //   .attr('class', 'repliedSliderSvg')
+    //   .attr('height', '50px')
+    //   .attr('width', '230px')
+    //   .append('g')
+    //   .attr('transform', 'scale(0.8)');
+    // const repliedSlider = slider.sliderBottom()
+    //   .min(0)
+    //   .max(100)
+    //   .width(150)
+    //   // .tickFormat(d3.format('.1'))
+    //   .ticks(10)
+    //   .default(articleThresh)
+    //   .on('onchange', (val) => {
+    //     articleThresh = val;
+    //     adjacencyMatrixNoAuthor(userSimilarity, similarThresh, articleThresh);
+    //   });
+
+    // const gSlider2 = repliedSliderSvg.append('g')
+    //   .attr('class', 'repliedSlider')
+    //   .attr('transform', `translate(${3 * margin.left + 10},${margin.top})`);
+    // const sliderText2 = repliedSliderSvg.append('g')
+    //   .attr('transform', `translate(0,${margin.top})`)
+    //   .append('text')
+    //   .text('ReplyCount')
+    //   .attr('y', 5);
+    // gSlider2.call(repliedSlider);
+
+    // d3.select('.repliedSlider')
+    //   .selectAll('.tick')
+    //   .selectAll('text')
+    //   .attr('y', 10);
     adjacencyMatrixNoAuthor(userSimilarity, similarThresh, articleThresh);
   }
 
@@ -149,7 +175,7 @@ export default function userSimilarityGraph(data, svg, user, articles) {
       .style('margin-left', '10px')
       .style('align-self', 'center')
       .style('font-size', 'x-small');
-    simOptionsDiv.append('p').text('Similarity options:');
+    simOptionsDiv.append('h6').text('Similarity options:');
     simOptionsDiv = simOptionsDiv.append('div').style('margin-left', '10px');
     const usersArticlesSim = simOptionsDiv.append('div')
       .style('float', 'left');
@@ -215,16 +241,16 @@ export default function userSimilarityGraph(data, svg, user, articles) {
           d3.selectAll('.avgSimilarityPath')
             .attr('visibility', checked ? 'visible' : 'hidden');
           break;
-      
+
         case 'quantile':
           d3.selectAll('.quantilePath')
             .attr('visibility', checked ? 'visible' : 'hidden');
           break;
-      
+
         default:
           break;
       }
-    })
+    });
   }
   // heatMapWithAuthor();
 
@@ -448,9 +474,7 @@ export default function userSimilarityGraph(data, svg, user, articles) {
       const endDate = d3.select('#date2').attr('value');
       const us = datas.filter(_d => selectedUser.includes(_d.id));
       if (us.length === 2) {
-        bothRepliedArticles = us[0].repliedArticle.filter((a) => {
-          return us[1].repliedArticle.some(_a => a.article_id === _a.article_id);
-        });
+        bothRepliedArticles = us[0].repliedArticle.filter(a => us[1].repliedArticle.some(_a => a.article_id === _a.article_id));
       } else {
         us.forEach((usr) => {
           usr.repliedArticle.forEach((art) => {
@@ -514,11 +538,11 @@ export default function userSimilarityGraph(data, svg, user, articles) {
       .enter()
       .append('g')
       .attr('class', (d, index) => `group_${index}`)
-      .attr('transform', (d, index) => `translate(${110 * ((index % 2) + 4)}, ${70 * Math.floor(index / 2)})`)
+      .attr('transform', (d, index) => `translate(${110 * (index % 2)}, ${70 * Math.floor(index / 2)})`)
       // .attr('transform', (d, index) => `translate(0 ${20 * index})`)
       .each((d, index, nodes) => {
         d3.select(nodes[index]).append('text')
-          .text(`Community ${index}`)
+          .text(`Community ${index + 1}`)
           .attr('x', 0)
           .attr('font-size', 14)
           .attr('fill', colorArray[index](1));
@@ -965,7 +989,7 @@ export default function userSimilarityGraph(data, svg, user, articles) {
               })
               .attr('stroke-width', (q, step) => (step === 1 ? '3px' : '3px'))
               .attr('opacity', indY > indX ? 0 : 1);
-          })
+          });
       }
       function drawArticleSimilarity(_d, n, indX, indY, user1, user2, size) {
         d3.select(n[indX])
@@ -1131,7 +1155,7 @@ export default function userSimilarityGraph(data, svg, user, articles) {
           const s = d3.event.selection;
           const focusUserIndex = [];
           selectedUser.splice(0, selectedUser.length);
-          console.log(s[0] / reverseScale, s[1] / reverseScale, (s[0] / reverseScale)/ ((maxSize + rectMargin) * Math.sqrt(2)), (s[1] / reverseScale) / ((maxSize + rectMargin) * Math.sqrt(2)));
+          console.log(s[0] / reverseScale, s[1] / reverseScale, (s[0] / reverseScale) / ((maxSize + rectMargin) * Math.sqrt(2)), (s[1] / reverseScale) / ((maxSize + rectMargin) * Math.sqrt(2)));
           const start = Math.round((s[0] / reverseScale) / ((maxSize + rectMargin) * Math.sqrt(2)));
           const end = Math.floor((s[1] / reverseScale) / ((maxSize + rectMargin) * Math.sqrt(2)));
           for (let i = start; i <= end; i += 1) {
@@ -1173,14 +1197,12 @@ export default function userSimilarityGraph(data, svg, user, articles) {
           const brushPathOffset = maxSize * reverseScale;
           d3.select('.brush').select('path')
             .transition()
-            .attr('d', () => {
-              return `
+            .attr('d', () => `
                 M ${fixedX1} ${-brushPathOffset} 
                 L ${(fixedX2 + fixedX1) / 2} ${-(fixedX2 - fixedX1) / 2 - brushPathOffset} 
                 L ${fixedX2} ${-brushPathOffset} 
                 L ${fixedX1} ${-brushPathOffset}
-              `;
-            })
+              `)
             .attr('stroke', 'black')
             .attr('stroke-width', '2px')
             .attr('fill', 'gray')
@@ -1921,7 +1943,7 @@ export default function userSimilarityGraph(data, svg, user, articles) {
         }
         function drawArticleGroupLabel(svgGroup) {
           svgGroup.append('g')
-            .attr('class', `article_group_label`)
+            .attr('class', 'article_group_label')
             .selectAll('path')
             .data(positionOfArticleCom)
             .enter()
@@ -1957,8 +1979,8 @@ export default function userSimilarityGraph(data, svg, user, articles) {
             })
             .attr('width', maxWidth)
             .attr('fill', 'gray')
-            .attr('stroke', 'black')
-            // .attr('stroke-width', '1px');
+            .attr('stroke', 'black');
+          // .attr('stroke-width', '1px');
         }
 
         function drawBipartiteOfUserAndArticles(svgGroup, com, maxWidth) {
