@@ -739,7 +739,7 @@ export default function userDailyActivity(data, user, svg, begin, end) {
         nextDate.setDate(nextDate.getDate() + 1);
         const tempDatePos = timeScale(tempDate) > 0 ? timeScale(tempDate) : 0;
         const nextDatePos = timeScale(nextDate) < h ? timeScale(nextDate) : h;
-        return nextDatePos - tempDatePos;
+        return Math.max(0, nextDatePos - tempDatePos);
       })
       .attr('opacity', d => (timeScale(new Date(d)) < h ? 1 : 0));
     // update beforeWorl rect

@@ -18,7 +18,7 @@ import { userActivityTimeline } from './userActivityTimeline';
 import { userDailyActivity } from './userDailyActivity';
 import * as dp from './dataprocess';
 
-export default function userSimilarityGraph(data, svg, user, articles) {
+export default function userSimilarityGraph(data, svg, user, articles, submit) {
   // console.log(user);
   // console.log(data);
   const svgScale = d3.scaleSqrt().domain([0, 200]).range([0.5, 0.1]);
@@ -58,6 +58,7 @@ export default function userSimilarityGraph(data, svg, user, articles) {
       .text('Similarity >=');
     similarThreshDiv.append('input')
       .attr('type', 'number')
+      .attr('value', similarThresh)
       .on('keypress', (d, index, nodes) => {
         if (d3.event.keyCode === 13) {
           const val = d3.select(nodes[index]).property('value');
@@ -71,6 +72,7 @@ export default function userSimilarityGraph(data, svg, user, articles) {
       .text('ReplyCount >=');
     articleThreshDiv.append('input')
       .attr('type', 'number')
+      .attr('value', articleThresh)
       .on('keypress', (d, index, nodes) => {
         if (d3.event.keyCode === 13) {
           const val = d3.select(nodes[index]).property('value');
@@ -225,6 +227,20 @@ export default function userSimilarityGraph(data, svg, user, articles) {
       .attr('for', 'quantile')
       .style('margin-left', '2px')
       .text('quantile');
+    const getActivityDiv = simOptionsDiv.append('div')
+    getActivityDiv.append('button')
+      .style('type', 'button')
+      .style('font-size', 'smaller')
+      .attr('class', 'btn btn-primary')
+      .attr('id', 'submitUsers')
+      .text('Get Activity!')
+      .on('click', (d) => {
+        const usr = [];
+        selectedUser.forEach((e) => {
+          usr.push({ id: e });
+        });
+        submit(usr);
+      });
     simOptionsDiv.selectAll('input').on('change', (d, index, nodes) => {
       const type = d3.select(nodes[index]).attr('value');
       const checked = d3.select(nodes[index]).property('checked');
@@ -323,6 +339,14 @@ export default function userSimilarityGraph(data, svg, user, articles) {
     }
     const color = d => d3.schemeTableau10[d];
     const colorArray = [
+      d3.interpolateBlues,
+      d3.interpolateOranges,
+      d3.interpolateGreens,
+      d3.interpolatePurples,
+      d3.interpolateReds,
+      d3.interpolateYlOrBr,
+      d3.interpolateGnBu,
+      d3.interpolateGreys,
       d3.interpolateBlues,
       d3.interpolateOranges,
       d3.interpolateGreens,
@@ -597,17 +621,17 @@ export default function userSimilarityGraph(data, svg, user, articles) {
     drawUserRepliedArticleMatrix(articlesOrderByCommunity);
     drawUserGroupBipartiteRelations();
 
-    const removedUnusedDatas = JSON.parse(JSON.stringify(datas));
-    removedUnusedDatas.forEach((e) => {
-      e.totalReplyCount = e.repliedArticle.length;
-      delete e.orig_group;
-      delete e.haveReplied;
-      delete e.reply;
-      delete e.repliedArticle;
-      delete e.titleWordScore;
-      // delete e.totalReplyCount;
-    });
-    console.log('dataForNodeLink:', { nodes: removedUnusedDatas, links: similaritys });
+    // const removedUnusedDatas = JSON.parse(JSON.stringify(datas));
+    // removedUnusedDatas.forEach((e) => {
+    //   e.totalReplyCount = e.repliedArticle.length;
+    //   delete e.orig_group;
+    //   delete e.haveReplied;
+    //   delete e.reply;
+    //   delete e.repliedArticle;
+    //   delete e.titleWordScore;
+    //   // delete e.totalReplyCount;
+    // });
+    // console.log('dataForNodeLink:', { nodes: removedUnusedDatas, links: similaritys });
 
     function computePosition(userArr, scale) {
       const arr = [];
@@ -1903,16 +1927,16 @@ export default function userSimilarityGraph(data, svg, user, articles) {
         console.log(positionOfArticleCom);
         console.log(arr);
         // simplify output arr of console.log
-        const simpleArr = [];
-        for (let i = 0; i < arr.length; i += 1) {
-          simpleArr.push({ arr: [], num: 0 });
-          simpleArr[i].num = (datas.filter(e => e.community === i).length);
-          for (let j = 0; j < arr[i].length; j += 1) {
-            simpleArr[i].arr.push({ community: arr[i][j].community, level: arr[i][j].level[0].length });
-            simpleArr[i].arr[j].num = articlesCommunity.filter(e => e.community === arr[i][j].community).length;
-          }
-        }
-        console.log(simpleArr);
+        // const simpleArr = [];
+        // for (let i = 0; i < arr.length; i += 1) {
+        //   simpleArr.push({ arr: [], num: 0 });
+        //   simpleArr[i].num = (datas.filter(e => e.community === i).length);
+        //   for (let j = 0; j < arr[i].length; j += 1) {
+        //     simpleArr[i].arr.push({ community: arr[i][j].community, level: arr[i][j].level[0].length });
+        //     simpleArr[i].arr[j].num = articlesCommunity.filter(e => e.community === arr[i][j].community).length;
+        //   }
+        // }
+        // console.log(simpleArr);
         // article group label
         drawArticleGroupLabel(radial);
 
@@ -1960,7 +1984,7 @@ export default function userSimilarityGraph(data, svg, user, articles) {
               return scale(num) / 2;
             })
             .attr('text-anchor', 'end')
-            .text((d, index) => `Group ${index + 1}`);
+            // .text((d, index) => `Group ${index + 1}`);
         }
         function drawBlankAreaOfArticleCommunity(svgGroup, com, maxWidth) {
           const tempCom = comunityIndexY[com];

@@ -30,8 +30,8 @@ class OpinionLeaderView extends React.Component {
     let userSimilaritySvg = d3.select('#timeLine');
     // let userDailyActivitySvg = d3.select('#userDailyActivity');
     const boardname = d3.select('#pagename1').attr('value');
-    const beginDate = d3.select('#date1').attr('value');
-    const endDate = d3.select('#date2').attr('value');
+    // const beginDate = d3.select('#date1').attr('value');
+    // const endDate = d3.select('#date2').attr('value');
     function resArrayToArticlesArray(resArray) {
       const articlesArray = [];
       resArray.forEach((arr) => {
@@ -45,6 +45,8 @@ class OpinionLeaderView extends React.Component {
     }
 
     function getReqstr(id, begin, end) {
+      const beginDate = d3.select('#date1').attr('value');
+      const endDate = d3.select('#date2').attr('value');
       const searchBegin = begin || beginDate;
       const searchEnd = end || endDate;
       const {
@@ -124,6 +126,8 @@ class OpinionLeaderView extends React.Component {
 
     function handleSubmit(e) {
       // e.preventDefault();
+      const beginDate = d3.select('#date1').attr('value');
+      const endDate = d3.select('#date2').attr('value');
       console.log(e);
       const userNumsPerRequest = 50;
       const { length } = e;
@@ -138,7 +142,7 @@ class OpinionLeaderView extends React.Component {
       //   url.push(encodeURI(getReqstr(fixedUserArr[i])));
       // }
       // split date into many pieces by one day
-      const fixedUserArr = e.map(usr => usr.id);
+      const fixedUserArr = e.map(usr => usr.id || usr);
       const url = [];
       const betweenDate = (new Date(endDate) - new Date(beginDate)) / (1000 * 3600 * 24);
       for (let i = 0; i < betweenDate; i += 5) {
@@ -205,6 +209,7 @@ class OpinionLeaderView extends React.Component {
                 userSimilaritySvg,
                 userIdArr,
                 resArr.articles,
+                handleSubmit,
               );
             }
             return response;
@@ -235,6 +240,7 @@ class OpinionLeaderView extends React.Component {
               userSimilaritySvg,
               fixedUserArr,
               response.articles,
+              handleSubmit,
               // response.similarity,
             );
           }
