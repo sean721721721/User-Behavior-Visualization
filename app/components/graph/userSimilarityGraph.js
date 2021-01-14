@@ -227,7 +227,44 @@ export default function userSimilarityGraph(data, svg, user, articles, submit) {
       .attr('for', 'quantile')
       .style('margin-left', '2px')
       .text('quantile');
-    const getActivityDiv = simOptionsDiv.append('div')
+    const getActivityDiv = simOptionsDiv.append('div');
+    // <input
+    //   className="form-control date"
+    //   type="date"
+    //   name="since"
+    //   id="date1"
+    //   placeholder="date"
+    //   value={since}
+    //   onChange={handlePT}
+    // />
+    getActivityDiv.append('input')
+      .attr('type', 'date')
+      .attr('name', 'since')
+      .attr('id', 'userDate1')
+      .each((d, index, nodes) => {
+        if (!d3.select(nodes[index]).property('value')) {
+          d3.select(nodes[index]).property('value', d3.select('#date1').attr('value'));
+        }
+      })
+      .attr('placeholder', 'since');
+
+    getActivityDiv.append('span')
+      .style('margin-left', '5px')
+      .style('margin-right', '5px')
+      .text('~');
+
+    getActivityDiv.append('input')
+      .style('margin-right', '5px')
+      .attr('type', 'date')
+      .attr('name', 'until')
+      .attr('id', 'userDate2')
+      .each((d, index, nodes) => {
+        if (!d3.select(nodes[index]).property('value')) {
+          d3.select(nodes[index]).property('value', d3.select('#date2').attr('value'));
+        }
+      })
+      .attr('placeholder', 'until');
+      
     getActivityDiv.append('button')
       .style('type', 'button')
       .style('font-size', 'smaller')
@@ -239,7 +276,7 @@ export default function userSimilarityGraph(data, svg, user, articles, submit) {
         selectedUser.forEach((e) => {
           usr.push({ id: e });
         });
-        submit(usr);
+        submit(usr, 0);
       });
     simOptionsDiv.selectAll('input').on('change', (d, index, nodes) => {
       const type = d3.select(nodes[index]).attr('value');
@@ -362,6 +399,7 @@ export default function userSimilarityGraph(data, svg, user, articles, submit) {
     // console.log(user);
     const [datas, users, similaritys] = dp.filterAlwaysNonSimilarUser(data, user, similarity, simThresh, artThresh);
     console.log('[datas]:', [datas], '[users]:', [users], '[similaritys]:', [similaritys]);
+    if (!datas.length) return;
     // similarity for articles grouping
     // let filteredArticles = articles;
     // filteredArticles = filteredArticles.filter(
@@ -494,8 +532,8 @@ export default function userSimilarityGraph(data, svg, user, articles, submit) {
     const selectedArticles = [];
     const rectClick = (d, index, i) => {
       let bothRepliedArticles = [];
-      const beginDate = d3.select('#date1').attr('value');
-      const endDate = d3.select('#date2').attr('value');
+      const beginDate = d3.select('#userDate1').property('value');
+      const endDate = d3.select('#userDate2').property('value');
       const us = datas.filter(_d => selectedUser.includes(_d.id));
       if (us.length === 2) {
         bothRepliedArticles = us[0].repliedArticle.filter(a => us[1].repliedArticle.some(_a => a.article_id === _a.article_id));
@@ -872,9 +910,9 @@ export default function userSimilarityGraph(data, svg, user, articles, submit) {
           .attr('class', 'quantilePath')
           .each((_d, _index, _n) => {
             const quantile = [
-              d3.quantile(_d, 0.25),
-              d3.quantile(_d, 0.5),
-              d3.quantile(_d, 0.75),
+              Math.max(0, d3.quantile(_d, 0.25)),
+              Math.max(0, d3.quantile(_d, 0.5)),
+              Math.max(0, d3.quantile(_d, 0.75)),
             ];
             d3.select(_n[_index])
               .selectAll()
@@ -1183,6 +1221,8 @@ export default function userSimilarityGraph(data, svg, user, articles, submit) {
           const start = Math.round((s[0] / reverseScale) / ((maxSize + rectMargin) * Math.sqrt(2)));
           const end = Math.floor((s[1] / reverseScale) / ((maxSize + rectMargin) * Math.sqrt(2)));
           for (let i = start; i <= end; i += 1) {
+            // d3.selectAll(`circle.id_${d}`).attr('r', 10);
+            d3.selectAll(`circle.id_${newUserAxisValues[i]}`).attr('r', 7.5);
             selectedUser.push(newUserAxisValues[i]);
           }
           console.log(selectedUser);

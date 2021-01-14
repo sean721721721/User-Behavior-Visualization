@@ -124,10 +124,15 @@ class OpinionLeaderView extends React.Component {
       });
     }
 
-    function handleSubmit(e) {
+    function handleSubmit(e, type = 1) {
       // e.preventDefault();
-      const beginDate = d3.select('#date1').attr('value');
-      const endDate = d3.select('#date2').attr('value');
+      const beginDate = type === 1 ? d3.select('#date1').attr('value') : d3.select('#userDate1').property('value');
+      const endDate = type === 1 ? d3.select('#date2').attr('value') : d3.select('#userDate2').property('value');
+      d3.select('#date1').attr('value', d3.select('#userDate1').property('value'));
+      d3.select('#date2').attr('value', d3.select('#userDate2').property('value'));
+      console.log(type);
+      console.log(beginDate);
+      console.log(endDate);
       console.log(e);
       const userNumsPerRequest = 50;
       const { length } = e;
