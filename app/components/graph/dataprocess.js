@@ -333,6 +333,15 @@ function matrixReordering(mat, origMat, userAxis, us) {
   return [permutedMat, originalMat];
 }
 
+function testMatrixReordering(mat) {
+  const gra = reorder.mat2graph(mat);
+  const perm = reorder.pca_order(mat);
+  let permutedMat = reorder.permute(mat, perm);
+  permutedMat = reorder.transpose(permutedMat);
+  permutedMat = reorder.permute(permutedMat, perm);
+  permutedMat = reorder.transpose(permutedMat);
+  return permutedMat;
+}
 function matrixReorderingByCommunity(mat, origMat, com, userAxis, us) {
   const maxCommunity = Math.max(...com.map(p => p.community));
   const perm = [];
@@ -487,4 +496,5 @@ export {
   moveNonSimilarUsersToCorner,
   communityInnerMatrixReordering,
   computeUserSimilarityByAuthors,
+  testMatrixReordering,
 };
