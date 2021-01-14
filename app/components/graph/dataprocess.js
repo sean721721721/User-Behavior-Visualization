@@ -132,6 +132,7 @@ function computeArticleSimilarity(userArr) {
 }
 
 function jLouvainClustering(nodes, edges) {
+  if (!nodes) return;
   const edgeData = edges.map((e) => {
     e.weight = e.value * 10;
     return e;

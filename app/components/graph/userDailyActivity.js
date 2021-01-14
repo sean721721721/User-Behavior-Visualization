@@ -530,7 +530,10 @@ export default function userDailyActivity(data, user, svg, begin, end) {
             // .attr('r', pointerScale(includesUser.length))
             .attr('r', 5)
             .attr('stroke', 'black')
-            .attr('stroke-width', _d => (_d.article_title[0] !== 'R' ? '2px' : '0px'))
+            .attr('stroke-width', (_d) => {
+              if (!_d.article_title) return '0px';
+              return _d.article_title[0] !== 'R' ? '2px' : '0px';
+            })
             .style('fill', color[0](0.8))
             .on('mouseover', _d => mouseover(_d, data))
             .on('mouseout', mouseout)
