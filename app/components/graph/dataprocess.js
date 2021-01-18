@@ -333,15 +333,64 @@ function matrixReordering(mat, origMat, userAxis, us) {
   return [permutedMat, originalMat];
 }
 
-function testMatrixReordering(mat) {
+function testMatrixReordering(objmat) {
+  const mat = [];
+  for (let i = 0; i < objmat.length; i += 1) {
+    mat.push([]);
+    for (let j = 0; j < objmat[0].length; j += 1) {
+      mat[i].push(objmat[i][j].value);
+    }
+  }
+  console.log(mat);
   const gra = reorder.mat2graph(mat);
   const perm = reorder.pca_order(mat);
+  console.log(perm);
+  let permutedMat = reorder.permute(objmat, perm);
+  permutedMat = reorder.transpose(permutedMat);
+  permutedMat = reorder.permute(permutedMat, perm);
+  permutedMat = reorder.transpose(permutedMat);
+  return permutedMat;
+}
+
+function testRandomMatrixReordering(mat) {
+  const gra = reorder.mat2graph(mat);
+  const perm = [3, 1, 4, 19, 13, 2, 0, 11, 5, 20, 17, 15, 14, 18, 8, 6, 16, 10, 12, 9, 7];
   let permutedMat = reorder.permute(mat, perm);
   permutedMat = reorder.transpose(permutedMat);
   permutedMat = reorder.permute(permutedMat, perm);
   permutedMat = reorder.transpose(permutedMat);
   return permutedMat;
 }
+
+function testMatrixReorderingByCommunity(mat) {
+  const maxCommunity = 3;
+  const perm = [];
+  const comArr = [];
+  for (let i = 0; i < mat.length; i += 1) {
+    perm.push(i);
+  }
+  for (let i = 0; i < mat.length; i += 1) {
+    if (!comArr.includes(mat[i][i].com)) comArr.push(mat[i][i].com);
+  }
+  let index = 0;
+  for (let i = 0; i < maxCommunity; i += 1) {
+    for (let j = 0; j < mat.length; j += 1) {
+      if (comArr[i] === mat[j][j].com) {
+        perm[index] = j;
+        index += 1;
+      }
+    }
+  }
+  console.log(perm);
+  //   console.log('community permutation for matrix', perm);
+  let permutedMat = reorder.permute(mat, perm);
+  permutedMat = reorder.transpose(permutedMat);
+  permutedMat = reorder.permute(permutedMat, perm);
+  permutedMat = reorder.transpose(permutedMat);
+  return permutedMat;
+  // return [mat, origMat];
+}
+
 function matrixReorderingByCommunity(mat, origMat, com, userAxis, us) {
   const maxCommunity = Math.max(...com.map(p => p.community));
   const perm = [];
@@ -497,4 +546,6 @@ export {
   communityInnerMatrixReordering,
   computeUserSimilarityByAuthors,
   testMatrixReordering,
+  testRandomMatrixReordering,
+  testMatrixReorderingByCommunity,
 };
