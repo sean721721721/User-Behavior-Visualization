@@ -437,10 +437,13 @@ export default function userDailyActivity(data, user, svg, begin, end) {
   const pointerOffset = d3.scaleLinear().domain([0, userID.length]).range([0, -80]);
   const sortedArticles = data.sort((a, b) => new Date(a.date) - new Date(b.date))
     .filter(art => art.messages.some(mes => userID.includes(mes.push_userid)));
+  console.log(sortedArticles);
   const curveOffset = d3.scaleLinear().domain([0, 610]).range([-30, -100]);
   for (let i = 0; i < sortedArticles.length; i += 1) {
     for (let j = i + 1; j < sortedArticles.length; j += 1) {
-      if (!sortedArticles.article_title) break;
+      if (!sortedArticles[i].article_title) break;
+      console.log(sortedArticles[i].article_title, sortedArticles[j].article_title.substring(4));
+      console.log(sortedArticles[i].article_title === sortedArticles[j].article_title.substring(4));
       if (sortedArticles[i].article_title === sortedArticles[j].article_title.substring(4)) {
         const y1 = timeScale(new Date(sortedArticles[i].date));
         const y2 = timeScale(new Date(sortedArticles[j].date));
@@ -476,7 +479,10 @@ export default function userDailyActivity(data, user, svg, begin, end) {
           ]))
           .attr('stroke', 'gray')
           .attr('stroke-width', '4px')
-          .attr('fill', 'none')
+          .attr('fill', () => {
+            console.log('repostlink');
+            return 'none';
+          })
           .on('mouseover', () => repostLinkMouseOver([sortedArticles[i].article_id, sortedArticles[j].article_id]))
           .on('mouseout', mouseout);
       }
@@ -808,9 +814,9 @@ export default function userDailyActivity(data, user, svg, begin, end) {
           fixedSvg.select(`path#${articleId1}_${articleId2}`)
             .attr('visibility', 'visible')
             .attr('d', line([
-              { x: pointerOffset(includesUser1.length) - 20, y: y1 },
+              { x: pointerOffset(includesUser1.length), y: y1 },
               { x: Math.min(pointerOffset(includesUser1.length) - 20, pointerOffset(includesUser2.length) - 20) - 20, y: (y1 + y2) / 2 },
-              { x: pointerOffset(includesUser2.length) - 20, y: y2 },
+              { x: pointerOffset(includesUser2.length), y: y2 },
             ]));
         }
       }
