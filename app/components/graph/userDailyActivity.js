@@ -441,7 +441,7 @@ export default function userDailyActivity(data, user, svg, begin, end) {
   const curveOffset = d3.scaleLinear().domain([0, 610]).range([-30, -100]);
   for (let i = 0; i < sortedArticles.length; i += 1) {
     for (let j = i + 1; j < sortedArticles.length; j += 1) {
-      if (!sortedArticles[i].article_title) break;
+      if (!sortedArticles[i].article_title || !sortedArticles[j].article_title) break;
       console.log(sortedArticles[i].article_title, sortedArticles[j].article_title.substring(4));
       console.log(sortedArticles[i].article_title === sortedArticles[j].article_title.substring(4));
       if (sortedArticles[i].article_title === sortedArticles[j].article_title.substring(4)) {
