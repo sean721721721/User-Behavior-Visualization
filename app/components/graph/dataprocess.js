@@ -355,11 +355,15 @@ function testMatrixReordering(objmat) {
 function testRandomMatrixReordering(mat) {
   const gra = reorder.mat2graph(mat);
   const perm = [3, 1, 4, 19, 13, 2, 0, 11, 5, 20, 17, 15, 14, 18, 8, 6, 16, 10, 12, 9, 7];
+  randomSort(perm);
   let permutedMat = reorder.permute(mat, perm);
   permutedMat = reorder.transpose(permutedMat);
   permutedMat = reorder.permute(permutedMat, perm);
   permutedMat = reorder.transpose(permutedMat);
   return permutedMat;
+  function randomSort(array) {
+    array.sort(() => Math.random() - 0.5);
+  }
 }
 
 function testMatrixReorderingByCommunity(mat) {
