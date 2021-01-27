@@ -83,7 +83,7 @@ export default function userDailyActivity(data, user, svg, begin, end) {
   const xScale = getXScale(original_date1, original_date2);
   const timeScale = d3.scaleTime().domain([original_date1, original_date2]).range([0, h]);
   // console.log('height', h);
-  const userScaleRange = 400;
+  const userScaleRange = 350;
   const userID = user.map(e => e.id);
   const userScale = d3.scaleBand().domain(userID).range([0, userScaleRange]);
   const yDomain = getYDomain(original_date1, original_date2);
@@ -313,7 +313,7 @@ export default function userDailyActivity(data, user, svg, begin, end) {
   //   .on('mouseover', d => mouseover(data[i], d))
   //   .on('mouseout', mouseout);
   const fixedSvg = svg.append('g')
-    .attr('transform', 'translate(100, 100)');
+    .attr('transform', `translate(${w - userScaleRange - 10}, 100)`);
   // for (let i = 0; i < userID.length; i += 1) {
   //   fixedSvg.append('g')
   //     .selectAll()
@@ -380,7 +380,7 @@ export default function userDailyActivity(data, user, svg, begin, end) {
         });
     }
   }
-  // axis
+  // user axis
   fixedSvg.append('g')
     .attr('class', 'xAxis')
     .call(d3.axisTop(userScale).tickSizeInner([-h]))
@@ -392,13 +392,27 @@ export default function userDailyActivity(data, user, svg, begin, end) {
     .attr('dy', '0.5em')
     .attr('transform', 'rotate(-90)');
 
+  // date axis
   fixedSvg.append('g')
     .attr('class', 'yAxis')
     .call(d3.axisLeft(timeScale)
       .ticks(d3.timeDay.every(1))
       .tickFormat(d3.timeFormat('%m/%d'))
-      .tickSizeInner([40]));
-
+      .tickSizeInner([100]));
+  
+  // article reply by users axis
+  // const percentOfUsersReplyScale = d3.scaleLinear().domain(['0%', '25%', '50%', '75%', '100%']).range([0, -80]);
+  const percentOfUsersReplyScale = d3.scaleLinear().domain([0, 100]).range([0, -80]);
+  fixedSvg.append('g')
+    .attr('class', 'xAxis')
+    .call(d3.axisTop(percentOfUsersReplyScale).tickSizeInner([-h]).ticks(4).tickFormat(d => `${d}%`))
+    .selectAll('text')
+    .style('text-anchor', 'start')
+    .attr('font-size', 14)
+    .attr('dx', '0.8em')
+    .attr('dy', '0.5em')
+    .attr('transform', 'rotate(-90)');
+  
   // legend
   fixedSvg.append('circle')
     .attr('cx', 0)

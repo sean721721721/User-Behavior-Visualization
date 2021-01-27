@@ -199,12 +199,16 @@ export default function treemap(cellNodes, beforeThisDate,
     .style('height', (d) => {
       return (d.y1 - d.y0) > 20 ? '20px' : '0px';
     })
+    .attr('fill', d => color(d.data.name))
+    .append('p')
     .text((d) => {
       const name = d.data.name.split(' ')[0];
       return name;
     })
+    .style('color', 'black')
     .attr('font-size', '12px')
-    .attr('fill', d => color(d.data.name));
+    .style('font-weight', 800)
+    .style('-webkit-text-stroke', '0.5px white');
   // articleTreemap
   //   .selectAll('titles')
   //   .data(root.descendants().filter(d => d.depth === 1))
