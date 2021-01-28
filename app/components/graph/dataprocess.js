@@ -301,7 +301,7 @@ function relationToMatrix(sim, us) {
   return [mat, origMat];
 }
 
-function matrixReordering(mat, origMat, userAxis, us) {
+function matrixReordering(mat, origMat, userAxis, us, com) {
   // console.log(mat, origMat, userAxis, users);
   for (let i = 0; i < us.length; i += 1) {
     userAxis.push(Array(us.length).fill(''));
@@ -329,7 +329,16 @@ function matrixReordering(mat, origMat, userAxis, us) {
   originalMat = reorder.transpose(originalMat);
   originalMat = reorder.permute(originalMat, perm);
   originalMat = reorder.transpose(originalMat);
-
+  console.log(originalMat);
+  for (let i = 0; i < originalMat.length; i += 1) {
+    for (let j = 0; j < originalMat.length; j += 1) {
+      const val = JSON.parse(JSON.stringify(originalMat[i][j]));
+      const i_com = com.find(e => e.id === userAxis[i]).community;
+      const j_com = com.find(e => e.id === userAxis[j]).community;
+      const matCom = i_com === j_com ? i_com + 1 : 0;
+      originalMat[i][j] = { com: matCom, value: val };
+    }
+  }
   return [permutedMat, originalMat];
 }
 
@@ -354,7 +363,16 @@ function testMatrixReordering(objmat) {
 
 function testRandomMatrixReordering(mat) {
   const gra = reorder.mat2graph(mat);
-  const perm = [3, 1, 4, 19, 13, 2, 0, 11, 5, 20, 17, 15, 14, 18, 8, 6, 16, 10, 12, 9, 7];
+  const perm = [];
+  for (let i = 0; i < mat.length; i += 1) {
+    perm.push(i);
+  }
+  // perm[2] = 12;
+  // perm[12] = 2;
+  // perm[3] = 13;
+  // perm[13] = 3;
+  // perm[18] = 5;
+  // perm[5] = 18;
   randomSort(perm);
   let permutedMat = reorder.permute(mat, perm);
   permutedMat = reorder.transpose(permutedMat);
@@ -398,17 +416,19 @@ function testMatrixReorderingByCommunity(mat) {
 function matrixReorderingByCommunity(mat, origMat, com, userAxis, us) {
   const maxCommunity = Math.max(...com.map(p => p.community));
   const perm = [];
-  for (let i = 0; i <= maxCommunity; i += 1) {
-    // com.forEach((e, index) => {
-    //   if (e.community === i) {
-    //     const ind = userAxis.findIndex(d => d === e.id);
-    //     perm.push(ind);
-    //   }
-    // });
-    for (let j = 0; j < userAxis.length; j += 1) {
-      const id = userAxis[j];
-      if (com.find(e => e.id === id).community === i) {
-        perm.push(j);
+  const comArr = [];
+  for (let i = 0; i < mat.length; i += 1) {
+    perm.push(i);
+  }
+  for (let i = 0; i < mat.length; i += 1) {
+    if (!comArr.includes(origMat[i][i].com - 1)) comArr.push(origMat[i][i].com - 1);
+  }
+  let index = 0;
+  for (let i = 0; i < maxCommunity; i += 1) {
+    for (let j = 0; j < mat.length; j += 1) {
+      if (comArr[i] === origMat[j][j].com - 1) {
+        perm[index] = j;
+        index += 1;
       }
     }
   }

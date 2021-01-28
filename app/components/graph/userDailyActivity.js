@@ -10,7 +10,7 @@
 /* eslint-disable no-param-reassign */
 import * as d3 from 'd3';
 import * as slider from 'd3-simple-slider';
-import AuthorTable from './authorTable';
+// import AuthorTable from './authorTable';
 
 export default function userDailyActivity(data, user, svg, begin, end) {
   // console.log(begin);
@@ -399,7 +399,7 @@ export default function userDailyActivity(data, user, svg, begin, end) {
       .ticks(d3.timeDay.every(1))
       .tickFormat(d3.timeFormat('%m/%d'))
       .tickSizeInner([100]));
-  
+
   // article reply by users axis
   // const percentOfUsersReplyScale = d3.scaleLinear().domain(['0%', '25%', '50%', '75%', '100%']).range([0, -80]);
   const percentOfUsersReplyScale = d3.scaleLinear().domain([0, 100]).range([0, -80]);
@@ -412,7 +412,7 @@ export default function userDailyActivity(data, user, svg, begin, end) {
     .attr('dx', '0.8em')
     .attr('dy', '0.5em')
     .attr('transform', 'rotate(-90)');
-  
+
   // legend
   fixedSvg.append('circle')
     .attr('cx', 0)
@@ -441,7 +441,7 @@ export default function userDailyActivity(data, user, svg, begin, end) {
     .text('噓')
     .attr('x', 110)
     .attr('y', h + 50);
-  
+
   fixedSvg.append('text')
     .text('白色區域: 平日9:00 - 18:00')
     .attr('x', 160)
@@ -456,8 +456,6 @@ export default function userDailyActivity(data, user, svg, begin, end) {
   for (let i = 0; i < sortedArticles.length; i += 1) {
     for (let j = i + 1; j < sortedArticles.length; j += 1) {
       if (!sortedArticles[i].article_title || !sortedArticles[j].article_title) break;
-      console.log(sortedArticles[i].article_title, sortedArticles[j].article_title.substring(4));
-      console.log(sortedArticles[i].article_title === sortedArticles[j].article_title.substring(4));
       if (sortedArticles[i].article_title === sortedArticles[j].article_title.substring(4)) {
         const y1 = timeScale(new Date(sortedArticles[i].date));
         const y2 = timeScale(new Date(sortedArticles[j].date));
