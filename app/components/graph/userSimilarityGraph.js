@@ -33,10 +33,36 @@ export default function userSimilarityGraph(data, svg, user, articles, submit) {
   };
   const width = 1300 - margin.left - margin.right;
   const height = 450 - margin.top - margin.bottom;
+  const colorArray = [
+    d3.interpolateBlues,
+    d3.interpolateOranges,
+    d3.interpolateGreens,
+    d3.interpolatePurples,
+    d3.interpolateReds,
+    d3.interpolateYlOrBr,
+    d3.interpolateGnBu,
+    d3.interpolateGreys,
+    d3.interpolateBlues,
+    d3.interpolateOranges,
+    d3.interpolateGreens,
+    d3.interpolatePurples,
+    d3.interpolateReds,
+    d3.interpolateYlOrBr,
+    d3.interpolateGnBu,
+    d3.interpolateGreys,
+  ];
+  // Build color scale
+  const color = d => d3.schemeTableau10[d];
+  const leftMyColor = d3.scaleLinear()
+    .range(['white', color(9)])
+    .domain([0, 100]);
   const userSimilarity = dp.computeUserSimilarityByArticles(data, user);
   // const myGroups = getAllAuthorId(data); // author
   const clickedUser = [];
-
+  let newUserAxisValues = [];
+  let datas = [];
+  let users = [];
+  let similaritys = [];
   // const [filteredArticles, articleSimilarity] = dp.computeArticleSimilarity(data);
   // console.log('articleSimilarity: ', articleSimilarity.length);
   // const articleIds = filteredArticles.map(e => e.article_id);
@@ -228,16 +254,19 @@ export default function userSimilarityGraph(data, svg, user, articles, submit) {
       .attr('for', 'quantile')
       .style('margin-left', '2px')
       .text('quantile');
+    const fiveLevelOption = simOptionsDiv.append('div')
+      .style('float', 'left');
+    fiveLevelOption.append('input')
+      .attr('type', 'checkbox')
+      .attr('id', 'fiveLevel')
+      .attr('name', 'similarity')
+      .attr('value', 'fiveLevel')
+      .property('checked', true);
+    fiveLevelOption.append('label')
+      .attr('for', 'fiveLevel')
+      .style('margin-left', '2px')
+      .text('5-Level');
     const getActivityDiv = simOptionsDiv.append('div');
-    // <input
-    //   className="form-control date"
-    //   type="date"
-    //   name="since"
-    //   id="date1"
-    //   placeholder="date"
-    //   value={since}
-    //   onChange={handlePT}
-    // />
     getActivityDiv.append('input')
       .attr('type', 'date')
       .attr('name', 'since')
@@ -300,7 +329,34 @@ export default function userSimilarityGraph(data, svg, user, articles, submit) {
           d3.selectAll('.quantilePath')
             .attr('visibility', checked ? 'visible' : 'hidden');
           break;
+        case 'fiveLevel':
+          d3.select('.leftSvg')
+            .selectAll('.articleSimilarity')
+            .attr('fill', (_d, _index, _nodes) => {
+              const className = d3.select(_nodes[_index]).attr('class');
+              console.log(className);
+              const xID = className.split(' ')[1];
+              const yID = className.split(' ')[2];
+              console.log(xID, yID);
+              const user1 = datas.find(e => e.id === xID);
+              const user2 = datas.find(e => e.id === yID);
+              // if (index1 > index2) return leftMyColor(100);
+              if (user1.community === user2.community) {
 
+                if (checked) {
+                  console.log('checked');
+                  return colorArray[user1.community](Math.floor(_d * 100 / 20) * 0.2);
+                }
+                return colorArray[user1.community](_d);
+              }
+              if (checked) {
+                console.log('checked');
+                return colorArray[7](Math.floor(_d * 100 / 20) * 0.2);
+              }
+              return colorArray[7](_d);
+            });
+          break;
+  
         default:
           break;
       }
@@ -362,6 +418,7 @@ export default function userSimilarityGraph(data, svg, user, articles, submit) {
   }
 
   function adjacencyMatrixNoAuthor(similarity, simThresh, artThresh) {
+    newUserAxisValues = [];
     // console.log(similarity, simThresh, artThresh);
     d3.select('.position').remove();
     d3.select('.groupLegends').remove();
@@ -375,30 +432,11 @@ export default function userSimilarityGraph(data, svg, user, articles, submit) {
     function zoomed() {
       group.attr('transform', d3.event.transform);
     }
-    const color = d => d3.schemeTableau10[d];
-    const colorArray = [
-      d3.interpolateBlues,
-      d3.interpolateOranges,
-      d3.interpolateGreens,
-      d3.interpolatePurples,
-      d3.interpolateReds,
-      d3.interpolateYlOrBr,
-      d3.interpolateGnBu,
-      d3.interpolateGreys,
-      d3.interpolateBlues,
-      d3.interpolateOranges,
-      d3.interpolateGreens,
-      d3.interpolatePurples,
-      d3.interpolateReds,
-      d3.interpolateYlOrBr,
-      d3.interpolateGnBu,
-      d3.interpolateGreys,
-    ];
     // Article Similarity
 
     // console.log(similarity);
     // console.log(user);
-    const [datas, users, similaritys] = dp.filterAlwaysNonSimilarUser(data, user, similarity, simThresh, artThresh);
+    [datas, users, similaritys] = dp.filterAlwaysNonSimilarUser(data, user, similarity, simThresh, artThresh);
     console.log('[datas]:', [datas], '[users]:', [users], '[similaritys]:', [similaritys]);
     if (!datas.length) return;
     // similarity for articles grouping
@@ -411,7 +449,6 @@ export default function userSimilarityGraph(data, svg, user, articles, submit) {
     // console.log('articlesOrderByCommunity', articlesOrderByCommunity);
     const articlesOrderByCommunity = filteredArticles;
     // responderCommunityDetecting(nodes, similaritys);
-    const newUserAxisValues = [];
     const axisDomain = [];
     for (let i = 0; i < users.length; i += 1) {
       axisDomain.push(i);
@@ -420,6 +457,7 @@ export default function userSimilarityGraph(data, svg, user, articles, submit) {
     community.forEach((e) => {
       datas.find(e1 => e1.id === e.id).community = e.community;
     });
+    console.log(community);
     const communityWord = dp.computeCommunityTitleWordScore(datas);
     console.log('communityWord: ', communityWord);
     if (communityWord.length) {
@@ -453,6 +491,7 @@ export default function userSimilarityGraph(data, svg, user, articles, submit) {
     // find user group index
     const groupIndex = [];
     newUserAxisValues.forEach((e, index) => {
+      console.log(e);
       const tempCom = community.find(e1 => e1.id === e).community;
       const existedCommunity = groupIndex.find(e1 => e1.community === tempCom);
       if (existedCommunity) existedCommunity.num += 1;
@@ -474,10 +513,6 @@ export default function userSimilarityGraph(data, svg, user, articles, submit) {
       .attr('class', 'leftSvg')
       .attr('transform', `rotate(-45) scale(${svgScale(datas.length) > 0 ? svgScale(datas.length) : 0.4}) translate(0,0)`);
 
-    // Build color scale
-    const leftMyColor = d3.scaleLinear()
-      .range(['white', color(9)])
-      .domain([0, 100]);
     d3.select('.tooltip').remove();
     const Tooltip = d3.select('.heatMap')
       .append('div')
@@ -633,9 +668,9 @@ export default function userSimilarityGraph(data, svg, user, articles, submit) {
       });
 
     const artComWidth = 100 + Math.max(...articlesCommunity.map(e => e.community)) * (2 + 10);
-    const articleGroup = group.append('g')
-      .attr('class', 'articleGroup')
-      .attr('transform', `scale(${svgScale(datas.length)}) translate(${newUserAxisValues.length * gridSize + artComWidth}, 100)`);
+    // const articleGroup = group.append('g')
+    //   .attr('class', 'articleGroup')
+    //   .attr('transform', `scale(${svgScale(datas.length)}) translate(${newUserAxisValues.length * gridSize + artComWidth}, 100)`);
 
     // drawHeatmap();
     const totalReplied = datas.reduce((prev, current) => {
@@ -659,7 +694,7 @@ export default function userSimilarityGraph(data, svg, user, articles, submit) {
     const brushHeight = 20;
     drawNewHeatmap();
     // drawCommunityWord();
-    drawUserRepliedArticleMatrix(articlesOrderByCommunity);
+    // drawUserRepliedArticleMatrix(articlesOrderByCommunity);
     drawUserGroupBipartiteRelations();
 
     // const removedUnusedDatas = JSON.parse(JSON.stringify(datas));
@@ -1076,7 +1111,7 @@ export default function userSimilarityGraph(data, svg, user, articles, submit) {
           // .attr('height', () => bandWidthScale(size))
           .attr('width', fixedSize)
           .attr('height', fixedSize)
-          .style('fill', () => {
+          .attr('fill', () => {
             if (indY > indX) return leftMyColor(100);
             if (user1.community === user2.community) {
               const communityColor = d3.scaleLinear()
@@ -1569,7 +1604,7 @@ export default function userSimilarityGraph(data, svg, user, articles, submit) {
         .attr('transform', `translate(0, ${maxSize + brushHeight}) scale(${svgScale(datas.length) > 0 ? svgScale(datas.length) : 0.4})`)
         .attr('stroke', 'slategray')
         .attr('stroke-width', '0.3px');
-      const articleGroupHeatmap = leftSvg.append('g').attr('class', 'articleGroupHeatmap');
+      // const articleGroupHeatmap = leftSvg.append('g').attr('class', 'articleGroupHeatmap');
       const numOfArtCom = Math.max(...articlesCommunity.map(e => e.community)) + 1;
       const numOfArtOfEachComunity = [];
       for (let i = 0; i < numOfArtCom; i += 1) {
@@ -1619,8 +1654,8 @@ export default function userSimilarityGraph(data, svg, user, articles, submit) {
       for (let i = 0; i < numOfUserCom; i += 1) {
         const groupRadial = radial.append('g')
           .attr('class', `group_${i}`);
-        const groupArtGroupHp = articleGroupHeatmap.append('g')
-          .attr('class', `group_${i}`);
+        // const groupArtGroupHp = articleGroupHeatmap.append('g')
+          // .attr('class', `group_${i}`);
         let numOfUser = 0;
         if (i === numOfUserCom - 1) numOfUser = newUserAxisValues.length - comunityIndexY[i];
         else numOfUser = comunityIndexY[i + 1] - comunityIndexY[i];
