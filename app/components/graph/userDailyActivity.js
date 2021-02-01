@@ -398,7 +398,9 @@ export default function userDailyActivity(data, user, svg, begin, end) {
     .call(d3.axisLeft(timeScale)
       .ticks(d3.timeDay.every(1))
       .tickFormat(d3.timeFormat('%m/%d'))
-      .tickSizeInner([100]));
+      .tickSizeInner([100]))
+    .selectAll('path')
+    .attr('stroke-width', '2px');
 
   // article reply by users axis
   // const percentOfUsersReplyScale = d3.scaleLinear().domain(['0%', '25%', '50%', '75%', '100%']).range([0, -80]);
