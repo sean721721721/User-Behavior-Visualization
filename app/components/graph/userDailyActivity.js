@@ -83,7 +83,7 @@ export default function userDailyActivity(data, user, svg, begin, end) {
   const xScale = getXScale(original_date1, original_date2);
   const timeScale = d3.scaleTime().domain([original_date1, original_date2]).range([0, h]);
   // console.log('height', h);
-  const userScaleRange = 350;
+  const userScaleRange = 330;
   const userID = user.map(e => e.id);
   const userScale = d3.scaleBand().domain(userID).range([0, userScaleRange]);
   const yDomain = getYDomain(original_date1, original_date2);
@@ -313,7 +313,7 @@ export default function userDailyActivity(data, user, svg, begin, end) {
   //   .on('mouseover', d => mouseover(data[i], d))
   //   .on('mouseout', mouseout);
   const fixedSvg = svg.append('g')
-    .attr('transform', `translate(${w - userScaleRange - 10}, 100)`);
+    .attr('transform', `translate(${w - userScaleRange - 50}, 100)`);
   // for (let i = 0; i < userID.length; i += 1) {
   //   fixedSvg.append('g')
   //     .selectAll()
@@ -384,13 +384,23 @@ export default function userDailyActivity(data, user, svg, begin, end) {
   fixedSvg.append('g')
     .attr('class', 'xAxis')
     .call(d3.axisTop(userScale).tickSizeInner([-h]))
-    .selectAll('text')
-    .style('text-anchor', 'start')
-    .attr('font-size', 14)
-    .attr('fill', d => color[user.find(e => e.id === d).community](0.8))
-    .attr('dx', '0.8em')
-    .attr('dy', '0.5em')
-    .attr('transform', 'rotate(-90)');
+    .each((d, index, nodes) => {
+      d3.select(nodes[index])
+        .selectAll('text')
+        .style('text-anchor', 'start')
+        .attr('font-size', 14)
+        .attr('fill', _d => color[user.find(e => e.id === _d).community](0.8))
+        .attr('dx', '0.8em')
+        .attr('dy', '0.5em')
+        .attr('transform', 'rotate(-45) translate(-5, -10)');
+
+      d3.select(nodes[index])
+        .append('text')
+        .text('使用者帳號')
+        .attr('stroke', 'black')
+        .attr('font-size', 'small')
+        .attr('transform', `translate(${userScale.range()[1] / 2}, -70)`);
+    });
 
   // date axis
   fixedSvg.append('g')
@@ -407,15 +417,45 @@ export default function userDailyActivity(data, user, svg, begin, end) {
   const percentOfUsersReplyScale = d3.scaleLinear().domain([0, 100]).range([0, -80]);
   fixedSvg.append('g')
     .attr('class', 'xAxis')
-    .call(d3.axisTop(percentOfUsersReplyScale).tickSizeInner([-h]).ticks(4).tickFormat(d => `${d}%`))
-    .selectAll('text')
-    .style('text-anchor', 'start')
-    .attr('font-size', 14)
-    .attr('dx', '0.8em')
-    .attr('dy', '0.5em')
-    .attr('transform', 'rotate(-90)');
+    .call(d3.axisTop(percentOfUsersReplyScale)
+      .tickSizeOuter([0])
+      .tickSizeInner([-h])
+      .ticks(3)
+      .tickFormat(d => `${d}`))
+    .each((d, index, nodes) => {
+      d3.select(nodes[index])
+        .append('text')
+        .text('使用者回覆(%)')
+        .attr('stroke', 'black')
+        .attr('font-size', 'small')
+        .attr('transform', `translate(${percentOfUsersReplyScale.range()[1] / 2}, -70)`);
+      const horizontalOffset = 10;
+      const angleDeg = Math.atan2(20, horizontalOffset) * 180 / Math.PI;
+      d3.select(nodes[index]).selectAll('.tick').selectAll('text')
+        .style('text-anchor', 'end')
+        .attr('font-size', 14)
+        .attr('dx', '0.8em')
+        .attr('dy', '0.5em')
+        .attr('transform', `rotate(${angleDeg}) translate(-40, 0)`);
+      d3.select(nodes[index]).selectAll('.tick')
+        .append('line')
+        .attr('stroke', 'black')
+        .attr('x1', -horizontalOffset)
+        .attr('y1', -20)
+        .attr('x2', 0)
+        .attr('y2', 0);
+    });
 
   // legend
+  fixedSvg.append('circle')
+    .attr('cx', -60)
+    .attr('cy', h + 50)
+    .attr('r', 5)
+    .attr('fill', color[0](0.7));
+  fixedSvg.append('text')
+    .text('文章')
+    .attr('x', -50)
+    .attr('y', h + 50);
   fixedSvg.append('circle')
     .attr('cx', 0)
     .attr('cy', h + 50)
