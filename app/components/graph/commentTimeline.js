@@ -16,7 +16,7 @@ export default function commentTimeline(data, svg, $this) {
   const w = parseFloat(d3.select('#articleStatus').style('width'));
   const xScaleWidth = w - 110;
   const timePeriod = 3;
-  const yAxisRange = 100;
+  const yAxisRange = 120;
   // const opinionLeader = nodes.find(e => e.id === $this.state.mouseOverUser);
   const timeScaleObjArr = [];
   timeScale(data, timeScaleObjArr);
@@ -46,7 +46,12 @@ export default function commentTimeline(data, svg, $this) {
           const articleYear = new Date(m.articleDate).getFullYear();
           return xScale(m.articleId, new Date(time).setFullYear(articleYear));
         })
-        .y(m => yScale(m.articleId, m.value)) // set the y values for the line generator
+        .y((m) => { // set the y values for the line generator
+          const commentScoreScale = d3.scaleLinear().domain([0, 100])
+            .range([yAxisRange, 0]);
+          console.log(commentScoreScale(m.value));
+          return commentScoreScale(m.value);
+        })
         .curve(d3.curveMonotoneX); // apply smoothing to the line
       const axis = d3.select(nodes[index]);
       const info = axis.append('g');
@@ -81,7 +86,7 @@ export default function commentTimeline(data, svg, $this) {
         .attr('fill', 'black')
         .attr('font-size', 12)
         .attr('text-anchor', 'middle')
-        .attr('transform', 'translate(-30, 50) rotate(-90)')
+        .attr('transform', `translate(-30, ${yAxisRange / 2}) rotate(-90)`)
         .text('Push - Boo');
       axis.append('g')
         .attr('transform', `translate(${xScaleWidth}, ${offset})`)
@@ -90,13 +95,13 @@ export default function commentTimeline(data, svg, $this) {
         .attr('fill', 'black')
         .attr('font-size', 12)
         .attr('text-anchor', 'middle')
-        .attr('transform', 'translate(40, 50) rotate(-90)')
+        .attr('transform', `translate(40, ${yAxisRange / 2}) rotate(-90)`)
         .text('comments per 10 mins');
       axis.append('g')
         .attr('transform', `translate(0, ${offset + yAxisRange})`)
         .call(xAxis)
         .append('g')
-        .attr('transform', 'translate(0, -50)')
+        .attr('transform', `translate(0, ${-yAxisRange})`)
         .append('path')
         .datum(makeDataFitLineChart(d)) // 10. Binds data to the line
         .attr('class', 'line') // Assign a class for styling
@@ -145,8 +150,8 @@ export default function commentTimeline(data, svg, $this) {
       return xScale(d.articleId, new Date(time).setFullYear(articleYear));
     })
     .attr('cy', (d) => {
-      let value = d.value > 100 ? 100 : d.value;
-      value = d.value < -100 ? -100 : value;
+      let value = d.value > 150 ? 150 : d.value;
+      value = d.value < -150 ? -150 : value;
       return yScale(d.articleId, value) + offset;
     })
     .attr('stroke', 'black')
@@ -214,7 +219,7 @@ export default function commentTimeline(data, svg, $this) {
     afterThreeDays.setHours(begin.getHours() + timePeriod);
 
     const scaleX = d3.scaleTime().domain([begin, afterThreeDays]).range([10, w - 100]);
-    const scaleY = d3.scaleLinear().domain([-100, 100]).range([100, 0]);
+    const scaleY = d3.scaleLinear().domain([-150, 150]).range([yAxisRange, 0]);
     arr.push({ articleId: d.articleId, scaleX, scaleY });
   }
 
@@ -244,13 +249,13 @@ export default function commentTimeline(data, svg, $this) {
 
   function makeYAxis(direction) {
     if (direction === 'left') {
-      const commentScoreScale = d3.scaleLinear().domain([-100, 100])
+      const commentScoreScale = d3.scaleLinear().domain([-150, 150])
         .range([yAxisRange, 0]);
-      return d3.axisLeft(commentScoreScale).ticks(3);
+      return d3.axisLeft(commentScoreScale).ticks(7);
     } if (direction === 'right') {
       const commentScoreScale = d3.scaleLinear().domain([0, 100])
         .range([yAxisRange, 0]);
-      return d3.axisRight(commentScoreScale).ticks(3);
+      return d3.axisRight(commentScoreScale).ticks(5);
     }
     return null;
   }
