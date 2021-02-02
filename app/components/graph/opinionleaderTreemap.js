@@ -302,11 +302,12 @@ export default function treemap(cellNodes, beforeThisDate,
     selectedUserDiv.selectAll('*').remove();
 
     const buttonDiv = selectedUserDiv.append('div')
-      .attr('class', 'p-2 d-flex justify-content-center')
+      .attr('class', 'p-1 d-flex justify-content-center')
       .attr('id', 'submitDiv');
     buttonDiv.append('button')
       .style('type', 'button')
-      .style('font-size', 'smaller')
+      .style('font-size', 'xx-small')
+      .style('padding', '2px')
       .attr('class', 'btn btn-primary')
       .attr('id', 'submitUsers')
       .text('Get Activity!')

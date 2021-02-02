@@ -12,8 +12,10 @@ export default function commentTimeline(data, svg, $this) {
   svg.selectAll('*').remove();
   // svg.attr('viewBox', '0 0 960 500');
   // console.log(data, svg, $this);
-  const h = parseFloat(d3.select('#articleStatus').style('height'));
-  const w = parseFloat(d3.select('#articleStatus').style('width'));
+  // const h = parseFloat(d3.select('#articleStatus').style('height'));
+  // const w = parseFloat(d3.select('#articleStatus').style('width'));
+  const w = 464;
+  const h = 229;
   const xScaleWidth = w - 110;
   const timePeriod = 3;
   const yAxisRange = 120;

@@ -13543,11 +13543,12 @@ class OpinionLeaderView extends React.Component {
         <div className="contextDiv" style={{display: 'block'}}>
           <div className="row align-items-center p-0 col-sm" style={{borderBottom: '2px solid slategray'}}>
             <div className="col-sm-4" style={{padding: 0}}><p id="value-range"></p></div>
-            <div className="col-sm-8" style={{padding: 0}}><div id="slider-range"></div></div>
+            <div className="col-sm-8" style={{paddingLeft: '10px'}}><div id="slider-range"></div></div>
           </div>
           {/* <div className="option " style={{width: '100%', height: '50px', display: 'block', borderBottom: '2px solid slategray' }}/> */}
           <div style={{height: '100%'}}>
-            <svg id="context" width="100%" height="100%" />
+            {/* <svg id="context" width="100%" height="100%" /> */}
+            <svg id="context" viewBox="0 0 500 1000" />
           </div>
         </div>
         <div className="commentTimeline" style={{overflowY: 'scroll', overflowX: 'hidden'}}>
