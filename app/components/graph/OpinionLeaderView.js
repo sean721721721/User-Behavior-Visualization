@@ -13533,7 +13533,7 @@ class OpinionLeaderView extends React.Component {
         </div> */}
         <div className="heatMap">
           <div className="optionDiv" style={{width: '100%', display: 'grid' }}>
-            <div className="option d-flex justify-content-start" style={{width: '100%', display: 'inline' }} />
+            <div className="row option d-flex justify-content-start" style={{paddingLeft: '10px', width: '100%', display: 'inline' }} />
           </div>
           {/* <div className="option"/> */}
           <div className="timeline" style={{width: '100%', display: 'grid' }}>
@@ -13541,9 +13541,9 @@ class OpinionLeaderView extends React.Component {
           </div>
         </div>
         <div className="contextDiv" style={{display: 'block'}}>
-          <div className="row align-items-center p-0" style={{borderBottom: '2px solid slategray'}}>
-            <div className="col-sm-3"><p id="value-range"></p></div>
-            <div className="col-sm"><div id="slider-range"></div></div>
+          <div className="row align-items-center p-0 col-sm" style={{borderBottom: '2px solid slategray'}}>
+            <div className="col-sm-4" style={{padding: 0}}><p id="value-range"></p></div>
+            <div className="col-sm-8" style={{padding: 0}}><div id="slider-range"></div></div>
           </div>
           {/* <div className="option " style={{width: '100%', height: '50px', display: 'block', borderBottom: '2px solid slategray' }}/> */}
           <div style={{height: '100%'}}>

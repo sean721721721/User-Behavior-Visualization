@@ -30,7 +30,7 @@ export default function userDailyActivity(data, user, svg, begin, end) {
   const sliderRange = slider.sliderBottom()
     .min(original_date1)
     .max(original_date2)
-    .width(300)
+    .width(w * 2 / 3)
     .tickFormat(d3.timeFormat('%m/%d %H'))
     .ticks(5)
     .default([original_date1, original_date2])
@@ -44,7 +44,7 @@ export default function userDailyActivity(data, user, svg, begin, end) {
   const gRange = d3
     .select('div#slider-range')
     .append('svg')
-    .attr('width', 300)
+    .attr('width', w * 2 / 3)
     .attr('height', 30)
     .append('g')
     .attr('transform', 'scale(0.8) translate(20,10)');
@@ -67,6 +67,14 @@ export default function userDailyActivity(data, user, svg, begin, end) {
   const userListByReplyCountPerHours = computeUserListByReplyCountPerHours(data, user);
   // console.log(userListByReplyCountPerHours);
   const color = [
+    d3.interpolateBlues,
+    d3.interpolateOranges,
+    d3.interpolateGreens,
+    d3.interpolatePurples,
+    d3.interpolateReds,
+    d3.interpolateYlOrBr,
+    d3.interpolateGnBu,
+    d3.interpolateGreys,
     d3.interpolateBlues,
     d3.interpolateOranges,
     d3.interpolateGreens,
