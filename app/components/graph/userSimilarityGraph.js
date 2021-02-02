@@ -80,12 +80,14 @@ export default function userSimilarityGraph(data, svg, user, articles, submit) {
     let articleThresh = 1;
     d3.select('.option').selectAll('*').remove();
     const similarThreshDiv = d3.select('.option').append('div')
-      .style('padding', '10px')
+      .style('padding-left', '10px')
       .attr('class', 'col-sm-4')
       .style('display', 'flex');
     similarThreshDiv.append('h6')
       .text('Similarity >=')
-      .style('margin-right', '10px');
+      .style('margin-right', '10px')
+      .style('margin-top', 'auto')
+      .style('margin-bottom', 'auto');
     similarThreshDiv.append('input')
       .attr('type', 'number')
       .style('width', '50px')
@@ -99,12 +101,14 @@ export default function userSimilarityGraph(data, svg, user, articles, submit) {
         }
       });
     const articleThreshDiv = d3.select('.option').append('div')
-      .style('padding', '10px')
+      .style('padding-left', '10px')
       .attr('class', 'col-sm-4')
       .style('display', 'flex');
     articleThreshDiv.append('h6')
       .text('Reply >=')
-      .style('margin-right', '10px');
+      .style('margin-right', '10px')
+      .style('margin-top', 'auto')
+      .style('margin-bottom', 'auto');;
     articleThreshDiv.append('input')
       .attr('type', 'number')
       .style('width', '50px')
@@ -217,7 +221,9 @@ export default function userSimilarityGraph(data, svg, user, articles, submit) {
       .style('font-size', 'x-small');
     simOptionsDiv.append('h6')
       .text('Options:')
-      .attr('margin-right', '10px');
+      .style('margin-right', '10px')
+      .style('margin-top', 'auto')
+      .style('margin-bottom', 'auto');
     simOptionsDiv = simOptionsDiv.append('div').style('margin-left', '10px');
     // const usersArticlesSim = simOptionsDiv.append('div')
     //   .style('float', 'left');
@@ -268,7 +274,8 @@ export default function userSimilarityGraph(data, svg, user, articles, submit) {
     //   .style('margin-left', '2px')
     //   .text('quantile');
     const fiveLevelOption = simOptionsDiv.append('div')
-      .style('float', 'left');
+      .style('float', 'left')
+      .style('display', 'flex');
     fiveLevelOption.append('input')
       .attr('type', 'checkbox')
       .attr('id', 'fiveLevel')
@@ -277,12 +284,13 @@ export default function userSimilarityGraph(data, svg, user, articles, submit) {
       .property('checked', true);
     fiveLevelOption.append('label')
       .attr('for', 'fiveLevel')
-      .style('margin-left', '2px')
-      .text('5-Level');
+      .text('5-Level')
+      .style('margin-right', '0px');
     const getActivityDiv = d3.select('.option')
       .append('div')
       .style('padding-left', '10px')
-      .style('margin-bottom', '5px');
+      .style('margin-bottom', '5px')
+      .style('margin-top', '5px');
     getActivityDiv.append('span')
       .style('margin-left', '5px')
       .style('margin-right', '5px')

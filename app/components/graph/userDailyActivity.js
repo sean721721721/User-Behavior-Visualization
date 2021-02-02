@@ -17,8 +17,10 @@ export default function userDailyActivity(data, user, svg, begin, end) {
   svg.selectAll('*').remove();
   // const h = parseFloat(d3.select('.commentTimeline').style('height'));
   // const w = parseFloat(d3.select('.commentTimeline').style('width'));
-  const h = parseFloat(d3.select('#context').style('height')) - 220;
-  const w = parseFloat(d3.select('#context').style('width'));
+  // const h = parseFloat(d3.select('#context').style('height')) - 220;
+  const h = 822 - 220;
+  // const w = parseFloat(d3.select('#context').style('width'));
+  const w = 512;
   let original_date1 = new Date(begin);
   original_date1.setHours(0, 0, 0);
   let original_date2 = new Date(end);
@@ -30,7 +32,7 @@ export default function userDailyActivity(data, user, svg, begin, end) {
   const sliderRange = slider.sliderBottom()
     .min(original_date1)
     .max(original_date2)
-    .width(w * 2 / 3)
+    .width(w * 2 / 3 - 5)
     .tickFormat(d3.timeFormat('%m/%d %H'))
     .ticks(5)
     .default([original_date1, original_date2])
@@ -44,10 +46,9 @@ export default function userDailyActivity(data, user, svg, begin, end) {
   const gRange = d3
     .select('div#slider-range')
     .append('svg')
-    .attr('width', w * 2 / 3)
-    .attr('height', 30)
+    .attr('viewBox', '-10 0 320 50')
     .append('g')
-    .attr('transform', 'scale(0.8) translate(20,10)');
+    .attr('transform', 'scale(0.8, 1.2) translate(20,10)');
 
   gRange.call(sliderRange);
   gRange.select('.axis')
@@ -58,7 +59,8 @@ export default function userDailyActivity(data, user, svg, begin, end) {
     .selectAll('text')
     .attr('y', 15);
   d3.select('p#value-range').text('Time Range')
-    .style('text-align', 'right');
+    .style('text-align', 'right')
+    .style('margin-right', '7px');
 
   //----------------
 

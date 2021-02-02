@@ -47952,9 +47952,9 @@ class Graph extends Component {
           <div className="termMap">
             <div className="termMapFilter">
               <div style={{ marginLeft: '10px', alignSelf: 'center', fontSize: 'x-small' }}>
-                <div style={{ marginLeft: '10px' }}>
-                  <fieldset>
-                    <label htmlFor="union" style={{ marginLeft: '10px' }}>
+                <div style={{ display: 'flex' }}>
+                  <fieldset style={{ display: 'flex' }}>
+                    <label htmlFor="union" >
                       union:
                       <input
                         checked
@@ -47964,7 +47964,7 @@ class Graph extends Component {
                         value="union"
                       />
                     </label>
-                    <label htmlFor="intersection" style={{ marginLeft: '10px' }}>
+                    <label htmlFor="intersection" >
                       intersection:
                       <input
                         type="radio"
@@ -47975,8 +47975,8 @@ class Graph extends Component {
                     </label>
                   </fieldset>
                   <fieldset>
-                    <label htmlFor="intersection" style={{ marginLeft: '10px' }}>
-                        full calculate:
+                    <label htmlFor="intersection" >
+                        full cal:
                       <input
                         chekced
                         type="checkbox"
@@ -47993,10 +47993,10 @@ class Graph extends Component {
               <svg id="graph" width="100%" height="100%" style={{}} />
             </div>
           </div>
-          <div className="selectedUserTable d-flex flex-column" style={{ minHeight: '400px' }} />
+          <div className="selectedUserTable d-flex flex-column" />
           <div className="authorList" id="authorList" style={{ overflowY: 'scroll' }} />
           <div className="articleStatus">
-            <svg id="articleStatus" width="100%" height="100%" />
+            <svg id="articleStatus" viewBox="0 0 450 950" />
           </div>
         </div>
         <OpinionLeaderView data={{
