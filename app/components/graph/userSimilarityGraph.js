@@ -80,11 +80,16 @@ export default function userSimilarityGraph(data, svg, user, articles, submit) {
     let articleThresh = 1;
     d3.select('.option').selectAll('*').remove();
     const similarThreshDiv = d3.select('.option').append('div')
-      .style('padding', '10px');
+      .style('padding', '10px')
+      .attr('class', 'col-sm-4')
+      .style('display', 'flex');
     similarThreshDiv.append('h6')
-      .text('Similarity >=');
+      .text('Similarity >=')
+      .style('margin-right', '10px');
     similarThreshDiv.append('input')
       .attr('type', 'number')
+      .style('width', '50px')
+      .style('height', 'fit-content')
       .attr('value', similarThresh)
       .on('keypress', (d, index, nodes) => {
         if (d3.event.keyCode === 13) {
@@ -94,11 +99,16 @@ export default function userSimilarityGraph(data, svg, user, articles, submit) {
         }
       });
     const articleThreshDiv = d3.select('.option').append('div')
-      .style('padding', '10px');
+      .style('padding', '10px')
+      .attr('class', 'col-sm-4')
+      .style('display', 'flex');
     articleThreshDiv.append('h6')
-      .text('ReplyCount >=');
+      .text('Reply >=')
+      .style('margin-right', '10px');
     articleThreshDiv.append('input')
       .attr('type', 'number')
+      .style('width', '50px')
+      .style('height', 'fit-content')
       .attr('value', articleThresh)
       .on('keypress', (d, index, nodes) => {
         if (d3.event.keyCode === 13) {
@@ -199,61 +209,64 @@ export default function userSimilarityGraph(data, svg, user, articles, submit) {
     //   .style('margin-left', '10px')
     //   .text('tag');
     let simOptionsDiv = d3.select('.heatMap').select('.option').append('div')
-      .attr('class', 'filterDiv d-flex align-items-center');
+      .attr('class', 'col-sm-4 filterDiv d-flex align-items-center');
     simOptionsDiv = simOptionsDiv.append('div')
       .style('margin-left', '10px')
       .style('align-self', 'center')
+      .style('display', 'flex')
       .style('font-size', 'x-small');
-    simOptionsDiv.append('h6').text('Similarity options:');
+    simOptionsDiv.append('h6')
+      .text('Options:')
+      .attr('margin-right', '10px');
     simOptionsDiv = simOptionsDiv.append('div').style('margin-left', '10px');
-    const usersArticlesSim = simOptionsDiv.append('div')
-      .style('float', 'left');
-    usersArticlesSim.append('input')
-      .attr('type', 'checkbox')
-      .attr('id', 'userArticle')
-      .attr('name', 'similarity')
-      .attr('value', 'userArticle')
-      .property('checked', true);
-    usersArticlesSim.append('label')
-      .attr('for', 'userArticle')
-      .style('margin-left', '2px')
-      .text('userArticle');
-    const usersAuthorSim = simOptionsDiv.append('div')
-      .style('float', 'left');
-    usersAuthorSim.append('input')
-      .attr('type', 'checkbox')
-      .attr('id', 'userAuthor')
-      .attr('name', 'similarity')
-      .attr('value', 'userAuthor')
-      .property('checked', true);
-    usersAuthorSim.append('label')
-      .attr('for', 'userAuthor')
-      .style('margin-left', '2px')
-      .text('userAuthor');
-    const comsSim = simOptionsDiv.append('div')
-      .style('float', 'left');
-    comsSim.append('input')
-      .attr('type', 'checkbox')
-      .attr('id', 'community')
-      .attr('name', 'similarity')
-      .attr('value', 'community')
-      .property('checked', true);
-    comsSim.append('label')
-      .attr('for', 'community')
-      .style('margin-left', '2px')
-      .text('community');
-    const replyQuantileOption = simOptionsDiv.append('div')
-      .style('float', 'left');
-    replyQuantileOption.append('input')
-      .attr('type', 'checkbox')
-      .attr('id', 'quantile')
-      .attr('name', 'similarity')
-      .attr('value', 'quantile')
-      .property('checked', true);
-    replyQuantileOption.append('label')
-      .attr('for', 'quantile')
-      .style('margin-left', '2px')
-      .text('quantile');
+    // const usersArticlesSim = simOptionsDiv.append('div')
+    //   .style('float', 'left');
+    // usersArticlesSim.append('input')
+    //   .attr('type', 'checkbox')
+    //   .attr('id', 'userArticle')
+    //   .attr('name', 'similarity')
+    //   .attr('value', 'userArticle')
+    //   .property('checked', true);
+    // usersArticlesSim.append('label')
+    //   .attr('for', 'userArticle')
+    //   .style('margin-left', '2px')
+    //   .text('userArticle');
+    // const usersAuthorSim = simOptionsDiv.append('div')
+    //   .style('float', 'left');
+    // usersAuthorSim.append('input')
+    //   .attr('type', 'checkbox')
+    //   .attr('id', 'userAuthor')
+    //   .attr('name', 'similarity')
+    //   .attr('value', 'userAuthor')
+    //   .property('checked', true);
+    // usersAuthorSim.append('label')
+    //   .attr('for', 'userAuthor')
+    //   .style('margin-left', '2px')
+    //   .text('userAuthor');
+    // const comsSim = simOptionsDiv.append('div')
+    //   .style('float', 'left');
+    // comsSim.append('input')
+    //   .attr('type', 'checkbox')
+    //   .attr('id', 'community')
+    //   .attr('name', 'similarity')
+    //   .attr('value', 'community')
+    //   .property('checked', true);
+    // comsSim.append('label')
+    //   .attr('for', 'community')
+    //   .style('margin-left', '2px')
+    //   .text('community');
+    // const replyQuantileOption = simOptionsDiv.append('div')
+    //   .style('float', 'left');
+    // replyQuantileOption.append('input')
+    //   .attr('type', 'checkbox')
+    //   .attr('id', 'quantile')
+    //   .attr('name', 'similarity')
+    //   .attr('value', 'quantile')
+    //   .property('checked', true);
+    // replyQuantileOption.append('label')
+    //   .attr('for', 'quantile')
+    //   .style('margin-left', '2px')
+    //   .text('quantile');
     const fiveLevelOption = simOptionsDiv.append('div')
       .style('float', 'left');
     fiveLevelOption.append('input')
@@ -266,7 +279,14 @@ export default function userSimilarityGraph(data, svg, user, articles, submit) {
       .attr('for', 'fiveLevel')
       .style('margin-left', '2px')
       .text('5-Level');
-    const getActivityDiv = simOptionsDiv.append('div');
+    const getActivityDiv = d3.select('.option')
+      .append('div')
+      .style('padding-left', '10px')
+      .style('margin-bottom', '5px');
+    getActivityDiv.append('span')
+      .style('margin-left', '5px')
+      .style('margin-right', '5px')
+      .text('From');
     getActivityDiv.append('input')
       .attr('type', 'date')
       .attr('name', 'since')
@@ -281,7 +301,7 @@ export default function userSimilarityGraph(data, svg, user, articles, submit) {
     getActivityDiv.append('span')
       .style('margin-left', '5px')
       .style('margin-right', '5px')
-      .text('~');
+      .text('to');
 
     getActivityDiv.append('input')
       .style('margin-right', '5px')
@@ -643,7 +663,7 @@ export default function userSimilarityGraph(data, svg, user, articles, submit) {
           .text(`Community ${index + 1}`)
           .attr('x', 0)
           .attr('font-size', 14)
-          .attr('fill', colorArray[index](1));
+          .attr('fill', colorArray[d.community](1));
 
         d3.select(nodes[index])
           .selectAll()
@@ -654,7 +674,7 @@ export default function userSimilarityGraph(data, svg, user, articles, submit) {
           .attr('y', 10)
           .attr('width', legendSize)
           .attr('height', legendSize)
-          .attr('fill', _d => colorArray[index](_d));
+          .attr('fill', _d => colorArray[d.community](_d));
         d3.select(nodes[index])
           .selectAll()
           .data(['1', '.8', '.6', '.4', '.2'])
