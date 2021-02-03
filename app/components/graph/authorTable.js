@@ -57,7 +57,7 @@ export default function AuthorTable(nodes, div, $this, callback) {
   // console.log(authorTable);
   const th = authorTable.append('tr');
   th.append('th').attr('class', 'tableHeader id')
-    .attr('width', '25%')
+    .attr('width', '30%')
     .text('AuthorID');
   th.append('th').attr('class', 'tableHeader deltaLength')
     .attr('width', '20%')
@@ -66,7 +66,7 @@ export default function AuthorTable(nodes, div, $this, callback) {
     .attr('width', '25%')
     .text('# Of Articles');
   th.append('th').attr('class', 'tableHeader messageCount')
-    .attr('width', '30%')
+    .attr('width', '25%')
     .text('Total Comments');
   // th.append('th').attr('class', 'tableHeader articles')
   //   .attr('width', '25%')
@@ -122,7 +122,7 @@ export default function AuthorTable(nodes, div, $this, callback) {
   }
 
   function financial(x) {
-    return Number.parseFloat(x).toFixed(3);
+    return Number.parseFloat(x).toFixed(2);
   }
 
   function calculateCentrality(authorArr) {

@@ -285,7 +285,8 @@ export default function userSimilarityGraph(data, svg, user, articles, submit) {
     fiveLevelOption.append('label')
       .attr('for', 'fiveLevel')
       .text('5-Level')
-      .style('margin-right', '0px');
+      .style('margin-right', '0px')
+      .style('margin-bottom', '0px');
     const getActivityDiv = d3.select('.option')
       .append('div')
       .style('padding-left', '10px')

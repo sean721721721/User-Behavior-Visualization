@@ -13537,7 +13537,8 @@ class OpinionLeaderView extends React.Component {
           </div>
           {/* <div className="option"/> */}
           <div className="timeline" style={{width: '100%', display: 'grid' }}>
-            <svg id="timeLine" width="100%" height="100%" />
+            {/* <svg id="timeLine" width="100%" height="100%" /> */}
+            <svg id="timeLine" viewBox="0 0 826 755"/>
           </div>
         </div>
         <div className="contextDiv" style={{display: 'block'}}>
