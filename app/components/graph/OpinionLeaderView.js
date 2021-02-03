@@ -13552,13 +13552,6 @@ class OpinionLeaderView extends React.Component {
             <svg id="context" viewBox="0 0 500 1000" />
           </div>
         </div>
-        <div className="commentTimeline" style={{overflowY: 'scroll', overflowX: 'hidden'}}>
-        {/* <div className="row align-items-center p-0" style={{borderBottom: '2px solid slategray'}}>
-          <div className="col-sm-2"><p id="value-range"></p></div>
-          <div className="col-sm"><div id="slider-range"></div></div>
-        </div> */}
-          <svg id="commentTimeline" width="100%" height="auto" />
-        </div>
         {/* <div className="focusDiv">
           <svg id="focus" width="100%" height="100%" />
         </div> */}
