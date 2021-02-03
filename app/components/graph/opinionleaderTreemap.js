@@ -306,7 +306,6 @@ export default function treemap(cellNodes, beforeThisDate,
       .attr('id', 'submitDiv');
     buttonDiv.append('button')
       .style('type', 'button')
-      .style('font-size', 'xx-small')
       .style('padding', '2px')
       .attr('class', 'btn btn-primary')
       .attr('id', 'submitUsers')
