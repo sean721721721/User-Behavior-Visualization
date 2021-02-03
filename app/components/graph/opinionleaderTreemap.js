@@ -331,7 +331,7 @@ export default function treemap(cellNodes, beforeThisDate,
       .style('overflow-y', 'scroll');
     const table = tableDiv.append('table');
     table.append('tr').append('td')
-      .text(`ID (${userArr.length})`)
+      .text(`ID(${userArr.length})`)
       .style('background', d3.schemeTableau10[0])
       .style('color', 'white');
     const tr = table.selectAll('tr.user')

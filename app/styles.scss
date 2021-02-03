@@ -198,10 +198,20 @@ div.tooltip.c {
     position: absolute;
 }
 
-th,
-td {
-    text-align: left;
-    font: 15px sans-serif;
+@media (min-width: 500px) {
+    th,
+    td {
+        text-align: end;
+        font: 12px sans-serif;
+    }  
+}
+
+@media (min-width: 1600px) {
+    th,
+    td {
+        text-align: end;
+        font: 15px sans-serif;
+    }  
 }
 
 /* Style the tab */
@@ -254,6 +264,17 @@ div.tab button.active {
     width: 165px;
 }
 
+@media (min-width: 600px) {
+    .tabcontent {
+        font-size: x-small;
+    }
+}
+
+@media (min-width: 1600px) {
+    .tabcontent {
+        font-size: inherit;
+    } 
+}
 /* Style the close button */
 
 .topright {
@@ -371,7 +392,7 @@ path:hover {
         grid-row: ssrow1 / ssrow2;
         grid-template-columns: [nwcol1] 8fr [nwcol2] 2fr [nwcolend];
         // grid-template-rows: [nwrow1] 6fr [nwrow2] 4fr [nwrowend];
-        grid-template-rows: [nwrow1] 42% [nwrow2] 28% [nwrow3] 20px [nwrow4] auto [acrowend];
+        grid-template-rows: [nwrow1] 40% [nwrow2] 25% [nwrow3] 20px [nwrow4] auto [acrowend];
     }  
 }
 
@@ -495,6 +516,23 @@ path:hover {
     display: grid;
     border-bottom: 2px solid slategray;
     grid-row: hmrow1 / hmrow2;
+}
+@media (min-width: 500px) {
+    .optionDiv {
+        font-size: x-small;
+    }
+    .optionDiv h6 {
+        font-size: x-small;
+    }
+}
+
+@media (min-width: 1600px) {
+    .optionDiv {
+        font-size: inherit;
+    } 
+    .optionDiv h6 {
+        font-size: 1rem;
+    }
 }
 
 .timeline {
