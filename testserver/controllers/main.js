@@ -147,7 +147,6 @@ const main = function main(app) {
       // console.log(req);
       const result = await query.callback(req, res);
       result.title = 'search';
-      // console.log(result);
       res.send(result);
       // }
     } catch (err) {

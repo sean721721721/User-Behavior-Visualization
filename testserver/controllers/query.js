@@ -348,11 +348,6 @@ let callback = function callback(req, res) {
                     return user1.includes(mes.push_userid);
                   })
                 });
-                // res.result.map(function(e, index){
-                //   e.messages = e.messages.filter((mes, index) => {
-                //     return user1.includes(mes.push_userid);
-                //   })
-                // });
                 let userListArray = [];
                 let time1 = new Date();
                 console.log('building UserList ...');
@@ -374,9 +369,11 @@ let callback = function callback(req, res) {
               let titleWordList = datalist[2];
               let titleCuttedWords = datalist[3];
               console.log('datalist.js done!');
-              let [set,initLinks] = ns.setNodes(titleWordList[0], queryobj1.date, titleCuttedWords, res.result);
+              // let [set,initLinks] = ns.setNodes(titleWordList[0], queryobj1.date, titleCuttedWords, res.result);
+              let [set] = ns.newSetNodes(titleWordList[0], queryobj1.date, titleCuttedWords, res.result);
               console.log('setNodes is done!');
-              return { list: [queryobj1.date, [set, initLinks], titleCuttedWords, res.result], previous: [res.previous], next: [res.next] };
+              // return { list: [queryobj1.date, [set, initLinks], titleCuttedWords, res.result], previous: [res.previous], next: [res.next] };
+              return { list: [queryobj1.date, [set], titleCuttedWords, res.result], previous: [res.previous], next: [res.next] };
             }),
           );
         } else if (!isEmpty(queryobj2)) {

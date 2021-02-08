@@ -377,7 +377,7 @@ class Grid extends React.Component {
         word: list[collection + 2],
         posts: list[collection + 3],
         set: list[collection + 1][0],
-        initLinks: list[collection + 1][1],
+        // initLinks: list[collection + 1][1],
       },
       postlistprops: {
         list: list[collection],

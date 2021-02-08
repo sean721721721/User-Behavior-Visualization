@@ -28,27 +28,31 @@ export default function AuthorTable(nodes, div, $this, callback) {
   const authorList = JSON.parse(JSON.stringify(nodes));
   const deltaLengthList = [];
   const threshold = 0;
-  // const betweenness = calculateCentrality(authorList.children);
-  // computeDeltaLength(authorList, deltaLengthList);
   const noCuttedAuthorIdList = JSON.parse(JSON.stringify(nodes));
-  authorIdPreprocessing(authorList.children);
-  leaderPageRank(authorList);
+  authorIdPreprocessing(authorList);
+  const clickType = d3.select('input[name="pageRank"]').property('checked');
+  if (clickType) leaderPageRank(authorList);
+  console.log(authorList);
   // computeSentimentMatrix(authorList);
   const articleCellSvg = d3.select('#graph');
   let authorIndex = 0;
   // compute author's influence
-  authorList.children.forEach((author) => {
+  authorList.forEach((author) => {
     let influence = 0;
     author.responder.forEach((article) => {
-      influence += article.message.length;
+      // influence += article.message.length;
+      influence += article.message_count.push;
+      influence -= article.message_count.boo;
+      influence += article.message_count.neutral / 2;
     });
     author.influence = influence;
+    author.pageRank = author.pageRank || influence;
   });
   // authorList.children = authorList.children.filter(author => author.influence >= 100);
-  authorList.children.sort((a, b) => d3.descending(a.pageRank, b.pageRank));
-  const topicWithSelectedAuthor = JSON.parse(JSON.stringify(noCuttedAuthorIdList));
-  topicWithSelectedAuthor.children = [];
-  callback({ children: authorList.children }, 'test');
+  authorList.sort((a, b) => d3.descending(a.pageRank, b.pageRank));
+  let topicWithSelectedAuthor = JSON.parse(JSON.stringify(noCuttedAuthorIdList));
+  topicWithSelectedAuthor = [];
+  callback({ children: authorList }, 'test');
   // console.log(authorList.children);
   // console.log(div);
   div = div.append('div')
@@ -68,12 +72,6 @@ export default function AuthorTable(nodes, div, $this, callback) {
   th.append('th').attr('class', 'tableHeader messageCount')
     .attr('width', '25%')
     .text('Total Comments');
-  // th.append('th').attr('class', 'tableHeader articles')
-  //   .attr('width', '25%')
-  //   .text('Articles');
-  // th.append('th').attr('class', 'tableHeader comments')
-  //   .attr('width', '25%')
-  //   .text('comments');
 
   authorTable.selectAll('.tableHeader')
     .style('background', d3.schemeTableau10[0])
@@ -81,22 +79,18 @@ export default function AuthorTable(nodes, div, $this, callback) {
 
   // Create a table with rows and bind a data row to each table row
   const tr = authorTable.selectAll('tr.data')
-    .data(authorList.children)
+    .data(authorList)
     .enter()
     .append('tr')
     .attr('class', 'datarow')
     .on('click', clicked);
 
   tr.append('td').text(d => d.id);
-
-  // tr.append('td').text(d => `${financial(d.pageRank)} ${financial(d.betweenness)}`);
   tr.append('td').text(d => `${financial(d.pageRank)}`);
-
   tr.append('td').text(d => d.responder.length);
-
   tr.append('td')
     .text((d) => {
-      const totalComment = d.responder.reduce((total, n) => total + n.message.length, 0);
+      const totalComment = d.responder.reduce((total, n) => total + n.messages.length, 0);
       return totalComment;
     });
   d3.selectAll('.datarow').filter(':nth-child(even)')
@@ -106,17 +100,17 @@ export default function AuthorTable(nodes, div, $this, callback) {
     console.log('table clicked');
     const pushAuthor = JSON.parse(JSON.stringify(d));
     pushAuthor.id = pushAuthor.oldId;
-    if (!topicWithSelectedAuthor.children.some(e => e.id === pushAuthor.id)) {
-      topicWithSelectedAuthor.children.push(pushAuthor);
+    if (!topicWithSelectedAuthor.some(e => e.id === pushAuthor.id)) {
+      topicWithSelectedAuthor.push(pushAuthor);
       console.log(topicWithSelectedAuthor, pushAuthor);
       callback(topicWithSelectedAuthor, pushAuthor.id);
       authorIndex += 1;
     } else {
-      const index = topicWithSelectedAuthor.children.findIndex(e => e.id === pushAuthor.id);
-      if (topicWithSelectedAuthor.children.length > 1) {
-        topicWithSelectedAuthor.children.splice(index, 1);
+      const index = topicWithSelectedAuthor.findIndex(e => e.id === pushAuthor.id);
+      if (topicWithSelectedAuthor.length > 1) {
+        topicWithSelectedAuthor.splice(index, 1);
         console.log(topicWithSelectedAuthor, pushAuthor);
-        callback(topicWithSelectedAuthor, topicWithSelectedAuthor.children[0].id);
+        callback(topicWithSelectedAuthor, topicWithSelectedAuthor[0].id);
       }
     }
   }
@@ -125,74 +119,13 @@ export default function AuthorTable(nodes, div, $this, callback) {
     return Number.parseFloat(x).toFixed(2);
   }
 
-  function calculateCentrality(authorArr) {
-    const G = new jsnx.Graph();
-    const list = getNodesAndLinks(authorArr);
-    buildGraph(list.nodes, list.links);
-    const between = jsnx.betweennessCentrality(G);
-    console.log(between);
-    addBetweennessAttr(authorArr, between);
-    // const termEigenVector = jsnx.eigenvectorCentrality(G);
-    // console.log(termEigenVector);
-    return between;
-    function getNodesAndLinks(arr) {
-      const ns = [];
-      const ls = [];
-      ns.push('centralPoint');
-      arr.forEach((author) => {
-        const authorID = author.id.split(' ')[0];
-        ns.push(authorID);
-        ls.push(['centralPoint', authorID]);
-        author.responder.forEach((article) => {
-          article.message.forEach((mes) => {
-            ls.push([authorID, mes.push_userid]);
-            if (!ns.includes(mes.push_userid)) {
-              ns.push(mes.push_userid);
-            }
-          });
-        });
-      });
-      console.log([ns, ls]);
-      G.addNodesFrom(ns);
-      G.addEdgesFrom(ls);
-      return { nodes: ns, links: ls };
-    }
-    function buildGraph(ns, ls) {
-      G.addNodesFrom(ns);
-      G.addEdgesFrom(ls);
-    }
-    function addBetweennessAttr(arr, bet) {
-      arr.forEach((usr) => {
-        const id = usr.id.split(' ')[0];
-        usr.betweenness = bet._stringValues[id];
-      });
-      console.log(arr);
-    }
-  }
-  function mergeCellDataNodes(ns, ls) {
-    ls = ls.filter(e => e.source !== e.target);
-    // merge nodes by author & article
-    for (let i = 0; i < ns.length - 1; i += 1) {
-      for (let j = i + 1; j < ns.length; j += 1) {
-        if (!ns[i].post && !ns[j].post) {
-          if (_.isEqual(ns[i].reply, ns[j].reply)) {
-            const temp_id = ns[i].id;
-            const next_id = ns[j].id;
-            ls = ls.filter(e => e.source !== next_id);
-            ns = ns.filter(e => e.id !== next_id);
-            j -= 1;
-          }
-        }
-      }
-    }
-    return [ns, ls];
-  }
-
   function authorIdPreprocessing(node_data) {
     node_data.forEach((n) => {
-      const new_id = n.id.split(' ');
-      n.oldId = n.id;
-      [n.id] = new_id;
+      if (n.id) {
+        const new_id = n.id.split(' ');
+        n.oldId = n.id;
+        [n.id] = new_id;
+      }
     });
   }
 
@@ -287,7 +220,7 @@ export default function AuthorTable(nodes, div, $this, callback) {
       const total_num = node_data.length;
       const link_num = link_data.length;
       const tolerance = 1e-6;
-      const clickType = d3.select('input[name="pageRank"]').property('checked');
+      // const clickType = d3.select('input[name="pageRank"]').property('checked');
       const loopMax = clickType ? 100 : 1;
       // const loopMax = 1;
       for (let k = 0; k < loopMax; k += 1) {

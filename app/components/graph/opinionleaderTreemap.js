@@ -41,7 +41,6 @@ export default function treemap(cellNodes, beforeThisDate,
     .attr('transform',
       `translate(${margin.left},${margin.top})`);
   const selectedArticleNodes = [];
-  // console.log(cellNodes);
   const data = { children: [] };
   const authorNodes = cellNodes.filter(e => e.responder);
   authorNodes.sort((a, b) => b.pageRank - a.pagrRank);
@@ -60,23 +59,22 @@ export default function treemap(cellNodes, beforeThisDate,
     const articles = [];
     let totalComments = 0;
     n.responder.forEach((a) => {
-      totalComments += a.message.length;
+      totalComments += a.messages.length;
     });
     n.responder.forEach((a) => {
       articles.push({
-        name: a.title,
-        id: a.articleId,
+        name: a.article_title,
+        id: a.article_id,
         group: 'A',
-        value: (a.message.length * n.pageRank) / totalComments,
+        value: (a.messages.length * n.pageRank) / totalComments,
         message_count: a.message_count,
         colname: 'level3',
-        messages: a.message.slice(0, mostUserNum),
+        messages: a.messages.slice(0, mostUserNum),
         tag: 0,
       });
     });
     data.children.push({ name: n.id, children: articles });
   });
-
   // Give the data to this cluster layout:
   const root = d3.hierarchy(data).sum(d => d.value); // Here the size of each leave is given in the 'value' field in input data
   // Then d3.treemap computes the position of each element of the hierarchy
@@ -119,27 +117,27 @@ export default function treemap(cellNodes, beforeThisDate,
       const title = d.data.name.replace('mister_', '');
       return title;
     });
-    // .text(d => d.data.name);
+  // .text(d => d.data.name);
   // articleTreemap
   //   .selectAll('rect')
   //   .data(root.leaves())
   //   .enter()
-    // .append('rect')
-    // .attr('x', d => d.x0)
-    // .attr('y', d => d.y0)
-    // // .attr('rx', d => Math.min(d.x1 - d.x0, d.y1 - d.y0) / 20)
-    // // .attr('ry', d => Math.min(d.x1 - d.x0, d.y1 - d.y0) / 20)
-    // .attr('width', d => d.x1 - d.x0)
-    // .attr('height', d => d.y1 - d.y0)
-    // .style('stroke', 'black')
-    // .style('fill', d => color(d.parent.data.name))
-    // .style('opacity', d => opacity(d.data.value))
-    // .on('click', (d, index, nodes) => articleNodeClicked(d, d.data.id, index, nodes))
-    // .append('title')
-    // .text((d) => {
-    //   const title = d.data.name.replace('mister_', '');
-    //   return title;
-    // });
+  // .append('rect')
+  // .attr('x', d => d.x0)
+  // .attr('y', d => d.y0)
+  // // .attr('rx', d => Math.min(d.x1 - d.x0, d.y1 - d.y0) / 20)
+  // // .attr('ry', d => Math.min(d.x1 - d.x0, d.y1 - d.y0) / 20)
+  // .attr('width', d => d.x1 - d.x0)
+  // .attr('height', d => d.y1 - d.y0)
+  // .style('stroke', 'black')
+  // .style('fill', d => color(d.parent.data.name))
+  // .style('opacity', d => opacity(d.data.value))
+  // .on('click', (d, index, nodes) => articleNodeClicked(d, d.data.id, index, nodes))
+  // .append('title')
+  // .text((d) => {
+  //   const title = d.data.name.replace('mister_', '');
+  //   return title;
+  // });
 
   // and to add the text labels
   articleTreemap
@@ -196,9 +194,7 @@ export default function treemap(cellNodes, beforeThisDate,
     .style('left', d => `${Math.max(0, (d.x1 + d.x0) / 2 - Math.max(0, d.x1 - d.x0 - 11) / 2)}px`)
     .style('top', d => `${Math.max(0, d.y1 + d.y0) / 2 - 9}px`)
     .style('width', d => `${Math.max(0, d.x1 - d.x0 - 11)}px`)
-    .style('height', (d) => {
-      return (d.y1 - d.y0) > 20 ? '20px' : '0px';
-    })
+    .style('height', d => ((d.y1 - d.y0) > 20 ? '20px' : '0px'))
     .attr('fill', d => color(d.data.name))
     .append('p')
     .text((d) => {
