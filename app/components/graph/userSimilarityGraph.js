@@ -516,7 +516,7 @@ export default function userSimilarityGraph(data, svg, user, articles, submit) {
     let [secondOrdering_mat, secondOrdering_origMat] = dp.matrixReorderingByCommunity(
       permuted_mat, permuted_origMat, community, newUserAxisValues, users,
     );
-
+    console.log(newUserAxisValues);
     // find user group index
     const groupIndex = [];
     newUserAxisValues.forEach((e, index) => {
@@ -1654,15 +1654,39 @@ export default function userSimilarityGraph(data, svg, user, articles, submit) {
       const numOfUserCom = Math.max(...community.map(e => e.community)) + 1;
       const comunityIndexY = [];
       const temp = [];
-      for (let i = 0; i < numOfUserCom; i += 1) {
-        let axisIndex = 0;
-        newUserAxisValues.every((e, index) => {
-          axisIndex = index;
-          return temp.some(e1 => e1 === community.find(e2 => e2.id === e).community);
-        });
-        temp.push(community.find(e => e.id === newUserAxisValues[axisIndex]).community);
-        comunityIndexY.push(axisIndex);
+      
+      // for (let i = 0; i < numOfUserCom; i += 1) {
+      //   comunityIndexY[i] = 0;
+      // }
+      // for (let i = 0; i < numOfUserCom; i += 1) {
+      //   let axisIndex = 0;
+      //   newUserAxisValues.every((e, index) => {
+      //     axisIndex = index;
+      //     return temp.some(e1 => e1 === community.find(e2 => e2.id === e).community);
+      //   });
+      //   const com = community.find(e => e.id === newUserAxisValues[axisIndex]).community;
+      //   temp.push(com);
+      //   comunityIndexY[com] = axisIndex;
+      // }
+      for (let j = 0; j < newUserAxisValues.length; j += 1) {
+        const com = datas.find(e => e.id === newUserAxisValues[j]).community;
+        if (!temp.includes(com)) {
+          temp.push(com);
+          comunityIndexY.push(j);
+        }
       }
+
+      // for (let i = 0; i < numOfUserCom; i += 1) {
+      //   comunityIndexY.push(0);
+      // }
+      // for (let i = 0; i < newUserAxisValues.length; i += 1) {
+      //   const tempUser = datas.find(e => e.id === newUserAxisValues[i]);
+      //   if (!temp.includes(tempUser.community)) {
+      //     temp.push(tempUser.community);
+      //     comunityIndexY[tempUser.community] = i;
+      //   }
+      // }
+
       const articleGroupWidthScale = d3.scaleLinear().domain([0, filteredArticles.length]).range([0, 2000]);
       const articleGroupIndexArray = [];
       const articleGroupYScale = [0];
@@ -2033,6 +2057,8 @@ export default function userSimilarityGraph(data, svg, user, articles, submit) {
         }
         console.log(positionOfArticleCom);
         console.log(arr);
+        console.log(temp);
+        console.log(comunityIndexY);
         // simplify output arr of console.log
         // const simpleArr = [];
         // for (let i = 0; i < arr.length; i += 1) {
@@ -2094,7 +2120,7 @@ export default function userSimilarityGraph(data, svg, user, articles, submit) {
             // .text((d, index) => `Group ${index + 1}`);
         }
         function drawBlankAreaOfArticleCommunity(svgGroup, com, maxWidth) {
-          const tempCom = comunityIndexY[com];
+          const tempIndex = comunityIndexY[com];
           svgGroup.append('g')
             .attr('class', `co-cluster_${com}`)
             .selectAll('path')
@@ -2102,7 +2128,7 @@ export default function userSimilarityGraph(data, svg, user, articles, submit) {
             .enter()
             .append('rect')
             .attr('class', d => `blank_group_${d.community}`)
-            .attr('x', () => (tempCom * (maxSize + rectMargin)) * Math.sqrt(2))
+            .attr('x', () => (tempIndex * (maxSize + rectMargin)) * Math.sqrt(2))
             .attr('y', d => d.position)
             .attr('height', (d) => {
               const { articles: art } = numOfArtOfEachComunity.find(e => e.community === d.community);
@@ -2115,11 +2141,12 @@ export default function userSimilarityGraph(data, svg, user, articles, submit) {
         }
 
         function drawBipartiteOfUserAndArticles(svgGroup, com, maxWidth) {
-          const tempCom = comunityIndexY[com];
+          const tempIndex = comunityIndexY[com];
+          const tempCom = temp[com];
           svgGroup.append('g')
             .attr('class', `co-cluster_${com}`)
             .selectAll('path')
-            .data(arr[com])
+            .data(arr[tempCom])
             .enter()
             .append('g')
             .each((d, index, nodes) => {
@@ -2128,7 +2155,7 @@ export default function userSimilarityGraph(data, svg, user, articles, submit) {
                 .data(d.level)
                 .enter()
                 .append('rect')
-                .attr('x', (_d, _index) => (tempCom * (maxSize + rectMargin)) * Math.sqrt(2))
+                .attr('x', (_d, _index) => (tempIndex * (maxSize + rectMargin)) * Math.sqrt(2))
                 .attr('y', (_d, _index) => {
                   const { position: pos } = positionOfArticleCom.find(e => e.community === d.community);
                   return pos;
@@ -2146,7 +2173,7 @@ export default function userSimilarityGraph(data, svg, user, articles, submit) {
                 })
                 .attr('stroke', 'black')
                 // .attr('stroke-width', '1px')
-                .attr('fill', (_d, _index) => colorArray[com]((_index + 1) * 0.2))
+                .attr('fill', (_d, _index) => colorArray[tempCom]((_index + 1) * 0.2))
                 // .attr('stroke', (_d, _index) => (_index === 0 ? 'black' : 'none'))
                 .on('click', (_d, _index, _nodes) => {
                   selectedArticles.splice(0, selectedArticles.length);
@@ -2172,9 +2199,11 @@ export default function userSimilarityGraph(data, svg, user, articles, submit) {
         function drawIntersectionOfUserCommunities(svgGroup, com) {
           let positionIndex = com;
           let diffAterSame = 0;
+          const tempCom = temp[com];
           for (let j = 0; j < arr.length; j += 1) {
             if (com !== j) {
               // cluster between community_i & community_k
+              const nextCom = temp[j];
               positionIndex += diffAterSame;
               diffAterSame = 0;
               const pIndex = positionIndex;
@@ -2183,14 +2212,14 @@ export default function userSimilarityGraph(data, svg, user, articles, submit) {
               const maxWidth_nex = ((nex_nex - nex) * (maxSize + rectMargin) - rectMargin) * Math.sqrt(2);
               const numOfArticlesOfUserCommunity = arr[j].reduce((acc, obj) => acc + obj.level[0].length, 0);
               svgGroup.append('g')
-                .attr('class', `co-cluster_${com}_${j}`)
+                .attr('class', `co-cluster_${tempCom}_${nextCom}`)
                 .selectAll('path')
-                .data(arr[com])
+                .data(arr[tempCom])
                 .enter()
                 .append('g')
                 .each((d, index, nodes) => {
                   const temCommunity = d.community;
-                  const nextArticleCommunity = arr[j].find(e => e.community === temCommunity);
+                  const nextArticleCommunity = arr[nextCom].find(e => e.community === temCommunity);
 
                   // visual co-cluster's maxWidth
                   d3.select(nodes[index]).selectAll('path')
@@ -2254,7 +2283,7 @@ export default function userSimilarityGraph(data, svg, user, articles, submit) {
                       return heightScale(sameArticles.length);
                       // return heightScale(nextArticleCommunity.length);
                     })
-                    .attr('fill', (_d, _index) => colorArray[com](_index * 0.25))
+                    .attr('fill', (_d, _index) => colorArray[tempCom](_index * 0.25))
                     .attr('stroke', 'black')
                     // .attr('stroke-width', '1px')
                     .attr('stroke', (_d, _index) => (_index === 0 ? 'black' : 'none'))

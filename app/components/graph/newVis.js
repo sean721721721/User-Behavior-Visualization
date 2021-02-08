@@ -47879,15 +47879,16 @@ class Graph extends Component {
     permutedMat = reorder.transpose(permutedMat);
     // console.log(permutedMat);
     console.log('draw');
-    // console.log(this.props);
+    console.log(this.props);
     const $this = this;
     const { date } = this.props;
     const startDate = new Date(date.$gte);
     const beforeThisDate = startDate;
     const { set: propsSet } = this.props;
     const set = JSON.parse(JSON.stringify(propsSet));
-    const authorSet = removeTermLayer(set);
-    authorSet.children = authorSet.children.filter(e => e.id);
+    // const authorSet = removeTermLayer(set);
+    const authorSet = set;
+    // authorSet.children = authorSet.children.filter(e => e.id);
     const authorTable = d3.select('#authorList');
     const totalAuthorInfluence = 0;
     const cellForceSimulation = d3.forceSimulation()
@@ -47935,7 +47936,7 @@ class Graph extends Component {
   }
 
   render() {
-    // console.log('render: ', this.state);
+    console.log('render: ', this.state);
     const {
       cellData,
       beforeThisDate,

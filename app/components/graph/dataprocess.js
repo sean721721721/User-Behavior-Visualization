@@ -319,6 +319,7 @@ function matrixReordering(mat, origMat, userAxis, us, com) {
     userAxis[j] = tempUser[perm[j]];
   }
   tempUser = [...userAxis];
+  console.log(tempUser);
   // console.log(userAxis);
   let permutedMat = reorder.permute(mat, perm);
   permutedMat = reorder.transpose(permutedMat);
@@ -414,7 +415,7 @@ function testMatrixReorderingByCommunity(mat) {
 }
 
 function matrixReorderingByCommunity(mat, origMat, com, userAxis, us) {
-  const maxCommunity = Math.max(...com.map(p => p.community));
+  const maxCommunity = Math.max(...com.map(p => p.community)) + 1;
   const perm = [];
   const comArr = [];
   for (let i = 0; i < mat.length; i += 1) {

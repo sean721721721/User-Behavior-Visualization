@@ -51,14 +51,13 @@ export default function commentTimeline(data, svg, $this) {
         .y((m) => { // set the y values for the line generator
           const commentScoreScale = d3.scaleLinear().domain([0, 100])
             .range([yAxisRange, 0]);
-          console.log(commentScoreScale(m.value));
           return commentScoreScale(m.value);
         })
         .curve(d3.curveMonotoneX); // apply smoothing to the line
       const axis = d3.select(nodes[index]);
       const info = axis.append('g');
       info.append('text')
-        .text(`Title: ${d.title}`)
+        .text(`Title: ${d.article_title}`)
         .attr('x', 0)
         .attr('y', -130);
       info.append('text')
@@ -66,7 +65,7 @@ export default function commentTimeline(data, svg, $this) {
         .attr('x', 0)
         .attr('y', -110);
       info.append('text')
-        .text(`推: ${d.message_count[0].count}  噓: ${d.message_count[1].count}  →: ${d.message_count[2].count}`)
+        .text(`推: ${d.message_count.push}  噓: ${d.message_count.boo}  →: ${d.message_count.neutral}`)
         .attr('x', 0)
         .attr('y', -90);
       info.append('text')
@@ -222,16 +221,16 @@ export default function commentTimeline(data, svg, $this) {
 
     const scaleX = d3.scaleTime().domain([begin, afterThreeDays]).range([10, w - 100]);
     const scaleY = d3.scaleLinear().domain([-150, 150]).range([yAxisRange, 0]);
-    arr.push({ articleId: d.articleId, scaleX, scaleY });
+    arr.push({ article_id: d.article_id, scaleX, scaleY });
   }
 
   function xScale(id, date) {
-    const { scaleX } = timeScaleObjArr.find(e => e.articleId === id);
+    const { scaleX } = timeScaleObjArr.find(e => e.article_id === id);
     return scaleX(date);
   }
 
   function yScale(id, date) {
-    const { scaleY } = timeScaleObjArr.find(e => e.articleId === id);
+    const { scaleY } = timeScaleObjArr.find(e => e.article_id === id);
     return scaleY(date);
   }
 
@@ -264,25 +263,25 @@ export default function commentTimeline(data, svg, $this) {
 
   function makeDataFitLineChart(d) {
     const newData = JSON.parse(JSON.stringify(d));
-    newData.message.forEach((mes) => {
-      mes.articleId = d.articleId;
+    newData.messages.forEach((mes) => {
+      mes.articleId = d.article_id;
       mes.articleDate = d.date;
       mes.value = 1;
     });
     // date type need to preprocess ip format
-    for (let i = 0; i < newData.message.length; i += 1) {
-      for (let j = i + 1; j < newData.message.length; j += 1) {
-        const pre = newData.message[i];
-        const nex = newData.message[j];
+    for (let i = 0; i < newData.messages.length; i += 1) {
+      for (let j = i + 1; j < newData.messages.length; j += 1) {
+        const pre = newData.messages[i];
+        const nex = newData.messages[j];
         const preTime = dateFormat(pre);
         const nexTime = dateFormat(nex);
         if (new Date(nexTime) - new Date(preTime) > 300000) break;
         pre.value += nex.value;
-        newData.message.splice(j, 1);
+        newData.messages.splice(j, 1);
         j -= 1;
       }
     }
-    const message = newData.message.filter((mes) => {
+    const message = newData.messages.filter((mes) => {
       let t = dateFormat(mes);
       const art = new Date(mes.articleDate).getFullYear();
       t = new Date(t).setFullYear(art);
@@ -294,8 +293,8 @@ export default function commentTimeline(data, svg, $this) {
 
   function commentTimeData(d) {
     const newData = JSON.parse(JSON.stringify(d));
-    newData.message.forEach((mes) => {
-      mes.articleId = d.articleId;
+    newData.messages.forEach((mes) => {
+      mes.articleId = d.article_id;
       mes.articleDate = d.date;
       switch (mes.push_tag) {
         case '推':
@@ -312,12 +311,12 @@ export default function commentTimeline(data, svg, $this) {
       }
     });
 
-    for (let i = 0; i < newData.message.length - 1; i += 1) {
-      const pre = newData.message[i];
-      const nex = newData.message[i + 1];
+    for (let i = 0; i < newData.messages.length - 1; i += 1) {
+      const pre = newData.messages[i];
+      const nex = newData.messages[i + 1];
       nex.value += pre.value;
     }
-    return newData.message;
+    return newData.messages;
   }
 }
 
