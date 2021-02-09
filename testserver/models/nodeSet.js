@@ -17,7 +17,7 @@ module.exports = {
           id: article.author,
           postCount: 1,
           responder: [article],
-        })
+        });
       }
     });
     return [set];
