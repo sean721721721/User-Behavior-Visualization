@@ -406,7 +406,7 @@ export default function userDailyActivity(data, user, svg, begin, end) {
 
       d3.select(nodes[index])
         .append('text')
-        .text('使用者帳號')
+        .text('User accounts')
         .attr('stroke', 'black')
         .attr('font-size', 'small')
         .attr('transform', `translate(${userScale.range()[1] / 2}, -70)`);
@@ -435,7 +435,7 @@ export default function userDailyActivity(data, user, svg, begin, end) {
     .each((d, index, nodes) => {
       d3.select(nodes[index])
         .append('text')
-        .text('使用者回覆(%)')
+        .text('Reply rate(%)')
         .attr('stroke', 'black')
         .attr('font-size', 'small')
         .attr('transform', `translate(${percentOfUsersReplyScale.range()[1] / 2}, -70)`);
@@ -455,49 +455,51 @@ export default function userDailyActivity(data, user, svg, begin, end) {
         .attr('x2', 0)
         .attr('y2', 0);
     });
-
+  
+  const legendsGroup = fixedSvg.append('g')
+    .attr('transform', 'translate(0, -30)');
   // legend
-  fixedSvg.append('circle')
-    .attr('cx', -60)
-    .attr('cy', h + 50)
+  legendsGroup.append('circle')
+    .attr('cx', -80)
+    .attr('cy', h + 45)
     .attr('r', 5)
     .attr('fill', color[0](0.7));
-  fixedSvg.append('text')
-    .text('文章')
-    .attr('x', -50)
+  legendsGroup.append('text')
+    .text('Article')
+    .attr('x', -70)
     .attr('y', h + 50);
-  fixedSvg.append('circle')
-    .attr('cx', 0)
-    .attr('cy', h + 50)
+  legendsGroup.append('circle')
+    .attr('cx', 10)
+    .attr('cy', h + 45)
     .attr('r', 5)
-    .attr('fill', commentTypeColor('推'));
-  fixedSvg.append('text')
-    .text('推')
-    .attr('x', 10)
+    .attr('fill', commentTypeColor('push'));
+  legendsGroup.append('text')
+    .text('push')
+    .attr('x', 20)
     .attr('y', h + 50);
-  fixedSvg.append('circle')
-    .attr('cx', 50)
-    .attr('cy', h + 50)
+  legendsGroup.append('circle')
+    .attr('cx', 70)
+    .attr('cy', h + 45)
     .attr('r', 5)
     .attr('fill', commentTypeColor('→'));
-  fixedSvg.append('text')
+  legendsGroup.append('text')
     .text('→')
-    .attr('x', 60)
+    .attr('x', 80)
     .attr('y', h + 50);
-  fixedSvg.append('circle')
-    .attr('cx', 100)
-    .attr('cy', h + 50)
+  legendsGroup.append('circle')
+    .attr('cx', 120)
+    .attr('cy', h + 45)
     .attr('r', 5)
-    .attr('fill', commentTypeColor('噓'));
-  fixedSvg.append('text')
-    .text('噓')
-    .attr('x', 110)
+    .attr('fill', commentTypeColor('boo'));
+  legendsGroup.append('text')
+    .text('boo')
+    .attr('x', 130)
     .attr('y', h + 50);
 
-  fixedSvg.append('text')
-    .text('白色區域: 平日9:00 - 18:00')
-    .attr('x', 160)
-    .attr('y', h + 50);
+  legendsGroup.append('text')
+    .text('White area: weekday 9:00 - 18:00')
+    .attr('x', 10)
+    .attr('y', h + 70);
   // add repost link
   const pointerScale = d3.scaleLinear().domain([0, userID.length]).range([0, 10]);
   const pointerOffset = d3.scaleLinear().domain([0, userID.length]).range([0, -80]);
@@ -776,9 +778,9 @@ export default function userDailyActivity(data, user, svg, begin, end) {
   }
   function commentTypeColor(tag) {
     switch (tag) {
-      case '推':
+      case 'push':
         return pushTypeColor[4];
-      case '噓':
+      case 'boo':
         return pushTypeColor[2];
       case '→':
         return pushTypeColor[5];

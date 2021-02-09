@@ -65,7 +65,7 @@ export default function commentTimeline(data, svg, $this) {
         .attr('x', 0)
         .attr('y', -110);
       info.append('text')
-        .text(`推: ${d.message_count.push}  噓: ${d.message_count.boo}  →: ${d.message_count.neutral}`)
+        .text(`Push: ${d.message_count.push}  Boo: ${d.message_count.boo}  →: ${d.message_count.neutral}`)
         .attr('x', 0)
         .attr('y', -90);
       info.append('text')
