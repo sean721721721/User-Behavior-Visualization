@@ -52,7 +52,7 @@ export default function AuthorTable(nodes, div, $this, callback) {
   authorList.sort((a, b) => d3.descending(a.pageRank, b.pageRank));
   let topicWithSelectedAuthor = JSON.parse(JSON.stringify(noCuttedAuthorIdList));
   topicWithSelectedAuthor = [];
-  callback({ children: authorList }, 'test');
+  callback(authorList, 'test');
   // console.log(authorList.children);
   // console.log(div);
   div = div.append('div')

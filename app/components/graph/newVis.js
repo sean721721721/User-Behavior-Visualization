@@ -47910,7 +47910,7 @@ class Graph extends Component {
       $this.setState({
         word: ['a'],
         draw: 0,
-        cellData: n,
+        cellData: { children: n },
         beforeThisDate,
         cellForceSimulation,
         totalAuthorInfluence,
