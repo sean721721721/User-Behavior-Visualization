@@ -455,7 +455,7 @@ export default function timelineView(data, user, svg, begin, end) {
         .attr('x2', 0)
         .attr('y2', 0);
     });
-  
+
   const legendsGroup = fixedSvg.append('g')
     .attr('transform', 'translate(0, -30)');
   // legend
@@ -781,7 +781,7 @@ export default function timelineView(data, user, svg, begin, end) {
       case '推':
         return pushTypeColor[4];
       case '噓':
-        return pushTypeColor[2];ㄋ
+        return pushTypeColor[2];
       case '→':
         return pushTypeColor[5];
       default:
@@ -845,9 +845,7 @@ export default function timelineView(data, user, svg, begin, end) {
     // const updateYScale = d3.scaleTime().domain([new Date(date1), new Date(date2)]).range([0, h]);
     const updateXScale = d3.scaleBand().domain(userID).range([0, userScaleRange]);
     // const curveOffset = d3.scaleLinear().domain([0, 610]).range([-30, -100]);
-    const filteredSortedArticles = sortedArticles.filter((e) => {
-      return new Date(date1) < new Date(e.date) && new Date(date2) > new Date(e.date);
-    });
+    const filteredSortedArticles = sortedArticles.filter(e => new Date(date1) < new Date(e.date) && new Date(date2) > new Date(e.date));
     // update reposting link
     fixedSvg.selectAll('path.repostLink').attr('visibility', 'hidden');
     for (let i = 0; i < filteredSortedArticles.length; i += 1) {

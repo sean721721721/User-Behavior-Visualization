@@ -1,7 +1,6 @@
 // @flow
 import React from 'react';
 import { render } from 'react-dom';
-import Favicon from 'react-favicon';
 import middleware from './middlewares/sagamiddleware';
 import rootSaga from './middlewares/sagaeffect';
 import Route from './components/route';
