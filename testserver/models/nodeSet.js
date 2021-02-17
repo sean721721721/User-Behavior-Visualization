@@ -1,7 +1,5 @@
 /* eslint-disable no-use-before-define */
 /* eslint-env node */
-const nodejieba = require('nodejieba');
-let jb = require('./text.js');
 
 module.exports = {
   newSetNodes(list, date, word, post) {
