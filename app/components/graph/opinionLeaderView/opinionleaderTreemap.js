@@ -23,8 +23,8 @@ import { commentTimeline } from '../userBehaviorView/commentTimeline';
 // import fetch from '../../../reducers/fetch';
 // import jieba from 'nodejieba';
 
-export default function treemap(cellNodes, beforeThisDate,
-  svg, forceSimulation, totalInfluence, $this, optionsWord, submit) {
+export default function treemap(cellNodes, svg, submit) {
+  console.log(submit);
   const margin = {
     top: 10, right: 10, bottom: 10, left: 10,
   };

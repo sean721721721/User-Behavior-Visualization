@@ -14,14 +14,14 @@ import * as slider from 'd3-simple-slider';
 import netClustering from 'netclustering';
 import CheckboxGroup from 'antd/lib/checkbox/Group';
 import { cps } from 'redux-saga/effects';
-import { userActivityTimeline } from './userActivityTimeline';
+// import { userActivityTimeline } from './userActivityTimeline';
 import { userDailyActivity } from './userDailyActivity';
 import * as dp from './dataprocess';
 
 export default function userSimilarityGraph(data, svg, user, articles, submit) {
   // console.log(user);
   // console.log(data);
-  doTest2();
+  // doTest2();
   const svgScale = d3.scaleSqrt().domain([0, 200]).range([0.5, 0.1]);
   // const commentTimelineSvg = d3.select('#commentTimeline');
   const commentTimelineSvg = d3.select('#context');
@@ -449,8 +449,9 @@ export default function userSimilarityGraph(data, svg, user, articles, submit) {
   function adjacencyMatrixNoAuthor(similarity, simThresh, artThresh) {
     newUserAxisValues = [];
     // console.log(similarity, simThresh, artThresh);
-    d3.select('.position').remove();
-    d3.select('.groupLegends').remove();
+    svg.selectAll('*').remove();
+    // d3.select('.position').remove();
+    // d3.select('.groupLegends').remove();
     svg.call(d3.zoom()
       .extent([[0, 0], [width, height]])
       .scaleExtent([0.1, 8])
