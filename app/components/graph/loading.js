@@ -36,20 +36,13 @@ export default function loading(temp, total, svg) {
       .attr('height', 10)
       // .transition()
       // .duration(1000)
-      .attr('width', () => {
-        return 200 * (temp / total);
-      });
+      .attr('width', () => 200 * (temp / total));
     svg.selectAll('text')
       .text(`${Math.round(100 * (temp / total))} %`)
       // .transition()
       // .duration(1000)
       .attr('x', (w / 2 - 100) + 200 * (temp / total) + 10)
       .attr('y', 60);
-  }
-
-  if (temp === total) {
-    // d3.select('#submitUsers')
-    //   .style('visibility', 'visible');
   }
 }
 export { loading };
