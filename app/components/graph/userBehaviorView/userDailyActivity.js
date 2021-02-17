@@ -472,7 +472,7 @@ export default function userDailyActivity(data, user, svg, begin, end) {
     .attr('cx', 10)
     .attr('cy', h + 45)
     .attr('r', 5)
-    .attr('fill', commentTypeColor('push'));
+    .attr('fill', commentTypeColor('推'));
   legendsGroup.append('text')
     .text('push')
     .attr('x', 20)
@@ -490,7 +490,7 @@ export default function userDailyActivity(data, user, svg, begin, end) {
     .attr('cx', 120)
     .attr('cy', h + 45)
     .attr('r', 5)
-    .attr('fill', commentTypeColor('boo'));
+    .attr('fill', commentTypeColor('噓'));
   legendsGroup.append('text')
     .text('boo')
     .attr('x', 130)
@@ -778,10 +778,10 @@ export default function userDailyActivity(data, user, svg, begin, end) {
   }
   function commentTypeColor(tag) {
     switch (tag) {
-      case 'push':
+      case '推':
         return pushTypeColor[4];
-      case 'boo':
-        return pushTypeColor[2];
+      case '噓':
+        return pushTypeColor[2];ㄋ
       case '→':
         return pushTypeColor[5];
       default:
@@ -852,6 +852,7 @@ export default function userDailyActivity(data, user, svg, begin, end) {
     fixedSvg.selectAll('path.repostLink').attr('visibility', 'hidden');
     for (let i = 0; i < filteredSortedArticles.length; i += 1) {
       for (let j = i + 1; j < filteredSortedArticles.length; j += 1) {
+        if (!filteredSortedArticles[i].article_title || !filteredSortedArticles[j].article_title) break;
         if (filteredSortedArticles[i].article_title === filteredSortedArticles[j].article_title.substring(4)) {
           const y1 = timeScale(new Date(filteredSortedArticles[i].date));
           const y2 = timeScale(new Date(filteredSortedArticles[j].date));

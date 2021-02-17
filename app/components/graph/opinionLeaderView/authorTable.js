@@ -7,26 +7,16 @@
 /* eslint-disable camelcase */
 /* eslint-disable no-param-reassign */
 import React, { Component, PureComponent } from 'react';
-// import PropTypes from 'prop-types';
-// import { connect } from 'react-redux';
-// import { push } from 'react-router-redux';
 import * as d3 from 'd3';
 import _ from 'lodash';
-// import * as sententree from 'sententree';
-// import { max } from 'moment';
-// import { Row, Form } from 'antd';
 import * as jsnx from 'jsnetworkx';
 import { loading } from '../loading';
-// import OpinionLeaderView from '../OpinionLeaderView';
 
 export default function AuthorTable(nodes, div, $this, callback) {
   console.log(nodes);
   div.selectAll('*').remove();
-  // console.log(parseFloat(d3.select('.network').style('height')));
-  // console.log(parseFloat(d3.select('.termMap').style('height')));
   const h = parseFloat(d3.select('.authorList').style('height'));
   const authorList = JSON.parse(JSON.stringify(nodes));
-  const deltaLengthList = [];
   const threshold = 0;
   const noCuttedAuthorIdList = JSON.parse(JSON.stringify(nodes));
   authorIdPreprocessing(authorList);
@@ -264,7 +254,6 @@ export default function AuthorTable(nodes, div, $this, callback) {
       return min;
     }
   }
-  // WordTree({ word: [['ag v'], ['ag c']] });
 }
 
 export { AuthorTable };
