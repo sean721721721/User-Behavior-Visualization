@@ -20,7 +20,7 @@ import * as dp from './dataprocess';
 
 export default function userActivityView(data, svg, user, articles, submit) {
   // console.log(user);
-  // console.log(data);
+  console.log(data);
   // doTest2();
   const svgScale = d3.scaleSqrt().domain([0, 200]).range([0.5, 0.1]);
   const commentTimelineSvg = d3.select('#context');
@@ -311,7 +311,7 @@ export default function userActivityView(data, svg, user, articles, submit) {
 
   function adjacencyMatrixNoAuthor(similarity, simThresh, artThresh) {
     newUserAxisValues = [];
-    // console.log(similarity, simThresh, artThresh);
+    console.log(similarity, simThresh, artThresh);
     svg.selectAll('*').remove();
     // d3.select('.position').remove();
     // d3.select('.groupLegends').remove();
@@ -330,8 +330,17 @@ export default function userActivityView(data, svg, user, articles, submit) {
     // console.log(similarity);
     // console.log(user);
     [datas, users, similaritys] = dp.filterAlwaysNonSimilarUser(data, user, similarity, simThresh, artThresh);
+
     console.log('[datas]:', [datas], '[users]:', [users], '[similaritys]:', [similaritys]);
-    if (!datas.length) return;
+    if (!datas.length) {
+      svg.append('text')
+        .text('No users meet the conditions. Please adjust the filter value')
+        .attr('x', 100)
+        .attr('y', height / 2)
+        .attr('font-size', 20)
+        .attr('fill', 'red');
+      return;
+    }
     // similarity for articles grouping
     // let filteredArticles = articles;
     // filteredArticles = filteredArticles.filter(

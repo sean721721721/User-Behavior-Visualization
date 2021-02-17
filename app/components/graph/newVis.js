@@ -279,6 +279,15 @@ class Graph extends Component {
         })
         .then(() => {
           recursiveFetch(myRequest, i + 1);
+        })
+        .catch((err) => {
+          userSimilaritySvg.append('text')
+            .text(`${err}. Reduce the amount of users being queried`)
+            .attr('x', 100)
+            .attr('y', 200)
+            .attr('font-size', 20)
+            .attr('fill', 'red');
+          console.log(err);
         });
     }
     console.log('draw');
