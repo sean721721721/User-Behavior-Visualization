@@ -12,7 +12,7 @@ import * as d3 from 'd3';
 import * as slider from 'd3-simple-slider';
 // import AuthorTable from './authorTable';
 
-export default function userDailyActivity(data, user, svg, begin, end) {
+export default function timelineView(data, user, svg, begin, end) {
   // console.log(begin);
   svg.selectAll('*').remove();
   // const h = parseFloat(d3.select('.commentTimeline').style('height'));
@@ -1026,4 +1026,4 @@ export default function userDailyActivity(data, user, svg, begin, end) {
   }
 }
 
-export { userDailyActivity };
+export { timelineView };

@@ -8,7 +8,7 @@
 /* eslint-disable no-param-reassign */
 import * as d3 from 'd3';
 
-export default function commentTimeline(data, svg, $this) {
+export default function articleSummaryView(data, svg, $this) {
   svg.selectAll('*').remove();
   // svg.attr('viewBox', '0 0 960 500');
   // console.log(data, svg, $this);
@@ -320,4 +320,4 @@ export default function commentTimeline(data, svg, $this) {
   }
 }
 
-export { commentTimeline };
+export { articleSummaryView };

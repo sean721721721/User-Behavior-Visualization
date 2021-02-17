@@ -26,7 +26,7 @@ import { string } from 'prop-types';
 import * as jsnx from 'jsnetworkx';
 // import { OpinionLeader } from './opinionLeaderView/OpinionLeader';
 import { AuthorTable } from './opinionLeaderView/authorTable';
-import OpinionLeaderView from './userBehaviorView/OpinionLeaderView';
+import UserBehavior from './userBehaviorView/uerBehavior';
 import { treemap } from './opinionLeaderView/opinionleaderTreemap';
 import { loading } from './loading';
 // import request from 'request';
@@ -46,7 +46,6 @@ class Graph extends Component {
       user: [],
       hover: 0,
     };
-    this.drawWordTree = this.drawWordTree.bind(this);
   }
 
   componentDidMount() {
@@ -94,32 +93,6 @@ class Graph extends Component {
     return true;
   }
 
-  drawWordTree = (d) => {
-    const options = {
-      maxFontSize: 14,
-      wordtree: {
-        format: 'implicit',
-        word: 'cats',
-      },
-    };
-    const style = {
-      float: 'left',
-      border: '2px solid gray',
-    };
-    return (
-      <div className="wordTree" style={style}>
-        <Chart
-          // style={style}
-          chartType="WordTree"
-          width="100%"
-          height="700px"
-          data={d}
-          options={options}
-        />
-      </div>
-    );
-  }
-  
   drawwithlabels() {
     const refData = this.props;
     function handleSubmit(e, type = 1) {
@@ -143,7 +116,7 @@ class Graph extends Component {
             },
           },
         } = refData.opState;
-  
+
         // const beginDate = d3.select('#date1').attr('value');
         // const endDate = d3.select('#date2').attr('value');
         // make url string for request data
@@ -201,8 +174,6 @@ class Graph extends Component {
           method: 'get',
         }));
       });
-      // console.log(url);
-      // console.log(myRequest);
       const userSimilaritySvg = d3.select('#timeLine');
       loading(0, myRequest.length, userSimilaritySvg);
       const resArr = { articles: [], userListArray: [] };
@@ -253,8 +224,6 @@ class Graph extends Component {
                 beforeThisDate,
                 cellForceSimulation,
                 totalAuthorInfluence,
-                // user: userState,
-                // hover: 1,
                 userData: {
                   userListArray: resArr.userListArray,
                   fixedUserArr: userIdArr,
@@ -264,20 +233,6 @@ class Graph extends Component {
                 mouseOverUser: 1,
               });
               console.log($this.state);
-              // userSimilarityGraph(
-              //   resArr.userListArray,
-              //   userSimilaritySvg,
-              //   userIdArr,
-              //   resArr.articles,
-              //   handleSubmit,
-              // );
-              // userSimilarityGraph(
-              //   response.userListArray,
-              //   userSimilaritySvg,
-              //   fixedUserArr,
-              //   response.articles,
-              //   handleSubmit,
-              // );
             }
             return response;
           })
@@ -310,8 +265,6 @@ class Graph extends Component {
               beforeThisDate,
               cellForceSimulation,
               totalAuthorInfluence,
-              // user: userState,
-              // hover: 1,
               userData: {
                 userListArray: response.userListArray,
                 fixedUserArr,
@@ -321,14 +274,6 @@ class Graph extends Component {
               mouseOverUser: 1,
             });
             console.log($this.state);
-            // userSimilarityGraph(
-            //   response.userListArray,
-            //   userSimilaritySvg,
-            //   fixedUserArr,
-            //   response.articles,
-            //   handleSubmit,
-            //   // response.similarity,
-            // );
           }
           return response;
         })
@@ -367,33 +312,12 @@ class Graph extends Component {
     AuthorTable(authorSet, authorTable, this, (n, index) => {
       const articleCellSvg = d3.select('#graph');
       treemap(n, articleCellSvg, handleSubmit);
-      // $this.setState({
-      //   word: ['a'],
-      //   draw: 0,
-      //   cellData: { children: n },
-      //   beforeThisDate,
-      //   cellForceSimulation,
-      //   totalAuthorInfluence,
-      //   // user: userState,
-      //   // hover: 1,
-      //   mouseOverUser: index,
-      // });
-      // console.log($this.state);
     });
   }
 
   render() {
     console.log('render: ', this.state);
-    const {
-      cellData,
-      beforeThisDate,
-      cellForceSimulation,
-      totalAuthorInfluence,
-      word,
-      optionsWord,
-      opState,
-      userData,
-    } = this.state;
+    const { userData } = this.state;
     console.log(userData);
     const $this = this;
     return (
@@ -404,7 +328,7 @@ class Graph extends Component {
               <div style={{ marginLeft: '10px', alignSelf: 'center', fontSize: 'x-small' }}>
                 <div style={{ display: 'flex' }}>
                   <fieldset style={{ display: 'flex' }}>
-                    <label htmlFor="union" >
+                    <label htmlFor="union">
                       union:
                       <input
                         checked
@@ -414,7 +338,7 @@ class Graph extends Component {
                         value="union"
                       />
                     </label>
-                    <label htmlFor="intersection" >
+                    <label htmlFor="intersection">
                       intersection:
                       <input
                         type="radio"
@@ -425,7 +349,7 @@ class Graph extends Component {
                     </label>
                   </fieldset>
                   <fieldset>
-                    <label htmlFor="intersection" >
+                    <label htmlFor="intersection">
                         full cal:
                       <input
                         chekced
@@ -449,7 +373,7 @@ class Graph extends Component {
             <svg id="articleStatus" viewBox="0 0 468 275" />
           </div>
         </div>
-        <OpinionLeaderView data={userData} />
+        <UserBehavior data={userData} />
       </div>
     );
   }

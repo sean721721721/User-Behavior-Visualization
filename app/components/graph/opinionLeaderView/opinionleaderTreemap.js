@@ -19,7 +19,7 @@ import * as d3 from 'd3';
 // import netClustering from 'netclustering';
 // import * as jsnx from 'jsnetworkx';
 // import Chart from 'react-google-charts';
-import { commentTimeline } from '../userBehaviorView/commentTimeline';
+import { articleSummaryView } from '../userBehaviorView/articleSummaryView';
 // import fetch from '../../../reducers/fetch';
 // import jieba from 'nodejieba';
 
@@ -224,7 +224,7 @@ export default function treemap(cellNodes, svg, submit) {
     const commentTimelineSvg = d3.select('#articleStatus');
     // console.log(articleNodes);
     const article = articleNodes.find(e => e.article_id === article_id);
-    commentTimeline(article, commentTimelineSvg, data.$this);
+    articleSummaryView(article, commentTimelineSvg, data.$this);
     const clickType = d3.select('input[name="set"]:checked').property('value');
     // submit(d);
     // const adj = cellLinks.filter(e => e.target.index === d.index);

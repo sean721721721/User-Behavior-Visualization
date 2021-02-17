@@ -15,15 +15,14 @@ import netClustering from 'netclustering';
 import CheckboxGroup from 'antd/lib/checkbox/Group';
 import { cps } from 'redux-saga/effects';
 // import { userActivityTimeline } from './userActivityTimeline';
-import { userDailyActivity } from './userDailyActivity';
+import { timelineView } from './timelineView';
 import * as dp from './dataprocess';
 
-export default function userSimilarityGraph(data, svg, user, articles, submit) {
+export default function userActivityView(data, svg, user, articles, submit) {
   // console.log(user);
   // console.log(data);
   // doTest2();
   const svgScale = d3.scaleSqrt().domain([0, 200]).range([0.5, 0.1]);
-  // const commentTimelineSvg = d3.select('#commentTimeline');
   const commentTimelineSvg = d3.select('#context');
   const h = parseFloat(d3.select('.heatMap').style('height'));
   const focusHeight = 500;
@@ -108,7 +107,7 @@ export default function userSimilarityGraph(data, svg, user, articles, submit) {
       .text('Reply >=')
       .style('margin-right', '10px')
       .style('margin-top', 'auto')
-      .style('margin-bottom', 'auto');;
+      .style('margin-bottom', 'auto');
     articleThreshDiv.append('input')
       .attr('type', 'number')
       .style('width', '50px')
@@ -121,97 +120,10 @@ export default function userSimilarityGraph(data, svg, user, articles, submit) {
           adjacencyMatrixNoAuthor(userSimilarity, similarThresh, articleThresh);
         }
       });
-    // const sliderSvg = d3.select('.option').append('div')
-    //   // .style('display', 'inline-block')
-    //   .append('svg')
-    //   .attr('class', 'sliderSvg')
-    //   .attr('width', '230px')
-    //   .attr('height', '50px')
-    //   .append('g')
-    //   .attr('transform', 'scale(0.8) translate(10, 0)');
-    // const similaritySlider = slider.sliderBottom()
-    //   .min(0)
-    //   .max(1)
-    //   .width(150)
-    //   .tickFormat(d3.format('.1'))
-    //   .ticks(5)
-    //   .default(similarThresh)
-    //   .on('onchange', (val) => {
-    //     similarThresh = val;
-    //     adjacencyMatrixNoAuthor(userSimilarity, similarThresh, articleThresh);
-    //   });
-
-    // const gSlider1 = sliderSvg.append('g')
-    //   .attr('class', 'similaritySlider')
-    //   .attr('transform', `translate(${3 * margin.left},${margin.top})`);
-    // const sliderText1 = sliderSvg.append('g')
-    //   .attr('transform', `translate(0,${margin.top})`)
-    //   .append('text')
-    //   .text('Similarity')
-    //   .attr('y', 5);
-    // gSlider1.call(similaritySlider);
-
-    // d3.select('.similaritySlider')
-    //   .selectAll('.tick')
-    //   .selectAll('text')
-    //   .attr('y', 10);
-    // const repliedSliderSvg = d3.select('.option').append('div')
-    //   // .style('display', 'inline-block')
-    //   .append('svg')
-    //   .attr('class', 'repliedSliderSvg')
-    //   .attr('height', '50px')
-    //   .attr('width', '230px')
-    //   .append('g')
-    //   .attr('transform', 'scale(0.8)');
-    // const repliedSlider = slider.sliderBottom()
-    //   .min(0)
-    //   .max(100)
-    //   .width(150)
-    //   // .tickFormat(d3.format('.1'))
-    //   .ticks(10)
-    //   .default(articleThresh)
-    //   .on('onchange', (val) => {
-    //     articleThresh = val;
-    //     adjacencyMatrixNoAuthor(userSimilarity, similarThresh, articleThresh);
-    //   });
-
-    // const gSlider2 = repliedSliderSvg.append('g')
-    //   .attr('class', 'repliedSlider')
-    //   .attr('transform', `translate(${3 * margin.left + 10},${margin.top})`);
-    // const sliderText2 = repliedSliderSvg.append('g')
-    //   .attr('transform', `translate(0,${margin.top})`)
-    //   .append('text')
-    //   .text('ReplyCount')
-    //   .attr('y', 5);
-    // gSlider2.call(repliedSlider);
-
-    // d3.select('.repliedSlider')
-    //   .selectAll('.tick')
-    //   .selectAll('text')
-    //   .attr('y', 10);
     adjacencyMatrixNoAuthor(userSimilarity, similarThresh, articleThresh);
   }
 
   function drawFilterDiv() {
-    // let filterDiv = d3.select('.heatMap').select('.option').append('div')
-    //   .attr('class', 'filterDiv d-flex align-items-center');
-    // filterDiv = filterDiv.append('div')
-    //   .style('margin-left', '10px')
-    //   .style('align-self', 'center')
-    //   .style('font-size', 'x-small')
-    //   .text('ArticleGroupBy:');
-    // const tagInput = filterDiv.append('div')
-    //   .style('margin-left', '10px');
-    // tagInput.append('input')
-    //   .attr('type', 'radio')
-    //   .attr('id', 'tag')
-    //   .attr('name', 'group')
-    //   .attr('value', 'tag')
-    //   .property('checked', true);
-    // tagInput.append('label')
-    //   .attr('for', 'tag')
-    //   .style('margin-left', '10px')
-    //   .text('tag');
     let simOptionsDiv = d3.select('.heatMap').select('.option').append('div')
       .attr('class', 'col-sm-4 filterDiv d-flex align-items-center');
     simOptionsDiv = simOptionsDiv.append('div')
@@ -225,54 +137,6 @@ export default function userSimilarityGraph(data, svg, user, articles, submit) {
       .style('margin-top', 'auto')
       .style('margin-bottom', 'auto');
     simOptionsDiv = simOptionsDiv.append('div').style('margin-left', '10px');
-    // const usersArticlesSim = simOptionsDiv.append('div')
-    //   .style('float', 'left');
-    // usersArticlesSim.append('input')
-    //   .attr('type', 'checkbox')
-    //   .attr('id', 'userArticle')
-    //   .attr('name', 'similarity')
-    //   .attr('value', 'userArticle')
-    //   .property('checked', true);
-    // usersArticlesSim.append('label')
-    //   .attr('for', 'userArticle')
-    //   .style('margin-left', '2px')
-    //   .text('userArticle');
-    // const usersAuthorSim = simOptionsDiv.append('div')
-    //   .style('float', 'left');
-    // usersAuthorSim.append('input')
-    //   .attr('type', 'checkbox')
-    //   .attr('id', 'userAuthor')
-    //   .attr('name', 'similarity')
-    //   .attr('value', 'userAuthor')
-    //   .property('checked', true);
-    // usersAuthorSim.append('label')
-    //   .attr('for', 'userAuthor')
-    //   .style('margin-left', '2px')
-    //   .text('userAuthor');
-    // const comsSim = simOptionsDiv.append('div')
-    //   .style('float', 'left');
-    // comsSim.append('input')
-    //   .attr('type', 'checkbox')
-    //   .attr('id', 'community')
-    //   .attr('name', 'similarity')
-    //   .attr('value', 'community')
-    //   .property('checked', true);
-    // comsSim.append('label')
-    //   .attr('for', 'community')
-    //   .style('margin-left', '2px')
-    //   .text('community');
-    // const replyQuantileOption = simOptionsDiv.append('div')
-    //   .style('float', 'left');
-    // replyQuantileOption.append('input')
-    //   .attr('type', 'checkbox')
-    //   .attr('id', 'quantile')
-    //   .attr('name', 'similarity')
-    //   .attr('value', 'quantile')
-    //   .property('checked', true);
-    // replyQuantileOption.append('label')
-    //   .attr('for', 'quantile')
-    //   .style('margin-left', '2px')
-    //   .text('quantile');
     const fiveLevelOption = simOptionsDiv.append('div')
       .style('float', 'left')
       .style('display', 'flex');
@@ -323,7 +187,7 @@ export default function userSimilarityGraph(data, svg, user, articles, submit) {
         }
       })
       .attr('placeholder', 'until');
-      
+
     getActivityDiv.append('button')
       .style('type', 'button')
       .style('font-size', 'smaller')
@@ -371,7 +235,6 @@ export default function userSimilarityGraph(data, svg, user, articles, submit) {
               const user2 = datas.find(e => e.id === yID);
               // if (index1 > index2) return leftMyColor(100);
               if (user1.community === user2.community) {
-
                 if (checked) {
                   console.log('checked');
                   return colorArray[user1.community](Math.floor(_d * 100 / 20) * 0.2);
@@ -385,7 +248,7 @@ export default function userSimilarityGraph(data, svg, user, articles, submit) {
               return colorArray[7](_d);
             });
           break;
-  
+
         default:
           break;
       }
@@ -514,7 +377,7 @@ export default function userSimilarityGraph(data, svg, user, articles, submit) {
     );
     console.log('[permuted_mat], [permuted_origMat]: ', [permuted_mat], [permuted_origMat]);
 
-    let [secondOrdering_mat, secondOrdering_origMat] = dp.matrixReorderingByCommunity(
+    const [secondOrdering_mat, secondOrdering_origMat] = dp.matrixReorderingByCommunity(
       permuted_mat, permuted_origMat, community, newUserAxisValues, users,
     );
     console.log(newUserAxisValues);
@@ -618,7 +481,7 @@ export default function userSimilarityGraph(data, svg, user, articles, submit) {
         if (usr) sortedUs.push(usr);
       });
       bothRepliedArticles = selectedArticles.length >= 1 ? selectedArticles : bothRepliedArticles;
-      userDailyActivity(bothRepliedArticles, sortedUs, commentTimelineSvg, beginDate, endDate);
+      timelineView(bothRepliedArticles, sortedUs, commentTimelineSvg, beginDate, endDate);
 
       articles.sort((a, b) => {
         if (bothRepliedArticles.find(e => e.article_title === b.article_title)) return 1;
@@ -646,8 +509,8 @@ export default function userSimilarityGraph(data, svg, user, articles, submit) {
         const usr = us.find(u => u.id === e);
         if (usr) sortedUs.push(usr);
       });
-      if (selectedArticles.length > 0) userDailyActivity(selectedArticles, sortedUs, commentTimelineSvg, beginDate, endDate);
-      else userDailyActivity(repliedArticles, sortedUs, commentTimelineSvg, beginDate, endDate);
+      if (selectedArticles.length > 0) timelineView(selectedArticles, sortedUs, commentTimelineSvg, beginDate, endDate);
+      else timelineView(repliedArticles, sortedUs, commentTimelineSvg, beginDate, endDate);
       console.log('tickclick');
       // updateArticleMatrix(repliedArticles);
     };
@@ -1096,27 +959,8 @@ export default function userSimilarityGraph(data, svg, user, articles, submit) {
                 // return colorArray[user2.community](0.6);
                 if (_index === 0) return colorArray[user1.community](secondOrdering_mat[indX][indY]);
                 return colorArray[user2.community](secondOrdering_mat[indX][indY]);
-                if (step === 0) {
-                  return 'black';
-                }
-                if (step === 1) {
-                  return 'black';
-                }
-                return 'green';
               })
-              .attr('stroke', (q, step) => {
-                return 'black';
-                // if (step === 1) return 'black';
-                if (_index === 0) return colorArray[user1.community](0.8);
-                return colorArray[user2.community](0.8);
-                if (step === 0) {
-                  return 'black';
-                }
-                if (step === 1) {
-                  return 'black';
-                }
-                return 'green';
-              })
+              .attr('stroke', (q, step) => 'black')
               .attr('stroke-width', (q, step) => (step === 1 ? '3px' : '3px'))
               .attr('opacity', indY > indX ? 0 : 1);
           });
@@ -1556,66 +1400,6 @@ export default function userSimilarityGraph(data, svg, user, articles, submit) {
       }
     }
 
-    function drawCommunityWord() {
-      leftSvg.append('g')
-        .attr('class', 'wordGroup')
-        .style('pointer-events', 'auto')
-        .selectAll('text')
-        .data(communityWord)
-        .enter()
-        .append('g')
-        .attr('class', d => `group_${d.community}`)
-        .attr('transform', (d, index) => `translate(500, ${200 * index})`)
-        .each((d, index, nodes) => {
-          d3.select(nodes[index])
-            .selectAll('text')
-            .data(d.wordList.filter((e, _index) => _index < 10))
-            .enter()
-            .append('text')
-            .attr('y', (_d, _index) => _index * 15)
-            .text(_d => `${_d.word}: ${_d.score}`)
-            .on('click', (_d) => {
-              const articleArr = [];
-              const usrs = datas.filter(e => e.community === d.community);
-              usrs.forEach((usr) => {
-                usr.repliedArticle.forEach((art) => {
-                  if (art.cuttedTitle.some(wl => wl.word === _d.word)) {
-                    // article contained this word
-                    if (!articleArr.some(a => a.article_id === art.article_id)) {
-                      articleArr.push(art);
-                    }
-                  }
-                });
-              });
-              console.log(articleArr);
-              rectClick(articleArr, d.community);
-            });
-        });
-    }
-
-    function drawUserRepliedArticleMatrix() {
-      d3.select('#focus').selectAll('*').remove();
-      d3.select('#context').selectAll('.focus').remove();
-      const focus = d3.select('#context')
-        .append('g')
-        .attr('class', 'focus')
-        .attr('transform', `translate(${activityTranslateX + 75},${60})`);
-
-      articleGroup.selectAll('.articleXAxis')
-        .selectAll('.tick')
-        .selectAll('text')
-        .attr('y', 0)
-        .attr('x', 3)
-        .attr('dy', '.35em')
-        .attr('transform', 'rotate(-90)')
-        .style('text-anchor', 'start')
-        .style('font-size', 'medium');
-      articleGroup.select('.articleXAxis')
-        .selectAll('line')
-        .remove();
-      // lineGroup.selectAll('line').remove();
-    }
-
     function dateFormat(mes) {
       let dat = '';
       const splitedDate = mes.push_ipdatetime.split(' ');
@@ -1655,7 +1439,7 @@ export default function userSimilarityGraph(data, svg, user, articles, submit) {
       const numOfUserCom = Math.max(...community.map(e => e.community)) + 1;
       const comunityIndexY = [];
       const temp = [];
-      
+
       // for (let i = 0; i < numOfUserCom; i += 1) {
       //   comunityIndexY[i] = 0;
       // }
@@ -1954,37 +1738,13 @@ export default function userSimilarityGraph(data, svg, user, articles, submit) {
                       }
                       return (nex * (maxSize + rectMargin)) * Math.sqrt(2);
                     })
-                    // .attr('x', (_d, _index) => {
-                    //   const temCommunity = d.community;
-                    //   const nexCommunity = arr[j].find(e => e.community === temCommunity);
-                    //   if (nexCommunity) {
-                    //     return positionScale[nex] * Math.sqrt(2) + nexCommunity.position;
-                    //   }
-                    //   return positionScale[nex] * Math.sqrt(2);
-                    // })
-                  // .attr('height', boxHeight)
-                  // .attr('width', (d) => {
-                  //   const temCommunity = d.community;
-                  //   console.log(temCommunity, arr[j]);
-                  //   const nextArticleCommunity = arr[j].find(e => e.community === temCommunity);
-                  //   if (!nextArticleCommunity) return 0;
-                  //   const sameArticles = nextArticleCommunity.level[0].filter(e => d.level[0].some(e1 => e1.article_id === e.article_id));
-                  //   return widthScale(sameArticles.length);
-                  // })
                     .attr('width', (_d) => {
-                      // const temCommunity = d.community;
-                      // const nextArticleCommunity = arr[j].find(e => e.community === temCommunity);
-                      // if (!nextArticleCommunity) return 0;
-                      // const sameArticles = nextArticleCommunity.level[0].filter(e => _d.some(e1 => e1.article_id === e.article_id));
-                      // return widthScale(sameArticles.length);
-
                       const temCommunity = d.community;
                       const nextArticleCommunity = arr[j].find(e => e.community === temCommunity);
                       if (!nextArticleCommunity) return 0;
                       return widthScale(nextArticleCommunity.level[0].length);
                     })
                     .attr('height', (_d) => {
-                      // return 20;
                       const temCommunity = d.community;
                       const nextArticleCommunity = arr[j].find(e => e.community === temCommunity);
                       if (!nextArticleCommunity) return 0;
@@ -1993,7 +1753,6 @@ export default function userSimilarityGraph(data, svg, user, articles, submit) {
                       return heightScale(sameArticles.length);
                     })
                     .attr('fill', (_d, _index) => colorArray[i](_index * 0.25))
-                    // .attr('stroke', (_d, _index) => (_index === 0 ? 'black' : 'none'))
                     .on('click', (_d, _index, _nodes, levelIndex) => {
                       const temCommunity = d.community;
                       const nextArticleCommunity = arr[j].find(e => e.community === temCommunity);
@@ -2056,22 +1815,6 @@ export default function userSimilarityGraph(data, svg, user, articles, submit) {
             });
           }
         }
-        console.log(positionOfArticleCom);
-        console.log(arr);
-        console.log(temp);
-        console.log(comunityIndexY);
-        // simplify output arr of console.log
-        // const simpleArr = [];
-        // for (let i = 0; i < arr.length; i += 1) {
-        //   simpleArr.push({ arr: [], num: 0 });
-        //   simpleArr[i].num = (datas.filter(e => e.community === i).length);
-        //   for (let j = 0; j < arr[i].length; j += 1) {
-        //     simpleArr[i].arr.push({ community: arr[i][j].community, level: arr[i][j].level[0].length });
-        //     simpleArr[i].arr[j].num = articlesCommunity.filter(e => e.community === arr[i][j].community).length;
-        //   }
-        // }
-        // console.log(simpleArr);
-        // article group label
         drawArticleGroupLabel(radial);
 
         for (let i = 0; i < arr.length; i += 1) {
@@ -2117,8 +1860,8 @@ export default function userSimilarityGraph(data, svg, user, articles, submit) {
               const num = numOfArtOfEachComunity.find(e => e.community === d.community).articles.length;
               return scale(num) / 2;
             })
-            .attr('text-anchor', 'end')
-            // .text((d, index) => `Group ${index + 1}`);
+            .attr('text-anchor', 'end');
+          // .text((d, index) => `Group ${index + 1}`);
         }
         function drawBlankAreaOfArticleCommunity(svgGroup, com, maxWidth) {
           const tempIndex = comunityIndexY[com];
@@ -2320,38 +2063,38 @@ export default function userSimilarityGraph(data, svg, user, articles, submit) {
   }
   function doTest() {
     const mat = [
-      [1,1,1,1,1,1,1,1,1,0.5,0.5,0.5,0.3,0.1,0.6,0.4,0.2,0.1,0.1,0.2,0.1],
-      [1,1,1,1,1,1,1,1,1,0.5,0.5,0.5,0.3,0.1,0.6,0.4,0.2,0.1,0.1,0.2,0.1],
-      [1,1,1,1,1,1,1,1,1,0.5,0.5,0.5,0.3,0.1,0.6,0.4,0.2,0.1,0.1,0.2,0.1],
-      [1,1,1,1,1,1,1,1,1,0.5,0.5,0.5,0.3,0.1,0.6,0.4,0.2,0.1,0.1,0.2,0.1],
-      [1,1,1,1,1,1,1,1,1,0.5,0.5,0.5,0.3,0.1,0.6,0.4,0.2,0.1,0.1,0.2,0.1],
-      [1,1,1,1,1,1,1,1,1,0.5,0.5,0.5,0.3,0.1,0.6,0.4,0.2,0.1,0.1,0.2,0.1],
-      [1,1,1,1,1,1,1,1,1,0.5,0.5,0.5,0.3,0.1,0.6,0.4,0.2,0.1,0.1,0.2,0.1],
-      [1,1,1,1,1,1,1,1,1,0.5,0.5,0.5,0.3,0.1,0.6,0.4,0.2,0.1,0.1,0.2,0.1],
-      [1,1,1,1,1,1,1,1,1,0.5,0.5,0.5,0.3,0.1,0.6,0.4,0.2,0.1,0.1,0.2,0.1],
-      [0.5,0.5,0.5,0.3,0.1,0.6,0.4,0.2,0.1,1,1,1,1,1,1,1,0.2,0.1,0.1,0.2,0.1],
-      [0.5,0.5,0.5,0.3,0.1,0.6,0.4,0.2,0.1,1,1,1,1,1,1,1,0.2,0.1,0.1,0.2,0.1],
-      [0.5,0.5,0.5,0.3,0.1,0.6,0.4,0.2,0.1,1,1,1,1,1,1,1,0.2,0.1,0.1,0.2,0.1],
-      [0.5,0.5,0.5,0.3,0.1,0.6,0.4,0.2,0.1,1,1,1,1,1,1,1,0.2,0.1,0.1,0.2,0.1],
-      [0.5,0.5,0.5,0.3,0.1,0.6,0.4,0.2,0.1,1,1,1,1,1,1,1,0.2,0.1,0.1,0.2,0.1],
-      [0.5,0.5,0.5,0.3,0.1,0.6,0.4,0.2,0.1,1,1,1,1,1,1,1,0.2,0.1,0.1,0.2,0.1],
-      [0.5,0.5,0.5,0.3,0.1,0.6,0.4,0.2,0.1,1,1,1,1,1,1,1,0.2,0.1,0.1,0.2,0.1],
-      [0.5,0.5,0.5,0.3,0.1,0.6,0.4,0.2,0.1,0.5,0.5,0.5,0.3,0.1,0.6,0.4,1,1,1,1,1],
-      [0.5,0.5,0.5,0.3,0.1,0.6,0.4,0.2,0.1,0.5,0.5,0.5,0.3,0.1,0.6,0.4,1,1,1,1,1],
-      [0.5,0.5,0.5,0.3,0.1,0.6,0.4,0.2,0.1,0.5,0.5,0.5,0.3,0.1,0.6,0.4,1,1,1,1,1],
-      [0.5,0.5,0.5,0.3,0.1,0.6,0.4,0.2,0.1,0.5,0.5,0.5,0.3,0.1,0.6,0.4,1,1,1,1,1],
-      [0.5,0.5,0.5,0.3,0.1,0.6,0.4,0.2,0.1,0.5,0.5,0.5,0.3,0.1,0.6,0.4,1,1,1,1,1],
-      
+      [1, 1, 1, 1, 1, 1, 1, 1, 1, 0.5, 0.5, 0.5, 0.3, 0.1, 0.6, 0.4, 0.2, 0.1, 0.1, 0.2, 0.1],
+      [1, 1, 1, 1, 1, 1, 1, 1, 1, 0.5, 0.5, 0.5, 0.3, 0.1, 0.6, 0.4, 0.2, 0.1, 0.1, 0.2, 0.1],
+      [1, 1, 1, 1, 1, 1, 1, 1, 1, 0.5, 0.5, 0.5, 0.3, 0.1, 0.6, 0.4, 0.2, 0.1, 0.1, 0.2, 0.1],
+      [1, 1, 1, 1, 1, 1, 1, 1, 1, 0.5, 0.5, 0.5, 0.3, 0.1, 0.6, 0.4, 0.2, 0.1, 0.1, 0.2, 0.1],
+      [1, 1, 1, 1, 1, 1, 1, 1, 1, 0.5, 0.5, 0.5, 0.3, 0.1, 0.6, 0.4, 0.2, 0.1, 0.1, 0.2, 0.1],
+      [1, 1, 1, 1, 1, 1, 1, 1, 1, 0.5, 0.5, 0.5, 0.3, 0.1, 0.6, 0.4, 0.2, 0.1, 0.1, 0.2, 0.1],
+      [1, 1, 1, 1, 1, 1, 1, 1, 1, 0.5, 0.5, 0.5, 0.3, 0.1, 0.6, 0.4, 0.2, 0.1, 0.1, 0.2, 0.1],
+      [1, 1, 1, 1, 1, 1, 1, 1, 1, 0.5, 0.5, 0.5, 0.3, 0.1, 0.6, 0.4, 0.2, 0.1, 0.1, 0.2, 0.1],
+      [1, 1, 1, 1, 1, 1, 1, 1, 1, 0.5, 0.5, 0.5, 0.3, 0.1, 0.6, 0.4, 0.2, 0.1, 0.1, 0.2, 0.1],
+      [0.5, 0.5, 0.5, 0.3, 0.1, 0.6, 0.4, 0.2, 0.1, 1, 1, 1, 1, 1, 1, 1, 0.2, 0.1, 0.1, 0.2, 0.1],
+      [0.5, 0.5, 0.5, 0.3, 0.1, 0.6, 0.4, 0.2, 0.1, 1, 1, 1, 1, 1, 1, 1, 0.2, 0.1, 0.1, 0.2, 0.1],
+      [0.5, 0.5, 0.5, 0.3, 0.1, 0.6, 0.4, 0.2, 0.1, 1, 1, 1, 1, 1, 1, 1, 0.2, 0.1, 0.1, 0.2, 0.1],
+      [0.5, 0.5, 0.5, 0.3, 0.1, 0.6, 0.4, 0.2, 0.1, 1, 1, 1, 1, 1, 1, 1, 0.2, 0.1, 0.1, 0.2, 0.1],
+      [0.5, 0.5, 0.5, 0.3, 0.1, 0.6, 0.4, 0.2, 0.1, 1, 1, 1, 1, 1, 1, 1, 0.2, 0.1, 0.1, 0.2, 0.1],
+      [0.5, 0.5, 0.5, 0.3, 0.1, 0.6, 0.4, 0.2, 0.1, 1, 1, 1, 1, 1, 1, 1, 0.2, 0.1, 0.1, 0.2, 0.1],
+      [0.5, 0.5, 0.5, 0.3, 0.1, 0.6, 0.4, 0.2, 0.1, 1, 1, 1, 1, 1, 1, 1, 0.2, 0.1, 0.1, 0.2, 0.1],
+      [0.5, 0.5, 0.5, 0.3, 0.1, 0.6, 0.4, 0.2, 0.1, 0.5, 0.5, 0.5, 0.3, 0.1, 0.6, 0.4, 1, 1, 1, 1, 1],
+      [0.5, 0.5, 0.5, 0.3, 0.1, 0.6, 0.4, 0.2, 0.1, 0.5, 0.5, 0.5, 0.3, 0.1, 0.6, 0.4, 1, 1, 1, 1, 1],
+      [0.5, 0.5, 0.5, 0.3, 0.1, 0.6, 0.4, 0.2, 0.1, 0.5, 0.5, 0.5, 0.3, 0.1, 0.6, 0.4, 1, 1, 1, 1, 1],
+      [0.5, 0.5, 0.5, 0.3, 0.1, 0.6, 0.4, 0.2, 0.1, 0.5, 0.5, 0.5, 0.3, 0.1, 0.6, 0.4, 1, 1, 1, 1, 1],
+      [0.5, 0.5, 0.5, 0.3, 0.1, 0.6, 0.4, 0.2, 0.1, 0.5, 0.5, 0.5, 0.3, 0.1, 0.6, 0.4, 1, 1, 1, 1, 1],
+
     ];
     const mul = 1;
     for (let i = 0; i < mat[0].length; i += 1) {
       for (let j = 0; j < mat[0].length; j += 1) {
-        if (i < 9 && j < 9) mat[i][j] = {com: 1, value: Math.min(mat[i][j] * mul, 1)};
-        else if ((i >= 9 && i < 16) && (j >= 9 && j < 16)) mat[i][j] = {com: 2, value: Math.min(mat[i][j] * mul, 1)}
+        if (i < 9 && j < 9) mat[i][j] = { com: 1, value: Math.min(mat[i][j] * mul, 1) };
+        else if ((i >= 9 && i < 16) && (j >= 9 && j < 16)) mat[i][j] = { com: 2, value: Math.min(mat[i][j] * mul, 1) };
         else if (i >= 16 && j >= 16) {
-          mat[i][j] = {com: 3, value: Math.min(mat[i][j] * mul, 1)};
+          mat[i][j] = { com: 3, value: Math.min(mat[i][j] * mul, 1) };
         } else {
-          mat[i][j] = {com: 0, value: mat[i][j] / 2};
+          mat[i][j] = { com: 0, value: mat[i][j] / 2 };
         }
       }
     }
@@ -2361,15 +2104,15 @@ export default function userSimilarityGraph(data, svg, user, articles, submit) {
       }
     }
     console.log(mat);
-    
-    const mat1 = []
+
+    const mat1 = [];
     for (let i = 0; i < 21; i += 1) {
       mat1.push([]);
       for (let j = 0; j < 21; j += 1) {
         mat1[i][j] = 0;
       }
     }
-    
+
     // for (let i = 0; i < mat1[0].length; i += 1) {
     //   for (let j = 0; j < mat1[0].length; j += 1) {
     //     if (i < 9 && j < 9) {
@@ -2423,21 +2166,19 @@ export default function userSimilarityGraph(data, svg, user, articles, submit) {
           else {
             mat1[i][j] = { com: 1, value: Math.min(getRandomArbitrary(0.5, 0.5), 1) };
           }
-        }
-        else if ((i >= 9 && i < 16) && (j >= 9 && j < 16)) {
+        } else if ((i >= 9 && i < 16) && (j >= 9 && j < 16)) {
           if ((i >= 9 && i < 14) && (j >= 9 && j < 14)) mat1[i][j] = { com: 2, value: getRandomArbitrary(0.95, 1) };
           else if ((i >= 14 && i < 15) && (j >= 9 && j < 15)) mat1[i][j] = { com: 2, value: getRandomArbitrary(0.7, 0.8) };
           else if ((i >= 14 && i < 16) && (j >= 9 && j < 16)) mat1[i][j] = { com: 2, value: getRandomArbitrary(0.6, 0.7) };
           else {
             mat1[i][j] = { com: 2, value: Math.min(getRandomArbitrary(0.5, 0.5), 1) };
           }
-        }
-        else if (i >= 16 && j >= 16) {
+        } else if (i >= 16 && j >= 16) {
           if ((i >= 16 && i < 19) && (j >= 16 && j < 19)) mat1[i][j] = { com: 3, value: 1 };
           else if ((i >= 19 && i < 21) && (j >= 16 && j < 21)) mat1[i][j] = { com: 3, value: getRandomArbitrary(0.7, 0.9) };
-          else mat1[i][j] = {com: 3, value: Math.min(getRandomArbitrary(0.5, 0.5), 1)};
+          else mat1[i][j] = { com: 3, value: Math.min(getRandomArbitrary(0.5, 0.5), 1) };
         } else {
-          mat1[i][j] = {com: 0, value: getRandomArbitrary(0, 0.6)};
+          mat1[i][j] = { com: 0, value: getRandomArbitrary(0, 0.6) };
         }
       }
     }
@@ -4263,1810 +4004,1810 @@ export default function userSimilarityGraph(data, svg, user, articles, submit) {
     const random = [
       [
         {
-          "com": 1,
-          "value": 1
+          com: 1,
+          value: 1,
         },
         {
-          "com": 0,
-          "value": 0.4302813718984438
+          com: 0,
+          value: 0.4302813718984438,
         },
         {
-          "com": 1,
-          "value": 0.6704319335146465
+          com: 1,
+          value: 0.6704319335146465,
         },
         {
-          "com": 0,
-          "value": 0.4274312441433005
+          com: 0,
+          value: 0.4274312441433005,
         },
         {
-          "com": 0,
-          "value": 0.28885585785555257
+          com: 0,
+          value: 0.28885585785555257,
         },
         {
-          "com": 1,
-          "value": 0.9793073357772102
+          com: 1,
+          value: 0.9793073357772102,
         },
         {
-          "com": 1,
-          "value": 0.9838943206959297
+          com: 1,
+          value: 0.9838943206959297,
         },
         {
-          "com": 1,
-          "value": 0.712998925514988
+          com: 1,
+          value: 0.712998925514988,
         },
         {
-          "com": 0,
-          "value": 0.4440709070638372
+          com: 0,
+          value: 0.4440709070638372,
         },
         {
-          "com": 0,
-          "value": 0.01733857892061046
+          com: 0,
+          value: 0.01733857892061046,
         },
         {
-          "com": 0,
-          "value": 0.21354300530313255
+          com: 0,
+          value: 0.21354300530313255,
         },
         {
-          "com": 1,
-          "value": 0.6780640125095587
+          com: 1,
+          value: 0.6780640125095587,
         },
         {
-          "com": 0,
-          "value": 0.5304877613285571
+          com: 0,
+          value: 0.5304877613285571,
         },
         {
-          "com": 1,
-          "value": 0.7805839253532785
+          com: 1,
+          value: 0.7805839253532785,
         },
         {
-          "com": 0,
-          "value": 0.5014890036722373
+          com: 0,
+          value: 0.5014890036722373,
         },
         {
-          "com": 1,
-          "value": 0.9620008487146012
+          com: 1,
+          value: 0.9620008487146012,
         },
         {
-          "com": 0,
-          "value": 0.3323588741943031
+          com: 0,
+          value: 0.3323588741943031,
         },
         {
-          "com": 0,
-          "value": 0.57439070957112
+          com: 0,
+          value: 0.57439070957112,
         },
         {
-          "com": 0,
-          "value": 0.1515992541635371
+          com: 0,
+          value: 0.1515992541635371,
         },
         {
-          "com": 1,
-          "value": 0.9844877904710154
+          com: 1,
+          value: 0.9844877904710154,
         },
         {
-          "com": 0,
-          "value": 0.4832944509490521
-        }
+          com: 0,
+          value: 0.4832944509490521,
+        },
       ],
       [
         {
-          "com": 0,
-          "value": 0.4302813718984438
+          com: 0,
+          value: 0.4302813718984438,
         },
         {
-          "com": 2,
-          "value": 1
+          com: 2,
+          value: 1,
         },
         {
-          "com": 0,
-          "value": 0.16628507918558313
+          com: 0,
+          value: 0.16628507918558313,
         },
         {
-          "com": 2,
-          "value": 0.7000833891517283
+          com: 2,
+          value: 0.7000833891517283,
         },
         {
-          "com": 2,
-          "value": 0.6918277971656696
+          com: 2,
+          value: 0.6918277971656696,
         },
         {
-          "com": 0,
-          "value": 0.46979746505552733
+          com: 0,
+          value: 0.46979746505552733,
         },
         {
-          "com": 0,
-          "value": 0.5416289138838677
+          com: 0,
+          value: 0.5416289138838677,
         },
         {
-          "com": 0,
-          "value": 0.5727226668432291
+          com: 0,
+          value: 0.5727226668432291,
         },
         {
-          "com": 2,
-          "value": 0.7294952051497557
+          com: 2,
+          value: 0.7294952051497557,
         },
         {
-          "com": 0,
-          "value": 0.36088423171859135
+          com: 0,
+          value: 0.36088423171859135,
         },
         {
-          "com": 2,
-          "value": 0.7803276945021504
+          com: 2,
+          value: 0.7803276945021504,
         },
         {
-          "com": 0,
-          "value": 0.08581411019276435
+          com: 0,
+          value: 0.08581411019276435,
         },
         {
-          "com": 2,
-          "value": 0.7647136273982043
+          com: 2,
+          value: 0.7647136273982043,
         },
         {
-          "com": 0,
-          "value": 0.21193691348954408
+          com: 0,
+          value: 0.21193691348954408,
         },
         {
-          "com": 0,
-          "value": 0.4579345204649987
+          com: 0,
+          value: 0.4579345204649987,
         },
         {
-          "com": 0,
-          "value": 0.41276373391808535
+          com: 0,
+          value: 0.41276373391808535,
         },
         {
-          "com": 0,
-          "value": 0.5211496957519924
+          com: 0,
+          value: 0.5211496957519924,
         },
         {
-          "com": 2,
-          "value": 0.7004369202645425
+          com: 2,
+          value: 0.7004369202645425,
         },
         {
-          "com": 0,
-          "value": 0.17274904464353055
+          com: 0,
+          value: 0.17274904464353055,
         },
         {
-          "com": 0,
-          "value": 0.2953499083994237
+          com: 0,
+          value: 0.2953499083994237,
         },
         {
-          "com": 0,
-          "value": 0.2740767714302525
-        }
+          com: 0,
+          value: 0.2740767714302525,
+        },
       ],
       [
         {
-          "com": 1,
-          "value": 0.6704319335146465
+          com: 1,
+          value: 0.6704319335146465,
         },
         {
-          "com": 0,
-          "value": 0.16628507918558313
+          com: 0,
+          value: 0.16628507918558313,
         },
         {
-          "com": 1,
-          "value": 1
+          com: 1,
+          value: 1,
         },
         {
-          "com": 0,
-          "value": 0.31639732377432034
+          com: 0,
+          value: 0.31639732377432034,
         },
         {
-          "com": 0,
-          "value": 0.118631433841144
+          com: 0,
+          value: 0.118631433841144,
         },
         {
-          "com": 1,
-          "value": 0.6111487943582662
+          com: 1,
+          value: 0.6111487943582662,
         },
         {
-          "com": 1,
-          "value": 0.6406105126216658
+          com: 1,
+          value: 0.6406105126216658,
         },
         {
-          "com": 1,
-          "value": 0.6065982218249649
+          com: 1,
+          value: 0.6065982218249649,
         },
         {
-          "com": 0,
-          "value": 0.0559472347747703
+          com: 0,
+          value: 0.0559472347747703,
         },
         {
-          "com": 0,
-          "value": 0.4239345453591677
+          com: 0,
+          value: 0.4239345453591677,
         },
         {
-          "com": 0,
-          "value": 0.0546755986011306
+          com: 0,
+          value: 0.0546755986011306,
         },
         {
-          "com": 1,
-          "value": 0.6436252361982031
+          com: 1,
+          value: 0.6436252361982031,
         },
         {
-          "com": 0,
-          "value": 0.03548186569026037
+          com: 0,
+          value: 0.03548186569026037,
         },
         {
-          "com": 1,
-          "value": 0.6774247827366625
+          com: 1,
+          value: 0.6774247827366625,
         },
         {
-          "com": 0,
-          "value": 0.06464968319827542
+          com: 0,
+          value: 0.06464968319827542,
         },
         {
-          "com": 1,
-          "value": 0.686215746121468
+          com: 1,
+          value: 0.686215746121468,
         },
         {
-          "com": 0,
-          "value": 0.20240997594212365
+          com: 0,
+          value: 0.20240997594212365,
         },
         {
-          "com": 0,
-          "value": 0.31831969917042324
+          com: 0,
+          value: 0.31831969917042324,
         },
         {
-          "com": 0,
-          "value": 0.5494082580419617
+          com: 0,
+          value: 0.5494082580419617,
         },
         {
-          "com": 1,
-          "value": 0.6320647952528045
+          com: 1,
+          value: 0.6320647952528045,
         },
         {
-          "com": 0,
-          "value": 0.44340437193875826
-        }
+          com: 0,
+          value: 0.44340437193875826,
+        },
       ],
       [
         {
-          "com": 0,
-          "value": 0.4274312441433005
+          com: 0,
+          value: 0.4274312441433005,
         },
         {
-          "com": 2,
-          "value": 0.7000833891517283
+          com: 2,
+          value: 0.7000833891517283,
         },
         {
-          "com": 0,
-          "value": 0.31639732377432034
+          com: 0,
+          value: 0.31639732377432034,
         },
         {
-          "com": 2,
-          "value": 1
+          com: 2,
+          value: 1,
         },
         {
-          "com": 2,
-          "value": 0.6415382242575653
+          com: 2,
+          value: 0.6415382242575653,
         },
         {
-          "com": 0,
-          "value": 0.374339032376708
+          com: 0,
+          value: 0.374339032376708,
         },
         {
-          "com": 0,
-          "value": 0.463021246076638
+          com: 0,
+          value: 0.463021246076638,
         },
         {
-          "com": 0,
-          "value": 0.15172905481558754
+          com: 0,
+          value: 0.15172905481558754,
         },
         {
-          "com": 2,
-          "value": 0.9925287032873288
+          com: 2,
+          value: 0.9925287032873288,
         },
         {
-          "com": 0,
-          "value": 0.18418252403534469
+          com: 0,
+          value: 0.18418252403534469,
         },
         {
-          "com": 2,
-          "value": 0.9660200638088474
+          com: 2,
+          value: 0.9660200638088474,
         },
         {
-          "com": 0,
-          "value": 0.4510721468395074
+          com: 0,
+          value: 0.4510721468395074,
         },
         {
-          "com": 2,
-          "value": 0.9595877600437693
+          com: 2,
+          value: 0.9595877600437693,
         },
         {
-          "com": 0,
-          "value": 0.5754706408600923
+          com: 0,
+          value: 0.5754706408600923,
         },
         {
-          "com": 0,
-          "value": 0.48488185769937475
+          com: 0,
+          value: 0.48488185769937475,
         },
         {
-          "com": 0,
-          "value": 0.21213928580264882
+          com: 0,
+          value: 0.21213928580264882,
         },
         {
-          "com": 0,
-          "value": 0.3834399597251908
+          com: 0,
+          value: 0.3834399597251908,
         },
         {
-          "com": 2,
-          "value": 0.9796040137720046
+          com: 2,
+          value: 0.9796040137720046,
         },
         {
-          "com": 0,
-          "value": 0.26918028268809113
+          com: 0,
+          value: 0.26918028268809113,
         },
         {
-          "com": 0,
-          "value": 0.016107572395066015
+          com: 0,
+          value: 0.016107572395066015,
         },
         {
-          "com": 0,
-          "value": 0.07248311613412128
-        }
+          com: 0,
+          value: 0.07248311613412128,
+        },
       ],
       [
         {
-          "com": 0,
-          "value": 0.28885585785555257
+          com: 0,
+          value: 0.28885585785555257,
         },
         {
-          "com": 2,
-          "value": 0.6918277971656696
+          com: 2,
+          value: 0.6918277971656696,
         },
         {
-          "com": 0,
-          "value": 0.118631433841144
+          com: 0,
+          value: 0.118631433841144,
         },
         {
-          "com": 2,
-          "value": 0.6415382242575653
+          com: 2,
+          value: 0.6415382242575653,
         },
         {
-          "com": 2,
-          "value": 1
+          com: 2,
+          value: 1,
         },
         {
-          "com": 0,
-          "value": 0.40836613584932363
+          com: 0,
+          value: 0.40836613584932363,
         },
         {
-          "com": 0,
-          "value": 0.17956884136789414
+          com: 0,
+          value: 0.17956884136789414,
         },
         {
-          "com": 0,
-          "value": 0.14779303946815706
+          com: 0,
+          value: 0.14779303946815706,
         },
         {
-          "com": 2,
-          "value": 0.6909850366081302
+          com: 2,
+          value: 0.6909850366081302,
         },
         {
-          "com": 0,
-          "value": 0.30451697884078255
+          com: 0,
+          value: 0.30451697884078255,
         },
         {
-          "com": 2,
-          "value": 0.6402466244044014
+          com: 2,
+          value: 0.6402466244044014,
         },
         {
-          "com": 0,
-          "value": 0.34997248729244934
+          com: 0,
+          value: 0.34997248729244934,
         },
         {
-          "com": 2,
-          "value": 0.650260657057246
+          com: 2,
+          value: 0.650260657057246,
         },
         {
-          "com": 0,
-          "value": 0.38692414762389116
+          com: 0,
+          value: 0.38692414762389116,
         },
         {
-          "com": 0,
-          "value": 0.3795680131826813
+          com: 0,
+          value: 0.3795680131826813,
         },
         {
-          "com": 0,
-          "value": 0.30295002387537806
+          com: 0,
+          value: 0.30295002387537806,
         },
         {
-          "com": 0,
-          "value": 0.28025169603249483
+          com: 0,
+          value: 0.28025169603249483,
         },
         {
-          "com": 2,
-          "value": 0.69513582570644
+          com: 2,
+          value: 0.69513582570644,
         },
         {
-          "com": 0,
-          "value": 0.31841295045439627
+          com: 0,
+          value: 0.31841295045439627,
         },
         {
-          "com": 0,
-          "value": 0.11399916865786376
+          com: 0,
+          value: 0.11399916865786376,
         },
         {
-          "com": 0,
-          "value": 0.5751399574246424
-        }
+          com: 0,
+          value: 0.5751399574246424,
+        },
       ],
       [
         {
-          "com": 1,
-          "value": 0.9793073357772102
+          com: 1,
+          value: 0.9793073357772102,
         },
         {
-          "com": 0,
-          "value": 0.46979746505552733
+          com: 0,
+          value: 0.46979746505552733,
         },
         {
-          "com": 1,
-          "value": 0.6111487943582662
+          com: 1,
+          value: 0.6111487943582662,
         },
         {
-          "com": 0,
-          "value": 0.374339032376708
+          com: 0,
+          value: 0.374339032376708,
         },
         {
-          "com": 0,
-          "value": 0.40836613584932363
+          com: 0,
+          value: 0.40836613584932363,
         },
         {
-          "com": 1,
-          "value": 1
+          com: 1,
+          value: 1,
         },
         {
-          "com": 1,
-          "value": 0.9905731760235057
+          com: 1,
+          value: 0.9905731760235057,
         },
         {
-          "com": 1,
-          "value": 0.7779557796026211
+          com: 1,
+          value: 0.7779557796026211,
         },
         {
-          "com": 0,
-          "value": 0.2571493895263891
+          com: 0,
+          value: 0.2571493895263891,
         },
         {
-          "com": 0,
-          "value": 0.49474235963891555
+          com: 0,
+          value: 0.49474235963891555,
         },
         {
-          "com": 0,
-          "value": 0.3296160463193344
+          com: 0,
+          value: 0.3296160463193344,
         },
         {
-          "com": 1,
-          "value": 0.6587204439519443
+          com: 1,
+          value: 0.6587204439519443,
         },
         {
-          "com": 0,
-          "value": 0.5145852902884008
+          com: 0,
+          value: 0.5145852902884008,
         },
         {
-          "com": 1,
-          "value": 0.7166297846113852
+          com: 1,
+          value: 0.7166297846113852,
         },
         {
-          "com": 0,
-          "value": 0.2951568317259717
+          com: 0,
+          value: 0.2951568317259717,
         },
         {
-          "com": 1,
-          "value": 0.9977709009992196
+          com: 1,
+          value: 0.9977709009992196,
         },
         {
-          "com": 0,
-          "value": 0.0360553705978063
+          com: 0,
+          value: 0.0360553705978063,
         },
         {
-          "com": 0,
-          "value": 0.09424162111247147
+          com: 0,
+          value: 0.09424162111247147,
         },
         {
-          "com": 0,
-          "value": 0.029198630929865386
+          com: 0,
+          value: 0.029198630929865386,
         },
         {
-          "com": 1,
-          "value": 0.9840525958479017
+          com: 1,
+          value: 0.9840525958479017,
         },
         {
-          "com": 0,
-          "value": 0.03979421504969376
-        }
+          com: 0,
+          value: 0.03979421504969376,
+        },
       ],
       [
         {
-          "com": 1,
-          "value": 0.9838943206959297
+          com: 1,
+          value: 0.9838943206959297,
         },
         {
-          "com": 0,
-          "value": 0.5416289138838677
+          com: 0,
+          value: 0.5416289138838677,
         },
         {
-          "com": 1,
-          "value": 0.6406105126216658
+          com: 1,
+          value: 0.6406105126216658,
         },
         {
-          "com": 0,
-          "value": 0.463021246076638
+          com: 0,
+          value: 0.463021246076638,
         },
         {
-          "com": 0,
-          "value": 0.17956884136789414
+          com: 0,
+          value: 0.17956884136789414,
         },
         {
-          "com": 1,
-          "value": 0.9905731760235057
+          com: 1,
+          value: 0.9905731760235057,
         },
         {
-          "com": 1,
-          "value": 1
+          com: 1,
+          value: 1,
         },
         {
-          "com": 1,
-          "value": 0.7004121611469898
+          com: 1,
+          value: 0.7004121611469898,
         },
         {
-          "com": 0,
-          "value": 0.3492818081551138
+          com: 0,
+          value: 0.3492818081551138,
         },
         {
-          "com": 0,
-          "value": 0.12038442734240715
+          com: 0,
+          value: 0.12038442734240715,
         },
         {
-          "com": 0,
-          "value": 0.18053232281635062
+          com: 0,
+          value: 0.18053232281635062,
         },
         {
-          "com": 1,
-          "value": 0.668003187863772
+          com: 1,
+          value: 0.668003187863772,
         },
         {
-          "com": 0,
-          "value": 0.18521008677077702
+          com: 0,
+          value: 0.18521008677077702,
         },
         {
-          "com": 1,
-          "value": 0.74969787328211
+          com: 1,
+          value: 0.74969787328211,
         },
         {
-          "com": 0,
-          "value": 0.51208024949083
+          com: 0,
+          value: 0.51208024949083,
         },
         {
-          "com": 1,
-          "value": 0.9851689237639557
+          com: 1,
+          value: 0.9851689237639557,
         },
         {
-          "com": 0,
-          "value": 0.21404655790741178
+          com: 0,
+          value: 0.21404655790741178,
         },
         {
-          "com": 0,
-          "value": 0.5774447782064832
+          com: 0,
+          value: 0.5774447782064832,
         },
         {
-          "com": 0,
-          "value": 0.29355478258498
+          com: 0,
+          value: 0.29355478258498,
         },
         {
-          "com": 1,
-          "value": 0.9513895008713835
+          com: 1,
+          value: 0.9513895008713835,
         },
         {
-          "com": 0,
-          "value": 0.5799071800763311
-        }
+          com: 0,
+          value: 0.5799071800763311,
+        },
       ],
       [
         {
-          "com": 1,
-          "value": 0.712998925514988
+          com: 1,
+          value: 0.712998925514988,
         },
         {
-          "com": 0,
-          "value": 0.5727226668432291
+          com: 0,
+          value: 0.5727226668432291,
         },
         {
-          "com": 1,
-          "value": 0.6065982218249649
+          com: 1,
+          value: 0.6065982218249649,
         },
         {
-          "com": 0,
-          "value": 0.15172905481558754
+          com: 0,
+          value: 0.15172905481558754,
         },
         {
-          "com": 0,
-          "value": 0.14779303946815706
+          com: 0,
+          value: 0.14779303946815706,
         },
         {
-          "com": 1,
-          "value": 0.7779557796026211
+          com: 1,
+          value: 0.7779557796026211,
         },
         {
-          "com": 1,
-          "value": 0.7004121611469898
+          com: 1,
+          value: 0.7004121611469898,
         },
         {
-          "com": 1,
-          "value": 1
+          com: 1,
+          value: 1,
         },
         {
-          "com": 0,
-          "value": 0.31720707836742057
+          com: 0,
+          value: 0.31720707836742057,
         },
         {
-          "com": 0,
-          "value": 0.14757127752526683
+          com: 0,
+          value: 0.14757127752526683,
         },
         {
-          "com": 0,
-          "value": 0.17893163932918113
+          com: 0,
+          value: 0.17893163932918113,
         },
         {
-          "com": 1,
-          "value": 0.6532652273109822
+          com: 1,
+          value: 0.6532652273109822,
         },
         {
-          "com": 0,
-          "value": 0.15369061217942973
+          com: 0,
+          value: 0.15369061217942973,
         },
         {
-          "com": 1,
-          "value": 0.7208195730317702
+          com: 1,
+          value: 0.7208195730317702,
         },
         {
-          "com": 0,
-          "value": 0.2784512263758024
+          com: 0,
+          value: 0.2784512263758024,
         },
         {
-          "com": 1,
-          "value": 0.7020449086411032
+          com: 1,
+          value: 0.7020449086411032,
         },
         {
-          "com": 0,
-          "value": 0.3160574152068511
+          com: 0,
+          value: 0.3160574152068511,
         },
         {
-          "com": 0,
-          "value": 0.041107757855170936
+          com: 0,
+          value: 0.041107757855170936,
         },
         {
-          "com": 0,
-          "value": 0.03400120484921158
+          com: 0,
+          value: 0.03400120484921158,
         },
         {
-          "com": 1,
-          "value": 0.7534213594200394
+          com: 1,
+          value: 0.7534213594200394,
         },
         {
-          "com": 0,
-          "value": 0.03507171433330991
-        }
+          com: 0,
+          value: 0.03507171433330991,
+        },
       ],
       [
         {
-          "com": 0,
-          "value": 0.4440709070638372
+          com: 0,
+          value: 0.4440709070638372,
         },
         {
-          "com": 2,
-          "value": 0.7294952051497557
+          com: 2,
+          value: 0.7294952051497557,
         },
         {
-          "com": 0,
-          "value": 0.0559472347747703
+          com: 0,
+          value: 0.0559472347747703,
         },
         {
-          "com": 2,
-          "value": 0.9925287032873288
+          com: 2,
+          value: 0.9925287032873288,
         },
         {
-          "com": 2,
-          "value": 0.6909850366081302
+          com: 2,
+          value: 0.6909850366081302,
         },
         {
-          "com": 0,
-          "value": 0.2571493895263891
+          com: 0,
+          value: 0.2571493895263891,
         },
         {
-          "com": 0,
-          "value": 0.3492818081551138
+          com: 0,
+          value: 0.3492818081551138,
         },
         {
-          "com": 0,
-          "value": 0.31720707836742057
+          com: 0,
+          value: 0.31720707836742057,
         },
         {
-          "com": 2,
-          "value": 1
+          com: 2,
+          value: 1,
         },
         {
-          "com": 0,
-          "value": 0.11358462521119898
+          com: 0,
+          value: 0.11358462521119898,
         },
         {
-          "com": 2,
-          "value": 0.9786694247712003
+          com: 2,
+          value: 0.9786694247712003,
         },
         {
-          "com": 0,
-          "value": 0.39370444984005487
+          com: 0,
+          value: 0.39370444984005487,
         },
         {
-          "com": 2,
-          "value": 0.9552071356430223
+          com: 2,
+          value: 0.9552071356430223,
         },
         {
-          "com": 0,
-          "value": 0.3598135651934422
+          com: 0,
+          value: 0.3598135651934422,
         },
         {
-          "com": 0,
-          "value": 0.27915718062844275
+          com: 0,
+          value: 0.27915718062844275,
         },
         {
-          "com": 0,
-          "value": 0.5709446466761627
+          com: 0,
+          value: 0.5709446466761627,
         },
         {
-          "com": 0,
-          "value": 0.06448709275978479
+          com: 0,
+          value: 0.06448709275978479,
         },
         {
-          "com": 2,
-          "value": 0.9619458298313928
+          com: 2,
+          value: 0.9619458298313928,
         },
         {
-          "com": 0,
-          "value": 0.30285694918186756
+          com: 0,
+          value: 0.30285694918186756,
         },
         {
-          "com": 0,
-          "value": 0.22134637052600017
+          com: 0,
+          value: 0.22134637052600017,
         },
         {
-          "com": 0,
-          "value": 0.23040177821734237
-        }
+          com: 0,
+          value: 0.23040177821734237,
+        },
       ],
       [
         {
-          "com": 0,
-          "value": 0.01733857892061046
+          com: 0,
+          value: 0.01733857892061046,
         },
         {
-          "com": 0,
-          "value": 0.36088423171859135
+          com: 0,
+          value: 0.36088423171859135,
         },
         {
-          "com": 0,
-          "value": 0.4239345453591677
+          com: 0,
+          value: 0.4239345453591677,
         },
         {
-          "com": 0,
-          "value": 0.18418252403534469
+          com: 0,
+          value: 0.18418252403534469,
         },
         {
-          "com": 0,
-          "value": 0.30451697884078255
+          com: 0,
+          value: 0.30451697884078255,
         },
         {
-          "com": 0,
-          "value": 0.49474235963891555
+          com: 0,
+          value: 0.49474235963891555,
         },
         {
-          "com": 0,
-          "value": 0.12038442734240715
+          com: 0,
+          value: 0.12038442734240715,
         },
         {
-          "com": 0,
-          "value": 0.14757127752526683
+          com: 0,
+          value: 0.14757127752526683,
         },
         {
-          "com": 0,
-          "value": 0.11358462521119898
+          com: 0,
+          value: 0.11358462521119898,
         },
         {
-          "com": 3,
-          "value": 1
+          com: 3,
+          value: 1,
         },
         {
-          "com": 0,
-          "value": 0.2923503639747692
+          com: 0,
+          value: 0.2923503639747692,
         },
         {
-          "com": 0,
-          "value": 0.3971279428652952
+          com: 0,
+          value: 0.3971279428652952,
         },
         {
-          "com": 0,
-          "value": 0.23464576116897307
+          com: 0,
+          value: 0.23464576116897307,
         },
         {
-          "com": 0,
-          "value": 0.03253476317489832
+          com: 0,
+          value: 0.03253476317489832,
         },
         {
-          "com": 3,
-          "value": 0.8335709520066037
+          com: 3,
+          value: 0.8335709520066037,
         },
         {
-          "com": 0,
-          "value": 0.24051194916766427
+          com: 0,
+          value: 0.24051194916766427,
         },
         {
-          "com": 3,
-          "value": 1
+          com: 3,
+          value: 1,
         },
         {
-          "com": 0,
-          "value": 0.5458810788029261
+          com: 0,
+          value: 0.5458810788029261,
         },
         {
-          "com": 3,
-          "value": 1
+          com: 3,
+          value: 1,
         },
         {
-          "com": 0,
-          "value": 0.46459043537081546
+          com: 0,
+          value: 0.46459043537081546,
         },
         {
-          "com": 3,
-          "value": 0.7337267796273246
-        }
+          com: 3,
+          value: 0.7337267796273246,
+        },
       ],
       [
         {
-          "com": 0,
-          "value": 0.21354300530313255
+          com: 0,
+          value: 0.21354300530313255,
         },
         {
-          "com": 2,
-          "value": 0.7803276945021504
+          com: 2,
+          value: 0.7803276945021504,
         },
         {
-          "com": 0,
-          "value": 0.0546755986011306
+          com: 0,
+          value: 0.0546755986011306,
         },
         {
-          "com": 2,
-          "value": 0.9660200638088474
+          com: 2,
+          value: 0.9660200638088474,
         },
         {
-          "com": 2,
-          "value": 0.6402466244044014
+          com: 2,
+          value: 0.6402466244044014,
         },
         {
-          "com": 0,
-          "value": 0.3296160463193344
+          com: 0,
+          value: 0.3296160463193344,
         },
         {
-          "com": 0,
-          "value": 0.18053232281635062
+          com: 0,
+          value: 0.18053232281635062,
         },
         {
-          "com": 0,
-          "value": 0.17893163932918113
+          com: 0,
+          value: 0.17893163932918113,
         },
         {
-          "com": 2,
-          "value": 0.9786694247712003
+          com: 2,
+          value: 0.9786694247712003,
         },
         {
-          "com": 0,
-          "value": 0.2923503639747692
+          com: 0,
+          value: 0.2923503639747692,
         },
         {
-          "com": 2,
-          "value": 1
+          com: 2,
+          value: 1,
         },
         {
-          "com": 0,
-          "value": 0.5927260824811869
+          com: 0,
+          value: 0.5927260824811869,
         },
         {
-          "com": 2,
-          "value": 0.9587999016962205
+          com: 2,
+          value: 0.9587999016962205,
         },
         {
-          "com": 0,
-          "value": 0.07246040611158518
+          com: 0,
+          value: 0.07246040611158518,
         },
         {
-          "com": 0,
-          "value": 0.016062639549016388
+          com: 0,
+          value: 0.016062639549016388,
         },
         {
-          "com": 0,
-          "value": 0.35392730931587435
+          com: 0,
+          value: 0.35392730931587435,
         },
         {
-          "com": 0,
-          "value": 0.3854819563952922
+          com: 0,
+          value: 0.3854819563952922,
         },
         {
-          "com": 2,
-          "value": 0.9504278721001371
+          com: 2,
+          value: 0.9504278721001371,
         },
         {
-          "com": 0,
-          "value": 0.2783227422855877
+          com: 0,
+          value: 0.2783227422855877,
         },
         {
-          "com": 0,
-          "value": 0.4262094772617071
+          com: 0,
+          value: 0.4262094772617071,
         },
         {
-          "com": 0,
-          "value": 0.1285105107208667
-        }
+          com: 0,
+          value: 0.1285105107208667,
+        },
       ],
       [
         {
-          "com": 1,
-          "value": 0.6780640125095587
+          com: 1,
+          value: 0.6780640125095587,
         },
         {
-          "com": 0,
-          "value": 0.08581411019276435
+          com: 0,
+          value: 0.08581411019276435,
         },
         {
-          "com": 1,
-          "value": 0.6436252361982031
+          com: 1,
+          value: 0.6436252361982031,
         },
         {
-          "com": 0,
-          "value": 0.4510721468395074
+          com: 0,
+          value: 0.4510721468395074,
         },
         {
-          "com": 0,
-          "value": 0.34997248729244934
+          com: 0,
+          value: 0.34997248729244934,
         },
         {
-          "com": 1,
-          "value": 0.6587204439519443
+          com: 1,
+          value: 0.6587204439519443,
         },
         {
-          "com": 1,
-          "value": 0.668003187863772
+          com: 1,
+          value: 0.668003187863772,
         },
         {
-          "com": 1,
-          "value": 0.6532652273109822
+          com: 1,
+          value: 0.6532652273109822,
         },
         {
-          "com": 0,
-          "value": 0.39370444984005487
+          com: 0,
+          value: 0.39370444984005487,
         },
         {
-          "com": 0,
-          "value": 0.3971279428652952
+          com: 0,
+          value: 0.3971279428652952,
         },
         {
-          "com": 0,
-          "value": 0.5927260824811869
+          com: 0,
+          value: 0.5927260824811869,
         },
         {
-          "com": 1,
-          "value": 1
+          com: 1,
+          value: 1,
         },
         {
-          "com": 0,
-          "value": 0.019865094339557077
+          com: 0,
+          value: 0.019865094339557077,
         },
         {
-          "com": 1,
-          "value": 0.655654482133707
+          com: 1,
+          value: 0.655654482133707,
         },
         {
-          "com": 0,
-          "value": 0.23149101768572702
+          com: 0,
+          value: 0.23149101768572702,
         },
         {
-          "com": 1,
-          "value": 0.6889207388851366
+          com: 1,
+          value: 0.6889207388851366,
         },
         {
-          "com": 0,
-          "value": 0.4634291281667471
+          com: 0,
+          value: 0.4634291281667471,
         },
         {
-          "com": 0,
-          "value": 0.1630149815179661
+          com: 0,
+          value: 0.1630149815179661,
         },
         {
-          "com": 0,
-          "value": 0.3181292763139884
+          com: 0,
+          value: 0.3181292763139884,
         },
         {
-          "com": 1,
-          "value": 0.6316671490949906
+          com: 1,
+          value: 0.6316671490949906,
         },
         {
-          "com": 0,
-          "value": 0.4734693052228483
-        }
+          com: 0,
+          value: 0.4734693052228483,
+        },
       ],
       [
         {
-          "com": 0,
-          "value": 0.5304877613285571
+          com: 0,
+          value: 0.5304877613285571,
         },
         {
-          "com": 2,
-          "value": 0.7647136273982043
+          com: 2,
+          value: 0.7647136273982043,
         },
         {
-          "com": 0,
-          "value": 0.03548186569026037
+          com: 0,
+          value: 0.03548186569026037,
         },
         {
-          "com": 2,
-          "value": 0.9595877600437693
+          com: 2,
+          value: 0.9595877600437693,
         },
         {
-          "com": 2,
-          "value": 0.650260657057246
+          com: 2,
+          value: 0.650260657057246,
         },
         {
-          "com": 0,
-          "value": 0.5145852902884008
+          com: 0,
+          value: 0.5145852902884008,
         },
         {
-          "com": 0,
-          "value": 0.18521008677077702
+          com: 0,
+          value: 0.18521008677077702,
         },
         {
-          "com": 0,
-          "value": 0.15369061217942973
+          com: 0,
+          value: 0.15369061217942973,
         },
         {
-          "com": 2,
-          "value": 0.9552071356430223
+          com: 2,
+          value: 0.9552071356430223,
         },
         {
-          "com": 0,
-          "value": 0.23464576116897307
+          com: 0,
+          value: 0.23464576116897307,
         },
         {
-          "com": 2,
-          "value": 0.9587999016962205
+          com: 2,
+          value: 0.9587999016962205,
         },
         {
-          "com": 0,
-          "value": 0.019865094339557077
+          com: 0,
+          value: 0.019865094339557077,
         },
         {
-          "com": 2,
-          "value": 1
+          com: 2,
+          value: 1,
         },
         {
-          "com": 0,
-          "value": 0.07796543145200596
+          com: 0,
+          value: 0.07796543145200596,
         },
         {
-          "com": 0,
-          "value": 0.11823854101718227
+          com: 0,
+          value: 0.11823854101718227,
         },
         {
-          "com": 0,
-          "value": 0.20967072269092218
+          com: 0,
+          value: 0.20967072269092218,
         },
         {
-          "com": 0,
-          "value": 0.20773460227182666
+          com: 0,
+          value: 0.20773460227182666,
         },
         {
-          "com": 2,
-          "value": 0.978789730404256
+          com: 2,
+          value: 0.978789730404256,
         },
         {
-          "com": 0,
-          "value": 0.5919728306953677
+          com: 0,
+          value: 0.5919728306953677,
         },
         {
-          "com": 0,
-          "value": 0.5162735150077128
+          com: 0,
+          value: 0.5162735150077128,
         },
         {
-          "com": 0,
-          "value": 0.004202473110855509
-        }
+          com: 0,
+          value: 0.004202473110855509,
+        },
       ],
       [
         {
-          "com": 1,
-          "value": 0.7805839253532785
+          com: 1,
+          value: 0.7805839253532785,
         },
         {
-          "com": 0,
-          "value": 0.21193691348954408
+          com: 0,
+          value: 0.21193691348954408,
         },
         {
-          "com": 1,
-          "value": 0.6774247827366625
+          com: 1,
+          value: 0.6774247827366625,
         },
         {
-          "com": 0,
-          "value": 0.5754706408600923
+          com: 0,
+          value: 0.5754706408600923,
         },
         {
-          "com": 0,
-          "value": 0.38692414762389116
+          com: 0,
+          value: 0.38692414762389116,
         },
         {
-          "com": 1,
-          "value": 0.7166297846113852
+          com: 1,
+          value: 0.7166297846113852,
         },
         {
-          "com": 1,
-          "value": 0.74969787328211
+          com: 1,
+          value: 0.74969787328211,
         },
         {
-          "com": 1,
-          "value": 0.7208195730317702
+          com: 1,
+          value: 0.7208195730317702,
         },
         {
-          "com": 0,
-          "value": 0.3598135651934422
+          com: 0,
+          value: 0.3598135651934422,
         },
         {
-          "com": 0,
-          "value": 0.03253476317489832
+          com: 0,
+          value: 0.03253476317489832,
         },
         {
-          "com": 0,
-          "value": 0.07246040611158518
+          com: 0,
+          value: 0.07246040611158518,
         },
         {
-          "com": 1,
-          "value": 0.655654482133707
+          com: 1,
+          value: 0.655654482133707,
         },
         {
-          "com": 0,
-          "value": 0.07796543145200596
+          com: 0,
+          value: 0.07796543145200596,
         },
         {
-          "com": 1,
-          "value": 1
+          com: 1,
+          value: 1,
         },
         {
-          "com": 0,
-          "value": 0.28222946299767393
+          com: 0,
+          value: 0.28222946299767393,
         },
         {
-          "com": 1,
-          "value": 0.7142845685439907
+          com: 1,
+          value: 0.7142845685439907,
         },
         {
-          "com": 0,
-          "value": 0.15482297848658497
+          com: 0,
+          value: 0.15482297848658497,
         },
         {
-          "com": 0,
-          "value": 0.23215524245732871
+          com: 0,
+          value: 0.23215524245732871,
         },
         {
-          "com": 0,
-          "value": 0.4751022416580436
+          com: 0,
+          value: 0.4751022416580436,
         },
         {
-          "com": 1,
-          "value": 0.7646359355041064
+          com: 1,
+          value: 0.7646359355041064,
         },
         {
-          "com": 0,
-          "value": 0.516790082685222
-        }
+          com: 0,
+          value: 0.516790082685222,
+        },
       ],
       [
         {
-          "com": 0,
-          "value": 0.5014890036722373
+          com: 0,
+          value: 0.5014890036722373,
         },
         {
-          "com": 0,
-          "value": 0.4579345204649987
+          com: 0,
+          value: 0.4579345204649987,
         },
         {
-          "com": 0,
-          "value": 0.06464968319827542
+          com: 0,
+          value: 0.06464968319827542,
         },
         {
-          "com": 0,
-          "value": 0.48488185769937475
+          com: 0,
+          value: 0.48488185769937475,
         },
         {
-          "com": 0,
-          "value": 0.3795680131826813
+          com: 0,
+          value: 0.3795680131826813,
         },
         {
-          "com": 0,
-          "value": 0.2951568317259717
+          com: 0,
+          value: 0.2951568317259717,
         },
         {
-          "com": 0,
-          "value": 0.51208024949083
+          com: 0,
+          value: 0.51208024949083,
         },
         {
-          "com": 0,
-          "value": 0.2784512263758024
+          com: 0,
+          value: 0.2784512263758024,
         },
         {
-          "com": 0,
-          "value": 0.27915718062844275
+          com: 0,
+          value: 0.27915718062844275,
         },
         {
-          "com": 3,
-          "value": 0.8335709520066037
+          com: 3,
+          value: 0.8335709520066037,
         },
         {
-          "com": 0,
-          "value": 0.016062639549016388
+          com: 0,
+          value: 0.016062639549016388,
         },
         {
-          "com": 0,
-          "value": 0.23149101768572702
+          com: 0,
+          value: 0.23149101768572702,
         },
         {
-          "com": 0,
-          "value": 0.11823854101718227
+          com: 0,
+          value: 0.11823854101718227,
         },
         {
-          "com": 0,
-          "value": 0.28222946299767393
+          com: 0,
+          value: 0.28222946299767393,
         },
         {
-          "com": 3,
-          "value": 1
+          com: 3,
+          value: 1,
         },
         {
-          "com": 0,
-          "value": 0.14554920696714715
+          com: 0,
+          value: 0.14554920696714715,
         },
         {
-          "com": 3,
-          "value": 0.806699884272933
+          com: 3,
+          value: 0.806699884272933,
         },
         {
-          "com": 0,
-          "value": 0.05293474700240459
+          com: 0,
+          value: 0.05293474700240459,
         },
         {
-          "com": 3,
-          "value": 0.7153565214728528
+          com: 3,
+          value: 0.7153565214728528,
         },
         {
-          "com": 0,
-          "value": 0.5536613177898603
+          com: 0,
+          value: 0.5536613177898603,
         },
         {
-          "com": 3,
-          "value": 0.7281112604543061
-        }
+          com: 3,
+          value: 0.7281112604543061,
+        },
       ],
       [
         {
-          "com": 1,
-          "value": 0.9620008487146012
+          com: 1,
+          value: 0.9620008487146012,
         },
         {
-          "com": 0,
-          "value": 0.41276373391808535
+          com: 0,
+          value: 0.41276373391808535,
         },
         {
-          "com": 1,
-          "value": 0.686215746121468
+          com: 1,
+          value: 0.686215746121468,
         },
         {
-          "com": 0,
-          "value": 0.21213928580264882
+          com: 0,
+          value: 0.21213928580264882,
         },
         {
-          "com": 0,
-          "value": 0.30295002387537806
+          com: 0,
+          value: 0.30295002387537806,
         },
         {
-          "com": 1,
-          "value": 0.9977709009992196
+          com: 1,
+          value: 0.9977709009992196,
         },
         {
-          "com": 1,
-          "value": 0.9851689237639557
+          com: 1,
+          value: 0.9851689237639557,
         },
         {
-          "com": 1,
-          "value": 0.7020449086411032
+          com: 1,
+          value: 0.7020449086411032,
         },
         {
-          "com": 0,
-          "value": 0.5709446466761627
+          com: 0,
+          value: 0.5709446466761627,
         },
         {
-          "com": 0,
-          "value": 0.24051194916766427
+          com: 0,
+          value: 0.24051194916766427,
         },
         {
-          "com": 0,
-          "value": 0.35392730931587435
+          com: 0,
+          value: 0.35392730931587435,
         },
         {
-          "com": 1,
-          "value": 0.6889207388851366
+          com: 1,
+          value: 0.6889207388851366,
         },
         {
-          "com": 0,
-          "value": 0.20967072269092218
+          com: 0,
+          value: 0.20967072269092218,
         },
         {
-          "com": 1,
-          "value": 0.7142845685439907
+          com: 1,
+          value: 0.7142845685439907,
         },
         {
-          "com": 0,
-          "value": 0.14554920696714715
+          com: 0,
+          value: 0.14554920696714715,
         },
         {
-          "com": 1,
-          "value": 1
+          com: 1,
+          value: 1,
         },
         {
-          "com": 0,
-          "value": 0.47294221836546396
+          com: 0,
+          value: 0.47294221836546396,
         },
         {
-          "com": 0,
-          "value": 0.3066450925464064
+          com: 0,
+          value: 0.3066450925464064,
         },
         {
-          "com": 0,
-          "value": 0.009262733314171179
+          com: 0,
+          value: 0.009262733314171179,
         },
         {
-          "com": 1,
-          "value": 0.9574947228269575
+          com: 1,
+          value: 0.9574947228269575,
         },
         {
-          "com": 0,
-          "value": 0.34707867884717886
-        }
+          com: 0,
+          value: 0.34707867884717886,
+        },
       ],
       [
         {
-          "com": 0,
-          "value": 0.3323588741943031
+          com: 0,
+          value: 0.3323588741943031,
         },
         {
-          "com": 0,
-          "value": 0.5211496957519924
+          com: 0,
+          value: 0.5211496957519924,
         },
         {
-          "com": 0,
-          "value": 0.20240997594212365
+          com: 0,
+          value: 0.20240997594212365,
         },
         {
-          "com": 0,
-          "value": 0.3834399597251908
+          com: 0,
+          value: 0.3834399597251908,
         },
         {
-          "com": 0,
-          "value": 0.28025169603249483
+          com: 0,
+          value: 0.28025169603249483,
         },
         {
-          "com": 0,
-          "value": 0.0360553705978063
+          com: 0,
+          value: 0.0360553705978063,
         },
         {
-          "com": 0,
-          "value": 0.21404655790741178
+          com: 0,
+          value: 0.21404655790741178,
         },
         {
-          "com": 0,
-          "value": 0.3160574152068511
+          com: 0,
+          value: 0.3160574152068511,
         },
         {
-          "com": 0,
-          "value": 0.06448709275978479
+          com: 0,
+          value: 0.06448709275978479,
         },
         {
-          "com": 3,
-          "value": 1
+          com: 3,
+          value: 1,
         },
         {
-          "com": 0,
-          "value": 0.3854819563952922
+          com: 0,
+          value: 0.3854819563952922,
         },
         {
-          "com": 0,
-          "value": 0.4634291281667471
+          com: 0,
+          value: 0.4634291281667471,
         },
         {
-          "com": 0,
-          "value": 0.20773460227182666
+          com: 0,
+          value: 0.20773460227182666,
         },
         {
-          "com": 0,
-          "value": 0.15482297848658497
+          com: 0,
+          value: 0.15482297848658497,
         },
         {
-          "com": 3,
-          "value": 0.806699884272933
+          com: 3,
+          value: 0.806699884272933,
         },
         {
-          "com": 0,
-          "value": 0.47294221836546396
+          com: 0,
+          value: 0.47294221836546396,
         },
         {
-          "com": 3,
-          "value": 1
+          com: 3,
+          value: 1,
         },
         {
-          "com": 0,
-          "value": 0.06362466799835444
+          com: 0,
+          value: 0.06362466799835444,
         },
         {
-          "com": 3,
-          "value": 1
+          com: 3,
+          value: 1,
         },
         {
-          "com": 0,
-          "value": 0.5360138224776471
+          com: 0,
+          value: 0.5360138224776471,
         },
         {
-          "com": 3,
-          "value": 0.8534572864080539
-        }
+          com: 3,
+          value: 0.8534572864080539,
+        },
       ],
       [
         {
-          "com": 0,
-          "value": 0.57439070957112
+          com: 0,
+          value: 0.57439070957112,
         },
         {
-          "com": 2,
-          "value": 0.7004369202645425
+          com: 2,
+          value: 0.7004369202645425,
         },
         {
-          "com": 0,
-          "value": 0.31831969917042324
+          com: 0,
+          value: 0.31831969917042324,
         },
         {
-          "com": 2,
-          "value": 0.9796040137720046
+          com: 2,
+          value: 0.9796040137720046,
         },
         {
-          "com": 2,
-          "value": 0.69513582570644
+          com: 2,
+          value: 0.69513582570644,
         },
         {
-          "com": 0,
-          "value": 0.09424162111247147
+          com: 0,
+          value: 0.09424162111247147,
         },
         {
-          "com": 0,
-          "value": 0.5774447782064832
+          com: 0,
+          value: 0.5774447782064832,
         },
         {
-          "com": 0,
-          "value": 0.041107757855170936
+          com: 0,
+          value: 0.041107757855170936,
         },
         {
-          "com": 2,
-          "value": 0.9619458298313928
+          com: 2,
+          value: 0.9619458298313928,
         },
         {
-          "com": 0,
-          "value": 0.5458810788029261
+          com: 0,
+          value: 0.5458810788029261,
         },
         {
-          "com": 2,
-          "value": 0.9504278721001371
+          com: 2,
+          value: 0.9504278721001371,
         },
         {
-          "com": 0,
-          "value": 0.1630149815179661
+          com: 0,
+          value: 0.1630149815179661,
         },
         {
-          "com": 2,
-          "value": 0.978789730404256
+          com: 2,
+          value: 0.978789730404256,
         },
         {
-          "com": 0,
-          "value": 0.23215524245732871
+          com: 0,
+          value: 0.23215524245732871,
         },
         {
-          "com": 0,
-          "value": 0.05293474700240459
+          com: 0,
+          value: 0.05293474700240459,
         },
         {
-          "com": 0,
-          "value": 0.3066450925464064
+          com: 0,
+          value: 0.3066450925464064,
         },
         {
-          "com": 0,
-          "value": 0.06362466799835444
+          com: 0,
+          value: 0.06362466799835444,
         },
         {
-          "com": 2,
-          "value": 1
+          com: 2,
+          value: 1,
         },
         {
-          "com": 0,
-          "value": 0.2876964248398442
+          com: 0,
+          value: 0.2876964248398442,
         },
         {
-          "com": 0,
-          "value": 0.5831320630152079
+          com: 0,
+          value: 0.5831320630152079,
         },
         {
-          "com": 0,
-          "value": 0.5445695927636868
-        }
+          com: 0,
+          value: 0.5445695927636868,
+        },
       ],
       [
         {
-          "com": 0,
-          "value": 0.1515992541635371
+          com: 0,
+          value: 0.1515992541635371,
         },
         {
-          "com": 0,
-          "value": 0.17274904464353055
+          com: 0,
+          value: 0.17274904464353055,
         },
         {
-          "com": 0,
-          "value": 0.5494082580419617
+          com: 0,
+          value: 0.5494082580419617,
         },
         {
-          "com": 0,
-          "value": 0.26918028268809113
+          com: 0,
+          value: 0.26918028268809113,
         },
         {
-          "com": 0,
-          "value": 0.31841295045439627
+          com: 0,
+          value: 0.31841295045439627,
         },
         {
-          "com": 0,
-          "value": 0.029198630929865386
+          com: 0,
+          value: 0.029198630929865386,
         },
         {
-          "com": 0,
-          "value": 0.29355478258498
+          com: 0,
+          value: 0.29355478258498,
         },
         {
-          "com": 0,
-          "value": 0.03400120484921158
+          com: 0,
+          value: 0.03400120484921158,
         },
         {
-          "com": 0,
-          "value": 0.30285694918186756
+          com: 0,
+          value: 0.30285694918186756,
         },
         {
-          "com": 3,
-          "value": 1
+          com: 3,
+          value: 1,
         },
         {
-          "com": 0,
-          "value": 0.2783227422855877
+          com: 0,
+          value: 0.2783227422855877,
         },
         {
-          "com": 0,
-          "value": 0.3181292763139884
+          com: 0,
+          value: 0.3181292763139884,
         },
         {
-          "com": 0,
-          "value": 0.5919728306953677
+          com: 0,
+          value: 0.5919728306953677,
         },
         {
-          "com": 0,
-          "value": 0.4751022416580436
+          com: 0,
+          value: 0.4751022416580436,
         },
         {
-          "com": 3,
-          "value": 0.7153565214728528
+          com: 3,
+          value: 0.7153565214728528,
         },
         {
-          "com": 0,
-          "value": 0.009262733314171179
+          com: 0,
+          value: 0.009262733314171179,
         },
         {
-          "com": 3,
-          "value": 1
+          com: 3,
+          value: 1,
         },
         {
-          "com": 0,
-          "value": 0.2876964248398442
+          com: 0,
+          value: 0.2876964248398442,
         },
         {
-          "com": 3,
-          "value": 1
+          com: 3,
+          value: 1,
         },
         {
-          "com": 0,
-          "value": 0.005412576696464733
+          com: 0,
+          value: 0.005412576696464733,
         },
         {
-          "com": 3,
-          "value": 0.8564768112313015
-        }
+          com: 3,
+          value: 0.8564768112313015,
+        },
       ],
       [
         {
-          "com": 1,
-          "value": 0.9844877904710154
+          com: 1,
+          value: 0.9844877904710154,
         },
         {
-          "com": 0,
-          "value": 0.2953499083994237
+          com: 0,
+          value: 0.2953499083994237,
         },
         {
-          "com": 1,
-          "value": 0.6320647952528045
+          com: 1,
+          value: 0.6320647952528045,
         },
         {
-          "com": 0,
-          "value": 0.016107572395066015
+          com: 0,
+          value: 0.016107572395066015,
         },
         {
-          "com": 0,
-          "value": 0.11399916865786376
+          com: 0,
+          value: 0.11399916865786376,
         },
         {
-          "com": 1,
-          "value": 0.9840525958479017
+          com: 1,
+          value: 0.9840525958479017,
         },
         {
-          "com": 1,
-          "value": 0.9513895008713835
+          com: 1,
+          value: 0.9513895008713835,
         },
         {
-          "com": 1,
-          "value": 0.7534213594200394
+          com: 1,
+          value: 0.7534213594200394,
         },
         {
-          "com": 0,
-          "value": 0.22134637052600017
+          com: 0,
+          value: 0.22134637052600017,
         },
         {
-          "com": 0,
-          "value": 0.46459043537081546
+          com: 0,
+          value: 0.46459043537081546,
         },
         {
-          "com": 0,
-          "value": 0.4262094772617071
+          com: 0,
+          value: 0.4262094772617071,
         },
         {
-          "com": 1,
-          "value": 0.6316671490949906
+          com: 1,
+          value: 0.6316671490949906,
         },
         {
-          "com": 0,
-          "value": 0.5162735150077128
+          com: 0,
+          value: 0.5162735150077128,
         },
         {
-          "com": 1,
-          "value": 0.7646359355041064
+          com: 1,
+          value: 0.7646359355041064,
         },
         {
-          "com": 0,
-          "value": 0.5536613177898603
+          com: 0,
+          value: 0.5536613177898603,
         },
         {
-          "com": 1,
-          "value": 0.9574947228269575
+          com: 1,
+          value: 0.9574947228269575,
         },
         {
-          "com": 0,
-          "value": 0.5360138224776471
+          com: 0,
+          value: 0.5360138224776471,
         },
         {
-          "com": 0,
-          "value": 0.5831320630152079
+          com: 0,
+          value: 0.5831320630152079,
         },
         {
-          "com": 0,
-          "value": 0.005412576696464733
+          com: 0,
+          value: 0.005412576696464733,
         },
         {
-          "com": 1,
-          "value": 1
+          com: 1,
+          value: 1,
         },
         {
-          "com": 0,
-          "value": 0.5152052893613951
-        }
+          com: 0,
+          value: 0.5152052893613951,
+        },
       ],
       [
         {
-          "com": 0,
-          "value": 0.4832944509490521
+          com: 0,
+          value: 0.4832944509490521,
         },
         {
-          "com": 0,
-          "value": 0.2740767714302525
+          com: 0,
+          value: 0.2740767714302525,
         },
         {
-          "com": 0,
-          "value": 0.44340437193875826
+          com: 0,
+          value: 0.44340437193875826,
         },
         {
-          "com": 0,
-          "value": 0.07248311613412128
+          com: 0,
+          value: 0.07248311613412128,
         },
         {
-          "com": 0,
-          "value": 0.5751399574246424
+          com: 0,
+          value: 0.5751399574246424,
         },
         {
-          "com": 0,
-          "value": 0.03979421504969376
+          com: 0,
+          value: 0.03979421504969376,
         },
         {
-          "com": 0,
-          "value": 0.5799071800763311
+          com: 0,
+          value: 0.5799071800763311,
         },
         {
-          "com": 0,
-          "value": 0.03507171433330991
+          com: 0,
+          value: 0.03507171433330991,
         },
         {
-          "com": 0,
-          "value": 0.23040177821734237
+          com: 0,
+          value: 0.23040177821734237,
         },
         {
-          "com": 3,
-          "value": 0.7337267796273246
+          com: 3,
+          value: 0.7337267796273246,
         },
         {
-          "com": 0,
-          "value": 0.1285105107208667
+          com: 0,
+          value: 0.1285105107208667,
         },
         {
-          "com": 0,
-          "value": 0.4734693052228483
+          com: 0,
+          value: 0.4734693052228483,
         },
         {
-          "com": 0,
-          "value": 0.004202473110855509
+          com: 0,
+          value: 0.004202473110855509,
         },
         {
-          "com": 0,
-          "value": 0.516790082685222
+          com: 0,
+          value: 0.516790082685222,
         },
         {
-          "com": 3,
-          "value": 0.7281112604543061
+          com: 3,
+          value: 0.7281112604543061,
         },
         {
-          "com": 0,
-          "value": 0.34707867884717886
+          com: 0,
+          value: 0.34707867884717886,
         },
         {
-          "com": 3,
-          "value": 0.8534572864080539
+          com: 3,
+          value: 0.8534572864080539,
         },
         {
-          "com": 0,
-          "value": 0.5445695927636868
+          com: 0,
+          value: 0.5445695927636868,
         },
         {
-          "com": 3,
-          "value": 0.8564768112313015
+          com: 3,
+          value: 0.8564768112313015,
         },
         {
-          "com": 0,
-          "value": 0.5152052893613951
+          com: 0,
+          value: 0.5152052893613951,
         },
         {
-          "com": 3,
-          "value": 1
-        }
-      ]
+          com: 3,
+          value: 1,
+        },
+      ],
     ];
     // const random2 = dp.testRandomMatrixReordering(random);
     const comMat = dp.testMatrixReorderingByCommunity(remat);
@@ -6106,7 +5847,7 @@ export default function userSimilarityGraph(data, svg, user, articles, submit) {
         0.125,
         0.14285714285714285,
         0.14285714285714285,
-        0.125
+        0.125,
       ],
       [
         0.6,
@@ -6132,7 +5873,7 @@ export default function userSimilarityGraph(data, svg, user, articles, submit) {
         0.125,
         0.14285714285714285,
         0.14285714285714285,
-        0.125
+        0.125,
       ],
       [
         0.42857142857142855,
@@ -6158,7 +5899,7 @@ export default function userSimilarityGraph(data, svg, user, articles, submit) {
         0.1,
         0.1111111111111111,
         0.1111111111111111,
-        0.2222222222222222
+        0.2222222222222222,
       ],
       [
         0.5,
@@ -6184,7 +5925,7 @@ export default function userSimilarityGraph(data, svg, user, articles, submit) {
         0.1111111111111111,
         0.125,
         0.125,
-        0.25
+        0.25,
       ],
       [
         0.5,
@@ -6210,7 +5951,7 @@ export default function userSimilarityGraph(data, svg, user, articles, submit) {
         0.1111111111111111,
         0.125,
         0.125,
-        0.25
+        0.25,
       ],
       [
         0.6,
@@ -6236,7 +5977,7 @@ export default function userSimilarityGraph(data, svg, user, articles, submit) {
         0.125,
         0.14285714285714285,
         0.14285714285714285,
-        0.125
+        0.125,
       ],
       [
         0.6,
@@ -6262,7 +6003,7 @@ export default function userSimilarityGraph(data, svg, user, articles, submit) {
         0.125,
         0.14285714285714285,
         0.14285714285714285,
-        0.125
+        0.125,
       ],
       [
         0.6,
@@ -6288,7 +6029,7 @@ export default function userSimilarityGraph(data, svg, user, articles, submit) {
         0.125,
         0.14285714285714285,
         0.14285714285714285,
-        0.125
+        0.125,
       ],
       [
         0.6,
@@ -6314,7 +6055,7 @@ export default function userSimilarityGraph(data, svg, user, articles, submit) {
         0.125,
         0.14285714285714285,
         0.14285714285714285,
-        0.125
+        0.125,
       ],
       [
         0.6,
@@ -6340,7 +6081,7 @@ export default function userSimilarityGraph(data, svg, user, articles, submit) {
         0.125,
         0.14285714285714285,
         0.14285714285714285,
-        0.125
+        0.125,
       ],
       [
         0.6,
@@ -6366,7 +6107,7 @@ export default function userSimilarityGraph(data, svg, user, articles, submit) {
         0.125,
         0.14285714285714285,
         0.14285714285714285,
-        0.125
+        0.125,
       ],
       [
         0.6,
@@ -6392,7 +6133,7 @@ export default function userSimilarityGraph(data, svg, user, articles, submit) {
         0.125,
         0.14285714285714285,
         0.14285714285714285,
-        0.125
+        0.125,
       ],
       [
         0.08333333333333333,
@@ -6418,7 +6159,7 @@ export default function userSimilarityGraph(data, svg, user, articles, submit) {
         0.07692307692307693,
         0.18181818181818182,
         0.08333333333333333,
-        0.07692307692307693
+        0.07692307692307693,
       ],
       [
         0.125,
@@ -6444,7 +6185,7 @@ export default function userSimilarityGraph(data, svg, user, articles, submit) {
         0.25,
         0.125,
         0.125,
-        0.1111111111111111
+        0.1111111111111111,
       ],
       [
         0.14285714285714285,
@@ -6470,7 +6211,7 @@ export default function userSimilarityGraph(data, svg, user, articles, submit) {
         0.125,
         0.14285714285714285,
         0.14285714285714285,
-        0.125
+        0.125,
       ],
       [
         0.14285714285714285,
@@ -6496,7 +6237,7 @@ export default function userSimilarityGraph(data, svg, user, articles, submit) {
         0.2857142857142857,
         0.14285714285714285,
         0.14285714285714285,
-        0.125
+        0.125,
       ],
       [
         0.125,
@@ -6522,7 +6263,7 @@ export default function userSimilarityGraph(data, svg, user, articles, submit) {
         0.1111111111111111,
         0.125,
         0.125,
-        0.1111111111111111
+        0.1111111111111111,
       ],
       [
         0.125,
@@ -6548,7 +6289,7 @@ export default function userSimilarityGraph(data, svg, user, articles, submit) {
         0.1111111111111111,
         0.125,
         0.125,
-        0.1111111111111111
+        0.1111111111111111,
       ],
       [
         0.1,
@@ -6574,7 +6315,7 @@ export default function userSimilarityGraph(data, svg, user, articles, submit) {
         0.3333333333333333,
         0.375,
         0.1,
-        0.09090909090909091
+        0.09090909090909091,
       ],
       [
         0.07692307692307693,
@@ -6600,7 +6341,7 @@ export default function userSimilarityGraph(data, svg, user, articles, submit) {
         0.25,
         0.2727272727272727,
         0.07692307692307693,
-        0.07142857142857142
+        0.07142857142857142,
       ],
       [
         0.125,
@@ -6626,7 +6367,7 @@ export default function userSimilarityGraph(data, svg, user, articles, submit) {
         1,
         0.5,
         0.125,
-        0.1111111111111111
+        0.1111111111111111,
       ],
       [
         0.14285714285714285,
@@ -6652,7 +6393,7 @@ export default function userSimilarityGraph(data, svg, user, articles, submit) {
         0.5,
         1,
         0.14285714285714285,
-        0.125
+        0.125,
       ],
       [
         0.14285714285714285,
@@ -6678,7 +6419,7 @@ export default function userSimilarityGraph(data, svg, user, articles, submit) {
         0.125,
         0.14285714285714285,
         1,
-        0.5
+        0.5,
       ],
       [
         0.125,
@@ -6704,18 +6445,18 @@ export default function userSimilarityGraph(data, svg, user, articles, submit) {
         0.1111111111111111,
         0.125,
         0.5,
-        1
-      ]
+        1,
+      ],
     ];
     const mul = 1;
     for (let i = 0; i < mat[0].length; i += 1) {
       for (let j = 0; j < mat[0].length; j += 1) {
-        if (i < 12 && j < 12) mat[i][j] = {com: 1, value: Math.min(mat[i][j] * mul, 1)};
-        else if ((i >= 12 && i < 18) && (j >= 12 && j < 18)) mat[i][j] = {com: 2, value: Math.min(mat[i][j] * mul, 1)}
-        else if ((i >= 18 && i < 22) && (j >= 18 && j < 22)) mat[i][j] = {com: 3, value: Math.min(mat[i][j] * mul, 1)}
-        else if (i >= 22 && j >= 22) mat[i][j] = {com: 4, value: Math.min(mat[i][j] * mul, 1)}
+        if (i < 12 && j < 12) mat[i][j] = { com: 1, value: Math.min(mat[i][j] * mul, 1) };
+        else if ((i >= 12 && i < 18) && (j >= 12 && j < 18)) mat[i][j] = { com: 2, value: Math.min(mat[i][j] * mul, 1) };
+        else if ((i >= 18 && i < 22) && (j >= 18 && j < 22)) mat[i][j] = { com: 3, value: Math.min(mat[i][j] * mul, 1) };
+        else if (i >= 22 && j >= 22) mat[i][j] = { com: 4, value: Math.min(mat[i][j] * mul, 1) };
         else {
-          mat[i][j] = {com: 0, value: mat[i][j] / 2};
+          mat[i][j] = { com: 0, value: mat[i][j] / 2 };
         }
       }
     }
@@ -6725,7 +6466,7 @@ export default function userSimilarityGraph(data, svg, user, articles, submit) {
       }
     }
     console.log(mat);
-    
+
     // const randomMat = dp.testRandomMatrixReordering(mat);
     const remat = dp.testMatrixReordering(mat);
     // const remat_pre2 = dp.testMatrixReordering(remat_pre);
@@ -6733,2356 +6474,2356 @@ export default function userSimilarityGraph(data, svg, user, articles, submit) {
     const random = [
       [
         {
-          "com": 3,
-          "value": 1
+          com: 3,
+          value: 1,
         },
         {
-          "com": 3,
-          "value": 0.4166666666666667
+          com: 3,
+          value: 0.4166666666666667,
         },
         {
-          "com": 3,
-          "value": 0.3333333333333333
+          com: 3,
+          value: 0.3333333333333333,
         },
         {
-          "com": 0,
-          "value": 0.14285714285714285
+          com: 0,
+          value: 0.14285714285714285,
         },
         {
-          "com": 0,
-          "value": 0.2
+          com: 0,
+          value: 0.2,
         },
         {
-          "com": 3,
-          "value": 0.375
+          com: 3,
+          value: 0.375,
         },
         {
-          "com": 0,
-          "value": 0.2222222222222222
+          com: 0,
+          value: 0.2222222222222222,
         },
         {
-          "com": 0,
-          "value": 0.1
+          com: 0,
+          value: 0.1,
         },
         {
-          "com": 0,
-          "value": 0.1
+          com: 0,
+          value: 0.1,
         },
         {
-          "com": 0,
-          "value": 0.09090909090909091
+          com: 0,
+          value: 0.09090909090909091,
         },
         {
-          "com": 0,
-          "value": 0.09090909090909091
+          com: 0,
+          value: 0.09090909090909091,
         },
         {
-          "com": 0,
-          "value": 0.09090909090909091
+          com: 0,
+          value: 0.09090909090909091,
         },
         {
-          "com": 0,
-          "value": 0.1
+          com: 0,
+          value: 0.1,
         },
         {
-          "com": 0,
-          "value": 0.1
+          com: 0,
+          value: 0.1,
         },
         {
-          "com": 0,
-          "value": 0.08333333333333333
+          com: 0,
+          value: 0.08333333333333333,
         },
         {
-          "com": 0,
-          "value": 0.09090909090909091
+          com: 0,
+          value: 0.09090909090909091,
         },
         {
-          "com": 0,
-          "value": 0.09090909090909091
+          com: 0,
+          value: 0.09090909090909091,
         },
         {
-          "com": 0,
-          "value": 0.1
+          com: 0,
+          value: 0.1,
         },
         {
-          "com": 0,
-          "value": 0.1
+          com: 0,
+          value: 0.1,
         },
         {
-          "com": 0,
-          "value": 0.1
+          com: 0,
+          value: 0.1,
         },
         {
-          "com": 0,
-          "value": 0.1
+          com: 0,
+          value: 0.1,
         },
         {
-          "com": 0,
-          "value": 0.1
+          com: 0,
+          value: 0.1,
         },
         {
-          "com": 0,
-          "value": 0.1
+          com: 0,
+          value: 0.1,
         },
         {
-          "com": 0,
-          "value": 0.1
-        }
+          com: 0,
+          value: 0.1,
+        },
       ],
       [
         {
-          "com": 3,
-          "value": 0.4166666666666667
+          com: 3,
+          value: 0.4166666666666667,
         },
         {
-          "com": 3,
-          "value": 1
+          com: 3,
+          value: 1,
         },
         {
-          "com": 3,
-          "value": 0.25
+          com: 3,
+          value: 0.25,
         },
         {
-          "com": 0,
-          "value": 0.05555555555555555
+          com: 0,
+          value: 0.05555555555555555,
         },
         {
-          "com": 0,
-          "value": 0.07142857142857142
+          com: 0,
+          value: 0.07142857142857142,
         },
         {
-          "com": 3,
-          "value": 0.2727272727272727
+          com: 3,
+          value: 0.2727272727272727,
         },
         {
-          "com": 0,
-          "value": 0.16666666666666666
+          com: 0,
+          value: 0.16666666666666666,
         },
         {
-          "com": 0,
-          "value": 0.16666666666666666
+          com: 0,
+          value: 0.16666666666666666,
         },
         {
-          "com": 0,
-          "value": 0.07692307692307693
+          com: 0,
+          value: 0.07692307692307693,
         },
         {
-          "com": 0,
-          "value": 0.07142857142857142
+          com: 0,
+          value: 0.07142857142857142,
         },
         {
-          "com": 0,
-          "value": 0.07142857142857142
+          com: 0,
+          value: 0.07142857142857142,
         },
         {
-          "com": 0,
-          "value": 0.07142857142857142
+          com: 0,
+          value: 0.07142857142857142,
         },
         {
-          "com": 0,
-          "value": 0.07692307692307693
+          com: 0,
+          value: 0.07692307692307693,
         },
         {
-          "com": 0,
-          "value": 0.07692307692307693
+          com: 0,
+          value: 0.07692307692307693,
         },
         {
-          "com": 0,
-          "value": 0.06666666666666667
+          com: 0,
+          value: 0.06666666666666667,
         },
         {
-          "com": 0,
-          "value": 0.07142857142857142
+          com: 0,
+          value: 0.07142857142857142,
         },
         {
-          "com": 0,
-          "value": 0.07142857142857142
+          com: 0,
+          value: 0.07142857142857142,
         },
         {
-          "com": 0,
-          "value": 0.07692307692307693
+          com: 0,
+          value: 0.07692307692307693,
         },
         {
-          "com": 0,
-          "value": 0.07692307692307693
+          com: 0,
+          value: 0.07692307692307693,
         },
         {
-          "com": 0,
-          "value": 0.07692307692307693
+          com: 0,
+          value: 0.07692307692307693,
         },
         {
-          "com": 0,
-          "value": 0.07692307692307693
+          com: 0,
+          value: 0.07692307692307693,
         },
         {
-          "com": 0,
-          "value": 0.07692307692307693
+          com: 0,
+          value: 0.07692307692307693,
         },
         {
-          "com": 0,
-          "value": 0.07692307692307693
+          com: 0,
+          value: 0.07692307692307693,
         },
         {
-          "com": 0,
-          "value": 0.07692307692307693
-        }
+          com: 0,
+          value: 0.07692307692307693,
+        },
       ],
       [
         {
-          "com": 3,
-          "value": 0.3333333333333333
+          com: 3,
+          value: 0.3333333333333333,
         },
         {
-          "com": 3,
-          "value": 0.25
+          com: 3,
+          value: 0.25,
         },
         {
-          "com": 3,
-          "value": 1
+          com: 3,
+          value: 1,
         },
         {
-          "com": 0,
-          "value": 0.07692307692307693
+          com: 0,
+          value: 0.07692307692307693,
         },
         {
-          "com": 0,
-          "value": 0.25
+          com: 0,
+          value: 0.25,
         },
         {
-          "com": 3,
-          "value": 0.5
+          com: 3,
+          value: 0.5,
         },
         {
-          "com": 0,
-          "value": 0.125
+          com: 0,
+          value: 0.125,
         },
         {
-          "com": 0,
-          "value": 0.2857142857142857
+          com: 0,
+          value: 0.2857142857142857,
         },
         {
-          "com": 0,
-          "value": 0.125
+          com: 0,
+          value: 0.125,
         },
         {
-          "com": 0,
-          "value": 0.1111111111111111
+          com: 0,
+          value: 0.1111111111111111,
         },
         {
-          "com": 0,
-          "value": 0.1111111111111111
+          com: 0,
+          value: 0.1111111111111111,
         },
         {
-          "com": 0,
-          "value": 0.1111111111111111
+          com: 0,
+          value: 0.1111111111111111,
         },
         {
-          "com": 0,
-          "value": 0.125
+          com: 0,
+          value: 0.125,
         },
         {
-          "com": 0,
-          "value": 0.125
+          com: 0,
+          value: 0.125,
         },
         {
-          "com": 0,
-          "value": 0.1
+          com: 0,
+          value: 0.1,
         },
         {
-          "com": 0,
-          "value": 0.1111111111111111
+          com: 0,
+          value: 0.1111111111111111,
         },
         {
-          "com": 0,
-          "value": 0.1111111111111111
+          com: 0,
+          value: 0.1111111111111111,
         },
         {
-          "com": 0,
-          "value": 0.125
+          com: 0,
+          value: 0.125,
         },
         {
-          "com": 0,
-          "value": 0.125
+          com: 0,
+          value: 0.125,
         },
         {
-          "com": 0,
-          "value": 0.125
+          com: 0,
+          value: 0.125,
         },
         {
-          "com": 0,
-          "value": 0.125
+          com: 0,
+          value: 0.125,
         },
         {
-          "com": 0,
-          "value": 0.125
+          com: 0,
+          value: 0.125,
         },
         {
-          "com": 0,
-          "value": 0.125
+          com: 0,
+          value: 0.125,
         },
         {
-          "com": 0,
-          "value": 0.125
-        }
+          com: 0,
+          value: 0.125,
+        },
       ],
       [
         {
-          "com": 0,
-          "value": 0.14285714285714285
+          com: 0,
+          value: 0.14285714285714285,
         },
         {
-          "com": 0,
-          "value": 0.05555555555555555
+          com: 0,
+          value: 0.05555555555555555,
         },
         {
-          "com": 0,
-          "value": 0.07692307692307693
+          com: 0,
+          value: 0.07692307692307693,
         },
         {
-          "com": 2,
-          "value": 1
+          com: 2,
+          value: 1,
         },
         {
-          "com": 2,
-          "value": 0.4
+          com: 2,
+          value: 0.4,
         },
         {
-          "com": 0,
-          "value": 0.18181818181818182
+          com: 0,
+          value: 0.18181818181818182,
         },
         {
-          "com": 2,
-          "value": 0.3
+          com: 2,
+          value: 0.3,
         },
         {
-          "com": 2,
-          "value": 0.08333333333333333
+          com: 2,
+          value: 0.08333333333333333,
         },
         {
-          "com": 0,
-          "value": 0.08333333333333333
+          com: 0,
+          value: 0.08333333333333333,
         },
         {
-          "com": 2,
-          "value": 0.07692307692307693
+          com: 2,
+          value: 0.07692307692307693,
         },
         {
-          "com": 2,
-          "value": 0.07692307692307693
+          com: 2,
+          value: 0.07692307692307693,
         },
         {
-          "com": 0,
-          "value": 0.07692307692307693
+          com: 0,
+          value: 0.07692307692307693,
         },
         {
-          "com": 0,
-          "value": 0.08333333333333333
+          com: 0,
+          value: 0.08333333333333333,
         },
         {
-          "com": 0,
-          "value": 0.08333333333333333
+          com: 0,
+          value: 0.08333333333333333,
         },
         {
-          "com": 0,
-          "value": 0.07142857142857142
+          com: 0,
+          value: 0.07142857142857142,
         },
         {
-          "com": 0,
-          "value": 0.07692307692307693
+          com: 0,
+          value: 0.07692307692307693,
         },
         {
-          "com": 0,
-          "value": 0.07692307692307693
+          com: 0,
+          value: 0.07692307692307693,
         },
         {
-          "com": 0,
-          "value": 0.08333333333333333
+          com: 0,
+          value: 0.08333333333333333,
         },
         {
-          "com": 0,
-          "value": 0.08333333333333333
+          com: 0,
+          value: 0.08333333333333333,
         },
         {
-          "com": 0,
-          "value": 0.08333333333333333
+          com: 0,
+          value: 0.08333333333333333,
         },
         {
-          "com": 0,
-          "value": 0.08333333333333333
+          com: 0,
+          value: 0.08333333333333333,
         },
         {
-          "com": 0,
-          "value": 0.08333333333333333
+          com: 0,
+          value: 0.08333333333333333,
         },
         {
-          "com": 0,
-          "value": 0.08333333333333333
+          com: 0,
+          value: 0.08333333333333333,
         },
         {
-          "com": 0,
-          "value": 0.08333333333333333
-        }
+          com: 0,
+          value: 0.08333333333333333,
+        },
       ],
       [
         {
-          "com": 0,
-          "value": 0.2
+          com: 0,
+          value: 0.2,
         },
         {
-          "com": 0,
-          "value": 0.07142857142857142
+          com: 0,
+          value: 0.07142857142857142,
         },
         {
-          "com": 0,
-          "value": 0.25
+          com: 0,
+          value: 0.25,
         },
         {
-          "com": 2,
-          "value": 0.4
+          com: 2,
+          value: 0.4,
         },
         {
-          "com": 2,
-          "value": 1
+          com: 2,
+          value: 1,
         },
         {
-          "com": 0,
-          "value": 0.125
+          com: 0,
+          value: 0.125,
         },
         {
-          "com": 2,
-          "value": 0.2857142857142857
+          com: 2,
+          value: 0.2857142857142857,
         },
         {
-          "com": 2,
-          "value": 0.2857142857142857
+          com: 2,
+          value: 0.2857142857142857,
         },
         {
-          "com": 0,
-          "value": 0.125
+          com: 0,
+          value: 0.125,
         },
         {
-          "com": 2,
-          "value": 0.1111111111111111
+          com: 2,
+          value: 0.1111111111111111,
         },
         {
-          "com": 2,
-          "value": 0.1111111111111111
+          com: 2,
+          value: 0.1111111111111111,
         },
         {
-          "com": 0,
-          "value": 0.1111111111111111
+          com: 0,
+          value: 0.1111111111111111,
         },
         {
-          "com": 0,
-          "value": 0.125
+          com: 0,
+          value: 0.125,
         },
         {
-          "com": 0,
-          "value": 0.125
+          com: 0,
+          value: 0.125,
         },
         {
-          "com": 0,
-          "value": 0.1
+          com: 0,
+          value: 0.1,
         },
         {
-          "com": 0,
-          "value": 0.1111111111111111
+          com: 0,
+          value: 0.1111111111111111,
         },
         {
-          "com": 0,
-          "value": 0.1111111111111111
+          com: 0,
+          value: 0.1111111111111111,
         },
         {
-          "com": 0,
-          "value": 0.125
+          com: 0,
+          value: 0.125,
         },
         {
-          "com": 0,
-          "value": 0.125
+          com: 0,
+          value: 0.125,
         },
         {
-          "com": 0,
-          "value": 0.125
+          com: 0,
+          value: 0.125,
         },
         {
-          "com": 0,
-          "value": 0.125
+          com: 0,
+          value: 0.125,
         },
         {
-          "com": 0,
-          "value": 0.125
+          com: 0,
+          value: 0.125,
         },
         {
-          "com": 0,
-          "value": 0.125
+          com: 0,
+          value: 0.125,
         },
         {
-          "com": 0,
-          "value": 0.125
-        }
+          com: 0,
+          value: 0.125,
+        },
       ],
       [
         {
-          "com": 3,
-          "value": 0.375
+          com: 3,
+          value: 0.375,
         },
         {
-          "com": 3,
-          "value": 0.2727272727272727
+          com: 3,
+          value: 0.2727272727272727,
         },
         {
-          "com": 3,
-          "value": 0.5
+          com: 3,
+          value: 0.5,
         },
         {
-          "com": 0,
-          "value": 0.18181818181818182
+          com: 0,
+          value: 0.18181818181818182,
         },
         {
-          "com": 0,
-          "value": 0.125
+          com: 0,
+          value: 0.125,
         },
         {
-          "com": 3,
-          "value": 1
+          com: 3,
+          value: 1,
         },
         {
-          "com": 0,
-          "value": 0.14285714285714285
+          com: 0,
+          value: 0.14285714285714285,
         },
         {
-          "com": 0,
-          "value": 0.14285714285714285
+          com: 0,
+          value: 0.14285714285714285,
         },
         {
-          "com": 0,
-          "value": 0.14285714285714285
+          com: 0,
+          value: 0.14285714285714285,
         },
         {
-          "com": 0,
-          "value": 0.125
+          com: 0,
+          value: 0.125,
         },
         {
-          "com": 0,
-          "value": 0.125
+          com: 0,
+          value: 0.125,
         },
         {
-          "com": 0,
-          "value": 0.125
+          com: 0,
+          value: 0.125,
         },
         {
-          "com": 0,
-          "value": 0.14285714285714285
+          com: 0,
+          value: 0.14285714285714285,
         },
         {
-          "com": 0,
-          "value": 0.14285714285714285
+          com: 0,
+          value: 0.14285714285714285,
         },
         {
-          "com": 0,
-          "value": 0.1111111111111111
+          com: 0,
+          value: 0.1111111111111111,
         },
         {
-          "com": 0,
-          "value": 0.125
+          com: 0,
+          value: 0.125,
         },
         {
-          "com": 0,
-          "value": 0.125
+          com: 0,
+          value: 0.125,
         },
         {
-          "com": 0,
-          "value": 0.14285714285714285
+          com: 0,
+          value: 0.14285714285714285,
         },
         {
-          "com": 0,
-          "value": 0.14285714285714285
+          com: 0,
+          value: 0.14285714285714285,
         },
         {
-          "com": 0,
-          "value": 0.14285714285714285
+          com: 0,
+          value: 0.14285714285714285,
         },
         {
-          "com": 0,
-          "value": 0.14285714285714285
+          com: 0,
+          value: 0.14285714285714285,
         },
         {
-          "com": 0,
-          "value": 0.14285714285714285
+          com: 0,
+          value: 0.14285714285714285,
         },
         {
-          "com": 0,
-          "value": 0.14285714285714285
+          com: 0,
+          value: 0.14285714285714285,
         },
         {
-          "com": 0,
-          "value": 0.14285714285714285
-        }
+          com: 0,
+          value: 0.14285714285714285,
+        },
       ],
       [
         {
-          "com": 0,
-          "value": 0.2222222222222222
+          com: 0,
+          value: 0.2222222222222222,
         },
         {
-          "com": 0,
-          "value": 0.16666666666666666
+          com: 0,
+          value: 0.16666666666666666,
         },
         {
-          "com": 0,
-          "value": 0.125
+          com: 0,
+          value: 0.125,
         },
         {
-          "com": 2,
-          "value": 0.3
+          com: 2,
+          value: 0.3,
         },
         {
-          "com": 2,
-          "value": 0.2857142857142857
+          com: 2,
+          value: 0.2857142857142857,
         },
         {
-          "com": 0,
-          "value": 0.14285714285714285
+          com: 0,
+          value: 0.14285714285714285,
         },
         {
-          "com": 2,
-          "value": 1
+          com: 2,
+          value: 1,
         },
         {
-          "com": 2,
-          "value": 0.3333333333333333
+          com: 2,
+          value: 0.3333333333333333,
         },
         {
-          "com": 0,
-          "value": 0.14285714285714285
+          com: 0,
+          value: 0.14285714285714285,
         },
         {
-          "com": 2,
-          "value": 0.125
+          com: 2,
+          value: 0.125,
         },
         {
-          "com": 2,
-          "value": 0.125
+          com: 2,
+          value: 0.125,
         },
         {
-          "com": 0,
-          "value": 0.125
+          com: 0,
+          value: 0.125,
         },
         {
-          "com": 0,
-          "value": 0.14285714285714285
+          com: 0,
+          value: 0.14285714285714285,
         },
         {
-          "com": 0,
-          "value": 0.14285714285714285
+          com: 0,
+          value: 0.14285714285714285,
         },
         {
-          "com": 0,
-          "value": 0.1111111111111111
+          com: 0,
+          value: 0.1111111111111111,
         },
         {
-          "com": 0,
-          "value": 0.125
+          com: 0,
+          value: 0.125,
         },
         {
-          "com": 0,
-          "value": 0.125
+          com: 0,
+          value: 0.125,
         },
         {
-          "com": 0,
-          "value": 0.14285714285714285
+          com: 0,
+          value: 0.14285714285714285,
         },
         {
-          "com": 0,
-          "value": 0.14285714285714285
+          com: 0,
+          value: 0.14285714285714285,
         },
         {
-          "com": 0,
-          "value": 0.14285714285714285
+          com: 0,
+          value: 0.14285714285714285,
         },
         {
-          "com": 0,
-          "value": 0.14285714285714285
+          com: 0,
+          value: 0.14285714285714285,
         },
         {
-          "com": 0,
-          "value": 0.14285714285714285
+          com: 0,
+          value: 0.14285714285714285,
         },
         {
-          "com": 0,
-          "value": 0.14285714285714285
+          com: 0,
+          value: 0.14285714285714285,
         },
         {
-          "com": 0,
-          "value": 0.14285714285714285
-        }
+          com: 0,
+          value: 0.14285714285714285,
+        },
       ],
       [
         {
-          "com": 0,
-          "value": 0.1
+          com: 0,
+          value: 0.1,
         },
         {
-          "com": 0,
-          "value": 0.16666666666666666
+          com: 0,
+          value: 0.16666666666666666,
         },
         {
-          "com": 0,
-          "value": 0.2857142857142857
+          com: 0,
+          value: 0.2857142857142857,
         },
         {
-          "com": 2,
-          "value": 0.08333333333333333
+          com: 2,
+          value: 0.08333333333333333,
         },
         {
-          "com": 2,
-          "value": 0.2857142857142857
+          com: 2,
+          value: 0.2857142857142857,
         },
         {
-          "com": 0,
-          "value": 0.14285714285714285
+          com: 0,
+          value: 0.14285714285714285,
         },
         {
-          "com": 2,
-          "value": 0.3333333333333333
+          com: 2,
+          value: 0.3333333333333333,
         },
         {
-          "com": 2,
-          "value": 1
+          com: 2,
+          value: 1,
         },
         {
-          "com": 0,
-          "value": 0.14285714285714285
+          com: 0,
+          value: 0.14285714285714285,
         },
         {
-          "com": 2,
-          "value": 0.125
+          com: 2,
+          value: 0.125,
         },
         {
-          "com": 2,
-          "value": 0.125
+          com: 2,
+          value: 0.125,
         },
         {
-          "com": 0,
-          "value": 0.125
+          com: 0,
+          value: 0.125,
         },
         {
-          "com": 0,
-          "value": 0.14285714285714285
+          com: 0,
+          value: 0.14285714285714285,
         },
         {
-          "com": 0,
-          "value": 0.14285714285714285
+          com: 0,
+          value: 0.14285714285714285,
         },
         {
-          "com": 0,
-          "value": 0.1111111111111111
+          com: 0,
+          value: 0.1111111111111111,
         },
         {
-          "com": 0,
-          "value": 0.125
+          com: 0,
+          value: 0.125,
         },
         {
-          "com": 0,
-          "value": 0.125
+          com: 0,
+          value: 0.125,
         },
         {
-          "com": 0,
-          "value": 0.14285714285714285
+          com: 0,
+          value: 0.14285714285714285,
         },
         {
-          "com": 0,
-          "value": 0.14285714285714285
+          com: 0,
+          value: 0.14285714285714285,
         },
         {
-          "com": 0,
-          "value": 0.14285714285714285
+          com: 0,
+          value: 0.14285714285714285,
         },
         {
-          "com": 0,
-          "value": 0.14285714285714285
+          com: 0,
+          value: 0.14285714285714285,
         },
         {
-          "com": 0,
-          "value": 0.14285714285714285
+          com: 0,
+          value: 0.14285714285714285,
         },
         {
-          "com": 0,
-          "value": 0.14285714285714285
+          com: 0,
+          value: 0.14285714285714285,
         },
         {
-          "com": 0,
-          "value": 0.14285714285714285
-        }
+          com: 0,
+          value: 0.14285714285714285,
+        },
       ],
       [
         {
-          "com": 0,
-          "value": 0.1
+          com: 0,
+          value: 0.1,
         },
         {
-          "com": 0,
-          "value": 0.07692307692307693
+          com: 0,
+          value: 0.07692307692307693,
         },
         {
-          "com": 0,
-          "value": 0.125
+          com: 0,
+          value: 0.125,
         },
         {
-          "com": 0,
-          "value": 0.08333333333333333
+          com: 0,
+          value: 0.08333333333333333,
         },
         {
-          "com": 0,
-          "value": 0.125
+          com: 0,
+          value: 0.125,
         },
         {
-          "com": 0,
-          "value": 0.14285714285714285
+          com: 0,
+          value: 0.14285714285714285,
         },
         {
-          "com": 0,
-          "value": 0.14285714285714285
+          com: 0,
+          value: 0.14285714285714285,
         },
         {
-          "com": 0,
-          "value": 0.14285714285714285
+          com: 0,
+          value: 0.14285714285714285,
         },
         {
-          "com": 4,
-          "value": 1
+          com: 4,
+          value: 1,
         },
         {
-          "com": 0,
-          "value": 0.125
+          com: 0,
+          value: 0.125,
         },
         {
-          "com": 0,
-          "value": 0.125
+          com: 0,
+          value: 0.125,
         },
         {
-          "com": 4,
-          "value": 0.5
+          com: 4,
+          value: 0.5,
         },
         {
-          "com": 0,
-          "value": 0.14285714285714285
+          com: 0,
+          value: 0.14285714285714285,
         },
         {
-          "com": 0,
-          "value": 0.14285714285714285
+          com: 0,
+          value: 0.14285714285714285,
         },
         {
-          "com": 0,
-          "value": 0.1111111111111111
+          com: 0,
+          value: 0.1111111111111111,
         },
         {
-          "com": 0,
-          "value": 0.125
+          com: 0,
+          value: 0.125,
         },
         {
-          "com": 0,
-          "value": 0.125
+          com: 0,
+          value: 0.125,
         },
         {
-          "com": 0,
-          "value": 0.14285714285714285
+          com: 0,
+          value: 0.14285714285714285,
         },
         {
-          "com": 0,
-          "value": 0.14285714285714285
+          com: 0,
+          value: 0.14285714285714285,
         },
         {
-          "com": 0,
-          "value": 0.14285714285714285
+          com: 0,
+          value: 0.14285714285714285,
         },
         {
-          "com": 0,
-          "value": 0.14285714285714285
+          com: 0,
+          value: 0.14285714285714285,
         },
         {
-          "com": 0,
-          "value": 0.14285714285714285
+          com: 0,
+          value: 0.14285714285714285,
         },
         {
-          "com": 0,
-          "value": 0.14285714285714285
+          com: 0,
+          value: 0.14285714285714285,
         },
         {
-          "com": 0,
-          "value": 0.14285714285714285
-        }
+          com: 0,
+          value: 0.14285714285714285,
+        },
       ],
       [
         {
-          "com": 0,
-          "value": 0.09090909090909091
+          com: 0,
+          value: 0.09090909090909091,
         },
         {
-          "com": 0,
-          "value": 0.07142857142857142
+          com: 0,
+          value: 0.07142857142857142,
         },
         {
-          "com": 0,
-          "value": 0.1111111111111111
+          com: 0,
+          value: 0.1111111111111111,
         },
         {
-          "com": 2,
-          "value": 0.07692307692307693
+          com: 2,
+          value: 0.07692307692307693,
         },
         {
-          "com": 2,
-          "value": 0.1111111111111111
+          com: 2,
+          value: 0.1111111111111111,
         },
         {
-          "com": 0,
-          "value": 0.125
+          com: 0,
+          value: 0.125,
         },
         {
-          "com": 2,
-          "value": 0.125
+          com: 2,
+          value: 0.125,
         },
         {
-          "com": 2,
-          "value": 0.125
+          com: 2,
+          value: 0.125,
         },
         {
-          "com": 0,
-          "value": 0.125
+          com: 0,
+          value: 0.125,
         },
         {
-          "com": 2,
-          "value": 1
+          com: 2,
+          value: 1,
         },
         {
-          "com": 2,
-          "value": 0.1111111111111111
+          com: 2,
+          value: 0.1111111111111111,
         },
         {
-          "com": 0,
-          "value": 0.1111111111111111
+          com: 0,
+          value: 0.1111111111111111,
         },
         {
-          "com": 0,
-          "value": 0.125
+          com: 0,
+          value: 0.125,
         },
         {
-          "com": 0,
-          "value": 0.125
+          com: 0,
+          value: 0.125,
         },
         {
-          "com": 0,
-          "value": 0.1
+          com: 0,
+          value: 0.1,
         },
         {
-          "com": 0,
-          "value": 0.1111111111111111
+          com: 0,
+          value: 0.1111111111111111,
         },
         {
-          "com": 0,
-          "value": 0.1111111111111111
+          com: 0,
+          value: 0.1111111111111111,
         },
         {
-          "com": 0,
-          "value": 0.125
+          com: 0,
+          value: 0.125,
         },
         {
-          "com": 0,
-          "value": 0.125
+          com: 0,
+          value: 0.125,
         },
         {
-          "com": 0,
-          "value": 0.125
+          com: 0,
+          value: 0.125,
         },
         {
-          "com": 0,
-          "value": 0.125
+          com: 0,
+          value: 0.125,
         },
         {
-          "com": 0,
-          "value": 0.125
+          com: 0,
+          value: 0.125,
         },
         {
-          "com": 0,
-          "value": 0.125
+          com: 0,
+          value: 0.125,
         },
         {
-          "com": 0,
-          "value": 0.125
-        }
+          com: 0,
+          value: 0.125,
+        },
       ],
       [
         {
-          "com": 0,
-          "value": 0.09090909090909091
+          com: 0,
+          value: 0.09090909090909091,
         },
         {
-          "com": 0,
-          "value": 0.07142857142857142
+          com: 0,
+          value: 0.07142857142857142,
         },
         {
-          "com": 0,
-          "value": 0.1111111111111111
+          com: 0,
+          value: 0.1111111111111111,
         },
         {
-          "com": 2,
-          "value": 0.07692307692307693
+          com: 2,
+          value: 0.07692307692307693,
         },
         {
-          "com": 2,
-          "value": 0.1111111111111111
+          com: 2,
+          value: 0.1111111111111111,
         },
         {
-          "com": 0,
-          "value": 0.125
+          com: 0,
+          value: 0.125,
         },
         {
-          "com": 2,
-          "value": 0.125
+          com: 2,
+          value: 0.125,
         },
         {
-          "com": 2,
-          "value": 0.125
+          com: 2,
+          value: 0.125,
         },
         {
-          "com": 0,
-          "value": 0.125
+          com: 0,
+          value: 0.125,
         },
         {
-          "com": 2,
-          "value": 0.1111111111111111
+          com: 2,
+          value: 0.1111111111111111,
         },
         {
-          "com": 2,
-          "value": 1
+          com: 2,
+          value: 1,
         },
         {
-          "com": 0,
-          "value": 0.1111111111111111
+          com: 0,
+          value: 0.1111111111111111,
         },
         {
-          "com": 0,
-          "value": 0.125
+          com: 0,
+          value: 0.125,
         },
         {
-          "com": 0,
-          "value": 0.125
+          com: 0,
+          value: 0.125,
         },
         {
-          "com": 0,
-          "value": 0.1
+          com: 0,
+          value: 0.1,
         },
         {
-          "com": 0,
-          "value": 0.1111111111111111
+          com: 0,
+          value: 0.1111111111111111,
         },
         {
-          "com": 0,
-          "value": 0.1111111111111111
+          com: 0,
+          value: 0.1111111111111111,
         },
         {
-          "com": 0,
-          "value": 0.125
+          com: 0,
+          value: 0.125,
         },
         {
-          "com": 0,
-          "value": 0.125
+          com: 0,
+          value: 0.125,
         },
         {
-          "com": 0,
-          "value": 0.125
+          com: 0,
+          value: 0.125,
         },
         {
-          "com": 0,
-          "value": 0.125
+          com: 0,
+          value: 0.125,
         },
         {
-          "com": 0,
-          "value": 0.125
+          com: 0,
+          value: 0.125,
         },
         {
-          "com": 0,
-          "value": 0.125
+          com: 0,
+          value: 0.125,
         },
         {
-          "com": 0,
-          "value": 0.125
-        }
+          com: 0,
+          value: 0.125,
+        },
       ],
       [
         {
-          "com": 0,
-          "value": 0.09090909090909091
+          com: 0,
+          value: 0.09090909090909091,
         },
         {
-          "com": 0,
-          "value": 0.07142857142857142
+          com: 0,
+          value: 0.07142857142857142,
         },
         {
-          "com": 0,
-          "value": 0.1111111111111111
+          com: 0,
+          value: 0.1111111111111111,
         },
         {
-          "com": 0,
-          "value": 0.07692307692307693
+          com: 0,
+          value: 0.07692307692307693,
         },
         {
-          "com": 0,
-          "value": 0.1111111111111111
+          com: 0,
+          value: 0.1111111111111111,
         },
         {
-          "com": 0,
-          "value": 0.125
+          com: 0,
+          value: 0.125,
         },
         {
-          "com": 0,
-          "value": 0.125
+          com: 0,
+          value: 0.125,
         },
         {
-          "com": 0,
-          "value": 0.125
+          com: 0,
+          value: 0.125,
         },
         {
-          "com": 4,
-          "value": 0.5
+          com: 4,
+          value: 0.5,
         },
         {
-          "com": 0,
-          "value": 0.1111111111111111
+          com: 0,
+          value: 0.1111111111111111,
         },
         {
-          "com": 0,
-          "value": 0.1111111111111111
+          com: 0,
+          value: 0.1111111111111111,
         },
         {
-          "com": 4,
-          "value": 1
+          com: 4,
+          value: 1,
         },
         {
-          "com": 0,
-          "value": 0.125
+          com: 0,
+          value: 0.125,
         },
         {
-          "com": 0,
-          "value": 0.125
+          com: 0,
+          value: 0.125,
         },
         {
-          "com": 0,
-          "value": 0.2222222222222222
+          com: 0,
+          value: 0.2222222222222222,
         },
         {
-          "com": 0,
-          "value": 0.25
+          com: 0,
+          value: 0.25,
         },
         {
-          "com": 0,
-          "value": 0.25
+          com: 0,
+          value: 0.25,
         },
         {
-          "com": 0,
-          "value": 0.125
+          com: 0,
+          value: 0.125,
         },
         {
-          "com": 0,
-          "value": 0.125
+          com: 0,
+          value: 0.125,
         },
         {
-          "com": 0,
-          "value": 0.125
+          com: 0,
+          value: 0.125,
         },
         {
-          "com": 0,
-          "value": 0.125
+          com: 0,
+          value: 0.125,
         },
         {
-          "com": 0,
-          "value": 0.125
+          com: 0,
+          value: 0.125,
         },
         {
-          "com": 0,
-          "value": 0.125
+          com: 0,
+          value: 0.125,
         },
         {
-          "com": 0,
-          "value": 0.125
-        }
+          com: 0,
+          value: 0.125,
+        },
       ],
       [
         {
-          "com": 0,
-          "value": 0.1
+          com: 0,
+          value: 0.1,
         },
         {
-          "com": 0,
-          "value": 0.07692307692307693
+          com: 0,
+          value: 0.07692307692307693,
         },
         {
-          "com": 0,
-          "value": 0.125
+          com: 0,
+          value: 0.125,
         },
         {
-          "com": 0,
-          "value": 0.08333333333333333
+          com: 0,
+          value: 0.08333333333333333,
         },
         {
-          "com": 0,
-          "value": 0.125
+          com: 0,
+          value: 0.125,
         },
         {
-          "com": 0,
-          "value": 0.14285714285714285
+          com: 0,
+          value: 0.14285714285714285,
         },
         {
-          "com": 0,
-          "value": 0.14285714285714285
+          com: 0,
+          value: 0.14285714285714285,
         },
         {
-          "com": 0,
-          "value": 0.14285714285714285
+          com: 0,
+          value: 0.14285714285714285,
         },
         {
-          "com": 0,
-          "value": 0.14285714285714285
+          com: 0,
+          value: 0.14285714285714285,
         },
         {
-          "com": 0,
-          "value": 0.125
+          com: 0,
+          value: 0.125,
         },
         {
-          "com": 0,
-          "value": 0.125
+          com: 0,
+          value: 0.125,
         },
         {
-          "com": 0,
-          "value": 0.125
+          com: 0,
+          value: 0.125,
         },
         {
-          "com": 1,
-          "value": 1
+          com: 1,
+          value: 1,
         },
         {
-          "com": 1,
-          "value": 0.6
+          com: 1,
+          value: 0.6,
         },
         {
-          "com": 1,
-          "value": 0.42857142857142855
+          com: 1,
+          value: 0.42857142857142855,
         },
         {
-          "com": 1,
-          "value": 0.5
+          com: 1,
+          value: 0.5,
         },
         {
-          "com": 1,
-          "value": 0.5
+          com: 1,
+          value: 0.5,
         },
         {
-          "com": 1,
-          "value": 0.6
+          com: 1,
+          value: 0.6,
         },
         {
-          "com": 1,
-          "value": 0.6
+          com: 1,
+          value: 0.6,
         },
         {
-          "com": 1,
-          "value": 0.6
+          com: 1,
+          value: 0.6,
         },
         {
-          "com": 1,
-          "value": 0.6
+          com: 1,
+          value: 0.6,
         },
         {
-          "com": 1,
-          "value": 0.6
+          com: 1,
+          value: 0.6,
         },
         {
-          "com": 1,
-          "value": 0.6
+          com: 1,
+          value: 0.6,
         },
         {
-          "com": 1,
-          "value": 0.6
-        }
+          com: 1,
+          value: 0.6,
+        },
       ],
       [
         {
-          "com": 0,
-          "value": 0.1
+          com: 0,
+          value: 0.1,
         },
         {
-          "com": 0,
-          "value": 0.07692307692307693
+          com: 0,
+          value: 0.07692307692307693,
         },
         {
-          "com": 0,
-          "value": 0.125
+          com: 0,
+          value: 0.125,
         },
         {
-          "com": 0,
-          "value": 0.08333333333333333
+          com: 0,
+          value: 0.08333333333333333,
         },
         {
-          "com": 0,
-          "value": 0.125
+          com: 0,
+          value: 0.125,
         },
         {
-          "com": 0,
-          "value": 0.14285714285714285
+          com: 0,
+          value: 0.14285714285714285,
         },
         {
-          "com": 0,
-          "value": 0.14285714285714285
+          com: 0,
+          value: 0.14285714285714285,
         },
         {
-          "com": 0,
-          "value": 0.14285714285714285
+          com: 0,
+          value: 0.14285714285714285,
         },
         {
-          "com": 0,
-          "value": 0.14285714285714285
+          com: 0,
+          value: 0.14285714285714285,
         },
         {
-          "com": 0,
-          "value": 0.125
+          com: 0,
+          value: 0.125,
         },
         {
-          "com": 0,
-          "value": 0.125
+          com: 0,
+          value: 0.125,
         },
         {
-          "com": 0,
-          "value": 0.125
+          com: 0,
+          value: 0.125,
         },
         {
-          "com": 1,
-          "value": 0.6
+          com: 1,
+          value: 0.6,
         },
         {
-          "com": 1,
-          "value": 1
+          com: 1,
+          value: 1,
         },
         {
-          "com": 1,
-          "value": 0.42857142857142855
+          com: 1,
+          value: 0.42857142857142855,
         },
         {
-          "com": 1,
-          "value": 0.5
+          com: 1,
+          value: 0.5,
         },
         {
-          "com": 1,
-          "value": 0.5
+          com: 1,
+          value: 0.5,
         },
         {
-          "com": 1,
-          "value": 0.6
+          com: 1,
+          value: 0.6,
         },
         {
-          "com": 1,
-          "value": 0.6
+          com: 1,
+          value: 0.6,
         },
         {
-          "com": 1,
-          "value": 0.6
+          com: 1,
+          value: 0.6,
         },
         {
-          "com": 1,
-          "value": 0.6
+          com: 1,
+          value: 0.6,
         },
         {
-          "com": 1,
-          "value": 0.6
+          com: 1,
+          value: 0.6,
         },
         {
-          "com": 1,
-          "value": 0.6
+          com: 1,
+          value: 0.6,
         },
         {
-          "com": 1,
-          "value": 0.6
-        }
+          com: 1,
+          value: 0.6,
+        },
       ],
       [
         {
-          "com": 0,
-          "value": 0.08333333333333333
+          com: 0,
+          value: 0.08333333333333333,
         },
         {
-          "com": 0,
-          "value": 0.06666666666666667
+          com: 0,
+          value: 0.06666666666666667,
         },
         {
-          "com": 0,
-          "value": 0.1
+          com: 0,
+          value: 0.1,
         },
         {
-          "com": 0,
-          "value": 0.07142857142857142
+          com: 0,
+          value: 0.07142857142857142,
         },
         {
-          "com": 0,
-          "value": 0.1
+          com: 0,
+          value: 0.1,
         },
         {
-          "com": 0,
-          "value": 0.1111111111111111
+          com: 0,
+          value: 0.1111111111111111,
         },
         {
-          "com": 0,
-          "value": 0.1111111111111111
+          com: 0,
+          value: 0.1111111111111111,
         },
         {
-          "com": 0,
-          "value": 0.1111111111111111
+          com: 0,
+          value: 0.1111111111111111,
         },
         {
-          "com": 0,
-          "value": 0.1111111111111111
+          com: 0,
+          value: 0.1111111111111111,
         },
         {
-          "com": 0,
-          "value": 0.1
+          com: 0,
+          value: 0.1,
         },
         {
-          "com": 0,
-          "value": 0.1
+          com: 0,
+          value: 0.1,
         },
         {
-          "com": 0,
-          "value": 0.2222222222222222
+          com: 0,
+          value: 0.2222222222222222,
         },
         {
-          "com": 1,
-          "value": 0.42857142857142855
+          com: 1,
+          value: 0.42857142857142855,
         },
         {
-          "com": 1,
-          "value": 0.42857142857142855
+          com: 1,
+          value: 0.42857142857142855,
         },
         {
-          "com": 1,
-          "value": 1
+          com: 1,
+          value: 1,
         },
         {
-          "com": 1,
-          "value": 0.8333333333333334
+          com: 1,
+          value: 0.8333333333333334,
         },
         {
-          "com": 1,
-          "value": 0.8333333333333334
+          com: 1,
+          value: 0.8333333333333334,
         },
         {
-          "com": 1,
-          "value": 0.6666666666666666
+          com: 1,
+          value: 0.6666666666666666,
         },
         {
-          "com": 1,
-          "value": 0.6666666666666666
+          com: 1,
+          value: 0.6666666666666666,
         },
         {
-          "com": 1,
-          "value": 0.6666666666666666
+          com: 1,
+          value: 0.6666666666666666,
         },
         {
-          "com": 1,
-          "value": 0.6666666666666666
+          com: 1,
+          value: 0.6666666666666666,
         },
         {
-          "com": 1,
-          "value": 0.6666666666666666
+          com: 1,
+          value: 0.6666666666666666,
         },
         {
-          "com": 1,
-          "value": 0.6666666666666666
+          com: 1,
+          value: 0.6666666666666666,
         },
         {
-          "com": 1,
-          "value": 0.6666666666666666
-        }
+          com: 1,
+          value: 0.6666666666666666,
+        },
       ],
       [
         {
-          "com": 0,
-          "value": 0.09090909090909091
+          com: 0,
+          value: 0.09090909090909091,
         },
         {
-          "com": 0,
-          "value": 0.07142857142857142
+          com: 0,
+          value: 0.07142857142857142,
         },
         {
-          "com": 0,
-          "value": 0.1111111111111111
+          com: 0,
+          value: 0.1111111111111111,
         },
         {
-          "com": 0,
-          "value": 0.07692307692307693
+          com: 0,
+          value: 0.07692307692307693,
         },
         {
-          "com": 0,
-          "value": 0.1111111111111111
+          com: 0,
+          value: 0.1111111111111111,
         },
         {
-          "com": 0,
-          "value": 0.125
+          com: 0,
+          value: 0.125,
         },
         {
-          "com": 0,
-          "value": 0.125
+          com: 0,
+          value: 0.125,
         },
         {
-          "com": 0,
-          "value": 0.125
+          com: 0,
+          value: 0.125,
         },
         {
-          "com": 0,
-          "value": 0.125
+          com: 0,
+          value: 0.125,
         },
         {
-          "com": 0,
-          "value": 0.1111111111111111
+          com: 0,
+          value: 0.1111111111111111,
         },
         {
-          "com": 0,
-          "value": 0.1111111111111111
+          com: 0,
+          value: 0.1111111111111111,
         },
         {
-          "com": 0,
-          "value": 0.25
+          com: 0,
+          value: 0.25,
         },
         {
-          "com": 1,
-          "value": 0.5
+          com: 1,
+          value: 0.5,
         },
         {
-          "com": 1,
-          "value": 0.5
+          com: 1,
+          value: 0.5,
         },
         {
-          "com": 1,
-          "value": 0.8333333333333334
+          com: 1,
+          value: 0.8333333333333334,
         },
         {
-          "com": 1,
-          "value": 1
+          com: 1,
+          value: 1,
         },
         {
-          "com": 1,
-          "value": 1
+          com: 1,
+          value: 1,
         },
         {
-          "com": 1,
-          "value": 0.8
+          com: 1,
+          value: 0.8,
         },
         {
-          "com": 1,
-          "value": 0.8
+          com: 1,
+          value: 0.8,
         },
         {
-          "com": 1,
-          "value": 0.8
+          com: 1,
+          value: 0.8,
         },
         {
-          "com": 1,
-          "value": 0.8
+          com: 1,
+          value: 0.8,
         },
         {
-          "com": 1,
-          "value": 0.8
+          com: 1,
+          value: 0.8,
         },
         {
-          "com": 1,
-          "value": 0.8
+          com: 1,
+          value: 0.8,
         },
         {
-          "com": 1,
-          "value": 0.8
-        }
+          com: 1,
+          value: 0.8,
+        },
       ],
       [
         {
-          "com": 0,
-          "value": 0.09090909090909091
+          com: 0,
+          value: 0.09090909090909091,
         },
         {
-          "com": 0,
-          "value": 0.07142857142857142
+          com: 0,
+          value: 0.07142857142857142,
         },
         {
-          "com": 0,
-          "value": 0.1111111111111111
+          com: 0,
+          value: 0.1111111111111111,
         },
         {
-          "com": 0,
-          "value": 0.07692307692307693
+          com: 0,
+          value: 0.07692307692307693,
         },
         {
-          "com": 0,
-          "value": 0.1111111111111111
+          com: 0,
+          value: 0.1111111111111111,
         },
         {
-          "com": 0,
-          "value": 0.125
+          com: 0,
+          value: 0.125,
         },
         {
-          "com": 0,
-          "value": 0.125
+          com: 0,
+          value: 0.125,
         },
         {
-          "com": 0,
-          "value": 0.125
+          com: 0,
+          value: 0.125,
         },
         {
-          "com": 0,
-          "value": 0.125
+          com: 0,
+          value: 0.125,
         },
         {
-          "com": 0,
-          "value": 0.1111111111111111
+          com: 0,
+          value: 0.1111111111111111,
         },
         {
-          "com": 0,
-          "value": 0.1111111111111111
+          com: 0,
+          value: 0.1111111111111111,
         },
         {
-          "com": 0,
-          "value": 0.25
+          com: 0,
+          value: 0.25,
         },
         {
-          "com": 1,
-          "value": 0.5
+          com: 1,
+          value: 0.5,
         },
         {
-          "com": 1,
-          "value": 0.5
+          com: 1,
+          value: 0.5,
         },
         {
-          "com": 1,
-          "value": 0.8333333333333334
+          com: 1,
+          value: 0.8333333333333334,
         },
         {
-          "com": 1,
-          "value": 1
+          com: 1,
+          value: 1,
         },
         {
-          "com": 1,
-          "value": 1
+          com: 1,
+          value: 1,
         },
         {
-          "com": 1,
-          "value": 0.8
+          com: 1,
+          value: 0.8,
         },
         {
-          "com": 1,
-          "value": 0.8
+          com: 1,
+          value: 0.8,
         },
         {
-          "com": 1,
-          "value": 0.8
+          com: 1,
+          value: 0.8,
         },
         {
-          "com": 1,
-          "value": 0.8
+          com: 1,
+          value: 0.8,
         },
         {
-          "com": 1,
-          "value": 0.8
+          com: 1,
+          value: 0.8,
         },
         {
-          "com": 1,
-          "value": 0.8
+          com: 1,
+          value: 0.8,
         },
         {
-          "com": 1,
-          "value": 0.8
-        }
+          com: 1,
+          value: 0.8,
+        },
       ],
       [
         {
-          "com": 0,
-          "value": 0.1
+          com: 0,
+          value: 0.1,
         },
         {
-          "com": 0,
-          "value": 0.07692307692307693
+          com: 0,
+          value: 0.07692307692307693,
         },
         {
-          "com": 0,
-          "value": 0.125
+          com: 0,
+          value: 0.125,
         },
         {
-          "com": 0,
-          "value": 0.08333333333333333
+          com: 0,
+          value: 0.08333333333333333,
         },
         {
-          "com": 0,
-          "value": 0.125
+          com: 0,
+          value: 0.125,
         },
         {
-          "com": 0,
-          "value": 0.14285714285714285
+          com: 0,
+          value: 0.14285714285714285,
         },
         {
-          "com": 0,
-          "value": 0.14285714285714285
+          com: 0,
+          value: 0.14285714285714285,
         },
         {
-          "com": 0,
-          "value": 0.14285714285714285
+          com: 0,
+          value: 0.14285714285714285,
         },
         {
-          "com": 0,
-          "value": 0.14285714285714285
+          com: 0,
+          value: 0.14285714285714285,
         },
         {
-          "com": 0,
-          "value": 0.125
+          com: 0,
+          value: 0.125,
         },
         {
-          "com": 0,
-          "value": 0.125
+          com: 0,
+          value: 0.125,
         },
         {
-          "com": 0,
-          "value": 0.125
+          com: 0,
+          value: 0.125,
         },
         {
-          "com": 1,
-          "value": 0.6
+          com: 1,
+          value: 0.6,
         },
         {
-          "com": 1,
-          "value": 0.6
+          com: 1,
+          value: 0.6,
         },
         {
-          "com": 1,
-          "value": 0.6666666666666666
+          com: 1,
+          value: 0.6666666666666666,
         },
         {
-          "com": 1,
-          "value": 0.8
+          com: 1,
+          value: 0.8,
         },
         {
-          "com": 1,
-          "value": 0.8
+          com: 1,
+          value: 0.8,
         },
         {
-          "com": 1,
-          "value": 1
+          com: 1,
+          value: 1,
         },
         {
-          "com": 1,
-          "value": 1
+          com: 1,
+          value: 1,
         },
         {
-          "com": 1,
-          "value": 1
+          com: 1,
+          value: 1,
         },
         {
-          "com": 1,
-          "value": 1
+          com: 1,
+          value: 1,
         },
         {
-          "com": 1,
-          "value": 1
+          com: 1,
+          value: 1,
         },
         {
-          "com": 1,
-          "value": 1
+          com: 1,
+          value: 1,
         },
         {
-          "com": 1,
-          "value": 1
-        }
+          com: 1,
+          value: 1,
+        },
       ],
       [
         {
-          "com": 0,
-          "value": 0.1
+          com: 0,
+          value: 0.1,
         },
         {
-          "com": 0,
-          "value": 0.07692307692307693
+          com: 0,
+          value: 0.07692307692307693,
         },
         {
-          "com": 0,
-          "value": 0.125
+          com: 0,
+          value: 0.125,
         },
         {
-          "com": 0,
-          "value": 0.08333333333333333
+          com: 0,
+          value: 0.08333333333333333,
         },
         {
-          "com": 0,
-          "value": 0.125
+          com: 0,
+          value: 0.125,
         },
         {
-          "com": 0,
-          "value": 0.14285714285714285
+          com: 0,
+          value: 0.14285714285714285,
         },
         {
-          "com": 0,
-          "value": 0.14285714285714285
+          com: 0,
+          value: 0.14285714285714285,
         },
         {
-          "com": 0,
-          "value": 0.14285714285714285
+          com: 0,
+          value: 0.14285714285714285,
         },
         {
-          "com": 0,
-          "value": 0.14285714285714285
+          com: 0,
+          value: 0.14285714285714285,
         },
         {
-          "com": 0,
-          "value": 0.125
+          com: 0,
+          value: 0.125,
         },
         {
-          "com": 0,
-          "value": 0.125
+          com: 0,
+          value: 0.125,
         },
         {
-          "com": 0,
-          "value": 0.125
+          com: 0,
+          value: 0.125,
         },
         {
-          "com": 1,
-          "value": 0.6
+          com: 1,
+          value: 0.6,
         },
         {
-          "com": 1,
-          "value": 0.6
+          com: 1,
+          value: 0.6,
         },
         {
-          "com": 1,
-          "value": 0.6666666666666666
+          com: 1,
+          value: 0.6666666666666666,
         },
         {
-          "com": 1,
-          "value": 0.8
+          com: 1,
+          value: 0.8,
         },
         {
-          "com": 1,
-          "value": 0.8
+          com: 1,
+          value: 0.8,
         },
         {
-          "com": 1,
-          "value": 1
+          com: 1,
+          value: 1,
         },
         {
-          "com": 1,
-          "value": 1
+          com: 1,
+          value: 1,
         },
         {
-          "com": 1,
-          "value": 1
+          com: 1,
+          value: 1,
         },
         {
-          "com": 1,
-          "value": 1
+          com: 1,
+          value: 1,
         },
         {
-          "com": 1,
-          "value": 1
+          com: 1,
+          value: 1,
         },
         {
-          "com": 1,
-          "value": 1
+          com: 1,
+          value: 1,
         },
         {
-          "com": 1,
-          "value": 1
-        }
+          com: 1,
+          value: 1,
+        },
       ],
       [
         {
-          "com": 0,
-          "value": 0.1
+          com: 0,
+          value: 0.1,
         },
         {
-          "com": 0,
-          "value": 0.07692307692307693
+          com: 0,
+          value: 0.07692307692307693,
         },
         {
-          "com": 0,
-          "value": 0.125
+          com: 0,
+          value: 0.125,
         },
         {
-          "com": 0,
-          "value": 0.08333333333333333
+          com: 0,
+          value: 0.08333333333333333,
         },
         {
-          "com": 0,
-          "value": 0.125
+          com: 0,
+          value: 0.125,
         },
         {
-          "com": 0,
-          "value": 0.14285714285714285
+          com: 0,
+          value: 0.14285714285714285,
         },
         {
-          "com": 0,
-          "value": 0.14285714285714285
+          com: 0,
+          value: 0.14285714285714285,
         },
         {
-          "com": 0,
-          "value": 0.14285714285714285
+          com: 0,
+          value: 0.14285714285714285,
         },
         {
-          "com": 0,
-          "value": 0.14285714285714285
+          com: 0,
+          value: 0.14285714285714285,
         },
         {
-          "com": 0,
-          "value": 0.125
+          com: 0,
+          value: 0.125,
         },
         {
-          "com": 0,
-          "value": 0.125
+          com: 0,
+          value: 0.125,
         },
         {
-          "com": 0,
-          "value": 0.125
+          com: 0,
+          value: 0.125,
         },
         {
-          "com": 1,
-          "value": 0.6
+          com: 1,
+          value: 0.6,
         },
         {
-          "com": 1,
-          "value": 0.6
+          com: 1,
+          value: 0.6,
         },
         {
-          "com": 1,
-          "value": 0.6666666666666666
+          com: 1,
+          value: 0.6666666666666666,
         },
         {
-          "com": 1,
-          "value": 0.8
+          com: 1,
+          value: 0.8,
         },
         {
-          "com": 1,
-          "value": 0.8
+          com: 1,
+          value: 0.8,
         },
         {
-          "com": 1,
-          "value": 1
+          com: 1,
+          value: 1,
         },
         {
-          "com": 1,
-          "value": 1
+          com: 1,
+          value: 1,
         },
         {
-          "com": 1,
-          "value": 1
+          com: 1,
+          value: 1,
         },
         {
-          "com": 1,
-          "value": 1
+          com: 1,
+          value: 1,
         },
         {
-          "com": 1,
-          "value": 1
+          com: 1,
+          value: 1,
         },
         {
-          "com": 1,
-          "value": 1
+          com: 1,
+          value: 1,
         },
         {
-          "com": 1,
-          "value": 1
-        }
+          com: 1,
+          value: 1,
+        },
       ],
       [
         {
-          "com": 0,
-          "value": 0.1
+          com: 0,
+          value: 0.1,
         },
         {
-          "com": 0,
-          "value": 0.07692307692307693
+          com: 0,
+          value: 0.07692307692307693,
         },
         {
-          "com": 0,
-          "value": 0.125
+          com: 0,
+          value: 0.125,
         },
         {
-          "com": 0,
-          "value": 0.08333333333333333
+          com: 0,
+          value: 0.08333333333333333,
         },
         {
-          "com": 0,
-          "value": 0.125
+          com: 0,
+          value: 0.125,
         },
         {
-          "com": 0,
-          "value": 0.14285714285714285
+          com: 0,
+          value: 0.14285714285714285,
         },
         {
-          "com": 0,
-          "value": 0.14285714285714285
+          com: 0,
+          value: 0.14285714285714285,
         },
         {
-          "com": 0,
-          "value": 0.14285714285714285
+          com: 0,
+          value: 0.14285714285714285,
         },
         {
-          "com": 0,
-          "value": 0.14285714285714285
+          com: 0,
+          value: 0.14285714285714285,
         },
         {
-          "com": 0,
-          "value": 0.125
+          com: 0,
+          value: 0.125,
         },
         {
-          "com": 0,
-          "value": 0.125
+          com: 0,
+          value: 0.125,
         },
         {
-          "com": 0,
-          "value": 0.125
+          com: 0,
+          value: 0.125,
         },
         {
-          "com": 1,
-          "value": 0.6
+          com: 1,
+          value: 0.6,
         },
         {
-          "com": 1,
-          "value": 0.6
+          com: 1,
+          value: 0.6,
         },
         {
-          "com": 1,
-          "value": 0.6666666666666666
+          com: 1,
+          value: 0.6666666666666666,
         },
         {
-          "com": 1,
-          "value": 0.8
+          com: 1,
+          value: 0.8,
         },
         {
-          "com": 1,
-          "value": 0.8
+          com: 1,
+          value: 0.8,
         },
         {
-          "com": 1,
-          "value": 1
+          com: 1,
+          value: 1,
         },
         {
-          "com": 1,
-          "value": 1
+          com: 1,
+          value: 1,
         },
         {
-          "com": 1,
-          "value": 1
+          com: 1,
+          value: 1,
         },
         {
-          "com": 1,
-          "value": 1
+          com: 1,
+          value: 1,
         },
         {
-          "com": 1,
-          "value": 1
+          com: 1,
+          value: 1,
         },
         {
-          "com": 1,
-          "value": 1
+          com: 1,
+          value: 1,
         },
         {
-          "com": 1,
-          "value": 1
-        }
+          com: 1,
+          value: 1,
+        },
       ],
       [
         {
-          "com": 0,
-          "value": 0.1
+          com: 0,
+          value: 0.1,
         },
         {
-          "com": 0,
-          "value": 0.07692307692307693
+          com: 0,
+          value: 0.07692307692307693,
         },
         {
-          "com": 0,
-          "value": 0.125
+          com: 0,
+          value: 0.125,
         },
         {
-          "com": 0,
-          "value": 0.08333333333333333
+          com: 0,
+          value: 0.08333333333333333,
         },
         {
-          "com": 0,
-          "value": 0.125
+          com: 0,
+          value: 0.125,
         },
         {
-          "com": 0,
-          "value": 0.14285714285714285
+          com: 0,
+          value: 0.14285714285714285,
         },
         {
-          "com": 0,
-          "value": 0.14285714285714285
+          com: 0,
+          value: 0.14285714285714285,
         },
         {
-          "com": 0,
-          "value": 0.14285714285714285
+          com: 0,
+          value: 0.14285714285714285,
         },
         {
-          "com": 0,
-          "value": 0.14285714285714285
+          com: 0,
+          value: 0.14285714285714285,
         },
         {
-          "com": 0,
-          "value": 0.125
+          com: 0,
+          value: 0.125,
         },
         {
-          "com": 0,
-          "value": 0.125
+          com: 0,
+          value: 0.125,
         },
         {
-          "com": 0,
-          "value": 0.125
+          com: 0,
+          value: 0.125,
         },
         {
-          "com": 1,
-          "value": 0.6
+          com: 1,
+          value: 0.6,
         },
         {
-          "com": 1,
-          "value": 0.6
+          com: 1,
+          value: 0.6,
         },
         {
-          "com": 1,
-          "value": 0.6666666666666666
+          com: 1,
+          value: 0.6666666666666666,
         },
         {
-          "com": 1,
-          "value": 0.8
+          com: 1,
+          value: 0.8,
         },
         {
-          "com": 1,
-          "value": 0.8
+          com: 1,
+          value: 0.8,
         },
         {
-          "com": 1,
-          "value": 1
+          com: 1,
+          value: 1,
         },
         {
-          "com": 1,
-          "value": 1
+          com: 1,
+          value: 1,
         },
         {
-          "com": 1,
-          "value": 1
+          com: 1,
+          value: 1,
         },
         {
-          "com": 1,
-          "value": 1
+          com: 1,
+          value: 1,
         },
         {
-          "com": 1,
-          "value": 1
+          com: 1,
+          value: 1,
         },
         {
-          "com": 1,
-          "value": 1
+          com: 1,
+          value: 1,
         },
         {
-          "com": 1,
-          "value": 1
-        }
+          com: 1,
+          value: 1,
+        },
       ],
       [
         {
-          "com": 0,
-          "value": 0.1
+          com: 0,
+          value: 0.1,
         },
         {
-          "com": 0,
-          "value": 0.07692307692307693
+          com: 0,
+          value: 0.07692307692307693,
         },
         {
-          "com": 0,
-          "value": 0.125
+          com: 0,
+          value: 0.125,
         },
         {
-          "com": 0,
-          "value": 0.08333333333333333
+          com: 0,
+          value: 0.08333333333333333,
         },
         {
-          "com": 0,
-          "value": 0.125
+          com: 0,
+          value: 0.125,
         },
         {
-          "com": 0,
-          "value": 0.14285714285714285
+          com: 0,
+          value: 0.14285714285714285,
         },
         {
-          "com": 0,
-          "value": 0.14285714285714285
+          com: 0,
+          value: 0.14285714285714285,
         },
         {
-          "com": 0,
-          "value": 0.14285714285714285
+          com: 0,
+          value: 0.14285714285714285,
         },
         {
-          "com": 0,
-          "value": 0.14285714285714285
+          com: 0,
+          value: 0.14285714285714285,
         },
         {
-          "com": 0,
-          "value": 0.125
+          com: 0,
+          value: 0.125,
         },
         {
-          "com": 0,
-          "value": 0.125
+          com: 0,
+          value: 0.125,
         },
         {
-          "com": 0,
-          "value": 0.125
+          com: 0,
+          value: 0.125,
         },
         {
-          "com": 1,
-          "value": 0.6
+          com: 1,
+          value: 0.6,
         },
         {
-          "com": 1,
-          "value": 0.6
+          com: 1,
+          value: 0.6,
         },
         {
-          "com": 1,
-          "value": 0.6666666666666666
+          com: 1,
+          value: 0.6666666666666666,
         },
         {
-          "com": 1,
-          "value": 0.8
+          com: 1,
+          value: 0.8,
         },
         {
-          "com": 1,
-          "value": 0.8
+          com: 1,
+          value: 0.8,
         },
         {
-          "com": 1,
-          "value": 1
+          com: 1,
+          value: 1,
         },
         {
-          "com": 1,
-          "value": 1
+          com: 1,
+          value: 1,
         },
         {
-          "com": 1,
-          "value": 1
+          com: 1,
+          value: 1,
         },
         {
-          "com": 1,
-          "value": 1
+          com: 1,
+          value: 1,
         },
         {
-          "com": 1,
-          "value": 1
+          com: 1,
+          value: 1,
         },
         {
-          "com": 1,
-          "value": 1
+          com: 1,
+          value: 1,
         },
         {
-          "com": 1,
-          "value": 1
-        }
+          com: 1,
+          value: 1,
+        },
       ],
       [
         {
-          "com": 0,
-          "value": 0.1
+          com: 0,
+          value: 0.1,
         },
         {
-          "com": 0,
-          "value": 0.07692307692307693
+          com: 0,
+          value: 0.07692307692307693,
         },
         {
-          "com": 0,
-          "value": 0.125
+          com: 0,
+          value: 0.125,
         },
         {
-          "com": 0,
-          "value": 0.08333333333333333
+          com: 0,
+          value: 0.08333333333333333,
         },
         {
-          "com": 0,
-          "value": 0.125
+          com: 0,
+          value: 0.125,
         },
         {
-          "com": 0,
-          "value": 0.14285714285714285
+          com: 0,
+          value: 0.14285714285714285,
         },
         {
-          "com": 0,
-          "value": 0.14285714285714285
+          com: 0,
+          value: 0.14285714285714285,
         },
         {
-          "com": 0,
-          "value": 0.14285714285714285
+          com: 0,
+          value: 0.14285714285714285,
         },
         {
-          "com": 0,
-          "value": 0.14285714285714285
+          com: 0,
+          value: 0.14285714285714285,
         },
         {
-          "com": 0,
-          "value": 0.125
+          com: 0,
+          value: 0.125,
         },
         {
-          "com": 0,
-          "value": 0.125
+          com: 0,
+          value: 0.125,
         },
         {
-          "com": 0,
-          "value": 0.125
+          com: 0,
+          value: 0.125,
         },
         {
-          "com": 1,
-          "value": 0.6
+          com: 1,
+          value: 0.6,
         },
         {
-          "com": 1,
-          "value": 0.6
+          com: 1,
+          value: 0.6,
         },
         {
-          "com": 1,
-          "value": 0.6666666666666666
+          com: 1,
+          value: 0.6666666666666666,
         },
         {
-          "com": 1,
-          "value": 0.8
+          com: 1,
+          value: 0.8,
         },
         {
-          "com": 1,
-          "value": 0.8
+          com: 1,
+          value: 0.8,
         },
         {
-          "com": 1,
-          "value": 1
+          com: 1,
+          value: 1,
         },
         {
-          "com": 1,
-          "value": 1
+          com: 1,
+          value: 1,
         },
         {
-          "com": 1,
-          "value": 1
+          com: 1,
+          value: 1,
         },
         {
-          "com": 1,
-          "value": 1
+          com: 1,
+          value: 1,
         },
         {
-          "com": 1,
-          "value": 1
+          com: 1,
+          value: 1,
         },
         {
-          "com": 1,
-          "value": 1
+          com: 1,
+          value: 1,
         },
         {
-          "com": 1,
-          "value": 1
-        }
-      ]
+          com: 1,
+          value: 1,
+        },
+      ],
     ];
     const random2 = dp.testRandomMatrixReordering(random);
     const comMat = dp.testMatrixReorderingByCommunity(remat);
@@ -9098,4 +8839,4 @@ export default function userSimilarityGraph(data, svg, user, articles, submit) {
   }
 }
 
-export { userSimilarityGraph };
+export { userActivityView };
