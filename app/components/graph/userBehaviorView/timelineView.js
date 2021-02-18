@@ -505,7 +505,7 @@ export default function timelineView(data, user, svg, begin, end) {
   const pointerOffset = d3.scaleLinear().domain([0, userID.length]).range([0, -80]);
   const sortedArticles = data.sort((a, b) => new Date(a.date) - new Date(b.date))
     .filter(art => art.messages.some(mes => userID.includes(mes.push_userid)));
-  console.log(sortedArticles);
+  // console.log(sortedArticles);
   const curveOffset = d3.scaleLinear().domain([0, 610]).range([-30, -100]);
   for (let i = 0; i < sortedArticles.length; i += 1) {
     for (let j = i + 1; j < sortedArticles.length; j += 1) {
@@ -545,10 +545,6 @@ export default function timelineView(data, user, svg, begin, end) {
           ]))
           .attr('stroke', 'gray')
           .attr('stroke-width', '4px')
-          .attr('fill', () => {
-            console.log('repostlink');
-            return 'none';
-          })
           .on('mouseover', () => repostLinkMouseOver([sortedArticles[i].article_id, sortedArticles[j].article_id]))
           .on('mouseout', mouseout);
       }

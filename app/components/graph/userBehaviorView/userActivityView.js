@@ -18,9 +18,8 @@ import { cps } from 'redux-saga/effects';
 import { timelineView } from './timelineView';
 import * as dp from './dataprocess';
 
-export default function userActivityView(data, svg, user, articles, submit) {
+export default function userActivityView(beginDateOfQuery, endDateOfQuery, data, svg, user, articles, submit) {
   // console.log(user);
-  console.log(data);
   // doTest2();
   const svgScale = d3.scaleSqrt().domain([0, 200]).range([0.5, 0.1]);
   const commentTimelineSvg = d3.select('#context');
@@ -165,9 +164,10 @@ export default function userActivityView(data, svg, user, articles, submit) {
       .attr('name', 'since')
       .attr('id', 'userDate1')
       .each((d, index, nodes) => {
-        if (!d3.select(nodes[index]).property('value')) {
-          d3.select(nodes[index]).property('value', d3.select('#date1').attr('value'));
-        }
+        // if (!d3.select(nodes[index]).property('value')) {
+        //   d3.select(nodes[index]).property('value', d3.select('#date1').attr('value'));
+        // }
+        d3.select(nodes[index]).property('value', beginDateOfQuery);
       })
       .attr('placeholder', 'since');
 
@@ -182,9 +182,10 @@ export default function userActivityView(data, svg, user, articles, submit) {
       .attr('name', 'until')
       .attr('id', 'userDate2')
       .each((d, index, nodes) => {
-        if (!d3.select(nodes[index]).property('value')) {
-          d3.select(nodes[index]).property('value', d3.select('#date2').attr('value'));
-        }
+        // if (!d3.select(nodes[index]).property('value')) {
+        //   d3.select(nodes[index]).property('value', d3.select('#date2').attr('value'));
+        // }
+        d3.select(nodes[index]).property('value', endDateOfQuery);
       })
       .attr('placeholder', 'until');
 
@@ -311,10 +312,7 @@ export default function userActivityView(data, svg, user, articles, submit) {
 
   function adjacencyMatrixNoAuthor(similarity, simThresh, artThresh) {
     newUserAxisValues = [];
-    console.log(similarity, simThresh, artThresh);
     svg.selectAll('*').remove();
-    // d3.select('.position').remove();
-    // d3.select('.groupLegends').remove();
     svg.call(d3.zoom()
       .extent([[0, 0], [width, height]])
       .scaleExtent([0.1, 8])
@@ -326,9 +324,6 @@ export default function userActivityView(data, svg, user, articles, submit) {
       group.attr('transform', d3.event.transform);
     }
     // Article Similarity
-
-    // console.log(similarity);
-    // console.log(user);
     [datas, users, similaritys] = dp.filterAlwaysNonSimilarUser(data, user, similarity, simThresh, artThresh);
 
     console.log('[datas]:', [datas], '[users]:', [users], '[similaritys]:', [similaritys]);
@@ -359,47 +354,40 @@ export default function userActivityView(data, svg, user, articles, submit) {
     community.forEach((e) => {
       datas.find(e1 => e1.id === e.id).community = e.community;
     });
-    console.log(community);
+    // console.log(community);
     const communityWord = dp.computeCommunityTitleWordScore(datas);
-    console.log('communityWord: ', communityWord);
+    // console.log('communityWord: ', communityWord);
     if (communityWord.length) {
       const score = communityWord[0].wordList.reduce((acc, obj) => acc + obj.score, 0);
     }
     // similarity for articles grouping
     const [filteredArticles, articleSimilarity] = dp.computeArticleSimilarity(datas);
-    console.log('articleSimilarity: ', articleSimilarity);
+    // console.log('articleSimilarity: ', articleSimilarity);
     const articleIds = filteredArticles.map(e => e.article_id);
     const articlesCommunity = dp.jLouvainClustering(articleIds, articleSimilarity);
-    // const articlesCommunity = articleGroupByTag(articleIds, filteredArticles);
-    console.log('articlesCommunity', articlesCommunity);
+    // console.log('articlesCommunity', articlesCommunity);
 
     const [matrix, origMatrix] = dp.relationToMatrix(similaritys, users);
     const similarityScale = d3.scalePow().exponent(0.5).range([0, 100]);
-    // enlarge the difference between users
-    // for (let i = 0; i < users.length; i += 1) {
-    //   matrix[i] = matrix[i].map(e => similarityScale(e));
-    //   // matrix[i] = matrix[i].map(e => e * 100);
-    // }
-    console.log('[matrix]', [matrix]);
+    // console.log('[matrix]', [matrix]);
     const [permuted_mat, permuted_origMat] = dp.matrixReordering(
       matrix, origMatrix, newUserAxisValues, users, community,
     );
-    console.log('[permuted_mat], [permuted_origMat]: ', [permuted_mat], [permuted_origMat]);
+    // console.log('[permuted_mat], [permuted_origMat]: ', [permuted_mat], [permuted_origMat]);
 
     const [secondOrdering_mat, secondOrdering_origMat] = dp.matrixReorderingByCommunity(
       permuted_mat, permuted_origMat, community, newUserAxisValues, users,
     );
-    console.log(newUserAxisValues);
+    // console.log(newUserAxisValues);
     // find user group index
     const groupIndex = [];
     newUserAxisValues.forEach((e, index) => {
-      console.log(e);
       const tempCom = community.find(e1 => e1.id === e).community;
       const existedCommunity = groupIndex.find(e1 => e1.community === tempCom);
       if (existedCommunity) existedCommunity.num += 1;
       else groupIndex.push({ community: tempCom, num: 1, index });
     });
-    console.log('position Index of each user community:', groupIndex);
+    // console.log('position Index of each user community:', groupIndex);
 
     // const [secondOrdering_mat, secondOrdering_origMat] = [permuted_mat, permuted_origMat];
     // [secondOrdering_mat, secondOrdering_origMat] = moveNonSimilarUsersToCorner(
@@ -407,7 +395,7 @@ export default function userActivityView(data, svg, user, articles, submit) {
     // );
 
     // [secondOrdering_mat, secondOrdering_origMat] = dp.communityInnerMatrixReordering(secondOrdering_mat, secondOrdering_origMat, newUserAxisValues, users, groupIndex);
-    console.log('secondOrdering_mat, secondOrdering_origMat: ', secondOrdering_mat, secondOrdering_origMat);
+    // console.log('secondOrdering_mat, secondOrdering_origMat: ', secondOrdering_mat, secondOrdering_origMat);
 
     const gridSize = 20;
     d3.select('.position').attr('transform', `scale(1) translate(${2 * margin.left},${4 * margin.top})`);
@@ -439,16 +427,6 @@ export default function userActivityView(data, svg, user, articles, submit) {
         .html(`<p style="color: white;">Similarity between ${xUser} and ${yUser} is ${Math.round(d * 100) / 100}</p>`)
         .style('left', `${d3.event.pageX + 25}px`)
         .style('top', `${d3.event.pageY}px`);
-      d3.select(this)
-        .style('stroke', 'black')
-        .style('opacity', 1);
-    };
-    const authorGroupMouseover = (string) => {
-      Tooltip
-        .style('opacity', 1)
-        .html(string)
-        .style('left', `${d3.event.pageX + 25}px`)
-        .style('top', `${d3.event.pageY - 100}px`);
       d3.select(this)
         .style('stroke', 'black')
         .style('opacity', 1);
@@ -502,8 +480,8 @@ export default function userActivityView(data, svg, user, articles, submit) {
     };
 
     const tickClick = (d) => {
-      const beginDate = d3.select('#date1').attr('value');
-      const endDate = d3.select('#date2').attr('value');
+      const beginDate = beginDateOfQuery;
+      const endDate = endDateOfQuery;
       const repliedArticles = [];
       const us = datas.filter(_d => selectedUser.includes(_d.id));
       us.forEach((usr) => {
@@ -569,23 +547,8 @@ export default function userActivityView(data, svg, user, articles, submit) {
           .attr('fill', 'black');
       });
 
-    const artComWidth = 100 + Math.max(...articlesCommunity.map(e => e.community)) * (2 + 10);
-    // const articleGroup = group.append('g')
-    //   .attr('class', 'articleGroup')
-    //   .attr('transform', `scale(${svgScale(datas.length)}) translate(${newUserAxisValues.length * gridSize + artComWidth}, 100)`);
-
-    // drawHeatmap();
-    const totalReplied = datas.reduce((prev, current) => {
-      const preLen = prev.repliedArticle ? prev.repliedArticle.length : prev;
-      const curLen = current.repliedArticle ? current.repliedArticle.length : current;
-      return preLen + curLen;
-    });
-    // const bandWidthScale = d3.scaleSqrt().domain([0, totalReplied])
-    //   .range([0, maxSize]);
     const rectMargin = 20;
     const maxReplied = Math.max(...datas.map(usr => usr.repliedArticle.length));
-    const minReplied = Math.min(...datas.map(usr => usr.repliedArticle.length));
-    console.log('maxReplied', maxReplied);
     const maxSize = 80;
     const fixedSize = maxSize - 10;
     const bandWidthScale = d3.scaleSqrt().domain([0, maxReplied])
@@ -595,21 +558,7 @@ export default function userActivityView(data, svg, user, articles, submit) {
     const activityTranslateX = 120;
     const brushHeight = 20;
     drawNewHeatmap();
-    // drawCommunityWord();
-    // drawUserRepliedArticleMatrix(articlesOrderByCommunity);
     drawUserGroupBipartiteRelations();
-
-    // const removedUnusedDatas = JSON.parse(JSON.stringify(datas));
-    // removedUnusedDatas.forEach((e) => {
-    //   e.totalReplyCount = e.repliedArticle.length;
-    //   delete e.orig_group;
-    //   delete e.haveReplied;
-    //   delete e.reply;
-    //   delete e.repliedArticle;
-    //   delete e.titleWordScore;
-    //   // delete e.totalReplyCount;
-    // });
-    // console.log('dataForNodeLink:', { nodes: removedUnusedDatas, links: similaritys });
 
     function computePosition(userArr, scale) {
       const arr = [];
@@ -625,16 +574,16 @@ export default function userActivityView(data, svg, user, articles, submit) {
     }
 
     function drawNewHeatmap() {
-      const max = datas.reduce((prev, current) => {
-        const preLen = prev.repliedArticle ? prev.repliedArticle.length : prev;
-        const curLen = current.repliedArticle ? current.repliedArticle.length : current;
-        return (preLen > curLen) ? preLen : curLen;
-      });
-      const min = datas.reduce((prev, current) => {
-        const preLen = prev.repliedArticle ? prev.repliedArticle.length : prev;
-        const curLen = current.repliedArticle ? current.repliedArticle.length : current;
-        return (preLen < curLen) ? preLen : curLen;
-      });
+      // const max = datas.reduce((prev, current) => {
+      //   const preLen = prev.repliedArticle ? prev.repliedArticle.length : prev;
+      //   const curLen = current.repliedArticle ? current.repliedArticle.length : current;
+      //   return (preLen > curLen) ? preLen : curLen;
+      // });
+      // const min = datas.reduce((prev, current) => {
+      //   const preLen = prev.repliedArticle ? prev.repliedArticle.length : prev;
+      //   const curLen = current.repliedArticle ? current.repliedArticle.length : current;
+      //   return (preLen < curLen) ? preLen : curLen;
+      // });
       for (let i = 0; i < permuted_mat.length; i += 1) {
         const leftSvgGroup = leftSvg.append('g');
         leftSvgGroup.selectAll()
@@ -659,16 +608,13 @@ export default function userActivityView(data, svg, user, articles, submit) {
               // drawAuthorSimilarity(d, nodes, index, i, xUser, yUser, bothSize);
 
               // reply time
-              // drawReplyTime(nodes, index, i, xUser, yUser, bothReplied);
-              // drawNewReplyTime(nodes, index, i, xUser, yUser, bothReplied);
               drawNewReplyTimeWithQuantile(nodes, index, i, xUser, yUser, bothReplied);
             }
           });
         // user self path
         drawUserPath(leftSvgGroup, i);
       }
-      // draw user group heatmap
-      // drawAverageSimilarity();
+
       // brush & focus Users
       rangeSelectingUsers();
 
@@ -685,139 +631,9 @@ export default function userActivityView(data, svg, user, articles, submit) {
           .attr('width', maxSize)
           .attr('height', maxSize)
           .attr('fill', 'white')
-          .attr('stroke', () => {
-            const user1 = datas.find(e => e.id === newUserAxisValues[indX]);
-            const user2 = datas.find(e => e.id === newUserAxisValues[indY]);
-            // if (indY > indX) return leftMyColor(100);
-            // if (user1.community === user2.community) {
-            //   const communityColor = d3.scaleLinear()
-            //     .range(['white', color(user1.community)])
-            //     .domain([0, 1]);
-            //   return colorArray[user1.community](0.8);
-            // }
-            return colorArray[7](1);
-          })
-          // .attr('stroke', 'red')
+          .attr('stroke', colorArray[7](1))
           .attr('stroke-width', '2px')
           .attr('opacity', indY > indX ? 0 : 1);
-      }
-
-      function drawReplyTime(n, indX, indY, user1, user2, bothRepliedArticles) {
-        const xUserAvgRepliedTime = averageReplyTime(user1, bothRepliedArticles);
-        const yUserAvgRepliedTime = averageReplyTime(user2, bothRepliedArticles);
-        const threeHours = 60 * 60 * 3;
-        const thisTimeRectwidth = 5;
-        d3.select(n[indX])
-          .selectAll()
-          .data([xUserAvgRepliedTime, yUserAvgRepliedTime])
-          .enter()
-          .append('path')
-          .attr('d', (_d, _index) => {
-            const minutes = _d / 60;
-            const initX = ((indX % newUserAxisValues.length) + 1) * (maxSize + rectMargin) - ((4 - _index) * thisTimeRectwidth);
-            const initY = indY * (maxSize + rectMargin);
-            console.log(_d, minutes);
-            if (minutes < 30) {
-              const long = (_d / (30 * 60)) * maxSize;
-              console.log(long);
-              return `M ${initX} ${initY} 
-              L ${initX} ${initY + long}`;
-            }
-            if (minutes < (3 * 60)) {
-              const long = ((_d - (30 * 60)) / (3 * 60 * 60)) * maxSize;
-              console.log(long);
-
-              return `M ${initX} ${initY} 
-              L ${initX} ${initY + (_index * thisTimeRectwidth) + maxSize} 
-              L ${initX - long} ${initY + (_index * thisTimeRectwidth) + maxSize}`;
-            }
-            if (minutes < (6 * 60)) {
-              const long = ((_d - (3 * 60 * 60)) / (3 * 60 * 60)) * maxSize;
-              console.log(long);
-
-              return `M ${initX} ${initY} 
-              L ${initX} ${initY + (_index * thisTimeRectwidth) + maxSize} 
-              L ${initX - maxSize - 2 * (_index * thisTimeRectwidth)} ${initY + (_index * thisTimeRectwidth) + maxSize} 
-              L ${initX - maxSize - 2 * (_index * thisTimeRectwidth)} ${initY + maxSize - long - (_index * thisTimeRectwidth)}`;
-            }
-            const long = Math.min(maxSize, ((_d - (6 * 60 * 60)) / (18 * 60 * 60)) * maxSize);
-            console.log(long);
-            return `M ${initX} ${initY} 
-              L ${initX} ${initY + (_index * thisTimeRectwidth) + maxSize} 
-              L ${initX - maxSize - 2 * (_index * thisTimeRectwidth)} ${initY + (_index * thisTimeRectwidth) + maxSize} 
-              L ${initX - maxSize - 2 * (_index * thisTimeRectwidth)} ${initY - (_index * thisTimeRectwidth)} 
-              L ${initX - maxSize + long + (_index * thisTimeRectwidth)} ${initY - (_index * thisTimeRectwidth)}`;
-            // const size = datas.find(e => e.id === tempUser.id).repliedArticle.length;
-            // const offset = (bandWidthScale.range()[1] - bandWidthScale(size)) / 2;
-            // console.log(offset);
-            // const start = i * (maxSize + rectMargin) + offset;
-            // const end = start + bandWidthScale(size);
-            // return `M ${start} ${start} L ${end} ${start} L ${end} ${end}`;
-          })
-          .attr('fill', 'none')
-          .attr('stroke', (_d, _index) => (_index === 0 ? 'red' : 'blue'))
-          .attr('stroke-width', '5px')
-          .attr('opacity', indY >= indX ? 0 : 1);
-        // .append('rect')
-        // .attr('x', (_d, _index) => {
-        //   return ((index % newUserAxisValues.length) + 1) * (maxSize + rectMargin) - ((_index + 3) * thisTimeRectwidth);
-        // })
-        // .attr('y', () => {
-        //   return i * (maxSize + rectMargin);
-        // })
-        // .attr('width', 5)
-        // .attr('height', _d => Math.min((_d / threeHours) * 100, 100))
-        // .attr('fill', (_d, _index) => (_index === 0 ? 'red' : 'blue'))
-        // .attr('opacity', i >= index ? 0 : 1);
-      }
-
-      function drawNewReplyTime(n, indX, indY, user1, user2, bothRepliedArticles) {
-        const xUserAvgRepliedTime = averageReplyTime(user1, bothRepliedArticles);
-        const yUserAvgRepliedTime = averageReplyTime(user2, bothRepliedArticles);
-        const threeHours = 60 * 60 * 3;
-        const thisTimeRectwidth = 5;
-        d3.select(n[indX])
-          .append('circle')
-          .attr('r', 2.5)
-          .attr('cx', () => {
-            const initX = ((indX % newUserAxisValues.length) + 1) * (maxSize + rectMargin) - rectMargin;
-            return initX;
-          })
-          .attr('cy', () => {
-            const initY = indY * (maxSize + rectMargin);
-            return initY;
-          })
-          .attr('fill', 'black')
-          .attr('opacity', indY >= indX ? 0 : 1);
-        d3.select(n[indX])
-          .selectAll()
-          .data([xUserAvgRepliedTime, yUserAvgRepliedTime])
-          .enter()
-          .append('path')
-          .attr('d', (_d, _index) => {
-            const minutes = _d / 60;
-            const initX = ((indX % newUserAxisValues.length) + 1) * (maxSize + rectMargin) - rectMargin;
-            const initY = indY * (maxSize + rectMargin);
-            const long = Math.min(100, (minutes / (6 * 60)) * maxSize * 2);
-            if (long <= maxSize) {
-              return `M ${initX} ${initY} 
-              L ${initX - ((_index % 2) * long)} ${initY + (((_index + 1) % 2) * long)}`;
-            }
-            if (_index === 0) {
-              const fixedLong = long - maxSize;
-              return `M ${initX} ${initY} 
-                L ${initX} ${initY + maxSize} 
-                L ${initX - fixedLong} ${initY + maxSize}`;
-            }
-            const fixedLong = long - maxSize;
-            return `M ${initX} ${initY} 
-              L ${initX - maxSize} ${initY} 
-              L ${initX - maxSize} ${initY + fixedLong}`;
-          })
-          .attr('fill', 'none')
-          .attr('stroke', (_d, _index) => (_index === 0 ? 'black' : 'black'))
-          .attr('stroke-width', '5px')
-          .attr('opacity', indY >= indX ? 0 : 1);
       }
 
       function drawNewReplyTimeWithQuantile(n, indX, indY, user1, user2, bothRepliedArticles) {
@@ -829,19 +645,6 @@ export default function userActivityView(data, svg, user, articles, submit) {
         const threeHours = 60 * 60 * 3;
         const thisTimeRectwidth = 10;
         const thisTimeMaxLong = maxSize - 10;
-        // d3.select(n[indX])
-        //   .append('circle')
-        //   .attr('r', 2.5)
-        //   .attr('cx', () => {
-        //     const initX = ((indX % newUserAxisValues.length) + 1) * (maxSize + rectMargin) - rectMargin;
-        //     return initX;
-        //   })
-        //   .attr('cy', () => {
-        //     const initY = indY * (maxSize + rectMargin);
-        //     return initY;
-        //   })
-        //   .attr('fill', 'black')
-        //   .attr('opacity', indY >= indX ? 0 : 1);
         d3.select(n[indX])
           .selectAll()
           .data([xUserRepliedTime, yUserRepliedTime])
@@ -963,9 +766,7 @@ export default function userActivityView(data, svg, user, articles, submit) {
                   L ${initX - thisTimeMaxLong - thisTimeRectwidth} ${initY + (q2_long - thisTimeMaxLong)}
                   `;
               })
-              .attr('fill', (q, step) => {
-                // if (_index === 0) return colorArray[user1.community](0.6);
-                // return colorArray[user2.community](0.6);
+              .attr('fill', () => {
                 if (_index === 0) return colorArray[user1.community](secondOrdering_mat[indX][indY]);
                 return colorArray[user2.community](secondOrdering_mat[indX][indY]);
               })
@@ -982,16 +783,12 @@ export default function userActivityView(data, svg, user, articles, submit) {
             const yUserID = newUserAxisValues[indY];
             return `articleSimilarity ${xUserID} ${yUserID} y${indY} x${indX}`;
           })
-        // .attr('x', () => positionScale[indX])
-        // .attr('y', positionScale[i])
           .attr('x', (indX % newUserAxisValues.length) * (maxSize + rectMargin) + ((maxSize - fixedSize) / 2))
           .attr('y', indY * (maxSize + rectMargin) + ((maxSize - fixedSize) / 2))
           .attr('rx', () => {
             if (indY > indX) return 0;
             return Math.min(15, bandWidthScale(size) / 10);
           })
-          // .attr('width', () => bandWidthScale(size))
-          // .attr('height', () => bandWidthScale(size))
           .attr('width', fixedSize)
           .attr('height', fixedSize)
           .attr('fill', () => {
@@ -1017,69 +814,9 @@ export default function userActivityView(data, svg, user, articles, submit) {
           });
       }
 
-      function drawAuthorSimilarity(_d, n, indX, indY, user1, user2, size) {
-        const authorSim = dp.computeUserSimilarityByAuthors(user1, user2);
-        d3.select(n[indX])
-          .append('rect')
-          .attr('class', () => {
-            const xUserID = newUserAxisValues[indX];
-            const yUserID = newUserAxisValues[indY];
-            return `authorSimilarity ${xUserID} ${yUserID} y${indY} x${indX}`;
-          })
-        // .attr('x', () => {
-        //   const size = datas.find(e => e.id === xUser.id).repliedArticle.length;
-        //   return positionScale[index] + bandWidthScale(size) / 4;
-        // })
-        // .attr('y', () => {
-        //   const size = datas.find(e => e.id === yUser.id).repliedArticle.length;
-        //   return positionScale[i] + bandWidthScale(size) / 4;
-        // })
-          .attr('x', () => {
-            const offset = (bandWidthScale.range()[1] - (bandWidthScale(size) / 2)) / 2;
-            return (indX % newUserAxisValues.length) * (maxSize + rectMargin) + offset;
-          })
-          .attr('y', () => {
-            const offset = (bandWidthScale.range()[1] - (bandWidthScale(size) / 2)) / 2;
-            return indY * (maxSize + rectMargin) + offset;
-          })
-          .attr('rx', () => {
-            if (indY > indX) return 0;
-            return Math.min(15, bandWidthScale(size) / 10);
-          })
-          .attr('width', () => bandWidthScale(size) / 2)
-          .attr('height', () => bandWidthScale(size) / 2)
-          .style('fill', () => {
-            if (indY > indX) return leftMyColor(100);
-            // if (user1.community === user2.community) {
-            //   const communityColor = d3.scaleLinear()
-            //     .range(['white', color(user1.community)])
-            //     .domain([0, 1]);
-            //   // return communityColor(d);
-            //   return colorArray[user1.community](authorSim);
-            // }
-            // return leftMyColor(d);
-            return colorArray[7](authorSim);
-          })
-          .attr('opacity', indY >= indX ? 0 : 1)
-          .on('mouseover', () => mouseover(authorSim, indX, indY))
-          .on('mouseout', mouseout)
-          .on('click', () => {
-            selectedUser.splice(0, selectedUser.length);
-            selectedUser.push(newUserAxisValues[indY]);
-            selectedUser.push(newUserAxisValues[indX]);
-            rectClick(_d, indX, indY);
-          });
-      }
-
       function drawUserPath(selectedGroup, ind) {
         const tempUser = community.find(e => e.id === newUserAxisValues[ind]);
         selectedGroup.append('path')
-          // .attr('d', () => {
-          //   const start = positionScale[i];
-          //   const size = datas.find(e => e.id === tempUser.id).repliedArticle.length;
-          //   const end = positionScale[i] + bandWidthScale(size);
-          //   return `M ${start} ${start} L ${end} ${start} L ${end} ${end}`;
-          // })
           .attr('d', () => {
             const size = datas.find(e => e.id === tempUser.id).repliedArticle.length;
             const offset = (bandWidthScale.range()[1] - bandWidthScale(size)) / 2 + ((maxSize - fixedSize) / 2);
@@ -1087,7 +824,6 @@ export default function userActivityView(data, svg, user, articles, submit) {
             const end = start + bandWidthScale(size);
             return `M ${start} ${start} L ${end} ${start} L ${end} ${end} L ${start} ${end} L ${start} ${start}`;
           })
-          // .attr('fill', color(tempUser.community))
           .attr('fill', colorArray[tempUser.community](0.8))
           .on('click', () => {
             selectedUser.splice(0, selectedUser.length);
@@ -1113,7 +849,6 @@ export default function userActivityView(data, svg, user, articles, submit) {
 
         context.append('g')
           .attr('class', 'brush')
-        // .attr('transform', `translate(${positionScale[positionScale.length - 1] + 30}, 0)`)
           .attr('transform', `translate(0, ${maxSize * reverseScale})`)
           .call(brush)
           .call(brush.move, [0, 0])
@@ -1138,29 +873,15 @@ export default function userActivityView(data, svg, user, articles, submit) {
           const s = d3.event.selection;
           const focusUserIndex = [];
           selectedUser.splice(0, selectedUser.length);
-          console.log(s[0] / reverseScale, s[1] / reverseScale, (s[0] / reverseScale) / ((maxSize + rectMargin) * Math.sqrt(2)), (s[1] / reverseScale) / ((maxSize + rectMargin) * Math.sqrt(2)));
           const start = Math.round((s[0] / reverseScale) / ((maxSize + rectMargin) * Math.sqrt(2)));
           const end = Math.floor((s[1] / reverseScale) / ((maxSize + rectMargin) * Math.sqrt(2)));
           for (let i = start; i <= end; i += 1) {
-            // d3.selectAll(`circle.id_${d}`).attr('r', 10);
             d3.selectAll(`circle.id_${newUserAxisValues[i]}`).attr('r', 7.5);
             selectedUser.push(newUserAxisValues[i]);
           }
-          console.log(selectedUser);
-          // positionScale.forEach((e, index) => {
-          //   const tempPosition = (positionScale[index + 1] + positionScale[index]) / 2 * reverseScale * Math.sqrt(2);
-          //   if (tempPosition >= s[0] && tempPosition <= s[1]) {
-          //     selectedUser.push(newUserAxisValues[index]);
-          //     focusUserIndex.push(index);
-          //   }
-          // });
           // resize brush controller
-          // console.log(d3.select(this));
-          // console.log(d3.select('.brush').nodes()[0].__brush);
           const fixedX1 = start * (maxSize + rectMargin) * reverseScale * Math.sqrt(2);
           const fixedX2 = (end * (maxSize + rectMargin) + maxSize) * reverseScale * Math.sqrt(2);
-          // const fixedX1 = positionScale[focusUserIndex[0]] * reverseScale * Math.sqrt(2);
-          // const fixedX2 = positionScale[focusUserIndex[focusUserIndex.length - 1] + 1] * reverseScale * Math.sqrt(2) - 6;
 
           d3.select('.brush').nodes()[0].__brush.selection[0][0] = fixedX1;
           d3.select('.brush').nodes()[0].__brush.selection[1][0] = fixedX2;
@@ -1173,7 +894,6 @@ export default function userActivityView(data, svg, user, articles, submit) {
           context.select('.selection')
             .attr('x', fixedX1)
             .attr('width', fixedX2 - fixedX1);
-          // console.log(s);
           // setting all co-cluster rect stroke-width to 1
           // d3.select('.radialGroup').selectAll('rect')
           //   .attr('stroke', 'slategray')
@@ -1195,62 +915,6 @@ export default function userActivityView(data, svg, user, articles, submit) {
             .style('pointer-events', 'none');
           tickClick();
         }
-      }
-      // drawUserAxis();
-      function drawUserAxis() {
-        // y-axis
-        leftSvg.append('g')
-          .attr('class', 'yAxis')
-          .selectAll()
-          .data(newUserAxisValues)
-          .enter()
-          .append('g')
-          .append('text')
-          .text(d => d)
-          .attr('x', positionScale[positionScale.length - 1] + 30)
-          .attr('y', (d, index) => (positionScale[index + 1] + positionScale[index]) / 2)
-          .attr('fill', (d) => {
-            const index = community.findIndex(e => e.id === d);
-            return color(community[index].community);
-          })
-          .attr('dy', '0.2em')
-          .style('font-size', (d, index) => (positionScale[index + 1] - positionScale[index]) / 2)
-          .style('pointer-events', 'none')
-          // .on('mouseover', mouseover)
-          // .on('mouseout', mouseout)
-          .on('click', tickClick);
-
-        // x-axis
-        leftSvg.append('g')
-          .attr('class', 'xAxis')
-          .selectAll()
-          .data(newUserAxisValues)
-          .enter()
-          .append('g')
-          .append('text')
-          .text((d) => {
-            const usr = datas.find(e => e.id === d);
-            return `${d} ${usr.orig_group}`;
-          })
-          .attr('dy', '.2em')
-          .attr('transform', 'rotate(-90)')
-          .style('text-anchor', 'start')
-          .attr('x', 10)
-          .attr('y', (d, index) => {
-            const pos = positionScale.length - index - 2;
-            return (positionScale[index + 1] + positionScale[index]) / 2;
-          })
-          .attr('fill', (d) => {
-            const index = community.findIndex(e => e.id === d);
-            return color(community[index].community);
-          })
-          .style('font-size', (d, index) => (positionScale[index + 1] - positionScale[index]) / 2)
-          .style('pointer-events', 'none')
-          // .on('mouseover', mouseover)
-          // .on('mouseout', mouseout)
-          .on('click', tickClick);
-        // leftSvg.select('.xAxis')
-        //   .attr('transform', `translate(${positionScale[positionScale.length - 1]},-30)`);
       }
 
       function getBothRepliedArticle(usr1, usr2) {
@@ -1292,121 +956,6 @@ export default function userActivityView(data, svg, user, articles, submit) {
         arr.sort((a, b) => a - b);
         return arr;
       }
-
-      function drawAverageSimilarity() {
-        for (let i = 0; i < groupIndex.length; i += 1) {
-          const [similarityArray, selfAvgSimilarity] = computeAvgSim(i);
-          console.log(`community ${groupIndex[i].community} avgSim ${selfAvgSimilarity}`);
-          // self average similarity
-          drawSelfAvgSim(selfAvgSimilarity, i);
-          // self quantile similarity
-          drawQuantileSimilarity(similarityArray, i);
-          // average similarity between communities
-          drawAvgSimBetweenComs(i);
-        }
-
-        function computeAvgSim(i) {
-          let selfTotalSim = 0;
-          const simArr = [];
-          for (let j = groupIndex[i].index; j < groupIndex[i].index + groupIndex[i].num; j += 1) {
-            for (let k = groupIndex[i].index; k < groupIndex[i].index + groupIndex[i].num; k += 1) {
-              if (j !== k) {
-                selfTotalSim += secondOrdering_mat[j][k];
-                simArr.push(secondOrdering_mat[j][k]);
-              }
-            }
-          }
-          simArr.sort((a, b) => a - b);
-          const selfAvgSim = selfTotalSim / (groupIndex[i].num * groupIndex[i].num - groupIndex[i].num);
-          return [simArr, selfAvgSim];
-        }
-
-        function drawSelfAvgSim(selfAvgSim, i) {
-          leftSvg.append('g')
-            .attr('class', `avgSimilarityPath community${groupIndex[i].community}`)
-            .append('path')
-            .attr('fill', colorArray[groupIndex[i].community](selfAvgSim))
-            // .attr('fill', colorArray[colorArray.length - 1](selfAvgSim))
-            .attr('stroke', colorArray[groupIndex[i].community](1))
-            .attr('stroke-width', '5px')
-            .attr('d', () => {
-              const tempX = groupIndex[i].index;
-              const nextX = groupIndex[i].index + groupIndex[i].num;
-              const start = positionScale[tempX];
-              const end = positionScale[nextX];
-              return `M ${start} ${start} L ${end} ${start} L ${end} ${end}`;
-            })
-            .on('mouseover', (d, index, nodes) => {
-              d3.select(nodes[index]).attr('opacity', 0);
-            })
-            .on('mouseout', (d, index, nodes) => {
-              d3.select(nodes[index]).attr('opacity', 1);
-            });
-        }
-
-        function drawQuantileSimilarity(simArr, i) {
-          const quantile = [
-            d3.quantile(simArr, 0.75),
-            d3.quantile(simArr, 0.5),
-            d3.quantile(simArr, 0.25),
-          ];
-          console.log(quantile[2] - quantile[0]);
-          leftSvg.append('g')
-            .attr('class', `quantileSimilarityPath community${groupIndex[i].community}`)
-            .selectAll()
-            .data(quantile)
-            .enter()
-            .append('path')
-            .attr('fill', d => colorArray[groupIndex[i].community](d))
-            // .attr('stroke', colorArray[groupIndex[i].community](1))
-            // .attr('stroke-width', '5px')
-            .attr('d', (d, index) => {
-              const tempX = groupIndex[i].index;
-              const nextX = groupIndex[i].index + groupIndex[i].num;
-              const start = positionScale[tempX];
-              const end = positionScale[nextX];
-              return `
-                M ${start + (end - start) * index / 6} ${start + (end - start) * index / 6} 
-                L ${start + (end - start) * (6 - index) / 6} ${start + (end - start) * index / 6} 
-                L ${start + (end - start) * (6 - index) / 6} ${start + (end - start) * (6 - index) / 6}`;
-            })
-            .on('mouseover', (d, index, nodes) => {
-              d3.select(nodes[index]).attr('opacity', 0);
-            })
-            .on('mouseout', (d, index, nodes) => {
-              d3.select(nodes[index]).attr('opacity', 1);
-            });
-        }
-
-        function drawAvgSimBetweenComs(i) {
-          for (let j = i + 1; j < groupIndex.length; j += 1) {
-            let totalSim = 0;
-            for (let x = groupIndex[j - 1].index + groupIndex[j - 1].num; x < groupIndex[j].index + groupIndex[j].num; x += 1) {
-              for (let y = groupIndex[i].index; y < groupIndex[i].index + groupIndex[i].num; y += 1) {
-                totalSim += secondOrdering_mat[x][y];
-              }
-            }
-            const avgSim = totalSim / (groupIndex[i].num * groupIndex[j].num);
-            // console.log(totalSim);
-            leftSvg.append('g')
-              .attr('class', `avgSimilarityPath community${groupIndex[i].community}`)
-              .append('rect')
-              .attr('fill', colorArray[colorArray.length - 1](avgSim))
-              .attr('stroke', colorArray[colorArray.length - 1](1))
-              .attr('stroke-width', '1px')
-              .attr('x', positionScale[groupIndex[j].index])
-              .attr('y', positionScale[groupIndex[i].index])
-              .attr('width', positionScale[groupIndex[j].index + groupIndex[j].num] - positionScale[groupIndex[j].index])
-              .attr('height', positionScale[groupIndex[i].index + groupIndex[i].num] - positionScale[groupIndex[i].index])
-              .on('mouseover', (d, index, nodes) => {
-                d3.select(nodes[index]).attr('opacity', 0);
-              })
-              .on('mouseout', (d, index, nodes) => {
-                d3.select(nodes[index]).attr('opacity', 1);
-              });
-          }
-        }
-      }
     }
 
     function dateFormat(mes) {
@@ -1435,12 +984,12 @@ export default function userActivityView(data, svg, user, articles, submit) {
         if (tempCommunity.length) numOfArtOfEachComunity.push({ community: i, articles: tempCommunity });
       }
       numOfArtOfEachComunity.sort((a, b) => b.articles.length - a.articles.length);
-      console.log('numOfArtOfEachComunity', numOfArtOfEachComunity);
+      // console.log('numOfArtOfEachComunity', numOfArtOfEachComunity);
       const existedCommunityOfArticle = [];
       numOfArtOfEachComunity.forEach((e) => {
         existedCommunityOfArticle.push(e.community);
       });
-      console.log('existedCommunityOfArticle', existedCommunityOfArticle);
+      // console.log('existedCommunityOfArticle', existedCommunityOfArticle);
       const artComPie = d3.pie()
         .value(d => d.length)
         .sort(null);
@@ -1449,19 +998,6 @@ export default function userActivityView(data, svg, user, articles, submit) {
       const comunityIndexY = [];
       const temp = [];
 
-      // for (let i = 0; i < numOfUserCom; i += 1) {
-      //   comunityIndexY[i] = 0;
-      // }
-      // for (let i = 0; i < numOfUserCom; i += 1) {
-      //   let axisIndex = 0;
-      //   newUserAxisValues.every((e, index) => {
-      //     axisIndex = index;
-      //     return temp.some(e1 => e1 === community.find(e2 => e2.id === e).community);
-      //   });
-      //   const com = community.find(e => e.id === newUserAxisValues[axisIndex]).community;
-      //   temp.push(com);
-      //   comunityIndexY[com] = axisIndex;
-      // }
       for (let j = 0; j < newUserAxisValues.length; j += 1) {
         const com = datas.find(e => e.id === newUserAxisValues[j]).community;
         if (!temp.includes(com)) {
@@ -1469,17 +1005,6 @@ export default function userActivityView(data, svg, user, articles, submit) {
           comunityIndexY.push(j);
         }
       }
-
-      // for (let i = 0; i < numOfUserCom; i += 1) {
-      //   comunityIndexY.push(0);
-      // }
-      // for (let i = 0; i < newUserAxisValues.length; i += 1) {
-      //   const tempUser = datas.find(e => e.id === newUserAxisValues[i]);
-      //   if (!temp.includes(tempUser.community)) {
-      //     temp.push(tempUser.community);
-      //     comunityIndexY[tempUser.community] = i;
-      //   }
-      // }
 
       const articleGroupWidthScale = d3.scaleLinear().domain([0, filteredArticles.length]).range([0, 2000]);
       const articleGroupIndexArray = [];
@@ -1506,28 +1031,12 @@ export default function userActivityView(data, svg, user, articles, submit) {
         let numOfUser = 0;
         if (i === numOfUserCom - 1) numOfUser = newUserAxisValues.length - comunityIndexY[i];
         else numOfUser = comunityIndexY[i + 1] - comunityIndexY[i];
-        // for (let j = 0; j < numOfArtCom; j += 1) {
-        //   groupRadial.append('rect')
-        //     .attr('y', articleGroupYScale[j])
-        //     .attr('x', positionScale[comunityIndexY[i]] * Math.sqrt(2))
-        //     .attr('height', articleGroupWidthScale(numOfArtOfEachComunity[j].length))
-        //     .attr('width', () => {
-        //       const tem = comunityIndexY[i];
-        //       let nex = positionScale.length - 1;
-        //       if (comunityIndexY[i + 1]) nex = comunityIndexY[i + 1];
-        //       return (positionScale[nex] - positionScale[tem]) * Math.sqrt(2);
-        //     })
-        //     .attr('fill', 'white')
-        //     .attr('stroke', color(i))
-        //     .attr('stroke-width', '0.5px');
-        // }
         // draw bipartite graph visualization
         const arr = drawRelationRatio(i, numOfUser);
         articleGroupOfUserCommunity.push(arr);
       }
-      console.log('articleGroupOfUserCommunity: ', articleGroupOfUserCommunity);
+      // console.log('articleGroupOfUserCommunity: ', articleGroupOfUserCommunity);
       // draw bipartite co-cluster graph
-      // drawCoClusterGraph(articleGroupOfUserCommunity);
       drawNewCoClusterGraph(articleGroupOfUserCommunity);
 
       // draw article heatmap on the left side of the main heatMap
@@ -1861,7 +1370,6 @@ export default function userActivityView(data, svg, user, articles, submit) {
             .attr('x', -50)
             .attr('y', (d, index) => {
               const num = numOfArtOfEachComunity.find(e => e.community === d.community).articles.length;
-              console.log(scale(num) * (3 / 2) / 2);
               return d.position + scale(num) / 2;
             })
             .attr('dominant-baseline', 'central')
