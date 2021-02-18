@@ -8,44 +8,24 @@
 /* eslint-disable no-use-before-define */
 /* eslint-disable camelcase */
 /* eslint-disable no-param-reassign */
-import React, { Component, PureComponent } from 'react';
+import React, { Component } from 'react';
 // import PropTypes from 'prop-types';
 // import { connect } from 'react-redux';
 // import { push } from 'react-router-redux';
 import * as d3 from 'd3';
-// import * as sententree from 'sententree';
-// import { max } from 'moment';
-// import { Row, Form } from 'antd';
-import Chart from 'react-google-charts';
 // eslint-disable-next-line import/no-unresolved
-import netClustering from 'netclustering';
-import * as science from 'science';
-import * as Queue from 'tiny-queue';
-import * as reorder from 'reorder.js/index';
-import { string } from 'prop-types';
-import * as jsnx from 'jsnetworkx';
-// import { OpinionLeader } from './opinionLeaderView/OpinionLeader';
 import { AuthorTable } from './opinionLeaderView/authorTable';
 import UserBehavior from './userBehaviorView/uerBehavior';
 import { treemap } from './opinionLeaderView/opinionleaderTreemap';
 import { loading } from './loading';
-import { scaleLinear } from 'd3';
 // import request from 'request';
 
-const SetNumOfNodes = 200;
 class Graph extends Component {
   constructor(props) {
     super(props);
     this.myRef = React.createRef();
     this.state = {
       ...props,
-      draw: 1,
-      cellData: {},
-      beforeThisDate: '',
-      cellForceSimulation: '',
-      totalAuthorInfluence: '',
-      user: [],
-      hover: 0,
     };
   }
 
@@ -93,7 +73,6 @@ class Graph extends Component {
       return true;
     }
     if (thisUserData && nextUserData) {
-
       const thisBeginDate = JSON.stringify(thisUserData.beginDate);
       const nextBeginDate = JSON.stringify(nextUserData.beginDate);
       if (thisBeginDate !== nextBeginDate) {
@@ -134,16 +113,11 @@ class Graph extends Component {
             },
             initPage1: {
               pagename: pagename1,
-              // since: date1,
-              // until: date2,
               contentfilter: keyword3,
-              // authorfilter: author1,
             },
           },
         } = refData.opState;
 
-        // const beginDate = d3.select('#date1').attr('value');
-        // const endDate = d3.select('#date2').attr('value');
         // make url string for request data
         const strminvar1 = `min${varname1}=${minvar1}` || '';
         const strmaxvar1 = `max${varname1}=${maxvar1}` || '';
@@ -165,18 +139,7 @@ class Graph extends Component {
       const beginDate = type === 1 ? d3.select('#date1').attr('value') : d3.select('#userDate1').property('value');
       const endDate = type === 1 ? d3.select('#date2').attr('value') : d3.select('#userDate2').property('value');
       console.log(`beginDate: ${beginDate}, endDate: ${endDate}`);
-      const userNumsPerRequest = 50;
-      const { length } = e;
       const myRequest = [];
-      const userListArray = [];
-      const min = Math.min(e.length, userNumsPerRequest);
-      // split users into many pieces
-      // const fixedUserArr = [e.slice(0, min).map(usr => usr.id)];
-      // const url = [encodeURI(getReqstr(fixedUserArr[0]))];
-      // for (let i = 1; i < length / userNumsPerRequest; i += 1) {
-      //   fixedUserArr.push(e.slice(i * userNumsPerRequest, (i + 1) * userNumsPerRequest).map(usr => usr.id));
-      //   url.push(encodeURI(getReqstr(fixedUserArr[i])));
-      // }
       // split date into many pieces by one day
       const fixedUserArr = e.map(usr => usr.id || usr);
       const url = [];
@@ -239,12 +202,6 @@ class Graph extends Component {
               });
               const userIdArr = e.map(usr => usr.id);
               $this.setState({
-                word: ['a'],
-                draw: 0,
-                cellData: { children: 'abc' },
-                beforeThisDate,
-                cellForceSimulation,
-                totalAuthorInfluence,
                 userData: {
                   beginDate,
                   endDate,
@@ -253,7 +210,6 @@ class Graph extends Component {
                   articles: resArr.articles,
                   submit: handleSubmit,
                 },
-                mouseOverUser: 1,
               });
             }
             return response;
@@ -280,12 +236,6 @@ class Graph extends Component {
               usr.orig_group = e.find(u => u.id === usr.id).group;
             });
             $this.setState({
-              word: ['a'],
-              draw: 0,
-              cellData: { children: 'abc' },
-              beforeThisDate,
-              cellForceSimulation,
-              totalAuthorInfluence,
               userData: {
                 beginDate,
                 endDate,
@@ -294,7 +244,6 @@ class Graph extends Component {
                 articles: response.articles,
                 submit: handleSubmit,
               },
-              mouseOverUser: 1,
             });
           }
           return response;
@@ -314,31 +263,10 @@ class Graph extends Component {
     console.log('draw');
     console.log('this.props', this.props);
     const $this = this;
-    const { date } = this.props;
-    const startDate = new Date(date.$gte);
-    const beforeThisDate = startDate;
     const { set: propsSet } = this.props;
     const set = JSON.parse(JSON.stringify(propsSet));
-    // const authorSet = removeTermLayer(set);
     const authorSet = set;
-    // authorSet.children = authorSet.children.filter(e => e.id);
     const authorTable = d3.select('#authorList');
-    const totalAuthorInfluence = 0;
-    const cellForceSimulation = d3.forceSimulation()
-      .force('link', d3.forceLink().id((d) => {
-        if (d.group === 1) return d.titleTerm;
-
-        return d.articleId ? d.articleId : d.id;
-      }))
-      .force('charge', d3.forceManyBody().strength(-300))
-      .force('charge', d3.forceManyBody().distanceMax(1000))
-      .force('center', d3.forceCenter(0, 0))
-      .alphaTarget(1);
-    // cellForceSimulation.alphaTarget(0.3).restart();
-    // const h = parseFloat(d3.select('.termMap').style('height'));
-    // d3.select('.termMap').style('max-height', `${h}px`);
-    // const networkH = parseFloat(d3.select('.network').style('height'));
-    // d3.select('.network').style('max-height', `${networkH}px`);
     AuthorTable(authorSet, authorTable, this, (n, index) => {
       const articleCellSvg = d3.select('#graph');
       treemap(n, articleCellSvg, handleSubmit);

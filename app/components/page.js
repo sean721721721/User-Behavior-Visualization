@@ -47,12 +47,6 @@ class Page extends React.Component {
       handlePT,
     } = this.props;
     const actions = [
-      '客台',
-      '勞動之王',
-      '古斌',
-      '安唯綾',
-      '張靜之',
-      '黃騰浩',
       'Gossiping',
       'Soft_Job',
       'Tech_Job',
