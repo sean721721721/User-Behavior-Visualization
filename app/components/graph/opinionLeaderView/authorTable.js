@@ -13,7 +13,6 @@ import * as jsnx from 'jsnetworkx';
 import { loading } from '../loading';
 
 export default function AuthorTable(nodes, div, $this, callback) {
-  console.log(nodes);
   div.selectAll('*').remove();
   const h = parseFloat(d3.select('.authorList').style('height'));
   const authorList = JSON.parse(JSON.stringify(nodes));
@@ -22,7 +21,6 @@ export default function AuthorTable(nodes, div, $this, callback) {
   authorIdPreprocessing(authorList);
   const clickType = d3.select('input[name="pageRank"]').property('checked');
   if (clickType) leaderPageRank(authorList);
-  console.log(authorList);
   // computeSentimentMatrix(authorList);
   const articleCellSvg = d3.select('#graph');
   let authorIndex = 0;

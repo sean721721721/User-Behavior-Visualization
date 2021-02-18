@@ -24,11 +24,9 @@ import { articleSummaryView } from '../userBehaviorView/articleSummaryView';
 // import jieba from 'nodejieba';
 
 export default function treemap(cellNodes, svg, submit) {
-  console.log(submit);
   const margin = {
     top: 10, right: 10, bottom: 10, left: 10,
   };
-  console.log(cellNodes);
   const w = parseFloat(d3.select('.treemap').style('width'));
   const h = parseFloat(d3.select('.treemap').style('height'));
   const width = w - margin.left - margin.right;

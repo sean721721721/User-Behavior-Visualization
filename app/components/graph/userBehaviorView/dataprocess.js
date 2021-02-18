@@ -1,3 +1,5 @@
+/* eslint-disable no-console */
+/* eslint-disable no-use-before-define */
 /* eslint-disable no-unused-vars */
 /* eslint-disable max-len */
 import * as d3 from 'd3';
@@ -132,7 +134,7 @@ function computeArticleSimilarity(userArr) {
 }
 
 function jLouvainClustering(nodes, edges) {
-  if (!nodes) return;
+  if (!nodes) return false;
   const edgeData = edges.map((e) => {
     e.weight = e.value * 10;
     return e;
@@ -319,7 +321,6 @@ function matrixReordering(mat, origMat, userAxis, us, com) {
     userAxis[j] = tempUser[perm[j]];
   }
   tempUser = [...userAxis];
-  console.log(tempUser);
   // console.log(userAxis);
   let permutedMat = reorder.permute(mat, perm);
   permutedMat = reorder.transpose(permutedMat);
@@ -330,13 +331,12 @@ function matrixReordering(mat, origMat, userAxis, us, com) {
   originalMat = reorder.transpose(originalMat);
   originalMat = reorder.permute(originalMat, perm);
   originalMat = reorder.transpose(originalMat);
-  console.log(originalMat);
   for (let i = 0; i < originalMat.length; i += 1) {
     for (let j = 0; j < originalMat.length; j += 1) {
       const val = JSON.parse(JSON.stringify(originalMat[i][j]));
-      const i_com = com.find(e => e.id === userAxis[i]).community;
-      const j_com = com.find(e => e.id === userAxis[j]).community;
-      const matCom = i_com === j_com ? i_com + 1 : 0;
+      const iCom = com.find(e => e.id === userAxis[i]).community;
+      const jCom = com.find(e => e.id === userAxis[j]).community;
+      const matCom = iCom === jCom ? iCom + 1 : 0;
       originalMat[i][j] = { com: matCom, value: val };
     }
   }

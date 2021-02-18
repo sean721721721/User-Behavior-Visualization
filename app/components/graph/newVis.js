@@ -29,6 +29,7 @@ import { AuthorTable } from './opinionLeaderView/authorTable';
 import UserBehavior from './userBehaviorView/uerBehavior';
 import { treemap } from './opinionLeaderView/opinionleaderTreemap';
 import { loading } from './loading';
+import { scaleLinear } from 'd3';
 // import request from 'request';
 
 const SetNumOfNodes = 200;
@@ -53,44 +54,68 @@ class Graph extends Component {
     // console.log('vis_DidMount');
   }
 
-  componentWillReceiveProps(nextProps) {
-    const { word } = this.props;
-    // console.log(nextProps.word, word);
-    if (JSON.stringify(nextProps.word) !== JSON.stringify(word)) {
-      console.log('componentWillReceiveProps');
-      this.setState({ word: nextProps.word });
-    }
-  }
+  // componentWillReceiveProps(nextProps) {
+  //   const { word } = this.props;
+  //   // console.log(nextProps.word, word);
+  //   if (JSON.stringify(nextProps.word) !== JSON.stringify(word)) {
+  //     console.log('componentWillReceiveProps');
+  //     this.setState({ word: nextProps.word });
+  //   }
+  // }
 
   shouldComponentUpdate(nextProps, nextState) {
-    // console.log('tempState: ', this.state, 'nextState: ', nextState);
-    const { opState: thisOpState, ...thisWithoutOpState } = this.props;
-    const { opState: nextOpstate, ...nextWithoutOpState } = nextProps;
-    const { hover, word, mouseOverUser } = this.state;
-    // console.log('tempProps: ', this.props, 'nextProps: ', nextProps);
-    // console.log(thisWithoutOpState, nextWithoutOpState);
-    if (JSON.stringify(mouseOverUser) !== JSON.stringify(nextState.mouseOverUser)) {
-      console.log('vis update !');
-      // this.props = nextProps;
-      // this.drawwithlabels();
+    const { set: thisSet } = this.props;
+    const { set: nextSet } = nextProps;
+    const { userData: thisUserData } = this.state;
+    const { userData: nextUserData } = nextState;
+
+    if (!thisSet && !nextSet) {
+      console.log('No Update!');
+      return false;
+    }
+
+    if (!thisSet && nextSet) {
+      this.props = nextProps;
+      console.log('update');
+      this.drawwithlabels();
       return true;
     }
-    if (!hover) {
-      if (JSON.stringify(thisWithoutOpState) === JSON.stringify(nextWithoutOpState)) {
-        // console.log('shouldUpdate? No!!');
-        if (JSON.stringify(word) === JSON.stringify(nextState.word)) {
-          console.log('shouldUpdate? No!!');
-          return false;
-        }
+
+    if (thisSet.length !== nextSet.length || !thisSet.every((e, index) => e.id === nextSet[index].id)) {
+      this.props = nextProps;
+      console.log('Update');
+      this.drawwithlabels();
+      return true;
+    }
+
+    if (!thisUserData && nextUserData) {
+      console.log('Update');
+      return true;
+    }
+    if (thisUserData && nextUserData) {
+
+      const thisBeginDate = JSON.stringify(thisUserData.beginDate);
+      const nextBeginDate = JSON.stringify(nextUserData.beginDate);
+      if (thisBeginDate !== nextBeginDate) {
+        console.log('Update');
+        return true;
+      }
+
+      const thisEndDate = JSON.stringify(thisUserData.endDate);
+      const nextEndDate = JSON.stringify(nextUserData.endDate);
+      if (thisEndDate !== nextEndDate) {
+        console.log('Update');
+        return true;
+      }
+
+      if (JSON.stringify(thisUserData.fixedUserArr) !== JSON.stringify(nextUserData.fixedUserArr)) {
+        console.log('Update');
+        return true;
       }
     }
-    console.log('vis update !');
-    if (JSON.stringify(thisWithoutOpState)
-      !== JSON.stringify(nextWithoutOpState) || nextState.draw === 1) {
-      this.props = nextProps;
-      this.drawwithlabels();
-    }
-    return true;
+
+    console.log('No Update!');
+    return false;
   }
 
   drawwithlabels() {
@@ -139,10 +164,7 @@ class Graph extends Component {
       // e.preventDefault();
       const beginDate = type === 1 ? d3.select('#date1').attr('value') : d3.select('#userDate1').property('value');
       const endDate = type === 1 ? d3.select('#date2').attr('value') : d3.select('#userDate2').property('value');
-      console.log(type);
-      console.log(beginDate);
-      console.log(endDate);
-      console.log(e);
+      console.log(`beginDate: ${beginDate}, endDate: ${endDate}`);
       const userNumsPerRequest = 50;
       const { length } = e;
       const myRequest = [];
@@ -177,11 +199,11 @@ class Graph extends Component {
       const userSimilaritySvg = d3.select('#timeLine');
       loading(0, myRequest.length, userSimilaritySvg);
       const resArr = { articles: [], userListArray: [] };
+
       function recursiveFetch(req, index) {
         fetch(req[index])
           .then(response => response.json())
           .then((response) => {
-            console.log(response);
             // concat userlist because spliting user
             // resArr.userListArray = resArr.userListArray.concat(response.userListArray);
 
@@ -210,7 +232,6 @@ class Graph extends Component {
             resArr.articles.forEach((a) => {
               a.messages = a.messages.filter(mes => e.some(usr => usr.id === mes.push_userid));
             });
-            console.log(resArr);
             loading((index + 1), myRequest.length, userSimilaritySvg);
             if (myRequest.length === index + 1) {
               resArr.userListArray.forEach((usr) => {
@@ -225,6 +246,8 @@ class Graph extends Component {
                 cellForceSimulation,
                 totalAuthorInfluence,
                 userData: {
+                  beginDate,
+                  endDate,
                   userListArray: resArr.userListArray,
                   fixedUserArr: userIdArr,
                   articles: resArr.articles,
@@ -232,32 +255,30 @@ class Graph extends Component {
                 },
                 mouseOverUser: 1,
               });
-              console.log($this.state);
             }
             return response;
           })
           .then(() => {
-            console.log(req);
-            recursiveFetch(req, index + 1);
+            if (req.length > index + 1) recursiveFetch(req, index + 1);
+          })
+          .catch((err) => {
+            console.log(err);
           });
       }
       const i = 0;
       fetch(myRequest[0])
         .then(response => response.json())
         .then((response) => {
-          console.log(response);
           resArr.articles = response.articles;
           resArr.userListArray = response.userListArray;
           resArr.articles.forEach((a) => {
             a.messages = a.messages.filter(mes => e.some(usr => usr.id === mes.push_userid));
           });
-          console.log(resArr);
           loading((i + 1), myRequest.length, userSimilaritySvg);
           if (myRequest.length === i + 1) {
             response.userListArray.forEach((usr) => {
               usr.orig_group = e.find(u => u.id === usr.id).group;
             });
-            console.log(response);
             $this.setState({
               word: ['a'],
               draw: 0,
@@ -266,6 +287,8 @@ class Graph extends Component {
               cellForceSimulation,
               totalAuthorInfluence,
               userData: {
+                beginDate,
+                endDate,
                 userListArray: response.userListArray,
                 fixedUserArr,
                 articles: response.articles,
@@ -273,12 +296,11 @@ class Graph extends Component {
               },
               mouseOverUser: 1,
             });
-            console.log($this.state);
           }
           return response;
         })
         .then(() => {
-          recursiveFetch(myRequest, i + 1);
+          if (myRequest.length > i + 1) recursiveFetch(myRequest, i + 1);
         })
         .catch((err) => {
           userSimilaritySvg.append('text')
@@ -287,11 +309,10 @@ class Graph extends Component {
             .attr('y', 200)
             .attr('font-size', 20)
             .attr('fill', 'red');
-          console.log(err);
         });
     }
     console.log('draw');
-    console.log(this.props);
+    console.log('this.props', this.props);
     const $this = this;
     const { date } = this.props;
     const startDate = new Date(date.$gte);
@@ -327,7 +348,6 @@ class Graph extends Component {
   render() {
     console.log('render: ', this.state);
     const { userData } = this.state;
-    console.log(userData);
     const $this = this;
     return (
       <div className="graph" ref={this.myRef}>

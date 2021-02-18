@@ -12,11 +12,11 @@ class UserBehavior extends React.Component {
   componentDidUpdate() {
     const { data } = this.props;
     const userData = data || undefined;
-    console.log(data);
     if (userData) {
-      console.log(userData);
       const userSimilaritySvg = d3.select('#timeLine');
       userActivityView(
+        userData.beginDate,
+        userData.endDate,
         userData.userListArray,
         userSimilaritySvg,
         userData.fixedUserArr,
