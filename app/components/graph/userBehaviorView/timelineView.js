@@ -545,6 +545,7 @@ export default function timelineView(data, user, svg, begin, end) {
           ]))
           .attr('stroke', 'gray')
           .attr('stroke-width', '4px')
+          .attr('fill', 'none')
           .on('mouseover', () => repostLinkMouseOver([sortedArticles[i].article_id, sortedArticles[j].article_id]))
           .on('mouseout', mouseout);
       }
