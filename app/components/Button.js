@@ -4,10 +4,10 @@ import PropTypes from 'prop-types';
 
 type ButtonProps = {
   style: PropTypes.shape,
-  classname: PropTypes.string,
+  classname: string,
   action: PropTypes.func,
-  title: PropTypes.string,
-  type: PropTypes.string,
+  title: string,
+  type: string,
 };
 
 const Button = (props: ButtonProps) => {

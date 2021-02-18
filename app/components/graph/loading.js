@@ -6,6 +6,7 @@
 /* eslint-disable no-use-before-define */
 /* eslint-disable camelcase */
 /* eslint-disable no-param-reassign */
+// @flow
 import * as d3 from 'd3';
 
 export default function loading(temp, total, svg) {

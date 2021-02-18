@@ -108,6 +108,7 @@ class LoginTab extends React.Component {
   handleInput = (e) => {
     const { value } = e.target;
     const { name } = e.target;
+    console.log(e);
     this.setState(
       prevState => ({
         ...prevState,
