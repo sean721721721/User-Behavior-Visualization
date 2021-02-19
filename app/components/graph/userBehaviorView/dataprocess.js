@@ -95,7 +95,11 @@ function computeArticleSimilarity(userArr: Array<mixed>): Array<Array<mixed>> {
   return [articleArray, array];
 }
 
+<<<<<<< HEAD:app/components/graph/userBehaviorView/dataprocess.js
 function jLouvainClustering(nodes: Array<mixed>, edges: Array<mixed>): Array<mixed> | boolean {
+=======
+function jLouvainClustering(nodes, edges) {
+>>>>>>> f1124dfc5837f6624af29733433965003ea49d9d:app/components/graph/userBehaviorView/dataprocess.js
   if (!nodes) return false;
   const edgeData = edges.map((e) => {
     e.weight = e.value * 10;
