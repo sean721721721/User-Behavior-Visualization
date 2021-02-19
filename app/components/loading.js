@@ -4,9 +4,9 @@ import PropTypes from 'prop-types';
 import './style/loading.css';
 
 type LoadingProps = {
-  isLoading: PropTypes.bool,
-  responseError: PropTypes.bool,
-  errorType: PropTypes.string,
+  isLoading: boolean,
+  responseError: boolean,
+  errorType: string,
 };
 
 const Loading = (props: LoadingProps) => {

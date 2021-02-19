@@ -9,8 +9,8 @@
 // @flow
 import * as d3 from 'd3';
 
-export default function loading(temp, total, svg) {
-  // console.log(temp, total, svg);
+export default function loading(temp: number, total: number, svg) {
+  console.log(temp, total, svg);
   const h = parseFloat(d3.select('#timeLine').style('height'));
   const w = parseFloat(d3.select('#timeLine').style('width'));
   const color = d3.schemeTableau10;

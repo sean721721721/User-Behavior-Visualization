@@ -15,7 +15,6 @@ const Input = (props: InputProps) => {
   const {
     title, name, inputtype, value, placeholder, onChange,
   } = props;
-  console.log(props);
   return (
     <div className="form-group">
       <label htmlFor={name} className="form-label">

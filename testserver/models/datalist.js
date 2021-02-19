@@ -178,7 +178,7 @@ function newmuserlist(files, userobj) {
 
 let bindpostlist = function bindpostlist(qobj1, qobj2, ptt) {
     const time = process.hrtime();
-
+    console.log('bindpostlist inline');
     function postobj(obj) {
         for (prop in obj) {
             if (prop.match(/^(id)$/)) {
@@ -205,32 +205,16 @@ let bindpostlist = function bindpostlist(qobj1, qobj2, ptt) {
         let post = postobj(qobj1[i]);
         pagea.push(post);
     }
-    // pagea = pagea.filter(post => post.message_count.all > queryArticleFilter);
     list.push(pagea);
-    // console.log(444,list[0].length);
-    // let wordCount =0;
-    
-    // for (i = 0; i < list[0].length; i += 1){
-    //     if(list[0][i].content){
-    //         wordCount += list[0][i].content.length;
-    //         wordCount += list[0][i].article_title.length;
-    //     }
-    //     if(list[0][i].messages){
-    //         for (let j = 0; j < list[0][i].messages.length; j++) {
-    //             wordCount += list[0][i].messages[j].push_content.length;                
-    //         }
-    //     }
-    // }
-    // console.log(wordCount);
+    console.log('above cut');
     pagea = jb.cut(pagea, function () {
         for(i=0;i<pagea.length;i++){
-            // console.log(i, pagea[i].cuttedTitleWord);
             test[0][i] = pagea[i].word; 
             titleTest[0][i] = pagea[i].titleWord;
             titleWord.push(pagea[i].cuttedTitleWord);
-            // message_count[0][i] = pagea[i].message_count;
         }
     });
+    console.log('bottom cut');
     // for return single page query faster
     if (qobj1 !== qobj2) {
         for (let i = 0; i < l2; i++) {
@@ -296,12 +280,6 @@ let bindpostlist = function bindpostlist(qobj1, qobj2, ptt) {
             titleCount.push(titleUser(titleTest[i], list[i]));
         }
     }
-
-    //title term score
-    // for(i=0;i<titleTest.length;i++){ 
-    //     titleCount.push(titleScore(titleTest[i], list[0][i].message_count));
-    // }
-    // console.log(titleCount);
     console.log("postlen: " + (list[0].length + list[1].length));
     const diff = process.hrtime(time);
     console.log(`bindpostlist() Benchmark took ${diff[0] * NS_PER_SEC + diff[1]} nanoseconds`);

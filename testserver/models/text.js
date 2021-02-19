@@ -128,9 +128,8 @@ var cut = function cut(posts, callback) {
     //var test =[];
     var pattern = new RegExp("[`~!@#$^&*()=|{}':;',\\[\\].<>/?~！@#￥……&*（）&;|{}【】‘《》；：”“'。，、？ ↵「」]");
     var http = new RegExp(/http/);
-    // console.log(pattern);
-    var p = 0,
-        time = posts.length;
+    var p = 0;
+    var time = posts.length;
     // var termTable = [];
     // for(var i = 0;i < data.length;i++){
     //     if (data[i].content) {
@@ -149,11 +148,9 @@ var cut = function cut(posts, callback) {
 
     for (var i = 0; i < data.length; i++) {
         if (data[i].message) {
-
             var temp = data[i].message;
             var str = "";
             for (var j = 0; j < temp.length; j++) {
-
                 str += temp.substr(j, 1).replace(pattern, "");
             }
             //temp = temp.replace(/[\ |\~|\`|\!|\@|\#|\$|\%|\^|\&|\*|\(|\)|\-|\_|\+|\=|\||\\|\[|\]|\{|\}|\;|\:|\"|\'|\,|\<|\.|\>|\/|\?]/g,'');
@@ -180,8 +177,7 @@ var cut = function cut(posts, callback) {
 
             next();
 
-        } else if (data[i].content && data[i].article_title) {
-    
+        } else if (data[i].content && data[i].article_title) {     
             var tempWord = data[i].content;
             var tempTitle = data[i].article_title;
             var wordStr = "";
@@ -211,7 +207,6 @@ var cut = function cut(posts, callback) {
             post.cuttedWord = wordStr;
             post.cuttedTitleWord = cutTitleStr;
             result.push(post);
-
             next();
 
         } else {

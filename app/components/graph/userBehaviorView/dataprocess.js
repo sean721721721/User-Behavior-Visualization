@@ -35,7 +35,7 @@ function computeUserSimilarityByArticles(userAuthorRelationShipArr) {
   return userListArray;
 }
 
-function computeArticleSimilarity(userArr) {
+function computeArticleSimilarity(userArr: Array<mixed>): Array<Array<mixed>> {
   const articleArray = [];
   userArr.forEach((u) => {
     u.repliedArticle.forEach((a) => {
@@ -95,7 +95,7 @@ function computeArticleSimilarity(userArr) {
   return [articleArray, array];
 }
 
-function jLouvainClustering(nodes, edges) {
+function jLouvainClustering(nodes: Array<mixed>, edges: Array<mixed>): Array<mixed> | boolean {
   if (!nodes) return false;
   const edgeData = edges.map((e) => {
     e.weight = e.value * 10;

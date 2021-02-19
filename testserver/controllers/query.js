@@ -339,7 +339,7 @@ let callback = function callback(req, res) {
               console.log('q1 lenght: ' + res.result.length);
               // Remove article content
               res.result.forEach(function(result){
-                result.content = ' ';
+                result.content = '';
               })
               if (activity) {
                 const copyResult = JSON.parse(JSON.stringify(res.result));
@@ -363,6 +363,7 @@ let callback = function callback(req, res) {
                   // similarity,
                 };
               }
+              console.log('bindpostlist');
               let datalist = dl.bindpostlist(res.result, ptt);
               // let postlist = datalist[0];
               let wordlist = datalist[1];
