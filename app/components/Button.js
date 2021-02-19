@@ -5,7 +5,7 @@ import PropTypes from 'prop-types';
 type ButtonProps = {
   style: PropTypes.shape,
   classname: string,
-  action: PropTypes.func,
+  action: Function,
   title: string,
   type: string,
 };

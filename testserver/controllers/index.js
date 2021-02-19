@@ -1,5 +1,5 @@
 /* eslint-env node */
-
+// @flow
 const controller = function controller(app) {
   const files = ['main'];
   /*

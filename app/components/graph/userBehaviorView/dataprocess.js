@@ -9,7 +9,18 @@ import * as Queue from 'tiny-queue';
 import * as reorder from 'reorder.js/index';
 import jLouvain from '../jLouvain';
 
-function computeUserSimilarityByArticles(userAuthorRelationShipArr) {
+// type ArticleObjType = {
+//   article_id: string,
+//   article_title: string
+// };
+
+// type UserObjType = {
+//   id: string,
+//   community: number,
+//   repliedArticle: Array<ArticleObjType>
+// }
+
+function computeUserSimilarityByArticles(userAuthorRelationShipArr: Array<mixed>): Array<mixed> {
   const similarityScale = d3.scaleLinear().domain([0, 2]).range([1, 0]);
   const userListArray = [];
   for (let i = 0; i < userAuthorRelationShipArr.length - 1; i += 1) {
@@ -32,11 +43,12 @@ function computeUserSimilarityByArticles(userAuthorRelationShipArr) {
       });
     }
   }
+  
   return userListArray;
 }
 
-function computeArticleSimilarity(userArr: Array<mixed>): Array<Array<mixed>> {
-  const articleArray = [];
+function computeArticleSimilarity(userArr: Array<UserObj>): Array<Array<mixed>> {
+  const articleArray: Array<ArticleObj> = [];
   userArr.forEach((u) => {
     u.repliedArticle.forEach((a) => {
       const existedArticle = articleArray.find(e => e.article_id === a.article_id);
