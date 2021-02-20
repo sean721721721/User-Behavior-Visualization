@@ -9,18 +9,46 @@ import * as Queue from 'tiny-queue';
 import * as reorder from 'reorder.js/index';
 import jLouvain from '../jLouvain';
 
-// type ArticleObjType = {
-//   article_id: string,
-//   article_title: string
-// };
+type ArticleObjType = {
+  article_id: string,
+  article_title: string
+};
 
-// type UserObjType = {
-//   id: string,
-//   community: number,
-//   repliedArticle: Array<ArticleObjType>
-// }
+type UserObjType = {
+  id: string,
+  community: number,
+  repliedArticle: Array<ArticleObjType>
+};
 
-function computeUserSimilarityByArticles(userAuthorRelationShipArr: Array<mixed>): Array<mixed> {
+type SimilarityObjType = {
+  source: string,
+  target: string,
+  value: number,
+  weight?: number
+};
+
+type CommunityObjType = {
+  id: string,
+  community: number
+};
+
+type WordObjType = {
+  word: string,
+  score: number,
+  push: number,
+  boo: number,
+  neutral: number
+};
+
+type CommunityWordObjType = {
+  community: number,
+  wordList: Array<WordObjType>
+};
+
+declare type NestedArray<T> = Array<T | NestedArray<T>>;
+
+
+function computeUserSimilarityByArticles(userAuthorRelationShipArr: Array<UserObjType>): Array<SimilarityObjType> {
   const similarityScale = d3.scaleLinear().domain([0, 2]).range([1, 0]);
   const userListArray = [];
   for (let i = 0; i < userAuthorRelationShipArr.length - 1; i += 1) {
@@ -28,10 +56,10 @@ function computeUserSimilarityByArticles(userAuthorRelationShipArr: Array<mixed>
     for (let j = i + 1; j < userAuthorRelationShipArr.length; j += 1) {
       const next = userAuthorRelationShipArr[j].repliedArticle;
       const tempdiff = temp.filter(
-        o1 => next.filter(o2 => o2.article_id === o1.article_id).length === 0,
+        (o1: ArticleObjType): boolean => next.filter((o2: ArticleObjType): boolean => o2.article_id === o1.article_id).length === 0,
       );
       const nextdiff = next.filter(
-        o1 => temp.filter(o2 => o2.article_id === o1.article_id).length === 0,
+        (o1: ArticleObjType): boolean => temp.filter((o2: ArticleObjType): boolean => o2.article_id === o1.article_id).length === 0,
       );
       const intersectArticles = temp.length - tempdiff.length;
       const nextintersectArticles = next.length - nextdiff.length;
@@ -43,15 +71,14 @@ function computeUserSimilarityByArticles(userAuthorRelationShipArr: Array<mixed>
       });
     }
   }
-  
   return userListArray;
 }
 
-function computeArticleSimilarity(userArr: Array<UserObj>): Array<Array<mixed>> {
-  const articleArray: Array<ArticleObj> = [];
-  userArr.forEach((u) => {
-    u.repliedArticle.forEach((a) => {
-      const existedArticle = articleArray.find(e => e.article_id === a.article_id);
+function computeArticleSimilarity(userArr: Array<UserObjType>): Array<Array<ArticleObjType>, Array<SimilarityObjType>> {
+  const articleArray: Array<ArticleObjType> = [];
+  userArr.forEach((u: UserObjType) => {
+    u.repliedArticle.forEach((a: ArticleObjType) => {
+      const existedArticle = articleArray.find((e: ArticleObjType): boolean => e.article_id === a.article_id);
       if (!existedArticle) {
         articleArray.push({ ...a, userCommuniy: [u.community] });
       } else {
@@ -67,8 +94,8 @@ function computeArticleSimilarity(userArr: Array<UserObj>): Array<Array<mixed>> 
       const next = JSON.parse(JSON.stringify(articleArray[j]));
       const intersect = [];
       const union = [];
-      temp.userCommuniy.forEach((c) => {
-        const existed = next.userCommuniy.findIndex(e => e === c);
+      temp.userCommuniy.forEach((c: number) => {
+        const existed = next.userCommuniy.findIndex((e: number): boolean => e === c);
         union.push(c);
         if (existed >= 0) {
           intersect.push(c);
@@ -86,45 +113,27 @@ function computeArticleSimilarity(userArr: Array<UserObj>): Array<Array<mixed>> 
       }
     }
   }
-
-  // const array = [];
-  // for (let i = 0; i < articleArray.length; i += 1) {
-  //   const temp = articleArray[i];
-  //   for (let j = i + 1; j < articleArray.length; j += 1) {
-  //     const next = articleArray[j];
-  //     const intersect = temp.cuttedTitle.filter(c1 => next.cuttedTitle.some(c2 => c2.word === c1.word));
-  //     const sim = intersect.length / (temp.cuttedTitle.length + next.cuttedTitle.length - intersect.length);
-  //     if (sim) {
-  //       array.push({
-  //         source: temp.article_id,
-  //         target: next.article_id,
-  //         value: sim,
-  //       });
-  //     }
-  //   }
-  // }
-
   return [articleArray, array];
 }
 
-function jLouvainClustering(nodes: Array<mixed>, edges: Array<mixed>): Array<mixed> | boolean {
+function jLouvainClustering(nodes: Array<string>, edges: Array<SimilarityObjType>): Array<CommunityObjType> | boolean {
   if (!nodes) return false;
-  const edgeData = edges.map((e) => {
+  const edgeData = edges.map((e: SimilarityObjType): SimilarityObjType => {
     e.weight = e.value * 10;
     return e;
   });
 
-    // console.log('Input Node Data2', nodes);
-    // console.log('Input Edge Data2', edgeData);
+  // console.log('Input Node Data2', nodes);
+  // console.log('Input Edge Data2', edgeData);
 
   const nodeData3 = [];
   for (let i = 0; i < nodes.length; i += 1) {
     nodeData3.push(i);
   }
   let edgeData3 = [];
-  edgeData3 = edgeData.map((e) => {
-    const s = nodes.findIndex(d => d === e.source);
-    const t = nodes.findIndex(d => d === e.target);
+  edgeData3 = edges.map((e: SimilarityObjType): SimilarityObjType => {
+    const s = nodes.findIndex((d: string): boolean => d === e.source);
+    const t = nodes.findIndex((d: string): boolean => d === e.target);
     return { source: s, target: t, weight: e.weight };
   });
 
@@ -175,28 +184,28 @@ function jLouvainClustering(nodes: Array<mixed>, edges: Array<mixed>): Array<mix
   return final;
 }
 
-function filterAlwaysNonSimilarUser(ds, us, sims, simTh, artTh) {
-  let copyDs = ds.filter(e => e.repliedArticle.length > artTh);
-  const copyUsers = ds.map(e => e.id);
-  const isBelowThreshold = currentValue => currentValue.value < simTh;
-  let removeUnusedSims = sims.filter(e1 => copyUsers.includes(e1.source) && copyUsers.includes(e1.target));
-  copyUsers.forEach((e) => {
-    const filteredSimilarity = removeUnusedSims.filter(e1 => e1.source === e || e1.target === e);
+function filterAlwaysNonSimilarUser(ds: Array<UserObjType>, us: Array<string>, sims: Array<SimilarityObjType>, simTh: number, artTh: number): Array<Array<UserObjType>, Array<string>, Array<SimilarityObjType>> {
+  let copyDs = ds.filter((e: UserObjType): boolean => e.repliedArticle.length > artTh);
+  const copyUsers = ds.map((e: UserObjType): string => e.id);
+  const isBelowThreshold = (currentValue: number): boolean => currentValue.value < simTh;
+  let removeUnusedSims = sims.filter((e1: SimilarityObjType): boolean => copyUsers.includes(e1.source) && copyUsers.includes(e1.target));
+  copyUsers.forEach((e: string) => {
+    const filteredSimilarity = removeUnusedSims.filter((e1: SimilarityObjType): boolean => e1.source === e || e1.target === e);
     // console.log(e, filteredSimilarity);
-    if (filteredSimilarity.filter(e1 => e1.source !== e1.target).every(isBelowThreshold)) {
+    if (filteredSimilarity.filter((e1: SimilarityObjType): boolean => e1.source !== e1.target).every(isBelowThreshold)) {
     //   console.log('underthreshold');
-      removeUnusedSims = removeUnusedSims.filter(e1 => !(e1.source === e || e1.target === e));
-      copyDs = copyDs.filter(e1 => e1.id !== e);
-      copyDs = copyDs.filter(e1 => e1 !== e);
+      removeUnusedSims = removeUnusedSims.filter((e1: SimilarityObjType): boolean => !(e1.source === e || e1.target === e));
+      copyDs = copyDs.filter((e1: string): boolean => e1.id !== e);
+      copyDs = copyDs.filter((e1: string): boolean => e1 !== e);
     }
   });
   const filteredDs = copyDs;
-  const filteredUs = filteredDs.map(e => e.id);
-  const filteredSim = removeUnusedSims.filter(e => filteredDs.some(e1 => e1.id === e.source) && filteredDs.some(e1 => e1.id === e.target));
+  const filteredUs = filteredDs.map((e: UserObjType): string => e.id);
+  const filteredSim = removeUnusedSims.filter((e: SimilarityObjType): boolean => filteredDs.some((e1: UserObjType): boolean => e1.id === e.source) && filteredDs.some((e1: UserObjType): boolean => e1.id === e.target));
   return [filteredDs, filteredUs, filteredSim];
 }
 
-function computeCommunityTitleWordScore(userList) {
+function computeCommunityTitleWordScore(userList: Array<UserObjType>): Array<CommunityWordObjType> {
   if (!userList[0].titleWordScore) return [];
   const communityWordArr = [];
   const comNums = Math.max(...userList.map(e => e.community)) + 1;
@@ -212,7 +221,7 @@ function computeCommunityTitleWordScore(userList) {
     const usrTotalWordCount = filteredTitleWord.reduce((acc, obj) => acc + obj.score, 0);
     // user's replied articles
     const repliedArticles = usr.repliedArticle;
-    usr.titleWordScore.every((e, index) => {
+    usr.titleWordScore.every((e: {word: string, score: number}, index: number): boolean => {
       let push = 0;
       let boo = 0;
       let neutral = 0;
@@ -256,7 +265,7 @@ function computeCommunityTitleWordScore(userList) {
   return communityWordArr;
 }
 
-function relationToMatrix(sim, us) {
+function relationToMatrix(sim: SimilarityObjType, us: Array<string>): NestedArray<number> {
   const mat = [];
   const origMat = [];
   for (let i = 0; i < us.length; i += 1) {
@@ -277,7 +286,7 @@ function relationToMatrix(sim, us) {
   return [mat, origMat];
 }
 
-function matrixReordering(mat, origMat, userAxis, us, com) {
+function matrixReordering(mat: NestedArray<number>, origMat: NestedArray<number>, userAxis: Array<string>, us: Array<string>, com: CommunityObjType): NestedArray<number> {
   // console.log(mat, origMat, userAxis, users);
   for (let i = 0; i < us.length; i += 1) {
     userAxis.push(Array(us.length).fill(''));
@@ -317,7 +326,7 @@ function matrixReordering(mat, origMat, userAxis, us, com) {
   return [permutedMat, originalMat];
 }
 
-function testMatrixReordering(objmat) {
+function testMatrixReordering(objmat: NestedArray<number>): NestedArray<number> {
   const mat = [];
   for (let i = 0; i < objmat.length; i += 1) {
     mat.push([]);
@@ -336,7 +345,7 @@ function testMatrixReordering(objmat) {
   return permutedMat;
 }
 
-function testRandomMatrixReordering(mat) {
+function testRandomMatrixReordering(mat: NestedArray<number>): NestedArray<number> {
   const gra = reorder.mat2graph(mat);
   const perm = [];
   for (let i = 0; i < mat.length; i += 1) {
@@ -354,12 +363,12 @@ function testRandomMatrixReordering(mat) {
   permutedMat = reorder.permute(permutedMat, perm);
   permutedMat = reorder.transpose(permutedMat);
   return permutedMat;
-  function randomSort(array) {
+  function randomSort(array: Array<number>) {
     array.sort(() => Math.random() - 0.5);
   }
 }
 
-function testMatrixReorderingByCommunity(mat) {
+function testMatrixReorderingByCommunity(mat: NestedArray<number>): NestedArray<number> {
   const maxCommunity = 3;
   const perm = [];
   const comArr = [];

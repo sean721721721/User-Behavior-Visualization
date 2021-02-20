@@ -350,6 +350,7 @@ export default function userActivityView(beginDateOfQuery, endDateOfQuery, data,
     for (let i = 0; i < users.length; i += 1) {
       axisDomain.push(i);
     }
+    console.log(similaritys);
     const community = dp.jLouvainClustering(users, similaritys);
     community.forEach((e) => {
       datas.find(e1 => e1.id === e.id).community = e.community;
@@ -362,7 +363,7 @@ export default function userActivityView(beginDateOfQuery, endDateOfQuery, data,
     }
     // similarity for articles grouping
     const [filteredArticles, articleSimilarity] = dp.computeArticleSimilarity(datas);
-    // console.log('articleSimilarity: ', articleSimilarity);
+    console.log('articleSimilarity: ', articleSimilarity);
     const articleIds = filteredArticles.map(e => e.article_id);
     const articlesCommunity = dp.jLouvainClustering(articleIds, articleSimilarity);
     // console.log('articlesCommunity', articlesCommunity);
