@@ -2,7 +2,7 @@
 /* eslint-env node */
 
 module.exports = {
-  newSetNodes(list, date, word, post) {
+  newSetNodes(post) {
     const copyPost = JSON.parse(JSON.stringify(post));
     const set = [];
     copyPost.forEach((article) => {
