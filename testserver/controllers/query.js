@@ -3,12 +3,12 @@ let fs = require('fs');
 /*var MongoClient = require('mongodb').MongoClient,*/
 let assert = require('assert');
 let mongoose = require('mongoose');
-let dl = require('../models/datalist.js');
+// let dl = require('../models/datalist.js');
 let winston = require('winston');
 let db = require('../db');
 let ns= require('../models/nodeSet.js')
 let sg= require('../models/dataPreprocessForSimilarityGraph.js');
-let jb = require('../models/text.js');
+// let jb = require('../models/text.js');
 // import bar from '../models/nodeSet.js'
 // console.log(ns.setNodes());
 // Use native promises
@@ -364,17 +364,17 @@ let callback = function callback(req, res) {
                 };
               }
               console.log('bindpostlist');
-              let datalist = dl.bindpostlist(res.result, ptt);
+              // let datalist = dl.bindpostlist(res.result, ptt);
               // let postlist = datalist[0];
-              let wordlist = datalist[1];
-              let titleWordList = datalist[2];
-              let titleCuttedWords = datalist[3];
+              // let wordlist = datalist[1];
+              // let titleWordList = datalist[2];
+              // let titleCuttedWords = datalist[3];
               console.log('datalist.js done!');
               // let [set,initLinks] = ns.setNodes(titleWordList[0], queryobj1.date, titleCuttedWords, res.result);
-              let [set] = ns.newSetNodes(titleWordList[0], queryobj1.date, titleCuttedWords, res.result);
+              let [set] = ns.newSetNodes(res.result);
               console.log('setNodes is done!');
               // return { list: [queryobj1.date, [set, initLinks], titleCuttedWords, res.result], previous: [res.previous], next: [res.next] };
-              return { list: [queryobj1.date, [set], titleCuttedWords, res.result], previous: [res.previous], next: [res.next] };
+              return { list: [queryobj1.date, [set], [], res.result], previous: [res.previous], next: [res.next] };
             }),
           );
         } else if (!isEmpty(queryobj2)) {

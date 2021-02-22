@@ -425,7 +425,7 @@ export default function userActivityView(beginDateOfQuery, endDateOfQuery, data,
       const yUser = newUserAxisValues[i];
       Tooltip
         .style('opacity', 1)
-        .html(`<p style="color: white;">Similarity between ${xUser} and ${yUser} is ${Math.round(d * 100) / 100}</p>`)
+        .html(`<p style="color: white;">Similarity between ${xUser} and ${yUser} is ${Math.round(d.value * 100) / 100}</p>`)
         .style('left', `${d3.event.pageX + 25}px`)
         .style('top', `${d3.event.pageY}px`);
       d3.select(this)

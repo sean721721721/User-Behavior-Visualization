@@ -15,11 +15,17 @@ module.exports = {
     ecmaVersion: 12,
     sourceType: 'module',
   },
+  settings: {
+    flowtype: {
+      onlyFilesWithFlowAnnotation: true,
+    },
+  },
   plugins: [
     'react',
     'flowtype',
   ],
   rules: {
+    'arrow-parens': [2, 'as-needed'],
     'flowtype/boolean-style': [
       2,
       'boolean',

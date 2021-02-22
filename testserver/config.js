@@ -28,3 +28,31 @@ if (os.platform() === "linux") {
 		}
 	};
 }
+// const os = require('os');
+// if (os.platform() === "linux") {
+// 	module.exports = {
+// 		development: {
+// 			db: ["140.119.164.25:27017/ptt?authSource=admin", "140.119.164.25:27017/ptt?authSource=admin"],
+// 			dbUser: 'villager',
+// 			dbPwd: '4given4get'
+// 		},
+// 		production: {
+// 			db: ["140.119.164.25:27017/ptt?authSource=admin", "140.119.164.25:27017/ptt?authSource=admin"],
+// 			dbUser: 'villager',
+// 			dbPwd: '4given4get'
+// 		}
+// 	};
+// } else {
+// 	module.exports = {
+// 		development: {
+// 			db: ["140.119.164.25:27017/Pages?authSource=admin","140.119.164.25:27017/ptt?authSource=admin"],
+// 			dbUser: 'villager',
+// 			dbPwd: '4given4get'
+// 		},
+// 		production: {
+// 			db: ["140.119.164.25:27017/Pages?authSource=admin","140.119.164.25:27017/ptt?authSource=admin"],
+// 			dbUser: 'villager',
+// 			dbPwd: '4given4get'
+// 		}
+// 	};
+// }
