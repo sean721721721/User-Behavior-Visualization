@@ -106,7 +106,10 @@ export default function treemap(cellNodes, svg, submit) {
     .style('left', d => `${d.x0}px`)
     .style('top', d => `${d.y0}px`)
     .style('width', d => `${Math.max(0, d.x1 - d.x0 - 1)}px`)
-    .style('height', d => `${Math.max(0, d.y1 - d.y0 - 1)}px`)
+    .style('height', (d) => {
+      if (Math.max(0, d.x1 - d.x0 - 1) <= 1) return '0px';
+      return `${Math.max(0, d.y1 - d.y0 - 1)}px`;
+    })
     .style('background', d => color(d.parent.data.name))
     .style('border', '1px solid black')
     .on('click', (d, index, nodes) => articleNodeClicked(d, d.data.id, index, nodes))

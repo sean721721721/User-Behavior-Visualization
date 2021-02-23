@@ -265,6 +265,7 @@ class Graph extends Component {
     const $this = this;
     const { set: propsSet } = this.props;
     const set = JSON.parse(JSON.stringify(propsSet));
+    if (!set.length) return;
     const authorSet = set;
     const authorTable = d3.select('#authorList');
     AuthorTable(authorSet, authorTable, this, (n, index) => {

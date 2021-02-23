@@ -88,6 +88,7 @@ export default function userActivityView(beginDateOfQuery, endDateOfQuery, data,
       .style('margin-bottom', 'auto');
     similarThreshDiv.append('input')
       .attr('type', 'number')
+      .attr('id', 'similarThresh')
       .style('width', '50px')
       .style('height', 'fit-content')
       .attr('value', similarThresh)
@@ -109,6 +110,7 @@ export default function userActivityView(beginDateOfQuery, endDateOfQuery, data,
       .style('margin-bottom', 'auto');
     articleThreshDiv.append('input')
       .attr('type', 'number')
+      .attr('id', 'articleThresh')
       .style('width', '50px')
       .style('height', 'fit-content')
       .attr('value', articleThresh)
@@ -148,6 +150,20 @@ export default function userActivityView(beginDateOfQuery, endDateOfQuery, data,
     fiveLevelOption.append('label')
       .attr('for', 'fiveLevel')
       .text('5-Level')
+      .style('margin-right', '0px')
+      .style('margin-bottom', '0px');
+    const replyQuantileOption = simOptionsDiv.append('div')
+      .style('float', 'left')
+      .style('display', 'flex');
+    replyQuantileOption.append('input')
+      .attr('type', 'checkbox')
+      .attr('id', 'replyQuantile')
+      .attr('name', 'similarity')
+      .attr('value', 'replyQuantile')
+      .property('checked', true);
+    replyQuantileOption.append('label')
+      .attr('for', 'replyQuantile')
+      .text('replyQuantile')
       .style('margin-right', '0px')
       .style('margin-bottom', '0px');
     const getActivityDiv = d3.select('.option')
@@ -248,6 +264,13 @@ export default function userActivityView(beginDateOfQuery, endDateOfQuery, data,
               }
               return colorArray[7](_d);
             });
+          break;
+        case 'replyQuantile':
+          d3.selectAll('.betweenUsers.quantilePath')
+            .attr('visibility', checked ? 'hidden' : 'visible');
+          const simThresh = d3.select('#similarThresh').property('value');
+          const artThresh = d3.select('#articleThresh').property('value');
+          adjacencyMatrixNoAuthor(userSimilarity, simThresh, artThresh);
           break;
 
         default:
@@ -350,7 +373,7 @@ export default function userActivityView(beginDateOfQuery, endDateOfQuery, data,
     for (let i = 0; i < users.length; i += 1) {
       axisDomain.push(i);
     }
-    console.log(similaritys);
+    console.log('Similarity: ', similaritys.length);
     const community = dp.jLouvainClustering(users, similaritys);
     community.forEach((e) => {
       datas.find(e1 => e1.id === e.id).community = e.community;
@@ -363,7 +386,7 @@ export default function userActivityView(beginDateOfQuery, endDateOfQuery, data,
     }
     // similarity for articles grouping
     const [filteredArticles, articleSimilarity] = dp.computeArticleSimilarity(datas);
-    console.log('articleSimilarity: ', articleSimilarity);
+    console.log('articleSimilarity: ', articleSimilarity.length);
     const articleIds = filteredArticles.map(e => e.article_id);
     const articlesCommunity = dp.jLouvainClustering(articleIds, articleSimilarity);
     // console.log('articlesCommunity', articlesCommunity);
@@ -592,24 +615,27 @@ export default function userActivityView(beginDateOfQuery, endDateOfQuery, data,
           .enter()
           // .append('rect')
           .each((d, index, nodes) => {
-            const xUser = datas.find(e => e.id === newUserAxisValues[index]);
-            const yUser = datas.find(e => e.id === newUserAxisValues[i]);
-            if (i < index || xUser.community === yUser.community) {
-              const xSize = datas.find(e => e.id === xUser.id).repliedArticle.length;
-              const ySize = datas.find(e => e.id === yUser.id).repliedArticle.length;
-              const bothReplied = getBothRepliedArticle(xUser, yUser);
-              const bothSize = bothReplied.length;
-              // user rect
-              drawUserRect(nodes, index, i);
-
-              // article similarity
-              drawArticleSimilarity(d, nodes, index, i, xUser, yUser, bothSize);
-
-              // author similarity
-              // drawAuthorSimilarity(d, nodes, index, i, xUser, yUser, bothSize);
-
-              // reply time
-              drawNewReplyTimeWithQuantile(nodes, index, i, xUser, yUser, bothReplied);
+            if (index >= i) {
+              const xUser = datas.find(e => e.id === newUserAxisValues[index]);
+              const yUser = datas.find(e => e.id === newUserAxisValues[i]);
+              if (i < index || xUser.community === yUser.community) {
+                const xSize = datas.find(e => e.id === xUser.id).repliedArticle.length;
+                const ySize = datas.find(e => e.id === yUser.id).repliedArticle.length;
+                const bothReplied = getBothRepliedArticle(xUser, yUser);
+                const bothSize = bothReplied.length;
+                // user rect
+                drawUserRect(nodes, index, i);
+  
+                // article similarity
+                drawArticleSimilarity(d, nodes, index, i, xUser, yUser, bothSize);
+  
+                // reply time
+                const quantileFilter = d3.select('#replyQuantile');
+                const checked = quantileFilter.empty() ? null : quantileFilter.property('checked');
+                if (i === index || checked === false) {
+                  drawNewReplyTimeWithQuantile(nodes, index, i, xUser, yUser, bothReplied);
+                }
+              }
             }
           });
         // user self path
@@ -642,7 +668,6 @@ export default function userActivityView(beginDateOfQuery, endDateOfQuery, data,
         const yUserRepliedTime = getAllReplyTime(user2, bothRepliedArticles);
         // for user study
         if (user1.id === user2.id) datas.find(e => e.id === user1.id).replyTime = xUserRepliedTime;
-
         const threeHours = 60 * 60 * 3;
         const thisTimeRectwidth = 10;
         const thisTimeMaxLong = maxSize - 10;
@@ -651,7 +676,10 @@ export default function userActivityView(beginDateOfQuery, endDateOfQuery, data,
           .data([xUserRepliedTime, yUserRepliedTime])
           .enter()
           .append('g')
-          .attr('class', 'quantilePath')
+          .attr('class', () => {
+            if (user1.id === user2.id) return 'userSelf quantilePath';
+            return 'betweenUsers quantilePath';
+          })
           .each((_d, _index, _n) => {
             const quantile = [
               Math.max(0, d3.quantile(_d, 0.25)),
@@ -772,8 +800,7 @@ export default function userActivityView(beginDateOfQuery, endDateOfQuery, data,
                 return colorArray[user2.community](secondOrdering_mat[indX][indY]);
               })
               .attr('stroke', (q, step) => 'black')
-              .attr('stroke-width', (q, step) => (step === 1 ? '3px' : '3px'))
-              .attr('opacity', indY > indX ? 0 : 1);
+              .attr('stroke-width', (q, step) => (step === 1 ? '3px' : '3px'));
           });
       }
       function drawArticleSimilarity(_d, n, indX, indY, user1, user2, size) {
