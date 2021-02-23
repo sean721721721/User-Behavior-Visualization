@@ -11,7 +11,6 @@ import * as d3 from 'd3';
 import * as math from 'mathjs';
 import * as slider from 'd3-simple-slider';
 // eslint-disable-next-line import/no-unresolved
-import netClustering from 'netclustering';
 import CheckboxGroup from 'antd/lib/checkbox/Group';
 import { cps } from 'redux-saga/effects';
 // import { userActivityTimeline } from './userActivityTimeline';
@@ -78,9 +77,15 @@ export default function userActivityView(beginDateOfQuery, endDateOfQuery, data,
     let articleThresh = 1;
     d3.select('.option').selectAll('*').remove();
     const similarThreshDiv = d3.select('.option').append('div')
+      .style('padding', '0px')
       .style('padding-left', '10px')
-      .attr('class', 'col-sm-4')
-      .style('display', 'flex');
+      .attr('class', 'col-sm-3')
+      .style('display', 'flex')
+      .append('div')
+      .style('display', 'flex')
+      .style('margin-left', 'auto')
+      .style('margin-right', '0px')
+      .style('align-items', 'center');
     similarThreshDiv.append('h6')
       .text('Similarity >=')
       .style('margin-right', '10px')
@@ -92,17 +97,22 @@ export default function userActivityView(beginDateOfQuery, endDateOfQuery, data,
       .style('width', '50px')
       .style('height', 'fit-content')
       .attr('value', similarThresh)
-      .on('keypress', (d, index, nodes) => {
-        if (d3.event.keyCode === 13) {
-          const val = d3.select(nodes[index]).property('value');
-          similarThresh = val;
-          adjacencyMatrixNoAuthor(userSimilarity, similarThresh, articleThresh);
-        }
-      });
+      // .on('keypress', (d, index, nodes) => {
+      //   if (d3.event.keyCode === 13) {
+      //     const val = d3.select(nodes[index]).property('value');
+      //     similarThresh = val;
+      //     adjacencyMatrixNoAuthor(userSimilarity, similarThresh, articleThresh);
+      //   }
+      // });
     const articleThreshDiv = d3.select('.option').append('div')
-      .style('padding-left', '10px')
-      .attr('class', 'col-sm-4')
-      .style('display', 'flex');
+      .style('padding', '0px')
+      .attr('class', 'col-sm-3')
+      .style('display', 'flex')
+      .append('div')
+      .style('display', 'flex')
+      .style('margin-left', 'auto')
+      .style('margin-right', '0px')
+      .style('align-items', 'center');
     articleThreshDiv.append('h6')
       .text('Reply >=')
       .style('margin-right', '10px')
@@ -114,27 +124,42 @@ export default function userActivityView(beginDateOfQuery, endDateOfQuery, data,
       .style('width', '50px')
       .style('height', 'fit-content')
       .attr('value', articleThresh)
-      .on('keypress', (d, index, nodes) => {
-        if (d3.event.keyCode === 13) {
-          const val = d3.select(nodes[index]).property('value');
-          articleThresh = val;
-          adjacencyMatrixNoAuthor(userSimilarity, similarThresh, articleThresh);
-        }
+      // .on('keypress', (d, index, nodes) => {
+      //   if (d3.event.keyCode === 13) {
+      //     const val = d3.select(nodes[index]).property('value');
+      //     articleThresh = val;
+      //     adjacencyMatrixNoAuthor(userSimilarity, similarThresh, articleThresh);
+      //   }
+      // });
+    const filterButton = d3.select('.option').append('div')
+      .style('padding-left', '10px')
+      .attr('class', 'col-sm-1')
+      .style('display', 'flex');
+    filterButton.append('button')
+      .style('type', 'button')
+      .style('font-size', 'smaller')
+      .attr('class', 'btn btn-primary')
+      .attr('id', 'submitUsers')
+      .text('Filter')
+      .on('click', () => {
+        const simThresh = d3.select('#similarThresh').property('value');
+        const artThresh = d3.select('#articleThresh').property('value');
+        adjacencyMatrixNoAuthor(userSimilarity, simThresh, artThresh);
       });
     adjacencyMatrixNoAuthor(userSimilarity, similarThresh, articleThresh);
   }
 
   function drawFilterDiv() {
     let simOptionsDiv = d3.select('.heatMap').select('.option').append('div')
-      .attr('class', 'col-sm-4 filterDiv d-flex align-items-center');
+      .attr('class', 'col-sm-5 filterDiv d-flex align-items-center');
     simOptionsDiv = simOptionsDiv.append('div')
-      .style('margin-left', '10px')
+      .style('margin-right', '0px')
+      .style('margin-left', 'auto')
       .style('align-self', 'center')
       .style('display', 'flex')
       .style('font-size', 'x-small');
     simOptionsDiv.append('h6')
       .text('Options:')
-      .style('margin-right', '10px')
       .style('margin-top', 'auto')
       .style('margin-bottom', 'auto');
     simOptionsDiv = simOptionsDiv.append('div').style('margin-left', '10px');
@@ -150,7 +175,7 @@ export default function userActivityView(beginDateOfQuery, endDateOfQuery, data,
     fiveLevelOption.append('label')
       .attr('for', 'fiveLevel')
       .text('5-Level')
-      .style('margin-right', '0px')
+      .style('margin-right', '10px')
       .style('margin-bottom', '0px');
     const replyQuantileOption = simOptionsDiv.append('div')
       .style('float', 'left')
@@ -163,7 +188,7 @@ export default function userActivityView(beginDateOfQuery, endDateOfQuery, data,
       .property('checked', true);
     replyQuantileOption.append('label')
       .attr('for', 'replyQuantile')
-      .text('replyQuantile')
+      .text('Quantile')
       .style('margin-right', '0px')
       .style('margin-bottom', '0px');
     const getActivityDiv = d3.select('.option')

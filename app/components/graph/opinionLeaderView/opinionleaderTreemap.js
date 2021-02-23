@@ -93,7 +93,7 @@ export default function treemap(cellNodes, svg, submit) {
     .domain([0, 1])
     .range([0.5, 1]);
 
-    // use this information to add rectangles:
+  // use this information to add rectangles:
   d3.select('.treemap')
     .datum(root)
     .selectAll()
