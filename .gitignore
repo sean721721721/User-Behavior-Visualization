@@ -76,7 +76,6 @@ typings/
 testserver/config.js
 
 # Others
-ptt-web-crawler/
 outsource
 /coverage/
 dist/

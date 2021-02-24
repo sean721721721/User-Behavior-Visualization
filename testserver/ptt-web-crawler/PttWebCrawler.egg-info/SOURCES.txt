@@ -1,0 +1,11 @@
+setup.py
+PttWebCrawler/__init__.py
+PttWebCrawler/__main__.py
+PttWebCrawler/crawler.py
+PttWebCrawler.egg-info/PKG-INFO
+PttWebCrawler.egg-info/SOURCES.txt
+PttWebCrawler.egg-info/dependency_links.txt
+PttWebCrawler.egg-info/entry_points.txt
+PttWebCrawler.egg-info/requires.txt
+PttWebCrawler.egg-info/top_level.txt
+PttWebCrawler.egg-info/zip-safe

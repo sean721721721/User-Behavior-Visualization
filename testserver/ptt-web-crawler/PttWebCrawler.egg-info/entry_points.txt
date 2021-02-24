@@ -1,0 +1,3 @@
+[console_scripts]
+PttWebCrawler = PttWebCrawler.__main__:main
+
