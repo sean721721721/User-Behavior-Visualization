@@ -25,6 +25,7 @@ module.exports = {
     'flowtype',
   ],
   rules: {
+    'react/jsx-filename-extension': [1, { extensions: ['.js', '.jsx'] }],
     'arrow-parens': [2, 'as-needed'],
     'flowtype/boolean-style': [
       2,

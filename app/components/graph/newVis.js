@@ -154,7 +154,7 @@ class Graph extends Component {
         if (new Date(newEndDate) > new Date(endDate)) url.push(encodeURI(getReqstr(fixedUserArr, newBeginDate, new Date(endDate))));
         else url.push(encodeURI(getReqstr(fixedUserArr, newBeginDate, newEndDate)));
       }
-      url.forEach((u) => {
+      url.forEach(u => {
         myRequest.push(new Request(u, {
           method: 'get',
         }));
@@ -166,7 +166,7 @@ class Graph extends Component {
       function recursiveFetch(req, index) {
         fetch(req[index])
           .then(response => response.json())
-          .then((response) => {
+          .then(response => {
             // concat userlist because spliting user
             // resArr.userListArray = resArr.userListArray.concat(response.userListArray);
 
@@ -176,7 +176,7 @@ class Graph extends Component {
               const responseUser = response.userListArray[i];
               existedUser.totalReplyCount += responseUser.totalReplyCount;
               existedUser.repliedArticle = existedUser.repliedArticle.concat(responseUser.repliedArticle);
-              responseUser.titleWordScore.forEach((wordList) => {
+              responseUser.titleWordScore.forEach(wordList => {
                 const wordScore = existedUser.titleWordScore.find(wl => wl.word === wordList.word);
                 if (wordScore) {
                   wordScore.score += wordList.score;
@@ -186,18 +186,18 @@ class Graph extends Component {
               });
             }
             // remove duplicated articles
-            response.articles.forEach((a) => {
+            response.articles.forEach(a => {
               if (!resArr.articles.some(_a => _a.article_id === a.article_id)) {
                 resArr.articles.push(a);
               }
             });
             // remove messages which pushUserid is not included in request users
-            resArr.articles.forEach((a) => {
+            resArr.articles.forEach(a => {
               a.messages = a.messages.filter(mes => e.some(usr => usr.id === mes.push_userid));
             });
             loading((index + 1), myRequest.length, userSimilaritySvg);
             if (myRequest.length === index + 1) {
-              resArr.userListArray.forEach((usr) => {
+              resArr.userListArray.forEach(usr => {
                 usr.orig_group = e.find(u => u.id === usr.id).group;
               });
               const userIdArr = e.map(usr => usr.id);
@@ -217,22 +217,22 @@ class Graph extends Component {
           .then(() => {
             if (req.length > index + 1) recursiveFetch(req, index + 1);
           })
-          .catch((err) => {
+          .catch(err => {
             console.log(err);
           });
       }
       const i = 0;
       fetch(myRequest[0])
         .then(response => response.json())
-        .then((response) => {
+        .then(response => {
           resArr.articles = response.articles;
           resArr.userListArray = response.userListArray;
-          resArr.articles.forEach((a) => {
+          resArr.articles.forEach(a => {
             a.messages = a.messages.filter(mes => e.some(usr => usr.id === mes.push_userid));
           });
           loading((i + 1), myRequest.length, userSimilaritySvg);
           if (myRequest.length === i + 1) {
-            response.userListArray.forEach((usr) => {
+            response.userListArray.forEach(usr => {
               usr.orig_group = e.find(u => u.id === usr.id).group;
             });
             $this.setState({
@@ -251,7 +251,7 @@ class Graph extends Component {
         .then(() => {
           if (myRequest.length > i + 1) recursiveFetch(myRequest, i + 1);
         })
-        .catch((err) => {
+        .catch(err => {
           userSimilaritySvg.append('text')
             .text(`${err}. Reduce the amount of users being queried`)
             .attr('x', 100)
@@ -308,7 +308,7 @@ class Graph extends Component {
                   </fieldset>
                   <fieldset>
                     <label htmlFor="intersection">
-                        full cal:
+                      full cal:
                       <input
                         chekced
                         type="checkbox"

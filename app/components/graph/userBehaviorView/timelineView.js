@@ -32,12 +32,12 @@ export default function timelineView(data, user, svg, begin, end) {
   const sliderRange = slider.sliderBottom()
     .min(original_date1)
     .max(original_date2)
-    .width(w * 2 / 3 - 5)
+    .width(w * (2 / 3) - 5)
     .tickFormat(d3.timeFormat('%m/%d %H'))
     .ticks(5)
     .default([original_date1, original_date2])
     .fill('#2196f3')
-    .on('onchange', (val) => {
+    .on('onchange', val => {
       update(new Date(val[0]), new Date(val[1]));
       original_date1 = new Date(val[0]);
       original_date2 = new Date(val[1]);
@@ -109,7 +109,7 @@ export default function timelineView(data, user, svg, begin, end) {
     .padding(0.05);
   const Tooltip = d3.select('.tooltip');
   let isClicked = null;
-  const click = (article) => {
+  const click = article => {
     isClicked = isClicked ? null : article.article_id;
     console.log('isClicked', isClicked);
     Tooltip
@@ -129,7 +129,7 @@ export default function timelineView(data, user, svg, begin, end) {
     fixedSvg.selectAll(`.pointer.articleID_${articleId}`)
       .attr('opacity', 1);
     const includesUser = [];
-    article.messages.forEach((mes) => {
+    article.messages.forEach(mes => {
       if (userID.includes(mes.push_userid)) {
         if (!includesUser.includes(mes.push_userid)) {
           includesUser.push(mes.push_userid);
@@ -255,7 +255,7 @@ export default function timelineView(data, user, svg, begin, end) {
     }
   };
 
-  const repostLinkMouseOver = (d) => {
+  const repostLinkMouseOver = d => {
     if (!isClicked) {
       fixedSvg.selectAll('.repostLink')
         .attr('opacity', '0');
@@ -275,69 +275,10 @@ export default function timelineView(data, user, svg, begin, end) {
     }
   };
 
-  // const legends = svg.append('g').attr('transform', 'translate(50,25)');
-  // legends.selectAll('mydots')
-  //   .data(user)
-  //   .enter()
-  //   .append('circle')
-  //   .attr('cx', (d, i) => i * 100)
-  //   .attr('cy', 0)
-  //   .attr('r', 7)
-  //   .style('fill', (d, i) => color[i]);
-
-  // legends.selectAll('mylabels')
-  //   .data(user)
-  //   .enter()
-  //   .append('text')
-  //   .attr('x', (d, i) => 12 + i * 100)
-  //   .attr('y', 0)
-  //   .style('fill', (d, i) => color[i])
-  //   .text(d => d)
-  //   .attr('font-size', '12px')
-  //   .attr('text-anchor', 'left')
-  //   .style('alignment-baseline', 'middle');
-
-  // svg.attr('height', `${200 + user.length * (yDomain.length + 5) * gridSize}`);
   const userOffset = 0;
-  // for (let i = 0; i < userListByReplyCountPerHours.length; i += 1) {
-  //   if (i !== 0) {
-  //     userOffset = userOffset + yDomain.length + 10;
-  //   }
-  // svg.append('g')
-  //   .attr('transform', () => {
-  //     if (i === 0) return 'translate(200, 100)';
-  //     return `translate(200, ${userOffset * gridSize + 100})`;
-  //   })
-  //   .selectAll()
-  //   .data(userListByReplyCountPerHours[i].time)
-  //   .enter()
-  //   .append('rect')
-  //   // .attr('x', (d, index) => x(d.hours))
-  //   .attr('x', (d, index) => x(d.hours))
-  //   // eslint-disable-next-line no-loop-func
-  //   .attr('y', d => y(`${d.month + 1}/${d.date}`))
-  //   .attr('width', x.bandwidth())
-  //   .attr('height', x.bandwidth())
-  //   .style('fill', d => myColor(d.reply.length))
-  //   .attr('border', '0.5px solid black')
-  //   .on('mouseover', d => mouseover(data[i], d))
-  //   .on('mouseout', mouseout);
+
   const fixedSvg = svg.append('g')
     .attr('transform', `translate(${w - userScaleRange - 50}, 100)`);
-  // for (let i = 0; i < userID.length; i += 1) {
-  //   fixedSvg.append('g')
-  //     .selectAll()
-  //     .data(userID)
-  //     .enter()
-  //     .append('rect')
-  //     .attr('y', 0)
-  //     .attr('x', d => userScale(d))
-  //     .attr('height', timeScale.range()[1])
-  //     .attr('width', userScale.bandwidth())
-  //     .attr('stroke', 'black')
-  //     .attr('stroke-width', '0.3px')
-  //     .style('fill', (d, index) => (index % 2 ? 'white' : 'gainsboro'));
-  // }
 
   // add gray area for off day
   for (let i = timeScale.domain()[0]; i < timeScale.domain()[1]; i = new Date(i).setDate(new Date(i).getDate() + 1)) {
@@ -351,7 +292,7 @@ export default function timelineView(data, user, svg, begin, end) {
         .attr('y', d => timeScale(new Date(d)))
         .attr('fill', 'lightgray')
         .attr('width', userScale.range()[1])
-        .attr('height', (d) => {
+        .attr('height', d => {
           const nextDate = new Date(d);
           const temp = new Date(d);
           nextDate.setDate(nextDate.getDate() + 1);
@@ -367,7 +308,7 @@ export default function timelineView(data, user, svg, begin, end) {
         .attr('y', d => timeScale(new Date(d)))
         .attr('fill', 'lightgray')
         .attr('width', userScale.range()[1])
-        .attr('height', (d) => {
+        .attr('height', d => {
           const workHour = new Date(d);
           const temp = new Date(d);
           workHour.setHours(workHour.getHours() + 9);
@@ -382,7 +323,7 @@ export default function timelineView(data, user, svg, begin, end) {
         .attr('y', d => timeScale(new Date(d)))
         .attr('fill', 'lightgray')
         .attr('width', userScale.range()[1])
-        .attr('height', (d) => {
+        .attr('height', d => {
           const midnight = new Date(d);
           const temp = new Date(d);
           midnight.setHours(midnight.getHours() + 6);
@@ -440,7 +381,7 @@ export default function timelineView(data, user, svg, begin, end) {
         .attr('font-size', 'small')
         .attr('transform', `translate(${percentOfUsersReplyScale.range()[1] / 2}, -70)`);
       const horizontalOffset = 10;
-      const angleDeg = Math.atan2(20, horizontalOffset) * 180 / Math.PI;
+      const angleDeg = (Math.atan2(20, horizontalOffset) * 180) / Math.PI;
       d3.select(nodes[index]).selectAll('.tick').selectAll('text')
         .style('text-anchor', 'end')
         .attr('font-size', 14)
@@ -516,7 +457,7 @@ export default function timelineView(data, user, svg, begin, end) {
         const articleId1 = sortedArticles[i].article_id.replace(/\./gi, '');
         const articleId2 = sortedArticles[j].article_id.replace(/\./gi, '');
         const includesUser1 = [];
-        sortedArticles[i].messages.forEach((mes) => {
+        sortedArticles[i].messages.forEach(mes => {
           if (userID.includes(mes.push_userid)) {
             if (!includesUser1.includes(mes.push_userid)) {
               includesUser1.push(mes.push_userid);
@@ -524,7 +465,7 @@ export default function timelineView(data, user, svg, begin, end) {
           }
         });
         const includesUser2 = [];
-        sortedArticles[j].messages.forEach((mes) => {
+        sortedArticles[j].messages.forEach(mes => {
           if (userID.includes(mes.push_userid)) {
             if (!includesUser2.includes(mes.push_userid)) {
               includesUser2.push(mes.push_userid);
@@ -557,7 +498,7 @@ export default function timelineView(data, user, svg, begin, end) {
     if (data[i].messages.some(mes => userID.includes(mes.push_userid))) {
       const articleId = data[i].article_id.replace(/\./gi, '');
       const includesUser = [];
-      data[i].messages.forEach((mes) => {
+      data[i].messages.forEach(mes => {
         if (userID.includes(mes.push_userid)) {
           if (!includesUser.includes(mes.push_userid)) {
             includesUser.push(mes.push_userid);
@@ -572,11 +513,11 @@ export default function timelineView(data, user, svg, begin, end) {
         .enter()
         .each((d, index, nodes) => {
           d3.select(nodes[index]).append('rect')
-            .attr('y', (_d) => {
+            .attr('y', _d => {
               const postTime = new Date(_d.date);
               return timeScale(postTime);
             })
-            .attr('opacity', (_d) => {
+            .attr('opacity', _d => {
               const postTime = new Date(_d.date);
               return timeScale(postTime) < h ? 1 : 0;
             })
@@ -587,11 +528,11 @@ export default function timelineView(data, user, svg, begin, end) {
             .on('mouseover', _d => mouseover(_d, data))
             .on('mouseout', mouseout);
           d3.select(nodes[index]).append('circle')
-            .attr('cy', (_d) => {
+            .attr('cy', _d => {
               const postTime = new Date(_d.date);
               return timeScale(postTime) + 1;
             })
-            .attr('opacity', (_d) => {
+            .attr('opacity', _d => {
               const postTime = new Date(_d.date);
               return timeScale(postTime) < h ? 1 : 0;
             })
@@ -599,7 +540,7 @@ export default function timelineView(data, user, svg, begin, end) {
             // .attr('r', pointerScale(includesUser.length))
             .attr('r', 5)
             .attr('stroke', 'black')
-            .attr('stroke-width', (_d) => {
+            .attr('stroke-width', _d => {
               if (!_d.article_title) return '0px';
               return _d.article_title[0] !== 'R' ? '2px' : '0px';
             })
@@ -642,47 +583,6 @@ export default function timelineView(data, user, svg, begin, end) {
     }
   }
 
-  // fixedSvg.selectAll('path').remove();
-
-  // fixedSvg.append('g')
-  //   .attr('transform', () => {
-  //     if (i === 0) return 'translate(10, 100)';
-  //     return `translate(10, ${userOffset * gridSize + 100})`;
-  //   })
-  //   .append('text')
-  //   .text(userListByReplyCountPerHours[i].id);
-
-  // fixedSvg.append('g')
-  //   .attr('class', 'yAxis')
-  //   .attr('transform', () => {
-  //     if (i === 0) return 'translate(200, 100)';
-  //     return `translate(200, ${userOffset * gridSize + 100})`;
-  //   })
-  //   .call(d3.axisLeft(y).tickSize(0));
-  // fixedSvg.append('g')
-  //   .attr('class', 'xAxis')
-  //   .attr('transform', () => {
-  //     if (i === 0) return 'translate(200, 100)';
-  //     return `translate(200, ${userOffset * gridSize + 100})`;
-  //   })
-  //   .call(d3.axisTop(x).tickSize(0));
-  // fixedSvg.selectAll('.yAxis')
-  //   .selectAll('.tick')
-  //   .selectAll('text')
-  //   .style('color', (d) => {
-  //     const date = new Date(`${new Date(begin).getFullYear()}/${d}`);
-  //     if (date.getDay() > 0 && date.getDay() < 6) return 'black';
-  //     return 'lightgray';
-  //   });
-  // fixedSvg.selectAll('.xAxis')
-  //   .selectAll('.tick')
-  //   .selectAll('text')
-  //   .style('color', (d) => {
-  //     if (d >= 8 && d <= 18) return 'black';
-  //     return 'lightgray';
-  //   });
-  // }
-
   function tooltipForArticle(d) {
     const date = new Date(d.date);
     Tooltip
@@ -695,11 +595,11 @@ export default function timelineView(data, user, svg, begin, end) {
   }
   function computeUserListByReplyCountPerHours(d, u) {
     const userList = [];
-    u.forEach((e) => {
+    u.forEach(e => {
       userList.push({ id: e, time: [] });
     });
-    d.forEach((article) => {
-      article.messages.forEach((mes) => {
+    d.forEach(article => {
+      article.messages.forEach(mes => {
         const userIndex = userList.findIndex(e => e.id === mes.push_userid);
         if (userIndex !== -1) {
           // console.log(userIndex);
@@ -723,7 +623,7 @@ export default function timelineView(data, user, svg, begin, end) {
       });
     });
     // console.log(userList);
-    userList.forEach((e) => {
+    userList.forEach(e => {
       if (!e.time[0]) e.totalDate = 0;
       else {
         const earliestDate = new Date(`${e.time[0].month}/${e.time[0].date}`);
@@ -791,12 +691,12 @@ export default function timelineView(data, user, svg, begin, end) {
       const article = data.find(e => e.article_id === isClicked);
       const postYear = new Date(article.date).getFullYear();
       fixedSvg.selectAll('.commentTime')
-        .attr('cy', (d) => {
+        .attr('cy', d => {
           const date = dateFormat(d);
           const commentTime = new Date(new Date(date).setFullYear(postYear));
           return timeScale(commentTime);
         })
-        .attr('opacity', (d) => {
+        .attr('opacity', d => {
           const date = dateFormat(d);
           const commentTime = new Date(new Date(date).setFullYear(postYear));
           return timeScale(commentTime) < h && timeScale(commentTime) > 0 ? 1 : 0;
@@ -805,7 +705,7 @@ export default function timelineView(data, user, svg, begin, end) {
     // update offday rect
     fixedSvg.selectAll('.offday')
       .attr('y', d => (timeScale(new Date(d)) > 0 ? timeScale(new Date(d)) : 0))
-      .attr('height', (d) => {
+      .attr('height', d => {
         const nextDate = new Date(d);
         const tempDate = new Date(d);
         nextDate.setDate(nextDate.getDate() + 1);
@@ -817,7 +717,7 @@ export default function timelineView(data, user, svg, begin, end) {
     // update beforeWorl rect
     fixedSvg.selectAll('.beforWork')
       .attr('y', d => (timeScale(new Date(d)) > 0 ? timeScale(new Date(d)) : 0))
-      .attr('height', (d) => {
+      .attr('height', d => {
         const workHour = new Date(d);
         const tempDate = new Date(d);
         workHour.setHours(workHour.getHours() + 9);
@@ -829,7 +729,7 @@ export default function timelineView(data, user, svg, begin, end) {
     // update afterWork rect
     fixedSvg.selectAll('.afterWork')
       .attr('y', d => (timeScale(new Date(d)) > 0 ? timeScale(new Date(d)) : 0))
-      .attr('height', (d) => {
+      .attr('height', d => {
         const workHour = new Date(d);
         const tempDate = new Date(d);
         workHour.setHours(workHour.getHours() + 6);
@@ -854,7 +754,7 @@ export default function timelineView(data, user, svg, begin, end) {
           const articleId1 = filteredSortedArticles[i].article_id.replace(/\./gi, '');
           const articleId2 = filteredSortedArticles[j].article_id.replace(/\./gi, '');
           const includesUser1 = [];
-          filteredSortedArticles[i].messages.forEach((mes) => {
+          filteredSortedArticles[i].messages.forEach(mes => {
             if (userID.includes(mes.push_userid)) {
               if (!includesUser1.includes(mes.push_userid)) {
                 includesUser1.push(mes.push_userid);
@@ -862,7 +762,7 @@ export default function timelineView(data, user, svg, begin, end) {
             }
           });
           const includesUser2 = [];
-          filteredSortedArticles[j].messages.forEach((mes) => {
+          filteredSortedArticles[j].messages.forEach(mes => {
             if (userID.includes(mes.push_userid)) {
               if (!includesUser2.includes(mes.push_userid)) {
                 includesUser2.push(mes.push_userid);
@@ -884,7 +784,7 @@ export default function timelineView(data, user, svg, begin, end) {
       }
     }
     if (original_date1 < new Date(date1) || original_date2 > new Date(date2)) {
-      filteredArticles.forEach((art) => {
+      filteredArticles.forEach(art => {
         const article_id = art.article_id.replace(/\./gi, '');
         fixedSvg.selectAll(`.articleID_${article_id}`)
           .each((d, index, nodes) => {
@@ -988,7 +888,7 @@ export default function timelineView(data, user, svg, begin, end) {
         });
     }
 
-    filteredArticles = data.filter((e) => {
+    filteredArticles = data.filter(e => {
       const beginDateMinusTwo = new Date(date1);
       beginDateMinusTwo.setDate(beginDateMinusTwo.getDate() - 2);
       return new Date(beginDateMinusTwo) < new Date(e.date) && new Date(date2) > new Date(e.date);

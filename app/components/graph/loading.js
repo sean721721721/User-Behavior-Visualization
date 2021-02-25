@@ -8,8 +8,9 @@
 /* eslint-disable no-param-reassign */
 // @flow
 import * as d3 from 'd3';
+import React from 'react';
 
-export default function loading(temp: number, total: number, svg) {
+export default function loading(temp: number, total: number, svg: React.ElementRef<'svg'>) {
   console.log(temp, total, svg);
   const h = parseFloat(d3.select('#timeLine').style('height'));
   const w = parseFloat(d3.select('#timeLine').style('width'));
@@ -37,7 +38,7 @@ export default function loading(temp: number, total: number, svg) {
       .attr('height', 10)
       // .transition()
       // .duration(1000)
-      .attr('width', () => 200 * (temp / total));
+      .attr('width', (): number => 200 * (temp / total));
     svg.selectAll('text')
       .text(`${Math.round(100 * (temp / total))} %`)
       // .transition()

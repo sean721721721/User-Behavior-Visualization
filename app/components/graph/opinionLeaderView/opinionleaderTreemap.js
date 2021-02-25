@@ -43,8 +43,8 @@ export default function treemap(cellNodes, svg, submit) {
   const authorNodes = cellNodes.filter(e => e.responder);
   authorNodes.sort((a, b) => b.pageRank - a.pagrRank);
   const articleNodes = [];
-  authorNodes.forEach((u) => {
-    u.responder.forEach((a) => {
+  authorNodes.forEach(u => {
+    u.responder.forEach(a => {
       if (!articleNodes.some(_a => _a.article_id === a.articleId)) {
         articleNodes.push({
           article_id: a.articleId, ...a,
@@ -53,13 +53,13 @@ export default function treemap(cellNodes, svg, submit) {
     });
   });
   const top20Authors = authorNodes.filter((d, index) => index < 20);
-  top20Authors.forEach((n) => {
+  top20Authors.forEach(n => {
     const articles = [];
     let totalComments = 0;
-    n.responder.forEach((a) => {
+    n.responder.forEach(a => {
       totalComments += a.messages.length;
     });
-    n.responder.forEach((a) => {
+    n.responder.forEach(a => {
       articles.push({
         name: a.article_title,
         id: a.article_id,
@@ -88,7 +88,7 @@ export default function treemap(cellNodes, svg, submit) {
     .domain(['boss1', 'boss2', 'boss3'])
     .range(d3.schemeTableau10);
 
-    // And a opacity scale
+  // And a opacity scale
   const opacity = d3.scaleLinear()
     .domain([0, 1])
     .range([0.5, 1]);
@@ -106,7 +106,7 @@ export default function treemap(cellNodes, svg, submit) {
     .style('left', d => `${d.x0}px`)
     .style('top', d => `${d.y0}px`)
     .style('width', d => `${Math.max(0, d.x1 - d.x0 - 1)}px`)
-    .style('height', (d) => {
+    .style('height', d => {
       if (Math.max(0, d.x1 - d.x0 - 1) <= 1) return '0px';
       return `${Math.max(0, d.y1 - d.y0 - 1)}px`;
     })
@@ -114,7 +114,7 @@ export default function treemap(cellNodes, svg, submit) {
     .style('border', '1px solid black')
     .on('click', (d, index, nodes) => articleNodeClicked(d, d.data.id, index, nodes))
     .append('title')
-    .text((d) => {
+    .text(d => {
       const title = d.data.name.replace('mister_', '');
       return title;
     });
@@ -162,7 +162,7 @@ export default function treemap(cellNodes, svg, submit) {
     // .attr('font-size', '11px')
     // .attr('fill', 'white')
     .append('title')
-    .text((d) => {
+    .text(d => {
       const title = d.data.name.replace('mister_', '');
       return title;
     });
@@ -175,7 +175,7 @@ export default function treemap(cellNodes, svg, submit) {
     .append('text')
     .attr('x', d => d.x0 + 5) // +10 to adjust position (more right)
     .attr('y', d => d.y0 + 35) // +20 to adjust position (lower)
-    .text((d) => {
+    .text(d => {
       // const { message_count } = d.data;
       // return `Total Comment: ${message_count[0].count + message_count[1].count + message_count[2].count}<br>
       //   push: ${message_count[0].count}, boo: ${message_count[1].count}, neutral: ${message_count[2].count}`;
@@ -198,7 +198,7 @@ export default function treemap(cellNodes, svg, submit) {
     .style('height', d => ((d.y1 - d.y0) > 20 ? '20px' : '0px'))
     .attr('fill', d => color(d.data.name))
     .append('p')
-    .text((d) => {
+    .text(d => {
       const name = d.data.name.split(' ')[0];
       return name;
     })
@@ -267,7 +267,7 @@ export default function treemap(cellNodes, svg, submit) {
       // console.log('push');
       selectedArticleNodes.push(article_id);
       if (clickType === 'union') {
-        d.data.messages.forEach((e) => {
+        d.data.messages.forEach(e => {
           if (!selectedUser.some(u => u.id === e.push_userid)) {
             selectedUser.push({ id: e.push_userid, group: selectedArticleNodes.length });
           }
@@ -277,7 +277,7 @@ export default function treemap(cellNodes, svg, submit) {
         console.log('intersection');
         selectedUser = selectedUser.filter(e => d.data.messages.some(e1 => e1.push_userid === e.id));
       } else {
-        d.data.messages.forEach((e) => {
+        d.data.messages.forEach(e => {
           if (!selectedUser.some(u => u.id === e.push_userid)) {
             selectedUser.push({ id: e.push_userid, group: selectedArticleNodes.length });
           }
@@ -307,7 +307,7 @@ export default function treemap(cellNodes, svg, submit) {
       .attr('class', 'btn btn-primary')
       .attr('id', 'submitUsers')
       .text('Get Activity!')
-      .on('click', (d) => {
+      .on('click', d => {
         const test = [];
         d3.selectAll('.userDataRow')
           .each((_d, _index, _nodes) => {
@@ -338,7 +338,7 @@ export default function treemap(cellNodes, svg, submit) {
       .style('padding', '0px')
       .append('td')
       .text(d => d.id)
-      .on('click', (d) => {
+      .on('click', d => {
         clickUserTable(d, userArr);
       });
 

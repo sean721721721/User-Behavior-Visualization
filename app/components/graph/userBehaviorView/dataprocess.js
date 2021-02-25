@@ -397,13 +397,13 @@ function testMatrixReorderingByCommunity(mat: NestedArray<number>): NestedArray<
   // return [mat, origMat];
 }
 
-function matrixReorderingByCommunity(mat, origMat, com, userAxis, us) {
+function matrixReorderingByCommunity(mat: NestedArray<number>, origMat: NestedArray<number>, com: CommunityObjType, userAxis: Array<string>, us: Array<string>): NestedArray<number> {
   const maxCommunity = Math.max(...com.map(p => p.community)) + 1;
   const perm = [];
   const comArr = [];
   for (let i = 0; i < mat.length; i += 1) {
     perm.push(i);
-  }
+  } 
   for (let i = 0; i < mat.length; i += 1) {
     if (!comArr.includes(origMat[i][i].com - 1)) comArr.push(origMat[i][i].com - 1);
   }
@@ -433,52 +433,7 @@ function matrixReorderingByCommunity(mat, origMat, com, userAxis, us) {
   // return [mat, origMat];
 }
 
-function moveNonSimilarUsersToCorner(mat, origMat, groupInd, userAxis, us) {
-  const avgSimilarity = [];
-  let sortedSimilarty = [];
-  for (let i = 0; i < groupInd.length; i += 1) {
-    const pos = groupInd[i].index;
-    const { num } = groupInd[i];
-    let total = 0;
-    for (let j = pos; j < pos + num; j += 1) {
-      for (let k = j + 1; k < pos + num; k += 1) {
-        total += origMat[j][k];
-      }
-    }
-    const avg = total / (num * (num - 1) / 2);
-    avgSimilarity.push(avg);
-
-    const totalArr = [];
-    for (let j = pos; j < pos + num; j += 1) {
-      let t = 0;
-      for (let k = pos; k < pos + num; k += 1) {
-        t += origMat[j][k];
-      }
-      totalArr.push({ index: j, total: t });
-    }
-    totalArr.sort((a, b) => b.total - a.total);
-    sortedSimilarty = sortedSimilarty.concat(totalArr);
-  }
-  const perm = [];
-  sortedSimilarty.forEach((e) => { perm.push(e.index); });
-
-  const tempUser = userAxis.slice();
-  for (let j = 0; j < us.length; j += 1) {
-    userAxis[j] = tempUser[perm[j]];
-  }
-  let permutedMat = reorder.permute(mat, perm);
-  permutedMat = reorder.transpose(permutedMat);
-  permutedMat = reorder.permute(permutedMat, perm);
-  permutedMat = reorder.transpose(permutedMat);
-  let permutedOrigMat = reorder.permute(origMat, perm);
-  permutedOrigMat = reorder.transpose(permutedOrigMat);
-  permutedOrigMat = reorder.permute(permutedOrigMat, perm);
-  permutedOrigMat = reorder.transpose(permutedOrigMat);
-  return [permutedMat, permutedOrigMat];
-  // return [mat, origMat];
-}
-
-function communityInnerMatrixReordering(mat, origMat, userAxis, us, communityData) {
+function communityInnerMatrixReordering(mat: NestedArray<number>, origMat: NestedArray<number>, userAxis: Array<string>, us: Array<string>, communityData: CommunityObjType): NestedArray<number> {
   let copyMat = mat.slice();
   let copyOriginalMat = origMat.slice();
   communityData.forEach((com) => {
@@ -518,29 +473,6 @@ function communityInnerMatrixReordering(mat, origMat, userAxis, us, communityDat
   return [copyMat, copyOriginalMat];
 }
 
-function computeUserSimilarityByAuthors(user1, user2) {
-  const temp = user1.repliedArticle;
-  const next = user2.repliedArticle;
-  const tempAuthorList = [];
-  const nextAuthorList = [];
-  temp.forEach((a) => {
-    if (!tempAuthorList.includes(a.tuhor)) tempAuthorList.push(a.author);
-  });
-  next.forEach((a) => {
-    if (!nextAuthorList.includes(a.tuhor)) nextAuthorList.push(a.author);
-  });
-  const tempdiff = tempAuthorList.filter(
-    o1 => nextAuthorList.filter(o2 => o2 === o1).length === 0,
-  );
-  const nextdiff = nextAuthorList.filter(
-    o1 => tempAuthorList.filter(o2 => o2 === o1).length === 0,
-  );
-  const intersectArticles = tempAuthorList.length - tempdiff.length;
-  const nextintersectArticles = nextAuthorList.length - nextdiff.length;
-  const similarity = intersectArticles / (tempAuthorList.length + nextAuthorList.length - intersectArticles);
-  return similarity;
-}
-
 export {
   computeUserSimilarityByArticles,
   computeArticleSimilarity,
@@ -550,9 +482,7 @@ export {
   matrixReordering,
   computeCommunityTitleWordScore,
   matrixReorderingByCommunity,
-  moveNonSimilarUsersToCorner,
   communityInnerMatrixReordering,
-  computeUserSimilarityByAuthors,
   testMatrixReordering,
   testRandomMatrixReordering,
   testMatrixReorderingByCommunity,

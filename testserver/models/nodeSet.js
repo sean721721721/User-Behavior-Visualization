@@ -5,7 +5,7 @@ module.exports = {
   newSetNodes(post) {
     const copyPost = JSON.parse(JSON.stringify(post));
     const set = [];
-    copyPost.forEach((article) => {
+    copyPost.forEach(article => {
       const existedUser = set.find(e => e.id === article.author);
       if (existedUser) {
         existedUser.postCount += 1;

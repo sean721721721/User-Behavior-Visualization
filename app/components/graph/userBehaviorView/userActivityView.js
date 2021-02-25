@@ -68,13 +68,14 @@ export default function userActivityView(beginDateOfQuery, endDateOfQuery, data,
   // console.log('[articlesCommunity]', [articlesCommunity]);
 
   const selectedUser = user.slice();
-  drawSlider();
+  // Similarity & Reply Count Filter Div
   drawFilterDiv();
-  drawSortOptionDiv();
+  // 5-Level & Reply Quantile visibility Option Div
+  drawOptionDiv();
 
-  function drawSlider() {
-    let similarThresh = 0.2;
-    let articleThresh = 1;
+  function drawFilterDiv() {
+    const similarThresh = 0.2;
+    const articleThresh = 1;
     d3.select('.option').selectAll('*').remove();
     const similarThreshDiv = d3.select('.option').append('div')
       .style('padding', '0px')
@@ -96,14 +97,14 @@ export default function userActivityView(beginDateOfQuery, endDateOfQuery, data,
       .attr('id', 'similarThresh')
       .style('width', '50px')
       .style('height', 'fit-content')
-      .attr('value', similarThresh)
-      // .on('keypress', (d, index, nodes) => {
-      //   if (d3.event.keyCode === 13) {
-      //     const val = d3.select(nodes[index]).property('value');
-      //     similarThresh = val;
-      //     adjacencyMatrixNoAuthor(userSimilarity, similarThresh, articleThresh);
-      //   }
-      // });
+      .attr('value', similarThresh);
+    // .on('keypress', (d, index, nodes) => {
+    //   if (d3.event.keyCode === 13) {
+    //     const val = d3.select(nodes[index]).property('value');
+    //     similarThresh = val;
+    //     adjacencyMatrixNoAuthor(userSimilarity, similarThresh, articleThresh);
+    //   }
+    // });
     const articleThreshDiv = d3.select('.option').append('div')
       .style('padding', '0px')
       .attr('class', 'col-sm-3')
@@ -123,14 +124,7 @@ export default function userActivityView(beginDateOfQuery, endDateOfQuery, data,
       .attr('id', 'articleThresh')
       .style('width', '50px')
       .style('height', 'fit-content')
-      .attr('value', articleThresh)
-      // .on('keypress', (d, index, nodes) => {
-      //   if (d3.event.keyCode === 13) {
-      //     const val = d3.select(nodes[index]).property('value');
-      //     articleThresh = val;
-      //     adjacencyMatrixNoAuthor(userSimilarity, similarThresh, articleThresh);
-      //   }
-      // });
+      .attr('value', articleThresh);
     const filterButton = d3.select('.option').append('div')
       .style('padding-left', '10px')
       .attr('class', 'col-sm-1')
@@ -149,7 +143,7 @@ export default function userActivityView(beginDateOfQuery, endDateOfQuery, data,
     adjacencyMatrixNoAuthor(userSimilarity, similarThresh, articleThresh);
   }
 
-  function drawFilterDiv() {
+  function drawOptionDiv() {
     let simOptionsDiv = d3.select('.heatMap').select('.option').append('div')
       .attr('class', 'col-sm-5 filterDiv d-flex align-items-center');
     simOptionsDiv = simOptionsDiv.append('div')
@@ -236,9 +230,9 @@ export default function userActivityView(beginDateOfQuery, endDateOfQuery, data,
       .attr('class', 'btn btn-primary')
       .attr('id', 'submitUsers')
       .text('Get Activity!')
-      .on('click', (d) => {
+      .on('click', d => {
         const usr = [];
-        selectedUser.forEach((e) => {
+        selectedUser.forEach(e => {
           usr.push({ id: e });
         });
         submit(usr, 0);
@@ -305,59 +299,6 @@ export default function userActivityView(beginDateOfQuery, endDateOfQuery, data,
   }
   // heatMapWithAuthor();
 
-  function drawSortOptionDiv() {
-    d3.select('.contextDiv').select('.option').selectAll('*').remove();
-    const sortDiv = d3.select('.contextDiv').select('.option')
-      .append('div')
-      .attr('class', 'sort')
-      .style('margin-top', '10px');
-    const tagInput = sortDiv.append('div')
-      .style('margin-left', '10px');
-    tagInput.append('label')
-      .style('margin-bottom', '0px')
-      .text('SortBy:');
-    tagInput.append('input')
-      .attr('type', 'radio')
-      .attr('id', 'date')
-      .attr('name', 'sort')
-      .attr('value', 'date')
-      .property('checked', true);
-    tagInput.append('label')
-      .attr('for', 'date')
-      .style('margin-left', '10px')
-      .text('date');
-    tagInput.append('input')
-      .attr('type', 'radio')
-      .attr('id', 'push')
-      .attr('name', 'sort')
-      .attr('value', 'push')
-      .property('checked', null);
-    tagInput.append('label')
-      .attr('for', 'push')
-      .style('margin-left', '10px')
-      .text('push');
-    tagInput.append('input')
-      .attr('type', 'radio')
-      .attr('id', 'boo')
-      .attr('name', 'sort')
-      .attr('value', 'boo')
-      .property('checked', null);
-    tagInput.append('label')
-      .attr('for', 'boo')
-      .style('margin-left', '10px')
-      .text('boo');
-    tagInput.append('input')
-      .attr('type', 'radio')
-      .attr('id', 'comments')
-      .attr('name', 'sort')
-      .attr('value', 'comments')
-      .property('checked', null);
-    tagInput.append('label')
-      .attr('for', 'comments')
-      .style('margin-left', '10px')
-      .text('comments');
-  }
-
   function adjacencyMatrixNoAuthor(similarity, simThresh, artThresh) {
     newUserAxisValues = [];
     svg.selectAll('*').remove();
@@ -400,7 +341,7 @@ export default function userActivityView(beginDateOfQuery, endDateOfQuery, data,
     }
     console.log('Similarity: ', similaritys.length);
     const community = dp.jLouvainClustering(users, similaritys);
-    community.forEach((e) => {
+    community.forEach(e => {
       datas.find(e1 => e1.id === e.id).community = e.community;
     });
     // console.log(community);
@@ -480,7 +421,7 @@ export default function userActivityView(beginDateOfQuery, endDateOfQuery, data,
         .style('stroke', 'black')
         .style('opacity', 1);
     };
-    const mouseout = (d) => {
+    const mouseout = d => {
       if (typeof d === 'string') {
         // user axis
         d3.selectAll(`circle.${d}`)
@@ -503,8 +444,8 @@ export default function userActivityView(beginDateOfQuery, endDateOfQuery, data,
       if (us.length === 2) {
         bothRepliedArticles = us[0].repliedArticle.filter(a => us[1].repliedArticle.some(_a => a.article_id === _a.article_id));
       } else {
-        us.forEach((usr) => {
-          usr.repliedArticle.forEach((art) => {
+        us.forEach(usr => {
+          usr.repliedArticle.forEach(art => {
             if (!bothRepliedArticles.some(e => e.article_id === art.article_id)) {
               bothRepliedArticles.push(art);
             }
@@ -512,7 +453,7 @@ export default function userActivityView(beginDateOfQuery, endDateOfQuery, data,
         });
       }
       const sortedUs = [];
-      newUserAxisValues.forEach((e) => {
+      newUserAxisValues.forEach(e => {
         const usr = us.find(u => u.id === e);
         if (usr) sortedUs.push(usr);
       });
@@ -528,20 +469,20 @@ export default function userActivityView(beginDateOfQuery, endDateOfQuery, data,
       // updateArticleMatrix(bothRepliedArticles);
     };
 
-    const tickClick = (d) => {
+    const tickClick = d => {
       const beginDate = beginDateOfQuery;
       const endDate = endDateOfQuery;
       const repliedArticles = [];
       const us = datas.filter(_d => selectedUser.includes(_d.id));
-      us.forEach((usr) => {
-        usr.repliedArticle.forEach((art) => {
+      us.forEach(usr => {
+        usr.repliedArticle.forEach(art => {
           if (!repliedArticles.some(e => e.article_id === art.article_id)) {
             repliedArticles.push(art);
           }
         });
       });
       const sortedUs = [];
-      newUserAxisValues.forEach((e) => {
+      newUserAxisValues.forEach(e => {
         const usr = us.find(u => u.id === e);
         if (usr) sortedUs.push(usr);
       });
@@ -606,7 +547,9 @@ export default function userActivityView(beginDateOfQuery, endDateOfQuery, data,
 
     const activityTranslateX = 120;
     const brushHeight = 20;
+    // Upper Part Of UserActivityView
     drawNewHeatmap();
+    // Bottom Part Of UserActivityView
     drawUserGroupBipartiteRelations();
 
     function computePosition(userArr, scale) {
@@ -650,11 +593,11 @@ export default function userActivityView(beginDateOfQuery, endDateOfQuery, data,
                 const bothSize = bothReplied.length;
                 // user rect
                 drawUserRect(nodes, index, i);
-  
-                // article similarity
+
+                // draw article similarity between users
                 drawArticleSimilarity(d, nodes, index, i, xUser, yUser, bothSize);
-  
-                // reply time
+
+                // draw user reply time quantile
                 const quantileFilter = d3.select('#replyQuantile');
                 const checked = quantileFilter.empty() ? null : quantileFilter.property('checked');
                 if (i === index || checked === false) {
@@ -980,7 +923,7 @@ export default function userActivityView(beginDateOfQuery, endDateOfQuery, data,
       function getAllReplyTime(usr, articleArr) {
         // simArr.sort((a, b) => a - b);
         const arr = [];
-        articleArr.forEach((a) => {
+        articleArr.forEach(a => {
           const postYear = new Date(a.date).getFullYear();
           const mes = a.messages.find(m => m.push_userid === usr.id);
           const date = dateFormat(mes);
@@ -1021,7 +964,7 @@ export default function userActivityView(beginDateOfQuery, endDateOfQuery, data,
       numOfArtOfEachComunity.sort((a, b) => b.articles.length - a.articles.length);
       // console.log('numOfArtOfEachComunity', numOfArtOfEachComunity);
       const existedCommunityOfArticle = [];
-      numOfArtOfEachComunity.forEach((e) => {
+      numOfArtOfEachComunity.forEach(e => {
         existedCommunityOfArticle.push(e.community);
       });
       // console.log('existedCommunityOfArticle', existedCommunityOfArticle);
@@ -1067,17 +1010,15 @@ export default function userActivityView(beginDateOfQuery, endDateOfQuery, data,
         articleGroupOfUserCommunity.push(arr);
       }
       // console.log('articleGroupOfUserCommunity: ', articleGroupOfUserCommunity);
+
       // draw bipartite co-cluster graph
       drawNewCoClusterGraph(articleGroupOfUserCommunity);
-
-      // draw article heatmap on the left side of the main heatMap
-      // drawArticleGroupOfUserCommunity(articleGroupOfUserCommunity);
 
       function drawRelationRatio(index, userCount) {
         const communityIndexDatas = datas.filter(e => e.community === index);
         const communityIndexArticles = computeNumOfArticlesOfEachCommunity();
         const communityEachLevelCount = [];
-        communityIndexArticles.forEach((e) => {
+        communityIndexArticles.forEach(e => {
           const levelOne = e.articles.filter(a => a.count > 0);
           const levelTwo = e.articles.filter(a => a.count >= 0.2);
           const levelThree = e.articles.filter(a => a.count >= 0.4);
@@ -1096,8 +1037,8 @@ export default function userActivityView(beginDateOfQuery, endDateOfQuery, data,
 
         function computeNumOfArticlesOfEachCommunity() {
           const arr = [];
-          communityIndexDatas.forEach((u) => {
-            u.repliedArticle.forEach((article) => {
+          communityIndexDatas.forEach(u => {
+            u.repliedArticle.forEach(article => {
               const findArticle = articlesCommunity.find(a => a.id === article.article_id);
               if (findArticle) {
                 const existedComunity = arr.find(e => e.community === findArticle.community);
@@ -1150,7 +1091,6 @@ export default function userActivityView(beginDateOfQuery, endDateOfQuery, data,
             });
           }
         }
-        drawArticleGroupLabel(radial);
 
         for (let i = 0; i < arr.length; i += 1) {
           // user Community i
@@ -1170,30 +1110,11 @@ export default function userActivityView(beginDateOfQuery, endDateOfQuery, data,
           .attr('stroke-width', '5px');
         function coClusterMouseover(arts, communityIndex) {
           const usrs = datas.filter(e => e.community === communityIndex);
-          usrs.forEach((u) => {
+          usrs.forEach(u => {
             u.haveReplied = u.repliedArticle.filter(a => arts.some(_a => _a.article_id === a.article_id));
           });
         }
-        function drawArticleGroupLabel(svgGroup) {
-          svgGroup.append('g')
-            .attr('class', 'article_group_label')
-            .selectAll('path')
-            .data(positionOfArticleCom)
-            .enter()
-            .append('text')
-            .attr('x', -50)
-            .attr('y', (d, index) => {
-              const num = numOfArtOfEachComunity.find(e => e.community === d.community).articles.length;
-              return d.position + scale(num) / 2;
-            })
-            .attr('dominant-baseline', 'central')
-            .attr('font-size', (d) => {
-              const num = numOfArtOfEachComunity.find(e => e.community === d.community).articles.length;
-              return scale(num) / 2;
-            })
-            .attr('text-anchor', 'end');
-          // .text((d, index) => `Group ${index + 1}`);
-        }
+
         function drawBlankAreaOfArticleCommunity(svgGroup, com, maxWidth) {
           const tempIndex = comunityIndexY[com];
           svgGroup.append('g')
@@ -1205,7 +1126,7 @@ export default function userActivityView(beginDateOfQuery, endDateOfQuery, data,
             .attr('class', d => `blank_group_${d.community}`)
             .attr('x', () => (tempIndex * (maxSize + rectMargin)) * Math.sqrt(2))
             .attr('y', d => d.position)
-            .attr('height', (d) => {
+            .attr('height', d => {
               const { articles: art } = numOfArtOfEachComunity.find(e => e.community === d.community);
               return scale(art.length);
             })
@@ -1236,11 +1157,11 @@ export default function userActivityView(beginDateOfQuery, endDateOfQuery, data,
                   return pos;
                 })
                 // .attr('x', (_d, _index) => positionScale[tem] * Math.sqrt(2) + d.position)
-                .attr('height', (_d) => {
+                .attr('height', _d => {
                   const { articles: art } = numOfArtOfEachComunity.find(e => e.community === d.community);
                   return scale(art.length);
                 })
-                .attr('width', (_d) => {
+                .attr('width', _d => {
                   const totalArticlesOfThisCommunityOfArticle = numOfArtOfEachComunity.find(e => e.community === d.community).articles;
                   const thisWidthScale = d3.scaleLinear().domain([0, totalArticlesOfThisCommunityOfArticle.length]).range([0, maxWidth]);
                   const sameArticles = d.level[0].filter(e => _d.some(e1 => e1.article_id === e.article_id));
@@ -1258,7 +1179,7 @@ export default function userActivityView(beginDateOfQuery, endDateOfQuery, data,
                   } else {
                     svgGroup.selectAll('rect').attr('stroke-width', '3px');
                     d3.select(_nodes[_index]).attr('stroke-width', '10px');
-                    articles.forEach((e) => {
+                    articles.forEach(e => {
                       if (_d.some(e1 => e1.article_id === e.article_id)) selectedArticles.push(e);
                     });
                   }
@@ -1317,7 +1238,7 @@ export default function userActivityView(beginDateOfQuery, endDateOfQuery, data,
                       }
                       return 0;
                     })
-                    .attr('width', (_d) => {
+                    .attr('width', _d => {
                       if (!nextArticleCommunity) return 0;
                       const totalArticlesOfThisCommunityOfArticle = numOfArtOfEachComunity.find(e => e.community === nextArticleCommunity.community).articles;
                       const thisWidthScale = d3.scaleLinear().domain([0, totalArticlesOfThisCommunityOfArticle.length]).range([0, maxWidth_nex]);
@@ -1348,7 +1269,7 @@ export default function userActivityView(beginDateOfQuery, endDateOfQuery, data,
                       }
                       return 0;
                     })
-                    .attr('width', (_d) => {
+                    .attr('width', _d => {
                       if (!nextArticleCommunity) return 0;
                       const totalArticlesOfThisCommunityOfArticle = numOfArtOfEachComunity.find(e => e.community === nextArticleCommunity.community).articles;
                       const thisWidthScale = d3.scaleLinear().domain([0, totalArticlesOfThisCommunityOfArticle.length]).range([0, maxWidth_nex]);
@@ -1370,7 +1291,7 @@ export default function userActivityView(beginDateOfQuery, endDateOfQuery, data,
                       } else {
                         svgGroup.selectAll('rect').attr('stroke-width', '1px');
                         d3.select(_nodes[_index]).attr('stroke-width', '10px');
-                        articles.forEach((e) => {
+                        articles.forEach(e => {
                           if (sameArticles.some(e1 => e1.article_id === e.article_id)) {
                             selectedArticles.push(e);
                           }
