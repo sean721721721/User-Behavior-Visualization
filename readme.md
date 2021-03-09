@@ -8,8 +8,8 @@ Due to the development of the Internet and the popularization of mobile devices,
 Interaction
 ----
 Brushing interested users to show detail of their activities
-(https://i.imgur.com/RFlZNON.png "brushing users1")
-(https://i.imgur.com/26ZOmeh.png "brushing users2")
+![Brushing users](https://i.imgur.com/RFlZNON.png "brushing users1")
+![Brushing users](https://i.imgur.com/26ZOmeh.png "brushing users2")
 
 Build
 ----------------------
