@@ -7,7 +7,7 @@ Due to the development of the Internet and the popularization of mobile devices,
 
 Interaction
 ----
-* Brushing interested users to show detail of their activities  
+* Brushing interested users to show relationship between their activities and time 
 
 <img src="https://i.imgur.com/RFlZNON.png" height="300" width="500">
 <img src="https://i.imgur.com/26ZOmeh.png" height="300" width="500">
@@ -20,9 +20,10 @@ Interaction
 
 <img src="https://i.imgur.com/HaHxK0E.png" height="300" width="600">
 
-* Hovering
+* Hovering any interested informations
 
-<img src="https://i.imgur.com/gnsNleD.png" height="300" width="600">
+<img src="https://i.imgur.com/gnsNleD.png" height="400" width="600">
+
 Build
 ----------------------
 To install all dependencies and build the library, run npm install in the root of the project with node v11.0 or higher
