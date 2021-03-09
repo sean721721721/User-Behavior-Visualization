@@ -14,15 +14,15 @@ Interaction
 
 * Filtering users
 
-<img src="https://i.imgur.com/F5vwk8m.png" height="300" width="600">
+  <img src="https://i.imgur.com/F5vwk8m.png" height="300" width="600">
 
 * Scaling
 
-<img src="https://i.imgur.com/HaHxK0E.png" height="300" width="600">
+  <img src="https://i.imgur.com/HaHxK0E.png" height="300" width="600">
 
 * Hovering any interested informations
 
-<img src="https://i.imgur.com/gnsNleD.png" height="400" width="600">
+  <img src="https://i.imgur.com/gnsNleD.png" height="400" width="600">
 
 Build
 ----------------------
