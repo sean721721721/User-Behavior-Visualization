@@ -16,6 +16,13 @@ Interaction
 
 <img src="https://i.imgur.com/F5vwk8m.png" height="500" width="1000">
 
+* Scaling
+
+<img src="https://i.imgur.com/HaHxK0E.png">
+
+* Hovering
+
+<img src="https://i.imgur.com/gnsNleD.png">
 Build
 ----------------------
 To install all dependencies and build the library, run npm install in the root of the project with node v11.0 or higher
