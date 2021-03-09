@@ -8,8 +8,13 @@ Due to the development of the Internet and the popularization of mobile devices,
 Interaction
 ----
 Brushing interested users to show detail of their activities  
+
 <img src="https://i.imgur.com/RFlZNON.png" height="300" width="500">
 <img src="https://i.imgur.com/26ZOmeh.png" height="300" width="500">
+
+Filtering users
+
+<img src="https://i.imgur.com/F5vwk8m.png">
 
 Build
 ----------------------
