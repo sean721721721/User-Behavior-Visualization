@@ -9,8 +9,8 @@ Interaction
 ----
 * Brushing interested users to show relationship between their activities and time 
 
-<img src="https://i.imgur.com/RFlZNON.png" height="300" width="500">
-<img src="https://i.imgur.com/26ZOmeh.png" height="300" width="500">
+  <img src="https://i.imgur.com/RFlZNON.png" height="300" width="500">
+  <img src="https://i.imgur.com/26ZOmeh.png" height="300" width="500">
 
 * Filtering users
 
