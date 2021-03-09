@@ -14,15 +14,15 @@ Interaction
 
 * Filtering users
 
-<img src="https://i.imgur.com/F5vwk8m.png" height="500" width="1000">
+<img src="https://i.imgur.com/F5vwk8m.png" height="300" width="600">
 
 * Scaling
 
-<img src="https://i.imgur.com/HaHxK0E.png">
+<img src="https://i.imgur.com/HaHxK0E.png" height="300" width="600">
 
 * Hovering
 
-<img src="https://i.imgur.com/gnsNleD.png">
+<img src="https://i.imgur.com/gnsNleD.png" height="300" width="600">
 Build
 ----------------------
 To install all dependencies and build the library, run npm install in the root of the project with node v11.0 or higher
