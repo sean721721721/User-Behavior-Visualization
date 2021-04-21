@@ -3,7 +3,8 @@
 
 Demo
 ----
-https://sean721721721.github.io/user-behavior-visualization-demo/
+**[Demo Site]https://sean721721721.github.io/user-behavior-visualization-demo/
+**[Demo Video]https://www.youtube.com/watch?v=djDxURjqAgc
 
 Abstract
 ----
